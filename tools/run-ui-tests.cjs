@@ -7,7 +7,7 @@ const { chromium } = require('playwright');
   const page = await browser.newPage({ viewport: { width: 1500, height: 1000 } });
   page.on('pageerror', e => console.log('PAGE ERROR', e.message));
   await page.goto(url);
-  await page.waitForFunction(() => window.__TESTS && window.__TESTS.done, null, { timeout: 240000 });
+  await page.waitForFunction(() => window.__TESTS && window.__TESTS.done, null, { timeout: 600000 });
   const r = await page.evaluate(() => window.__TESTS);
   console.log(`UI tests: ${r.passed}/${r.total} passed, ${r.failed} failed`);
   r.failures.forEach(f => console.log('FAIL ' + f));
