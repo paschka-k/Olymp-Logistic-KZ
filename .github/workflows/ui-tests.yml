@@ -1,0 +1,33 @@
+name: UI tests (275)
+
+# FR-18: runs all platform tests (RU scenarios, data validation, DE/EN navigation + i18n)
+# in headless Chromium on every push. Fails the run if any test fails.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ui-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Playwright
+        run: |
+          npm install --no-audit --no-fund --prefix "$RUNNER_TEMP/pw" playwright@1.56.0
+          npx --prefix "$RUNNER_TEMP/pw" playwright install --with-deps chromium
+      - name: Serve site
+        run: |
+          python3 -m http.server 8080 >/dev/null 2>&1 &
+          sleep 2
+      - name: Run tests
+        env:
+          NODE_PATH: ${{ runner.temp }}/pw/node_modules
+        run: node tools/run-ui-tests.cjs http://localhost:8080/tests.html
