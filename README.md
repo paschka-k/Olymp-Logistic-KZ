@@ -9,7 +9,7 @@ All pages are self-contained HTML — no build step. All data is simulated.
 | `platform-v5.html` (+ `-de`, `-en`) | Platform mock-up v5 — 17 screens, real 4-vehicle fleet, new "Costs" screen, driver app RU/KZ/DE/EN (FR-52…70), 19 manufacturers with logo badges, FR-35…51 implemented |
 | `platform-v4.html` (+ `-de`, `-en`) | Platform mock-up v4 — 16 screens incl. "Baseline data" (question catalogue validation, rings, volumes, target fleet, express approval, launch path, FR-35…51) |
 | `platform-v3.html` (+ `-de`, `-en`) | Platform mock-up v3 — 15 screens |
-| `tests.html` | 494 automated UI/data tests (runs against v5) |
+| `tests.html` | 493 automated UI/data tests + change requests FR-01…51 (runs against v5) |
 | `platform-v2.html` | Platform mock-up v2 — 12 screens, alarm simulation |
 | `workflow.html` | Project & operational process workflow |
 | `platform-v1.html` | Platform mock-up v1 |
