@@ -6,6 +6,7 @@ All pages are self-contained HTML — no build step. All data is simulated.
 | File | Content |
 |---|---|
 | `index.html` | Landing page |
+| `platform/` | **Working platform – online demo** (built from the private repo `olymp-logistic-platform`; browser-only, fictitious data) |
 | `platform-v5.html` (+ `-de`, `-en`) | Platform mock-up v5 — 17 screens, real 4-vehicle fleet, new "Costs" screen, driver app RU/KZ/DE/EN (FR-52…70), 19 manufacturers with logo badges, FR-35…51 implemented |
 | `platform-v4.html` (+ `-de`, `-en`) | Platform mock-up v4 — 16 screens incl. "Baseline data" (question catalogue validation, rings, volumes, target fleet, express approval, launch path, FR-35…51) |
 | `platform-v3.html` (+ `-de`, `-en`) | Platform mock-up v3 — 15 screens |
