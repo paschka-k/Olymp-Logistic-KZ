@@ -3196,6 +3196,49 @@ class Component extends DCLogic {
     return T;
   };
 })();
+
+// FR-174 planning values to verify · FR-167 approval-function coverage (master data kind «verify», Users page wizard).
+(() => {
+  const baseBuild = Component.prototype.build;
+  Component.prototype.build = function (fr) {
+    const T = baseBuild.call(this, fr);
+    const h = this.helpers(fr), { D, W, all, ok } = h;
+    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const q = sel => D().querySelector(sel);
+    const goHash = async (hh, ms = 900) => { W().location.hash = '#' + hh; await sleep(ms); };
+    const waitFor = async (fn, n = 40) => { for (let i = 0; i < n; i++) { try { const v = fn(); if (v) return v; } catch (e) { /* not yet */ } await sleep(150); } return null; };
+    const req = async (m, p, b) => { try { return await W().__OLYMP_DEMO_REQ(m, p, b); } catch (e) { return { error: String(e && e.message || e), status: e && e.status }; } };
+    const press = el => { ok(el, 'нет кнопки'); el.click(); };
+    const M = 'Плановые значения · проверка перед запуском';
+    t(M, 'FR-174: «Справочники» показывают число непроверенных значений, список из 25 с источником, подтверждение аудируется', async () => {
+      await goHash('/master-data', 1200); const n = await waitFor(() => q('[data-unverified]')); ok(n, 'нет баннера непроверенных значений');
+      const before = Number(n.getAttribute('data-unverified')); ok(before >= 20, 'непроверенных: ' + before);
+      press(q('[data-goto-verify]')); await sleep(500);
+      const rows = all('[data-mtable="verify"] [data-mrow]'); ok(rows.length === 25, 'строк: ' + rows.length);
+      const esf = q('[data-mrow="esf_deadline"]'); ok(esf && /Tax Code RK art\. 412/.test(esf.textContent) && /ЭСФ/.test(esf.textContent), 'строка ЭСФ: ' + (esf && esf.textContent.slice(0, 120)));
+      const r = await req('POST', '/api/master/verify/esf_deadline', { data: { verified: true, note: 'Подтверждено налоговым консультантом', ref: 'НК РК ст. 412 п. 1' } });
+      ok(r && r.status === 'active' && r.changed.includes('verified'), 'подтверждение: ' + JSON.stringify(r).slice(0, 150));
+      await goHash('/s/overview', 400); await goHash('/master-data', 1200); const n2 = await waitFor(() => q('[data-unverified]'));
+      ok(n2 && Number(n2.getAttribute('data-unverified')) === before - 1, 'счётчик не уменьшился');
+      const bad = await req('POST', '/api/master/verify/no_such_value', { data: { verified: true } }); ok(bad.error || bad.status >= 400, 'неизвестный ключ принят');
+    });
+    t(M, 'FR-167: страница «Пользователи» — слот без владельца показывает мастер назначения, после назначения баннер исчезает', async () => {
+      const users = await req('GET', '/api/users');
+      if (!h.BE()) { // demo: the single admin holds every function explicitly → no empty slot; the wizard path runs in the backend suite
+        await goHash('/users', 1200); await waitFor(() => all('tbody tr').length > 0); ok(!q('[data-fn-missing]'), 'в демо баннер не ожидается'); return;
+      }
+      const qa = users.find(u => u.username === 'qa.manager'); ok(qa, 'нет qa.manager');
+      await req('PUT', '/api/users/' + qa.id, { display_name: qa.display_name, role: qa.role, hub_id: qa.hub_id, is_active: qa.is_active, functions: [] });
+      await goHash('/users', 1200); const b = await waitFor(() => q('[data-fn-missing]')); ok(b && b.getAttribute('data-fn-missing') === 'qa_manager', 'баннер: ' + (b && b.getAttribute('data-fn-missing')));
+      const sel = b.querySelector('select'); const opt = [...sel.options].find(o => o.textContent === 'qa.manager'); ok(opt, 'qa.manager не предлагается');
+      const set = Object.getOwnPropertyDescriptor(W().HTMLSelectElement.prototype, 'value').set; set.call(sel, opt.value); sel.dispatchEvent(new (W().Event)('change', { bubbles: true })); await sleep(200);
+      press(b.querySelector('button')); await sleep(900);
+      ok(!q('[data-fn-missing]'), 'баннер остался');
+      const after = (await req('GET', '/api/users')).find(u => u.username === 'qa.manager'); ok(after.functions.includes('qa_manager'), 'функция не назначена');
+    });
+    return T;
+  };
+})();
 </script>
 </body>
 </html>
