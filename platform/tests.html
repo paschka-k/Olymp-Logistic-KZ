@@ -2471,7 +2471,15 @@ class Component extends DCLogic {
     });
     t(MK, 'FR-120: свободная ТС в хабе → назначение создаёт рейс U-1, он виден в «Диспетчере»', async () => {
       const hub = (await req('GET', '/api/hubs')).find(x => /Астана/.test(x.city) || x.code === 'AST');
-      await req('POST', '/api/vehicles', { code: 'K77', plate: 'K 777 AST', model: 'Test reefer', hub_id: hub.id, capacity_kg: 6000, pallets: 14, temp_classes: ['cold', 'ambient'] });
+      const k77 = await req('POST', '/api/vehicles', { code: 'K77', plate: 'K 777 AST', model: 'Test reefer', hub_id: hub.id, capacity_kg: 6000, pallets: 14, temp_classes: ['cold', 'ambient'],
+        ogpo_until: '2027-06-30', logger_id: 'LG-77', logger_calibrated_until: '2027-06-30' });
+      // port: FR-157 – a new vehicle is offered to the urgent pick only after its onboarding checklist is closed
+      await req('PUT', '/api/vehicles/' + k77.id + '/sensors', { sensors: [{ sensor: 'T1', temp_class: 'cold' }] });
+      await req('PUT', '/api/vehicles/' + k77.id + '/load-profile', { variant: 'z1', pal: 14, tc: 2, tcFixed: true, box: 'amb', m3: 33, front0: 3200, rear0: 2800, gvw: 12000, frontMax: 4500, rearMax: 8000, axF: 0.8, axR: -0.1, hIn: 220, calSrc: 'sts', calDate: '2026-10-01' });
+      await req('POST', '/api/vehicles/' + k77.id + '/onboarding/sts', { ref: 'KZ 77 000777' });
+      await req('POST', '/api/vehicles/' + k77.id + '/onboarding/tachograph', { fitted: true });
+      await req('POST', '/api/vehicles/' + k77.id + '/onboarding/adr', {});
+      await req('POST', '/api/vehicles/' + k77.id + '/onboarding/complete', {});
       fr.src = fr.getAttribute('src'); await sleep(600); // the live view (/api/v5/ops) is loaded on start
       for (let i = 0; i < 60; i++) { try { if (fr.contentWindow.__OLYMP && fr.contentDocument.querySelectorAll('nav [data-nav]').length > 10) break; } catch (e) { /* loading */ } await sleep(250); }
       await sleep(400); await nav('Персонал'); await sleep(400);
@@ -2722,6 +2730,124 @@ class Component extends DCLogic {
       ok(q('h1').textContent === 'Обзор', 'не вернулся RU');
     });
 
+    return T;
+  };
+})();
+
+// ---- lane P: load planning (FR-139 … FR-146, FR-157) – truck finder total cost / split / partners / restrictions,
+// loading view 2.0, loading sequence + scan check, departure weighing, vehicle onboarding + calibration, restrictions master data
+(() => {
+  const baseBuild = Component.prototype.build;
+  Component.prototype.build = function (fr) {
+    const T = baseBuild.call(this, fr);
+    const h = this.helpers(fr), { O, D, all, nav, ok } = h;
+    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const MP = 'FR-139…157 Подбор ТС и погрузка';
+    const q = sel => D().querySelector(sel);
+    const demoReq = () => fr.contentWindow.__OLYMP_DEMO_REQ;
+    const goHash = async (hh, ms = 900) => { fr.contentWindow.location.hash = '#' + hh; await sleep(ms); };
+    const setVal = (el, v) => { const proto = el.tagName === 'SELECT' ? fr.contentWindow.HTMLSelectElement.prototype : fr.contentWindow.HTMLInputElement.prototype;
+      Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, v); el.dispatchEvent(new fr.contentWindow.Event(el.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true })); };
+    const press = async el => { if (!el) throw new Error('нет элемента'); el.click(); await sleep(450); };
+    const sim = () => all('[data-sec="finder"] [data-sim]').map(r => ({ key: r.getAttribute('data-sim'), fits: r.getAttribute('data-fits') === '1', total: Number(r.querySelector('[data-sim-total]').getAttribute('data-sim-total')), cost: Number(r.getAttribute('data-cost')) }));
+    const toR106 = async () => { await nav('Загрузка и вес'); const b = all('[data-load-trips] button').find(x => x.textContent.trim() === 'R-106'); if (b && b.getAttribute('aria-pressed') !== 'true') await press(b); await press(q('[data-ltype="V02"]')); };
+
+    t(MP, 'FR-143: ранжирование «дешевле всего» — по полной стоимости рейса (топливо, дороги, водитель, порожний возврат)', async () => {
+      await demoReq()('POST', '/api/v5/reset'); await toR106();
+      ok(q('[data-sim-rank="cost"]'), 'нет переключателя ранжирования');
+      let rows = sim(); ok(rows.length > 10 && rows.every(r => r.total > r.cost || r.cost === 0), 'полная стоимость не больше ставки');
+      const fit = rows.filter(r => r.fits); ok(fit.every((r, i) => i === 0 || fit[i - 1].cost <= r.cost), 'по ставке не по возрастанию');
+      await press([...q('[data-sim-rank]').querySelectorAll('button')][1]);
+      ok(q('[data-sim-rank="total"]'), 'режим не переключился');
+      rows = sim(); const fit2 = rows.filter(r => r.fits);
+      ok(fit2.length && fit2.every((r, i) => i === 0 || fit2[i - 1].total <= r.total), 'полная стоимость не по возрастанию: ' + fit2.map(r => r.total).join(','));
+      ok(q('[data-sim-best]').getAttribute('data-sim-best') === fit2[0].key, 'рекомендация не первая по полной стоимости');
+      ok(/340 ₸\/л/.test(q('[data-sim-cm]').textContent), 'нет цены дизеля из справочника: ' + q('[data-sim-cm]').textContent);
+      await press([...q('[data-sim-rank]').querySelectorAll('button')][0]);
+    });
+    t(MP, 'FR-143: предложения партнёров хаба как кандидаты; FR-142: ограничения дорог на дату выезда показаны', async () => {
+      await toR106();
+      const ps = all('[data-sim-partner]'); ok(ps.length >= 1, 'нет предложений партнёров');
+      ok(ps.every(p => Number(p.getAttribute('data-cost')) > 0), 'партнёр без стоимости');
+      const r = q('[data-sim-restr]'); ok(r && r.textContent.includes('RS-002'), 'нет ограничения моста RS-002: ' + (r ? r.textContent : '—'));
+    });
+    t(MP, 'FR-139: разделение на две ТС — обе части вместе = отмеченные заказы, сравнение с одной ТС', async () => {
+      await toR106();
+      const cb = q('[data-sim-opt="split"]'); ok(cb, 'нет переключателя разделения'); if (!cb.checked) await press(cb);
+      ok(q('[data-sim-split]'), 'нет блока разделения');
+      const ticked = all('main button[data-order][aria-pressed="true"]').map(b => b.getAttribute('data-order'));
+      const props = all('[data-split]'); ok(props.length >= 1, 'нет предложений');
+      ok(/Одна ТС/.test(q('[data-sim-split-head]').textContent), 'нет сравнения с одной ТС: ' + q('[data-sim-split-head]').textContent);
+      const txt = props[0].textContent; ok(ticked.every(id => txt.includes(id)), 'не все заказы в предложении: ' + txt);
+      ok(txt.includes('₸'), 'нет стоимости');
+      await press(q('[data-sim-opt="split"]'));
+    });
+    t(MP, 'FR-140: вид сверху и сбоку — центр тяжести, доля передней оси, слева / справа', async () => {
+      await toR106();
+      const top = q('[data-top-view]'); ok(top, 'нет вида сверху');
+      const x = Number(top.getAttribute('data-cogx')); ok(x > 0 && x < 1, 'центр тяжести ' + x);
+      ok(all('[data-top-view] [data-cell]').filter(c => c.getAttribute('data-cell')).length === all('[data-diagram] [data-slot]').filter(s => s.getAttribute('data-slot')).length, 'вид сверху ≠ схема');
+      ok(q('[data-top-view] [data-cog]') && q('[data-side-view] [data-stack]'), 'нет маркера / штабелей');
+      ok(/\d+ %/.test(q('[data-v2="front"]').textContent) && /Δ/.test(q('[data-v2="lat"]').textContent), 'нет плиток баланса');
+    });
+    t(MP, 'FR-144: порядок погрузки LIFO (первая строка — последняя точка), печать, скан на неверной позиции предупреждает', async () => {
+      await toR106();
+      const rows = all('[data-seq]'); ok(rows.length > 3, 'нет строк порядка погрузки');
+      const route = O().TRIPS.find(x => x.id === 'R-106').route;
+      const stopIx = r => route.indexOf(r.children[4].textContent.trim());
+      const main = rows.filter(r => !/термо/.test(r.children[2].textContent));
+      ok(main.every((r, i) => i === 0 || stopIx(main[i - 1]) >= stopIx(r)), 'основная зона не LIFO: ' + main.map(stopIx).join(','));
+      ok(q('[data-seq-print]'), 'нет печати');
+      const withPkg = rows.find(r => /\d{18}/.test(r.children[6].textContent)); ok(withPkg, 'нет SSCC в плане');
+      const sscc = withPkg.children[6].textContent.match(/\d{18}/)[0], n = Number(withPkg.getAttribute('data-seq'));
+      const ins = all('[data-seq-scan] input'); setVal(ins[0], sscc); setVal(ins[1], String(n === 1 ? 2 : 1)); await sleep(200);
+      await press([...q('[data-seq-scan]').querySelectorAll('button')][0]);
+      ok(q('[data-seq-result="2"]') && q('[data-seq-result="2"]').textContent.includes('Неверная позиция'), 'нет предупреждения');
+      setVal(ins[1], String(n)); await sleep(200); await press([...q('[data-seq-scan]').querySelectorAll('button')][0]);
+      ok(q('[data-seq-result="0"]'), 'верная позиция не подтверждена');
+    });
+    t(MP, 'FR-145: взвешивание демо-рейса — перегруз с точным превышением, допуск с обоснованием', async () => {
+      const req = demoReq();
+      const sites = await req('GET', '/api/sites'); const site = sites.find(x => x.city === 'Караганда');
+      const veh = (await req('GET', '/api/vehicles')).find(v => v.code === 'V04');
+      const o = await req('POST', '/api/orders', { site_id: site.id, description: 'Weighing test', temp_class: 'cold', pallets: 1, weight_kg: 80 });
+      const later = { planned_departure: new Date(Date.now() + 20 * 86400000).toISOString(), eta: new Date(Date.now() + 20 * 86400000 + 6 * 3600000).toISOString() };
+      const tr = await req('POST', '/api/trips', { hub_id: site.hub_id, vehicle_id: veh.id, order_ids: [o.id], ...later });
+      try {
+        fr.src = fr.getAttribute('src'); await sleep(600); // reload: the live view reads the new trip
+        for (let i = 0; i < 60; i++) { try { if (fr.contentWindow.__OLYMP && fr.contentDocument.querySelectorAll('nav [data-nav]').length > 10) break; } catch (e) { /* loading */ } await sleep(250); }
+        await sleep(400); await nav('Загрузка и вес'); await sleep(400);
+        const b = all('[data-load-trips] button').find(x => x.textContent.trim() === tr.number); ok(b, 'рейс не выбирается'); await press(b); await sleep(500);
+        ok(q('[data-sec="weigh"]'), 'нет блока взвешивания');
+        setVal(q('[data-weigh-in="gross"]'), '99000'); await sleep(200);
+        await press(q('[data-weigh-save]')); await sleep(500);
+        const l = q('[data-weigh-latest]'); ok(l && l.getAttribute('data-weigh-ok') === '0' && /\+[\d\s]+ кг полная масса/.test(l.textContent), 'нет перегруза: ' + (l ? l.textContent : '—'));
+        const ov = q('[data-weigh-override]'); ok(ov, 'нет допуска с обоснованием');
+        setVal(ov.querySelector('input'), 'Перевес весов, повторное взвешивание'); await sleep(200); await press(ov.querySelector('button')); await sleep(500);
+        ok(q('[data-weigh-latest]').getAttribute('data-weigh-ok') === '1', 'допуск не принят');
+      } finally {
+        const r2 = demoReq(); // the page was reloaded: the API of the new window
+        await r2('POST', '/api/trips/' + tr.id + '/status', { status: 'cancelled' }).catch(() => null); await r2('POST', '/api/orders/' + o.id + '/cancel', {}).catch(() => null);
+      }
+    });
+    t(MP, 'FR-157 / FR-141: «Реестр ТС» — профиль и приёмка ТС, расчёт долей осей по геометрии', async () => {
+      await goHash('/s/fleet/register');
+      await press(q('[data-veh-setup="V01"]')); await sleep(400);
+      const p = q('[data-veh-setup-panel="V01"]'); ok(p, 'нет панели');
+      ok(p.querySelector('[data-onboarding="available"]'), 'V01 не доступна');
+      ok(p.querySelectorAll('[data-ob-item]').length === 6, 'не 6 пунктов чек-листа');
+      setVal(p.querySelector('[data-lp="wb"]'), '420'); setVal(p.querySelector('[data-lp="x0"]'), '90'); setVal(p.querySelector('[data-lp="lenIn"]'), '600'); await sleep(250);
+      ok(/0\.7857/.test(q('[data-lp-geo]').textContent) && /-0\.6429/.test(q('[data-lp-geo]').textContent), 'доли осей: ' + q('[data-lp-geo]').textContent);
+    });
+    t(MP, 'FR-142: «Справочники» — ограничения дорог, новая запись ждёт второго пользователя', async () => {
+      await goHash('/master-data');
+      await press(all('[data-mkind]').find(b => b.getAttribute('data-mkind') === 'restriction')); await sleep(400);
+      ok(q('[data-mrow="RS-001"]') && q('[data-mrow="RS-003"]'), 'нет ограничений RS-001 / RS-003');
+      const key = 'RS-0' + (100 + Math.floor(Math.random() * 800));
+      const r = await demoReq()('POST', '/api/master/restriction/' + key, { data: { kind: 'bridge', a: 'Астана', b: 'Караганда', maxGross: 20000 } });
+      ok(r.status === 'pending' && r.data.a === 'KZ-AST', JSON.stringify(r));
+      await demoReq()('POST', '/api/master/restriction/' + key + '/' + r.version + '/reject', {});
+    });
     return T;
   };
 })();
