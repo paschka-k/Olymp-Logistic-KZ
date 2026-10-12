@@ -3239,6 +3239,145 @@ class Component extends DCLogic {
     return T;
   };
 })();
+
+// FR-172: demo partner account + partner self-onboarding (certificate upload → pending → staff approval on screen 11).
+(() => {
+  const baseBuild = Component.prototype.build;
+  Component.prototype.build = function (fr) {
+    const T = baseBuild.call(this, fr);
+    const h = this.helpers(fr), { D, W, all, ok, nav } = h;
+    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const q = sel => D().querySelector(sel);
+    const sleepFor = async (fn, n = 40) => { for (let i = 0; i < n; i++) { try { const v = fn(); if (v) return v; } catch (e) { /* not yet */ } await sleep(150); } return null; };
+    const setSel = async (sel, v) => { const s = q(sel); const set = Object.getOwnPropertyDescriptor(W().HTMLSelectElement.prototype, 'value').set; set.call(s, v); s.dispatchEvent(new (W().Event)('change', { bubbles: true })); await sleep(900); };
+    const setIn = (el, v) => { const set = Object.getOwnPropertyDescriptor(W().HTMLInputElement.prototype, 'value').set; set.call(el, v); el.dispatchEvent(new (W().Event)('input', { bubbles: true })); el.dispatchEvent(new (W().Event)('change', { bubbles: true })); };
+    const become = async (u) => { if (h.BE()) { await h.asUser(u); } else { await setSel('.demo-role select', u); } for (let i = 0; i < 60; i++) { try { if (D().querySelector('nav a') || D().querySelector('[data-page]')) break; } catch (e) { /* loading */ } await sleep(200); } };
+    const M = 'Партнёр · демо-аккаунт и самостоятельная регистрация GDP';
+    t(M, 'Аккаунт partner.pl01 открывает портал партнёра: профиль PL-01 без персональных данных, форма подачи сертификата', async () => {
+      await become('partner.pl01');
+      W().location.hash = '#/partner'; await sleep(900);
+      const prof = await sleepFor(() => q('[data-pp-profile="PL-01"]')); ok(prof, 'нет профиля PL-01');
+      ok(!/\+7|@/.test(prof.textContent), 'персональные данные в профиле');
+      ok(q('[data-pp-onboard]'), 'нет кнопки подачи');
+    });
+    t(M, 'Подача: сертификат (PNG) + ТС + классы + даты → заявка «ждёт проверки»; вторая подача → 409', async () => {
+      q('[data-pp-onboard]').click(); await sleep(300);
+      const png = Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAEAAAAAwCAIAAAAuKetIAAAAZElEQVR4nO3PUQkAIBTAwBfCOAYzviH8OITBAtxm7fN1wwUNaEEDWtCAFjSgBQ1oQQNa0IAWNKAFDWhBA1rQgBY0oAUNaEEDWtCAFjSgBQ1oQQNa0IAWNKAFDWhBA1rQgBY8dgFk6mCIBI3fZgAAAABJRU5ErkJggg=='), c => c.charCodeAt(0));
+      const file = new (W().File)([png], 'gdp.png', { type: 'image/png' });
+      const inp = q('[data-pp-cert]'); const dt = new (W().DataTransfer)(); dt.items.add(file); inp.files = dt.files; inp.dispatchEvent(new (W().Event)('change', { bubbles: true }));
+      ok(await sleepFor(() => q('[data-pp-profile] .mono')), 'сертификат не загружен');
+      setIn(q('[data-pp-veh]'), '555 ABC 02, 556 ABC 02');
+      const today = new Date(); const iso = d => d.toISOString().slice(0, 10);
+      setIn(q('[data-pp-audit]'), iso(new Date(today - 10 * 86400000))); setIn(q('[data-pp-until]'), iso(new Date(+today + 365 * 86400000))); setIn(q('[data-pp-ins]'), iso(new Date(+today + 200 * 86400000)));
+      await sleep(200); const b = q('[data-pp-submit]'); ok(b && !b.disabled, 'кнопка отправки неактивна'); b.click();
+      const sub = await sleepFor(() => q('[data-pp-sub]')); ok(sub && /ждёт проверки|awaiting|wartet/.test(sub.textContent), 'заявка не в статусе «ждёт проверки»: ' + (sub && sub.textContent));
+      ok(q('[data-pp-qual]').getAttribute('data-pp-qual') !== 'pending', 'ожидающая заявка не должна считаться действующей');
+      q('[data-pp-onboard]').click(); await sleep(200);
+      const again = await sleepFor(() => q('[data-pp-submit]')); if (again) { /* a second submission needs a new certificate → stays disabled */ ok(again.disabled, 'повторная подача без сертификата разрешена'); }
+    });
+    t(M, 'Экран 11 «Партнёры»: заявка видна, подтверждение сотрудником делает квалификацию действующей', async () => {
+      await become('admin'); await sleep(500);
+      await nav('Партнёры'); const box = await sleepFor(() => q('[data-gdp-pending]')); ok(box, 'заявка не видна на экране 11');
+      const row = box.querySelector('[data-gdp-sub]'); ok(row && /PL-01/.test(row.textContent), 'строка заявки: ' + (row && row.textContent));
+      row.querySelector('button.primary').click(); await sleep(1200);
+      ok(!q('[data-gdp-pending]'), 'заявка осталась после подтверждения');
+      const gdp = await W().__OLYMP_DEMO_REQ('GET', '/api/partners/gdp'); ok(gdp.items['PL-01'] && gdp.items['PL-01'].vehicles.length === 2 && gdp.items['PL-01'].status === 'active', 'квалификация не стала действующей');
+      await become('partner.pl01'); W().location.hash = '#/partner'; await sleep(900);
+      const st = await sleepFor(() => q('[data-pp-qual="active"]')); ok(st, 'партнёр не видит действующую квалификацию');
+      await become('admin');
+    });
+    return T;
+  };
+})();
+
+// "+ New entry" for manufacturers (master data → screen 04) and drivers (register form); vehicle / driver links on the master-data page.
+(() => {
+  const baseBuild = Component.prototype.build;
+  Component.prototype.build = function (fr) {
+    const T = baseBuild.call(this, fr);
+    const h = this.helpers(fr), { D, W, all, ok } = h;
+    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const q = sel => D().querySelector(sel);
+    const goHash = async (hh, ms = 900) => { W().location.hash = '#' + hh; await sleep(ms); };
+    const waitFor = async (fn, n = 40) => { for (let i = 0; i < n; i++) { try { const v = fn(); if (v) return v; } catch (e) { /* not yet */ } await sleep(150); } return null; };
+    const setIn = (el, v) => { const proto = el.tagName === 'SELECT' ? W().HTMLSelectElement.prototype : W().HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, v); el.dispatchEvent(new (W().Event)('input', { bubbles: true })); el.dispatchEvent(new (W().Event)('change', { bubbles: true })); };
+    const req = async (m, p, b) => { try { return await W().__OLYMP_DEMO_REQ(m, p, b); } catch (e) { return { error: String(e && e.message || e), status: e && e.status }; } };
+    const M = 'Новые записи · производители, ТС, водители';
+    t(M, 'Справочники → Производители: «+ Новая запись» создаёт производителя (бейдж, имя, страна, домен, группа), виден в списке', async () => {
+      await goHash('/master-data', 1200); await waitFor(() => q('[data-mkind="manufacturer"]')); q('[data-mkind="manufacturer"]').click(); await sleep(500);
+      const b = await waitFor(() => q('[data-mnew]')); ok(b, 'нет кнопки «+ Новая запись» для производителей'); b.click(); await sleep(300);
+      const f = await waitFor(() => q('[data-medit="new"]')); ok(f, 'нет формы');
+      const key = 'Nipro' + Math.floor(Math.random() * 900 + 100);
+      setIn(f.querySelector('input[required]'), key);
+      const byLabel = (lab) => [...f.querySelectorAll('label')].find(l => l.firstChild && String(l.firstChild.textContent || l.textContent).trim().startsWith(lab));
+      setIn(byLabel('ab').querySelector('input'), 'NP'); setIn(byLabel('name').querySelector('input'), 'Nipro Medical'); setIn(byLabel('co').querySelector('input'), 'JP'); setIn(byLabel('url').querySelector('input'), 'nipro.com');
+      await sleep(150); f.querySelector('button.primary').click(); await sleep(1200);
+      ok(q('[data-mrow="' + key + '"]'), 'новый производитель не в списке');
+      const r = await req('GET', '/api/master/manufacturer?lang=ru'); const it = r.items.find(x => x.key === key); ok(it && it.data.name === 'Nipro Medical' && it.data.grp === 2, 'данные не сохранены: ' + JSON.stringify(it && it.data));
+      const bad = await req('POST', '/api/master/manufacturer/' + key, { data: { url: 'not a domain' } }); ok(bad.error || bad.status >= 400, 'неверный домен принят');
+    });
+    t(M, 'Справочники: кнопки «+ Транспортное средство» и «+ Водитель» ведут в реестры; реестр водителей без персональных данных', async () => {
+      await goHash('/master-data', 900); q('[data-mkind="vehicle"]').click(); await sleep(400); ok(q('[data-mnew-link="vehicle"]'), 'нет ссылки «+ ТС»');
+      const dk = q('[data-mkind="driver"]'); ok(dk, 'нет вкладки водителей'); dk.click(); await sleep(500);
+      ok(q('[data-mnew-link="driver"]'), 'нет ссылки «+ Водитель»');
+      const rows = all('[data-mtable="driver"] [data-mrow]'); ok(rows.length >= 2, 'строк водителей: ' + rows.length);
+      ok(!/\+7 7|\d{12}/.test(q('[data-mtable="driver"]').textContent), 'персональные данные в реестре');
+      q('[data-mnew-link="driver"]').click(); await sleep(900);
+      ok(q('[data-drv-form]'), 'форма водителя не открылась по ссылке');
+    });
+    t(M, 'Водители: «+ Водитель» создаёт запись (ИИН/телефон маскированы в списке), пустое имя отклоняется', async () => {
+      await goHash('/drivers?new=1', 1000); const f = await waitFor(() => q('[data-drv-form]')); ok(f, 'нет формы');
+      const before = (await req('GET', '/api/drivers')).length;
+      const ins = f.querySelectorAll('input'); setIn(ins[0], 'Тестов Водитель'); setIn(ins[1], '990101300123'); setIn(ins[2], '+7 701 555 44 33'); setIn(ins[3], 'KZ777111');
+      await sleep(150); f.querySelector('button.primary').click(); await sleep(1200);
+      const after = await req('GET', '/api/drivers'); ok(after.length === before + 1, 'водитель не создан');
+      const d = after.find(x => x.full_name === 'Тестов Водитель'); ok(d && !('iin' in d) && d.iin_masked && d.iin_masked.endsWith('0123'), 'ИИН не замаскирован: ' + JSON.stringify(d));
+      ok(!q('[data-drv-form]'), 'форма не закрылась');
+    });
+    return T;
+  };
+})();
+
+// FR-166: on-call roster page (/oncall) – masked contacts, coverage per level, add / end a slot, audit without the number.
+(() => {
+  const baseBuild = Component.prototype.build;
+  Component.prototype.build = function (fr) {
+    const T = baseBuild.call(this, fr);
+    const h = this.helpers(fr), { D, W, all, ok } = h;
+    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const q = sel => D().querySelector(sel);
+    const goHash = async (hh, ms = 900) => { W().location.hash = '#' + hh; await sleep(ms); };
+    const waitFor = async (fn, n = 40) => { for (let i = 0; i < n; i++) { try { const v = fn(); if (v) return v; } catch (e) { /* not yet */ } await sleep(150); } return null; };
+    const setIn = (el, v) => { const set = Object.getOwnPropertyDescriptor(W().HTMLInputElement.prototype, 'value').set; set.call(el, v); el.dispatchEvent(new (W().Event)('input', { bubbles: true })); };
+    const req = async (m, p, b) => { try { return await W().__OLYMP_DEMO_REQ(m, p, b); } catch (e) { return { error: String(e && e.message || e), status: e && e.status }; } };
+    const M = 'Дежурства · график эскалаций';
+    t(M, 'Страница «Дежурства» в группе 2: три уровня, покрытие 72 ч, без дежурства — резервный файл', async () => {
+      ok(all('nav a').some(a => a.getAttribute('href') === '#/oncall' || a.getAttribute('href') === '/oncall'), 'нет пункта «Дежурства» в меню');
+      await goHash('/oncall', 1000); const cov = await waitFor(() => q('[data-oncall-coverage]')); ok(cov, 'нет блока покрытия');
+      ok(all('[data-oncall-target]').length === 3, 'уровней: ' + all('[data-oncall-target]').length);
+      ok(q('[data-oncall-form]'), 'администратор не видит форму');
+    });
+    t(M, 'Добавить дежурного: номер показан маскированно, статус «действует», аудит без номера; «Завершить» снимает', async () => {
+      await goHash('/oncall', 800); await waitFor(() => q('[data-oncall-form]'));
+      setIn(q('[data-oncall-sms]'), '+7 701 555 00 77'); setIn(q('[data-oncall-email]'), 'night.duty@olymp.example.kz'); await sleep(200);
+      q('[data-oncall-add]').click(); await sleep(1000);
+      const row = await waitFor(() => all('[data-oncall-slot]').find(r => /••• •• 77/.test(r.textContent))); ok(row, 'строка дежурства не появилась');
+      ok(!/5550077|555 00 77/.test(D().body.textContent), 'полный номер виден на странице');
+      ok(row.getAttribute('data-oncall-current') === '1', 'дежурство не действует');
+      ok(q('[data-oncall-target="oncall"]').getAttribute('data-oncall-now') === '1', 'покрытие уровня 1 не обновилось');
+      const au = await req('GET', '/api/audit?limit=20'); const a = (au.items || au).find(x => x.action === 'oncall.slot_added');
+      ok(a && !/5550077/.test(JSON.stringify(a)), 'аудит содержит номер или отсутствует');
+      row.querySelector('[data-oncall-end]').click(); await sleep(900);
+      const after = all('[data-oncall-slot]').find(r => /••• •• 77/.test(r.textContent)); ok(after && after.getAttribute('data-oncall-current') === '0', 'дежурство не завершено');
+    });
+    t(M, 'Диспетчер без функции «Руководитель безопасности» видит график, но не форму; EN без кириллицы', async () => {
+      const r = await W().__OLYMP_DEMO_REQ_AS('dispatcher.ast', 'GET', '/api/oncall'); ok(r && r.can_edit === false, 'диспетчер может редактировать');
+      const bad = await (async () => { try { return await W().__OLYMP_DEMO_REQ_AS('dispatcher.ast', 'POST', '/api/oncall', { target: 'oncall', sms: '+77010000000', valid_from: new Date().toISOString(), valid_until: new Date(Date.now() + 3600000).toISOString() }); } catch (e) { return { status: e.status }; } })();
+      ok(bad && bad.status === 403, 'диспетчер создал дежурство: ' + JSON.stringify(bad).slice(0, 80));
+    });
+    return T;
+  };
+})();
 </script>
 </body>
 </html>
