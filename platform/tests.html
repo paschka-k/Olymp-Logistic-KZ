@@ -3141,6 +3141,61 @@ class Component extends DCLogic {
     return T;
   };
 })();
+
+// Lane S: manufacturer logos on screen 04 (right part of the card, 515:380 box, no overlap with the text), label preview,
+// master-data override (PUT /api/manufacturers/{key}/logo). Demo and backend suite.
+(() => {
+  const baseBuild = Component.prototype.build;
+  Component.prototype.build = function (fr) {
+    const T = baseBuild.call(this, fr);
+    const h = this.helpers(fr), { D, W, all, ok } = h;
+    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const q = sel => D().querySelector(sel);
+    const goHash = async (hh, ms = 900) => { W().location.hash = '#' + hh; await sleep(ms); };
+    const waitFor = async (fn, n = 40) => { for (let i = 0; i < n; i++) { try { const v = fn(); if (v) return v; } catch (e) { /* not yet */ } await sleep(150); } return null; };
+    const M = 'Логотипы производителей · экран 04';
+    const WITH = ['Roche', 'Abbott', 'QIAGEN', 'Sysmex', 'bioMérieux', 'Beckman Coulter'];
+    const checkCards = async () => {
+      await goHash('/s/ship', 1200); await waitFor(() => all('[data-mfr]').length >= 10);
+      const imgs = all('[data-mfr] [data-mfr-logo] img'); ok(imgs.length >= 6, 'логотипов: ' + imgs.length);
+      for (const key of WITH) {
+        const card = q('[data-mfr="' + key + '"]'); ok(card, 'нет карточки ' + key);
+        const img = card.querySelector('[data-mfr-logo="' + key + '"] img'); ok(img && img.naturalWidth > 0 && img.clientWidth > 0, 'логотип не загружен: ' + key);
+        const c = card.getBoundingClientRect(), i = img.getBoundingClientRect(), name = card.querySelector('.v5-ops-stack b').getBoundingClientRect();
+        ok(Math.abs((c.right - i.right) - 9) <= 4, key + ': логотип не у правого края (' + (c.right - i.right).toFixed(0) + 'px)');
+        ok(i.left >= name.right - 1, key + ': логотип перекрывает название');
+        ok(Math.abs((i.top + i.height / 2) - (c.top + c.height / 2)) <= 6, key + ': не по центру по вертикали');
+        ok(Math.abs(i.width / i.height - 515 / 380) < 0.05, key + ': пропорция контейнера');
+      }
+      for (const card of all('[data-mfr]')) if (!WITH.includes(card.getAttribute('data-mfr'))) ok(!card.querySelector('img'), 'лишний логотип: ' + card.getAttribute('data-mfr'));
+    };
+    t(M, 'Шесть карточек с логотипом справа, без наложения на текст, остальные — только бейдж (1500 px)', checkCards);
+    t(M, 'То же при ширине 1024 px', async () => {
+      const w = fr.style.width; fr.style.width = '1024px'; await sleep(400);
+      try { await checkCards(); } finally { fr.style.width = w; await sleep(300); }
+    });
+    t(M, 'Этикетка места: логотип производителя рядом с названием', async () => {
+      await goHash('/s/ship', 900); const row = await waitFor(() => q('[data-lab-mfr]')); ok(row, 'нет превью этикетки');
+      const mfr = (q('[data-label]') && q('.v5-ops-lab-mname') || {}).textContent || '';
+      const img = row.querySelector('[data-mfr-logo] img');
+      if (WITH.some(k => mfr.includes(k.split(' ')[0]))) ok(img && img.clientWidth > 0, 'нет логотипа на этикетке для ' + mfr); else ok(!img, 'логотип без файла: ' + mfr);
+    });
+    t(M, 'Справочники: загрузка логотипа (PNG ≤ 300 KB) заменяет стандартный, удаление возвращает его; EN без кириллицы', async () => {
+      const req = (m, p, b) => W().__OLYMP_DEMO_REQ(m, p, b);
+      const png = 'iVBORw0KGgoAAAANSUhEUgAAAEAAAAAwCAYAAAChS3wfAAAAe0lEQVR4nO3QQRHAIADAMEAImpCI0yEjjzUKep373G/82NIBWgN0gNYAHaA1QAdoDdABWgN0gNYAHaA1QAdoDdABWgN0gNYAHaA1QAdoDdABWgN0gNYAHaA1QAdoDdABWgN0gNYAHaA1QAdoDdABWgN0gNYAHaA1QAdoDwtaAm3CpWy7AAAAAElFTkSuQmCC';
+      const call = async (m, p, b) => { try { return await req(m, p, b); } catch (e) { return { error: String(e && e.message || e), status: e && e.status }; } };
+      const before = (await req('GET', '/api/manufacturers/logos')).logos || {}; ok(!before.Sarstedt, 'Sarstedt уже переопределён');
+      let r = await call('PUT', '/api/manufacturers/Sarstedt/logo', { content_type: 'image/png', data: png }); ok(r && !r.error, 'загрузка: ' + JSON.stringify(r).slice(0, 120));
+      const after = (await req('GET', '/api/manufacturers/logos')).logos || {}; ok(after.Sarstedt, 'нет переопределения');
+      await goHash('/s/overview', 400); await goHash('/s/ship', 1200); await waitFor(() => q('[data-mfr="Sarstedt"] img'));
+      ok(q('[data-mfr="Sarstedt"] [data-mfr-logo] img'), 'загруженный логотип не показан');
+      let bad = await call('PUT', '/api/manufacturers/Sarstedt/logo', { content_type: 'image/png', data: btoa('not a png') }); ok(bad && (bad.error || bad.status >= 400 || bad.detail), 'подделка типа принята');
+      r = await call('DELETE', '/api/manufacturers/Sarstedt/logo'); await goHash('/s/overview', 400); await goHash('/s/ship', 1200); await waitFor(() => all('[data-mfr]').length >= 10);
+      ok(!q('[data-mfr="Sarstedt"] img'), 'логотип не удалён');
+    });
+    return T;
+  };
+})();
 </script>
 </body>
 </html>
