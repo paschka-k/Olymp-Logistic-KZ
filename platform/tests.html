@@ -1345,12 +1345,18 @@ class Component extends DCLogic {
       ok(s.querySelector('.offer-watermark').textContent === (lang === 'ru' ? 'ОБРАЗЕЦ' : 'SAMPLE'), 'водяной знак');
       return p;
     };
-    const portalQuote = async (d, w) => {
-      for (let i = 0; i < 40 && d.querySelectorAll('select[data-f="pickup"] option').length < 4; i++) await sleep(150);
-      const pk = [...d.querySelectorAll('select[data-f="pickup"] option')].find(o => /хаб Астана|Hub Astana|hub Astana/.test(o.textContent)); ok(pk, 'нет пункта забора «хаб Астана»');
-      await setVal('select[data-f="pickup"]', pk.value, d);
-      const opt = [...d.querySelectorAll('select[data-f="dest"] option')].find(o => /Костанай|Kostanay/.test(o.textContent)); ok(opt, 'нет назначения Костанай');
-      await setVal('select[data-f="dest"]', opt.value, d);
+    // B-09 (lane N): pick-up and destination = city + street address of the street directory (no «KDL Olymp» lists)
+    const fillAddr = async (d, k, cityRe, street, house) => {
+      for (let i = 0; i < 40 && d.querySelectorAll('select[data-f="' + k + '-city"] option').length < 10; i++) await sleep(150);
+      const o = [...d.querySelectorAll('select[data-f="' + k + '-city"] option')].find(x => cityRe.test(x.textContent)); ok(o, 'нет города ' + cityRe);
+      await setVal('select[data-f="' + k + '-city"]', o.value, d);
+      await setVal('[data-f="' + k + '-street"]', street, d); await setVal('[data-f="' + k + '-house"]', house, d);
+    };
+    const portalQuote = async (d, w) => { // changed: B-09 – city + street instead of the «KDL Olymp · hub / branch» lists
+      const en = !!(w && w !== W());
+      await fillAddr(d, 'pickup', /^(Астана|Astana)$/, en ? 'Abay St' : 'улица Абая', '5');
+      await fillAddr(d, 'dest', /^(Костанай|Kostanay)$/, en ? 'Auezov St' : 'улица Ауэзова', '12');
+      await setVal('[data-f="weight"]', '300', d);
       if (!d.querySelector('[data-good="ivd"] input').checked) { d.querySelector('[data-good="ivd"] input').click(); await sleep(250); }
       d.querySelector('[data-search]').click();
       for (let i = 0; i < 30 && !d.querySelector('[data-offer-open]'); i++) await sleep(150);
@@ -1366,6 +1372,7 @@ class Component extends DCLogic {
       const gross = num(q('[data-p="gross"]').textContent);
       btn.click(); await sleep(500);
       const p = offerChecks(D(), 'ru'); ok(p[p.length - 1] === gross, 'итог ' + p[p.length - 1] + ' ≠ расчёт ' + gross);
+      ok(q('[data-offer-dest]') && q('[data-offer-dest]').textContent.includes('улица Ауэзова 12'), 'нет адреса доставки в образце');
       ok(D().body.classList.contains('offer-printing'), 'нет режима печати');
       let printed = 0; W().print = () => { printed++; }; q('[data-offer-print]').click(); ok(printed === 1, 'window.print() не вызван');
       const css = [...D().styleSheets].some(sh => { try { return [...sh.cssRules].some(r => r.media && /print/.test(r.media.mediaText) && r.cssText.includes('offer-printing')); } catch (e) { return false; } }); ok(css, 'нет print CSS');
@@ -1375,7 +1382,7 @@ class Component extends DCLogic {
       const url = fr.getAttribute('src').replace('.html', '-en.html') + '#/book?lang=en';
       const f2 = document.createElement('iframe'); f2.style.cssText = 'position:fixed;left:-3000px;top:0;width:1400px;height:900px;border:0'; f2.src = url; document.body.appendChild(f2);
       try {
-        for (let k = 0; k < 60; k++) { try { if (f2.contentDocument.querySelector('select[data-f="pickup"] option + option')) break; } catch (e) { /* loading */ } await sleep(200); } await sleep(400);
+        for (let k = 0; k < 60; k++) { try { if (f2.contentDocument.querySelector('select[data-f="pickup-city"] option + option')) break; } catch (e) { /* loading */ } await sleep(200); } await sleep(400);
         const d = f2.contentDocument; await portalQuote(d, f2.contentWindow);
         ok(d.querySelector('[data-offer-open]').textContent.trim() === 'Offer and contract sample', 'label');
         d.querySelector('[data-offer-open]').click(); await sleep(500);
@@ -1386,7 +1393,6 @@ class Component extends DCLogic {
     t(MO, 'Бронирование → «Мои бронирования» и диспетчерская: образец по существующему бронированию с номером', async () => {
       W().location.hash = '#/book'; await sleep(700); await portalQuote(D());
       const slot = all('button.slot').find(b => !b.disabled); ok(slot, 'нет свободного рейса'); slot.click(); await sleep(400);
-      await setVal('[data-f="weight"]', '300');
       q('[data-book-confirm] button.btn.primary').click(); await sleep(700);
       const n = (q('[data-booked] b') || {}).textContent; ok(/^BK-[\d-]+$/.test(n || ''), 'бронирование не создано: ' + n);
       W().location.hash = '#/my-bookings'; await sleep(700);
@@ -1401,32 +1407,36 @@ class Component extends DCLogic {
       q('[data-offer-close]').click(); await sleep(300);
       W().location.hash = '#/'; await sleep(600);
     });
-    // ---- Портал клиента: бронирование v2 (забор + доставка, груз, ДОПОГ, страхование) ----
+    // ---- Портал клиента: бронирование v3 (B-09 адреса, B-10 хабы, B-11 вес, B-12 курсы, B-14 экспресс) ----
     const MB = 'Портал: бронирование v2';
     const optBy = (d, sel, re) => [...d.querySelectorAll(sel + ' option')].find(o => re.test(o.textContent));
     const choose = async (sel, re, d = D()) => { const o = optBy(d, sel, re); ok(o, 'нет варианта ' + re + ' в ' + sel); await setVal(sel, o.value, d); };
     const good = async (code, on = true) => { const i = q('[data-good="' + code + '"] input'); ok(i, 'нет категории ' + code); if (i.checked !== on) { i.click(); await sleep(250); } };
     const quote = async () => { const b = q('[data-search]'); ok(b && !b.disabled, 'расчёт недоступен'); b.click(); for (let i = 0; i < 30 && !q('[data-price]'); i++) await sleep(150); ok(q('[data-price]'), 'нет цены'); };
     const pv = k => num((q('[data-p="' + k + '"]') || { textContent: '0' }).textContent);
+    const route = async (fromRe, fromSt, toRe, toSt) => { await fillAddr(D(), 'pickup', fromRe, fromSt, '5'); await fillAddr(D(), 'dest', toRe, toSt, '10'); };
     const freshForm = async () => { W().location.hash = '#/my-bookings'; await sleep(400); W().location.hash = '#/book'; await sleep(700);
-      for (let i = 0; i < 40 && D().querySelectorAll('select[data-f="pickup"] option').length < 4; i++) await sleep(150); await good('ivd'); };
+      for (let i = 0; i < 40 && D().querySelectorAll('select[data-f="pickup-city"] option').length < 10; i++) await sleep(150); await good('ivd'); await setVal('[data-f="weight"]', '180'); };
     const toPortal = async () => {
       await setVal('.demo-role select', 'kdl.portal'); await sleep(700);
       for (let i = 0; i < 40; i++) { try { if (D().querySelector('nav a')) break; } catch (e) { /* loading */ } await sleep(200); }
       W().location.hash = '#/my-bookings'; await sleep(300); W().location.hash = '#/book'; await sleep(800);
-      for (let i = 0; i < 40 && D().querySelectorAll('select[data-f="pickup"] option').length < 4; i++) await sleep(150);
+      for (let i = 0; i < 40 && D().querySelectorAll('select[data-f="pickup-city"] option').length < 10; i++) await sleep(150);
     };
-    t(MB, 'Забор и доставка: отдельные списки, подписи «хаб» / «филиал», без «Город · KDL Olymp · Город»; совпадение отклоняется', async () => {
+    t(MB, 'B-09: списки — только города (без «KDL Olymp»), улица с подсказками и дом обязательны; одна улица одного города отклоняется', async () => {
       await toPortal();
-      const po = all('select[data-f="pickup"] option').map(o => o.textContent);
-      ok(po.includes('KDL Olymp · хаб Астана') && po.includes('KDL Olymp · хаб Алматы') && po.includes('KDL Olymp · филиал Шымкент'), po.join(' | '));
-      ok(!po.some(x => /^(.+) · KDL Olymp · \1$/.test(x)) && po.includes('Другой адрес отправителя…'), 'старый формат или нет другого адреса');
-      await choose('select[data-f="pickup"]', /филиал Тараз/);
-      ok(!optBy(D(), 'select[data-f="dest"]', /филиал Тараз/), 'пункт забора предлагается как назначение');
-      await choose('select[data-f="pickup"]', /Другой адрес/); await choose('select[data-f="city"]', /^Шымкент$/); await setVal('[data-f="address"]', 'ТОО «Фарм Юг», ул. Байтурсынова 12');
-      await choose('select[data-f="dest"]', /филиал Шымкент/); await good('ivd');
-      ok(q('[data-same]') && q('[data-search]').disabled, 'совпадение не отклонено');
-      await choose('select[data-f="dest"]', /филиал Кызылорда/); ok(!q('[data-same]') && !q('[data-search]').disabled, 'после смены назначения расчёт недоступен');
+      const po = all('select[data-f="pickup-city"] option').map(o => o.textContent);
+      ok(po.length >= 30 && po.includes('Шымкент') && po.includes('Темиртау') && !po.some(x => /KDL|хаб|филиал/.test(x)), po.join(' | '));
+      await choose('select[data-f="pickup-city"]', /^Шымкент$/); await setVal('[data-f="pickup-street"]', 'Байтур');
+      for (let i = 0; i < 20 && !q('[data-sugg="pickup"]'); i++) await sleep(150);
+      const s = all('[data-sugg="pickup"] [data-sugg-item]').find(b => b.textContent === 'улица Байтурсынова'); ok(s, 'нет подсказки «улица Байтурсынова»'); s.click(); await sleep(250);
+      ok(q('[data-f="pickup-street"]').value === 'улица Байтурсынова', q('[data-f="pickup-street"]').value);
+      await good('ivd'); await setVal('[data-f="weight"]', '200');
+      await fillAddr(D(), 'dest', /^Шымкент$/, 'улица Байтурсынова', '40');
+      ok(q('[data-search]').disabled, 'без дома в пункте забора расчёт доступен');
+      await setVal('[data-f="pickup-house"]', '12');
+      ok(q('[data-same]') && q('[data-search]').disabled, 'одна улица одного города не отклонена');
+      await fillAddr(D(), 'dest', /^Кызылорда$/, 'улица Айтеке би', '7'); ok(!q('[data-same]') && !q('[data-search]').disabled, 'после смены назначения расчёт недоступен');
       await quote(); ok(q('[data-price]').textContent.includes('прямой рейс линии'), q('[data-price]').textContent);
     });
     t(MB, 'Груз: 12 категорий GDP/GLP/GMP с режимом и подсказкой; режим подбирается; несовместимая смесь блокирует расчёт', async () => {
@@ -1439,69 +1449,145 @@ class Component extends DCLogic {
       await good('labcons', false); await good('cells', false); ok(!q('[data-goods-warn]') && q('[data-search]').disabled, 'без категорий расчёт должен быть недоступен');
       await good('ivd'); await choose('select[data-f="tc"]', /Холод/);
     });
-    t(MB, 'Маршрут: Тараз → Шымкент — прямой рейс ALA-1 (190 км); Шымкент → Тараз — забор до хаба + линия', async () => {
+    t(MB, 'B-11: вес обязателен, среднее на паллету; > 1 200 кг/пал. блокирует расчёт', async () => {
+      await setVal('[data-f="weight"]', ''); ok(q('[data-search]').disabled && q('[data-avg]').textContent.includes('Укажите вес'), 'без веса расчёт доступен');
+      await setVal('[data-f="pallets"]', '2'); await setVal('[data-f="weight"]', '300'); ok(q('[data-avg]').textContent.includes('≈ 150 kg'), q('[data-avg]').textContent);
+      await setVal('[data-f="weight"]', '3000'); ok(q('[data-search]').disabled && q('[data-avg]').classList.contains('neg'), 'перегруз паллеты не заблокирован');
+      await setVal('[data-f="pallets"]', '1'); await setVal('[data-f="weight"]', '180');
+    });
+    t(MB, 'Маршрут: Тараз → Шымкент — прямой рейс ALA-1 (190 км); Шымкент → Тараз — забор до хаба + линия; Астана → Шымкент — через хаб (B-10)', async () => {
       await freshForm();
-      await choose('select[data-f="pickup"]', /филиал Тараз/); await choose('select[data-f="dest"]', /филиал Шымкент/); await quote();
+      await route(/^Тараз$/, 'улица Абая', /^Шымкент$/, 'улица Абая'); await quote();
       ok(q('[data-price]').textContent.includes('190 km · прямой рейс линии'), q('[data-price]').textContent);
       ok(all('button.slot').length && all('button.slot').every(b => b.getAttribute('data-slot-line').startsWith('ALA-1')), 'рейсы не ALA-1');
-      await choose('select[data-f="pickup"]', /филиал Шымкент/); await choose('select[data-f="dest"]', /филиал Тараз/); await quote();
+      await route(/^Шымкент$/, 'улица Абая', /^Тараз$/, 'улица Абая'); await quote();
       ok(q('[data-price]').textContent.includes('забор до хаба + линия') && all('button.slot')[0].textContent.includes('забор до хаба + линия'), q('[data-price]').textContent);
-      await choose('select[data-f="pickup"]', /хаб Астана/); await choose('select[data-f="dest"]', /филиал Шымкент/); q('[data-search]').click(); await sleep(600);
-      ok(/No line connects|Нет линии|не соединяет/.test(D().body.textContent) && !q('[data-price]'), 'межхабовое направление без линии должно отклоняться');
+      ok(q('[data-hub-info]') && q('[data-hub-info]').textContent.includes('+1 раб. дн. через хаб Алматы'), q('[data-route]').textContent);
+      ok(all('button.slot')[0].querySelector('[data-slot-pickup]'), 'нет дня забора у рейса через хаб');
+      await route(/^Астана$/, 'улица Абая', /^Шымкент$/, 'улица Абая'); await quote(); // changed: B-10 – never «No line connects …»
+      ok(!/No line connects|Нет линии/.test(D().body.textContent), 'межхабовое направление отклонено');
+      ok(q('[data-price]').textContent.includes('через хаб с перевалкой') && pv('handling') >= 12000, q('[data-price]').textContent);
+      ok(q('[data-legs]').textContent.includes('магистраль') && q('[data-hub-info]').textContent.includes('через хаб Астана') && q('[data-lead]'), q('[data-route]').textContent);
     });
     t(MB, 'Опасный груз: раздел свёрнут; UN — 4 цифры; надбавка ДОПОГ строкой цены; рейс без ДОПОГ (ALA-2) недоступен', async () => {
       await freshForm();
       ok(!q('[data-dg]').open, 'раздел ДОПОГ должен быть свёрнут'); q('[data-dg] summary').click(); await sleep(200);
-      await choose('select[data-f="pickup"]', /филиал Тараз/); await choose('select[data-f="dest"]', /филиал Шымкент/);
+      await route(/^Тараз$/, 'улица Абая', /^Шымкент$/, 'улица Абая');
       await setVal('[data-f="un"]', '12'); ok(q('[data-dg-err]') && q('[data-dg-err]').textContent.includes('4 цифры') && q('[data-search]').disabled, 'UN из 2 цифр принят');
       await setVal('[data-f="un"]', '1993'); ok(q('[data-dg-err]').textContent.includes('наименование и класс'), 'без класса принят');
       await setVal('[data-f="psn"]', 'Легковоспламеняющаяся жидкость, н.у.к.'); await setVal('select[data-f="cls"]', '3'); await setVal('select[data-f="pg"]', 'III');
       ok(all('select[data-f="cls"] option').length === 16 && !q('[data-dg-err]'), 'список классов / ошибка');
       ok(all('select[data-f="emer"] option').map(o => o.textContent).includes('Диспетчер перевозчика (24/7)'), 'роль аварийного контакта');
       await quote(); const fr0 = pv('freight'), adr = pv('adr'); ok(adr >= 5000 && pv('net') === fr0 + adr && pv('vat') === Math.round(pv('net') * 0.16), 'надбавка ДОПОГ: ' + adr);
-      ok(q('[data-adr-need]') && q('summary').textContent.includes('UN 1993'), 'нет требования ДОПОГ-рейса');
+      ok(q('[data-adr-need]') && q('[data-dg] summary').textContent.includes('UN 1993'), 'нет требования ДОПОГ-рейса');
       for (const k of ['un', 'psn']) await setVal('[data-f="' + k + '"]', ''); await setVal('select[data-f="cls"]', ''); await setVal('select[data-f="pg"]', '');
-      await setVal('[data-f="dry"]', '5'); await choose('select[data-f="pickup"]', /хаб Алматы/); await choose('select[data-f="dest"]', /филиал Каскелен/); await quote();
+      await setVal('[data-f="dry"]', '5'); await route(/^Алматы$/, 'улица Абая', /^Каскелен$/, 'улица Абая'); await quote();
       ok(all('button.slot').length && all('button.slot').every(b => b.disabled && b.querySelector('[data-noadr]')) && q('[data-adr-none]'), 'рейсы ALA-2 без ДОПОГ доступны');
       await setVal('[data-f="dry"]', '');
     });
-    t(MB, 'Страхование: премия ≈ 0,15 % (мин. 3 000 ₸) отдельной строкой без НДС — в цене и в образце договора', async () => {
+    t(MB, 'Страхование: премия ≈ 0,15 % (мин. 3 000 ₸) без НДС; B-12: в € и $ по курсу НБ РК с датой — в цене и в образце договора', async () => {
       await freshForm();
-      await choose('select[data-f="pickup"]', /филиал Тараз/); await choose('select[data-f="dest"]', /филиал Шымкент/);
+      await route(/^Тараз$/, 'улица Абая', /^Шымкент$/, 'улица Абая');
       q('[data-f="insured"]').click(); await sleep(200); await setVal('[data-f="declared"]', '10000000');
       ok(q('[data-premium]').textContent.includes('15 000 ₸'), q('[data-premium]').textContent);
       await setVal('[data-f="un"]', '1993'); await setVal('[data-f="psn"]', 'Легковоспламеняющаяся жидкость, н.у.к.'); await setVal('select[data-f="cls"]', '3');
       await quote(); ok(pv('insurance') === 15000 && pv('gross') === pv('net') + pv('vat') + 15000, 'итог: ' + pv('gross'));
+      const fx = q('[data-ins-fx]'); ok(fx && fx.textContent.includes('€') && fx.textContent.includes('$') && /по курсу НБ РК на \d\d\.\d\d\.2026/.test(fx.textContent), fx ? fx.textContent : 'нет € / $');
       q('[data-offer-open]').click(); await sleep(600);
       const o = q('[data-offer]'); ok(o && q('[data-offer-ins]').textContent.includes('10 000 000') && o.textContent.includes('Страховая премия (не облагается НДС)') && o.textContent.includes('Надбавка ДОПОГ'), 'образец без страховки / ДОПОГ');
+      ok(q('[data-offer-fx]') && /курс НБ РК на \d\d\.\d\d\.2026/.test(q('[data-offer-fx]').textContent) && q('[data-offer-fx]').textContent.includes('€'), 'образец без пересчёта в валюту');
       ok(q('[data-offer-dg]').textContent.includes('UN 1993') && q('[data-offer-pickup]').textContent.includes('Тараз') && q('[data-offer-route]').textContent.includes('Тараз → Шымкент'), 'образец: ДОПОГ / забор');
       q('[data-offer-close]').click(); await sleep(250);
     });
-    t(MB, 'Бронирование: забор, груз, ДОПОГ и страховка в «Мои бронирования» и в диспетчерской', async () => {
+    t(MB, 'Бронирование: адрес, груз, ДОПОГ и страховка (с € / $) в «Мои бронирования» и в диспетчерской', async () => {
       const slot = all('button.slot').find(b => !b.disabled); ok(slot, 'нет свободного рейса'); slot.click(); await sleep(300);
-      await setVal('[data-f="remark"]', 'Хрупкие наборы'); await setVal('[data-f="weight"]', '180');
+      await setVal('[data-f="remark"]', 'Хрупкие наборы');
       q('[data-book-confirm] button.btn.primary').click(); await sleep(700);
       const n = (q('[data-booked] b') || {}).textContent; ok(/^BK-[\d-]+$/.test(n || ''), 'бронирование не создано');
       W().location.hash = '#/my-bookings'; await sleep(800);
       const r = q('[data-booking="' + n + '"]'); ok(r, 'нет строки ' + n);
-      ['Тараз → Шымкент', 'IVD-реагенты и калибраторы', 'Хрупкие наборы', 'UN 1993', 'Страхование (без НДС) 15 000 ₸'].forEach(s => ok(r.textContent.includes(s), 'нет «' + s + '»: ' + r.textContent));
+      ['Тараз, улица Абая 5', '→ Шымкент, улица Абая 10', 'IVD-реагенты и калибраторы', 'Хрупкие наборы', 'UN 1993', 'Страхование (без НДС) 15 000 ₸', '€'].forEach(s => ok(r.textContent.includes(s), 'нет «' + s + '»: ' + r.textContent));
+      const cb = q('[data-cert-open="' + n + '"]'); ok(cb, 'нет кнопки «Страховой сертификат»'); cb.click(); await sleep(600); // FR-153
+      const ce = q('[data-cert]'); ok(ce && /IC-/.test(ce.textContent) && q('[data-cert-value]').textContent.includes('10 000 000') && q('[data-cert-value]').textContent.includes('€'), 'сертификат: ' + (ce ? ce.textContent.slice(0, 200) : 'нет'));
+      q('[data-cert-close]').click(); await sleep(250);
       await setVal('.demo-role select', 'admin'); await sleep(700);
       for (let i = 0; i < 60; i++) { try { if (fr.contentWindow.__OLYMP && D().querySelectorAll('nav [data-nav]').length > 10) break; } catch (e) { /* loading */ } await sleep(250); }
       W().location.hash = '#/bookings'; await sleep(900);
-      const r2 = q('[data-booking="' + n + '"]'); ok(r2 && r2.textContent.includes('Тараз → Шымкент') && r2.textContent.includes('UN 1993') && r2.textContent.includes('KDL Olymp'), 'диспетчерская: ' + (r2 ? r2.textContent : 'нет строки'));
+      const r2 = q('[data-booking="' + n + '"]'); ok(r2 && r2.textContent.includes('Тараз, улица Абая') && r2.textContent.includes('UN 1993') && r2.textContent.includes('KDL Olymp'), 'диспетчерская: ' + (r2 ? r2.textContent : 'нет строки'));
       W().location.hash = '#/'; await sleep(600);
     });
-    ['DE', 'EN'].forEach(code => t(MB, code + ': названия мест и линий на языке страницы (Shymkent, Taraz, ALA-1 ' + (code === 'DE' ? 'Süd' : 'South') + ')', async () => {
+    t(MB, 'FR-151: улицы нет в справочнике → подсказки и «проверка сотрудником»; диспетчер проверяет адрес до подтверждения', async () => {
+      await toPortal(); await good('ivd'); await setVal('[data-f="weight"]', '120');
+      await route(/^Алматы$/, 'улица Абая', /^Тараз$/, 'улица Толе-биии');
+      q('[data-search]').click(); await sleep(700);
+      ok(/Unknown street/.test(D().body.textContent) && q('[data-sugg="dest"]') && q('[data-sugg="dest"]').textContent.includes('улица Толе би'), 'нет подсказок для неизвестной улицы');
+      q('[data-f="dest-manual"]').click(); await sleep(250); await quote();
+      ok(q('[data-manual-info]'), 'нет пометки «адрес будет проверен»');
+      const slot = all('button.slot').find(b => !b.disabled); slot.click(); await sleep(300);
+      q('[data-book-confirm] button.btn.primary').click(); await sleep(700);
+      const n = (q('[data-booked] b') || {}).textContent; ok(/^BK-[\d-]+$/.test(n || '') && q('[data-booked] [data-manual-info]'), 'бронирование с проверкой адреса не создано');
+      await setVal('.demo-role select', 'admin'); await sleep(700);
+      for (let i = 0; i < 60; i++) { try { if (fr.contentWindow.__OLYMP && D().querySelectorAll('nav [data-nav]').length > 10) break; } catch (e) { /* loading */ } await sleep(250); }
+      W().location.hash = '#/bookings'; await sleep(900);
+      const row = q('[data-booking="' + n + '"]'); ok(row && row.querySelector('[data-addr-check]'), 'нет пометки проверки адреса');
+      const confirmBtn = row.querySelector('button.btn.small.primary'); ok(confirmBtn && confirmBtn.disabled, 'подтверждение до проверки адреса доступно');
+      W().prompt = () => 'Улица новая, адрес подтверждён по телефону'; row.querySelector('[data-addr-review]').click(); await sleep(700);
+      const row2 = q('[data-booking="' + n + '"]'); ok(row2 && !row2.querySelector('[data-addr-check]') && row2.textContent.includes('Адрес проверен'), 'проверка адреса не сохранена');
+      W().location.hash = '#/'; await sleep(500);
+    });
+    t(MB, 'FR-150: адрес сохраняется в адресной книге клиента и выбирается при следующем бронировании', async () => {
+      await toPortal(); await fillAddr(D(), 'pickup', /^Алматы$/, 'улица Абая', '77');
+      q('[data-save-addr="pickup"]').click(); await sleep(700);
+      ok(q('[data-saved-msg="pickup"]') && q('[data-saved-msg="pickup"]').textContent.includes('Адрес сохранён'), 'адрес не сохранён');
+      await freshForm(); const o = optBy(D(), 'select[data-f="dest-saved"]', /улица Абая 77 · Алматы/); ok(o, 'нет адреса в адресной книге');
+      await setVal('select[data-f="dest-saved"]', o.value);
+      ok(q('select[data-f="dest-city"]').value === 'KZ-ALA' && q('[data-f="dest-street"]').value === 'улица Абая' && q('[data-f="dest-house"]').value === '77', 'адрес не подставлен');
+    });
+    t(MB, 'FR-147: цена фиксируется коммерческим предложением (номер, срок) и бронируется по нему', async () => {
+      await freshForm(); await route(/^Тараз$/, 'улица Абая', /^Алматы$/, 'улица Абая'); await quote();
+      const gross = pv('gross'); q('[data-quote-save]').click(); await sleep(600);
+      const d = q('[data-quote-done]'); ok(d && /QT-\d{2}-\d{6}/.test(d.textContent) && d.textContent.includes('цена зафиксирована до'), d ? d.textContent : 'нет предложения');
+      const qn = d.textContent.match(/QT-\d{2}-\d{6}/)[0];
+      const slot = all('button.slot').find(b => !b.disabled); slot.click(); await sleep(300);
+      q('[data-book-confirm] button.btn.primary').click(); await sleep(700);
+      ok(q('[data-booked]') && num(q('[data-booked]').textContent.split('·').pop()) === gross, 'бронирование не по цене предложения');
+      W().location.hash = '#/my-bookings'; await sleep(800);
+      const r = q('[data-quote="' + qn + '"]'); ok(r && r.textContent.includes('принято'), 'предложение не принято: ' + (r ? r.textContent : ''));
+    });
+    t(MB, 'B-14 / FR-154: экспресс из портала → 3 подписи в «Исходные данные · Экспресс» → клиент видит «согласовано»', async () => {
+      await toPortal(); await good('ivd'); await setVal('[data-f="weight"]', '18');
+      await route(/^Алматы$/, 'улица Абая', /^Атырау$/, 'улица Абая');
+      q('[data-f="express"]').click(); await sleep(200);
+      const dt = new Date(Date.now() + 2 * 86400000 + 5 * 3600000).toISOString().slice(0, 16); await setVal('[data-f="deliver-by"]', dt);
+      ok(q('[data-search]').textContent === 'Запросить экспресс', q('[data-search]').textContent); q('[data-search]').click(); await sleep(800);
+      const done = q('[data-express-done]'); ok(done && /EX-\d{4}/.test(done.textContent) && done.textContent.includes('решение до'), done ? done.textContent : 'нет экспресс-заявки');
+      const ex = done.textContent.match(/EX-\d{4,}/)[0];
+      W().location.hash = '#/my-bookings'; await sleep(800);
+      const r = q('[data-ex="' + ex + '"]'); ok(r && r.querySelector('[data-ex-st="pending"]') && r.textContent.includes('ожидает согласования'), 'в «Мои бронирования» нет заявки ' + ex);
+      await setVal('.demo-role select', 'admin'); await sleep(700);
+      for (let i = 0; i < 60; i++) { try { if (fr.contentWindow.__OLYMP && D().querySelectorAll('nav [data-nav]').length > 10) break; } catch (e) { /* loading */ } await sleep(250); }
+      const toEx = async () => { await nav('Исходные данные'); const tb = all('[data-bltab]').find(b => b.textContent.includes('Экспресс')); tb.click(); await sleep(400); };
+      await toEx(); ok(q('[data-express="' + ex + '"]'), 'заявки клиента нет в «Экспресс»');
+      for (let k = 0; k < 3; k++) { await h.asUser(['ceo', 'head.analytics', 'head.logistics'][k], toEx); q('[data-express="' + ex + '"]').querySelectorAll('button')[k].click(); await sleep(400); } // port: FR-136 backend – each slot by its approver
+      ok(q('[data-express="' + ex + '"]').textContent.includes('согласовано'), q('[data-express="' + ex + '"]').textContent.slice(0, 160));
+      await h.asUser('admin');
+      await setVal('.demo-role select', 'kdl.portal'); await sleep(700);
+      W().location.hash = '#/my-bookings'; await sleep(900);
+      const r2 = q('[data-ex="' + ex + '"]'); ok(r2 && r2.querySelector('[data-ex-st="approved"]') && /ORD-/.test(r2.textContent), 'клиент не видит согласование: ' + (r2 ? r2.textContent : ''));
+    });
+    ['DE', 'EN'].forEach(code => t(MB, code + ': названия мест, улиц и линий на языке страницы (Shymkent, Taraz, ALA-1 ' + (code === 'DE' ? 'Süd' : 'South') + ')', async () => {
       const lc = code.toLowerCase(), f2 = document.createElement('iframe'); f2.style.cssText = 'position:fixed;left:-3000px;top:0;width:1400px;height:900px;border:0';
       f2.src = fr.getAttribute('src').replace('.html', '-' + lc + '.html') + '#/?lang=' + lc; document.body.appendChild(f2);
       try {
         for (let k = 0; k < 60; k++) { try { if (f2.contentDocument.querySelector('.demo-role select')) break; } catch (e) { /* loading */ } await sleep(200); } await sleep(500);
         await setVal('.demo-role select', 'kdl.portal', f2.contentDocument); await sleep(900);
         f2.contentWindow.location.hash = '#/book'; await sleep(900);
-        const d = f2.contentDocument; for (let i = 0; i < 40 && d.querySelectorAll('select[data-f="pickup"] option').length < 4; i++) await sleep(150);
-        const po = [...d.querySelectorAll('select[data-f="pickup"] option')].map(o => o.textContent);
-        ok(po.includes(code === 'DE' ? 'KDL Olymp · Filiale Shymkent' : 'KDL Olymp · branch Shymkent') && po.includes(code === 'DE' ? 'KDL Olymp · Hub Astana' : 'KDL Olymp · hub Astana'), po.join(' | '));
-        await choose('select[data-f="pickup"]', /Taraz/, d); await choose('select[data-f="dest"]', /Shymkent/, d);
+        const d = f2.contentDocument;
+        await fillAddr(d, 'pickup', /^Taraz$/, 'Tole', '5');
+        for (let i = 0; i < 20 && !d.querySelector('[data-sugg="pickup"]'); i++) await sleep(150);
+        const sg = [...d.querySelectorAll('[data-sugg="pickup"] [data-sugg-item]')].map(b => b.textContent); ok(sg.includes('Tole Bi St'), 'подсказки улиц: ' + sg.join(' | '));
+        await setVal('[data-f="pickup-street"]', 'Tole Bi St', d);
+        await fillAddr(d, 'dest', /^Shymkent$/, 'Abay St', '10'); await setVal('[data-f="weight"]', '150', d);
         d.querySelector('[data-good="ivd"] input').click(); await sleep(250); d.querySelector('[data-search]').click();
         for (let i = 0; i < 30 && !d.querySelector('button.slot'); i++) await sleep(150);
         const sl = d.querySelector('button.slot').textContent; ok(sl.includes(code === 'DE' ? 'ALA-1 Süd: Taraz – Shymkent – Turkistan – Kyzylorda' : 'ALA-1 South: Taraz – Shymkent – Turkistan – Kyzylorda'), sl);
@@ -1569,11 +1655,11 @@ class Component extends DCLogic {
         if (token) { await go(f2, '/track/' + token, 900); scan('/track/:token'); }
         // customer portal: book (route, goods, quote, departures), offer sample, my bookings, account, help
         await go(f2, '/s/overview'); await role(f2, 'kdl.portal'); portal = true;
-        await go(f2, '/book', 900); await waitSel(D2(), 'select[data-f="pickup"] option[value]:not([value=""])');
-        const d = D2(), hub = d.querySelector('select[data-f="pickup"] optgroup option');
-        await setVal('select[data-f="pickup"]', hub.value, d);
-        const sh = [...d.querySelectorAll('select[data-f="dest"] option')].find(o => /Шымкент|Shymkent/.test(o.textContent)) || [...d.querySelectorAll('select[data-f="dest"] option')][2];
-        await setVal('select[data-f="dest"]', sh.value, d);
+        await go(f2, '/book', 900); await waitSel(D2(), 'select[data-f="pickup-city"] option[value]:not([value=""])');
+        const d = D2(); // changed: B-09 – city + street address
+        await setVal('select[data-f="pickup-city"]', 'KZ-ALA', d); await setVal('[data-f="pickup-street"]', 'Abay St', d); await setVal('[data-f="pickup-house"]', '5', d);
+        await setVal('select[data-f="dest-city"]', 'KZ-SHY', d); await setVal('[data-f="dest-street"]', 'Abay St', d); await setVal('[data-f="dest-house"]', '9', d);
+        await setVal('[data-f="weight"]', '150', d);
         d.querySelector('[data-good="ivd"] input').click(); await sleep(250);
         d.querySelector('[data-dg] summary').click(); await sleep(250); scan('/book form');
         d.querySelector('[data-search]').click(); await waitSel(d, '[data-price]'); scan('/book quote');
@@ -2634,6 +2720,296 @@ class Component extends DCLogic {
         const ru = all('.lang-row [role="button"]').find(b => b.textContent.trim() === 'RU'); ru.click(); await sleep(900); await goHash('/s/overview', 600);
       }
       ok(q('h1').textContent === 'Обзор', 'не вернулся RU');
+    });
+
+    return T;
+  };
+})();
+
+// Lane O: B-13 / FR-175 (titles, history, deep links, 403), B-14 (express on 02), help visuals, FR-158 (fleet register views),
+// FR-159 (records landing page), FR-160 (guided tours), FR-173 (forms for existing APIs). Demo and backend suite.
+(() => {
+  const baseBuild = Component.prototype.build;
+  Component.prototype.build = function (fr) {
+    const T = baseBuild.call(this, fr);
+    const h = this.helpers(fr), { D, W, all, nav, ok } = h;
+    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const q = sel => D().querySelector(sel);
+    const goHash = async (hh, ms = 900) => { W().location.hash = '#' + hh; await sleep(ms); };
+    const waitFor = async (fn, n = 40) => { for (let i = 0; i < n; i++) { try { const v = fn(); if (v) return v; } catch (e) { /* not yet */ } await sleep(150); } return null; };
+    const title = () => D().title;
+    const hash = () => W().location.hash;
+    const req = (m, p, b) => W().__OLYMP_DEMO_REQ(m, p, b);
+    const asRole = async r => { const s = q('.demo-role select'); const set = Object.getOwnPropertyDescriptor(W().HTMLSelectElement.prototype, 'value').set; set.call(s, r);
+      s.dispatchEvent(new (W().Event)('change', { bubbles: true })); await sleep(900); await waitFor(() => D().querySelector('nav a')); await sleep(300); };
+    const role = async r => { if (h.BE()) await h.asUser(r); else await asRole(r); }; // port: FR-136 account switch in both modes
+    const backToAdmin = async () => { await role('admin'); await waitFor(() => D().querySelectorAll('nav [data-nav]').length >= 17); await goHash('/s/overview', 500); };
+    const frame = async (url, ready) => {
+      const f2 = document.createElement('iframe'); f2.style.cssText = 'position:fixed;left:-3000px;top:0;width:1400px;height:900px;border:0'; f2.src = url; document.body.appendChild(f2);
+      for (let k = 0; k < 80; k++) { try { if (ready(f2.contentDocument)) break; } catch (e) { /* loading */ } await sleep(200); }
+      await sleep(450); return f2;
+    };
+    const langUrl = code => fr.getAttribute('src').replace('.html', '-' + code.toLowerCase() + '.html');
+    const cyr = el => { const w = el.ownerDocument.createTreeWalker(el, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+      for (let x = w.nextNode(); x; x = w.nextNode()) { if (x.nodeType === 3) { const m = x.nodeValue.match(/[Ѐ-ӿ]{2,}/); if (m) return x.nodeValue.trim().slice(0, 60); }
+        else for (const a of ['aria-label', 'title']) { const v = x.getAttribute(a); if (v && /[Ѐ-ӿ]{2,}/.test(v)) return '@' + a + ' ' + v.slice(0, 60); } } return ''; };
+    const setV = (el, v) => { const p = el.tagName === 'SELECT' ? W().HTMLSelectElement.prototype : W().HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(p, 'value').set.call(el, v);
+      el.dispatchEvent(new (W().Event)(el.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true })); };
+    const esc = () => D().dispatchEvent(new (W().KeyboardEvent)('keydown', { key: 'Escape', bubbles: true }));
+
+    // ---- B-13 / FR-175 -------------------------------------------------------------------------------------------
+    const MB = 'B-13 / FR-175 История, заголовки, ссылки';
+    t(MB, 'Заголовок вкладки: «запись · номер экрана и название · Olymp Logistic» для экрана, вкладки, страницы учёта и справки', async () => {
+      await h.asUser('admin'); await goHash('/s/overview', 700);
+      ok(title() === '01 Обзор · Olymp Logistic', 'обзор: ' + title());
+      await nav('Диспетчер'); await waitFor(() => /trip=/.test(hash()));
+      const sel = q('[data-board] [aria-pressed="true"]'); ok(sel, 'нет выбранного рейса');
+      const id = sel.querySelector('.v5-ops-card-top span').textContent.trim();
+      ok(hash().includes('trip=' + id), 'URL без рейса: ' + hash()); ok(title() === id + ' · 02 Диспетчер · Olymp Logistic', 'диспетчер: ' + title());
+      all('[data-subtabs="dispatch"] a')[1].click(); await sleep(800);
+      ok(title() === 'Планирование рейсов · 02 Диспетчер · Olymp Logistic', 'вкладка: ' + title());
+      await goHash('/trips', 900); ok(title() === 'Рейсы · Учёт и администрирование · Olymp Logistic', 'рейсы: ' + title());
+      await goHash('/help#docs', 1200); ok(title() === 'Помощь · 08 Документы РК · Olymp Logistic', 'справка: ' + title());
+    });
+    t(MB, 'history.back() / forward(): экран, вкладка и выбранная запись восстанавливаются', async () => {
+      await nav('Диспетчер'); const cards = all('[data-board] .v5-ops-card'); ok(cards.length >= 2, 'мало рейсов');
+      const other = cards.find(c => c.getAttribute('aria-pressed') !== 'true'); const id = other.querySelector('.v5-ops-card-top span').textContent.trim();
+      other.click(); await waitFor(() => hash().includes('trip=' + id)); ok(hash().includes('trip=' + id), 'выбор не в URL: ' + hash());
+      all('[data-subtabs="dispatch"] a')[1].click(); await sleep(800); ok(hash().startsWith('#/s/dispatch/plan'), 'вкладка: ' + hash());
+      await nav('Термостатус'); await sleep(300); ok(hash().startsWith('#/s/thermo'), hash());
+      W().history.back(); await sleep(900); ok(hash().startsWith('#/s/dispatch/plan') && q('[data-screen-tab="dispatch/plan"]'), 'назад → вкладка: ' + hash());
+      W().history.back(); await sleep(900); ok(hash().startsWith('#/s/dispatch?') && hash().includes('trip=' + id), 'назад → экран с рейсом: ' + hash());
+      ok(q('[data-board] [aria-pressed="true"]').textContent.includes(id), 'рейс не восстановлен'); ok(title().startsWith(id + ' · 02 '), title());
+      W().history.forward(); await sleep(900); ok(q('[data-screen-tab="dispatch/plan"]'), 'вперёд → вкладка');
+      W().history.forward(); await sleep(900); ok(hash().startsWith('#/s/thermo'), 'вперёд → 05: ' + hash());
+    });
+    t(MB, 'history.back() возвращает позицию прокрутки', async () => {
+      await goHash('/help', 1200); const max = D().documentElement.scrollHeight - W().innerHeight; ok(max > 800, 'страница короткая: ' + max);
+      W().scrollTo(0, 700); await sleep(400);
+      await nav('Обзор'); await sleep(500); ok(W().scrollY < 50, 'новая страница не сверху: ' + W().scrollY);
+      W().history.back(); await sleep(1500); ok(Math.abs(W().scrollY - 700) < 30, 'прокрутка не восстановлена: ' + W().scrollY);
+    });
+    t(MB, 'Прямые ссылки /r/…: отклонение, рейс, статья справки; неизвестный заказ и чужой рейс → 403 без данных', async () => {
+      await goHash('/r/deviation/DEV-T1', 1200); ok(hash().startsWith('#/s/quality?dev=DEV-T1'), 'отклонение: ' + hash()); ok(q('section[data-screen="quality"]'), 'нет экрана 09');
+      await goHash('/s/overview', 600);
+      const any = (W().__OLYMP.TRIPS || [])[1]; ok(any, 'нет рейсов');
+      await goHash('/r/trip/' + any.id, 1200); ok(hash().startsWith('#/s/dispatch?trip=' + any.id), 'рейс: ' + hash());
+      ok(q('[data-board] [aria-pressed="true"]') && q('[data-board] [aria-pressed="true"]').textContent.includes(any.id), 'рейс не выбран');
+      await goHash('/r/help/express-where', 1500); ok(q('[data-help-current]') && q('[data-help-current]').getAttribute('data-help-article') === 'express-where', 'статья: ' + hash());
+      await goHash('/r/order/ORD-00-NOPE', 1500); ok(q('[data-page="forbidden"]'), 'нет страницы 403'); ok(title().startsWith('403 · '), title()); ok(!q('main table'), 'данные на 403');
+      await goHash('/trips/987654', 1500); ok(q('[data-page="forbidden"]'), 'несуществующий рейс без 403');
+    });
+    t(MB, 'Прямые ссылки на бронирование и тревогу открывают одну запись; заголовок вкладки — её номер', async () => {
+      const al = (await req('GET', '/api/alarms?include_resolved=true'))[0];
+      if (al) { await goHash('/r/alarm/' + al.id, 1500); ok(hash().startsWith('#/alarms?id=' + al.id), 'тревога: ' + hash());
+        ok(all('.alarm-row').length === 1 && title().startsWith('ALM-' + al.id + ' · '), 'не одна тревога / заголовок: ' + title()); }
+      const bk = (await req('GET', '/api/bookings'))[0];
+      if (bk) { await goHash('/r/booking/' + bk.number, 1500); ok(hash().startsWith('#/bookings?n=' + bk.number), 'бронирование: ' + hash());
+        ok(title().startsWith(bk.number + ' · '), 'заголовок: ' + title()); }
+      await goHash('/r/booking/BK-00-000000', 1500); ok(q('[data-page="forbidden"]'), 'несуществующее бронирование без 403');
+    });
+    t(MB, 'Водитель: ссылка на отклонение и на рейс → 403 без данных; ссылка на экран без записи → перенаправление', async () => {
+      await role('driver.v01');
+      try {
+        await goHash('/s/quality?dev=DEV-T1', 1200); ok(q('[data-page="forbidden"]') && !q('section[data-screen]'), 'нет 403 у водителя: ' + hash());
+        await goHash('/r/deviation/DEV-T1', 1200); ok(q('[data-page="forbidden"]'), '/r/deviation у водителя');
+        await goHash('/trips/1', 1200); ok(q('[data-page="forbidden"]') && !q('main table'), '/trips/1 у водителя');
+        await goHash('/s/docs', 900); ok(!hash().startsWith('#/s/docs'), 'экран без записи открылся');
+      } finally { await backToAdmin(); }
+    });
+    ['DE', 'EN'].forEach(code => t(MB, code + ': заголовок вкладки на языке страницы', async () => {
+      const f2 = await frame(langUrl(code) + '#/s/dispatch?lang=' + code.toLowerCase(), d => d.querySelector('section[data-screen="dispatch"] [data-board]'));
+      try {
+        await sleep(600); const tt = f2.contentDocument.title;
+        ok(new RegExp(' · 02 ' + (code === 'DE' ? 'Disponent' : 'Dispatcher') + ' · Olymp Logistic$').test(tt), tt); ok(!/[Ѐ-ӿ]/.test(tt), 'кириллица: ' + tt);
+        f2.contentWindow.location.hash = '#/help#roles'; await sleep(1500);
+        ok(f2.contentDocument.title.startsWith(code === 'DE' ? 'Hilfe · Rollen' : 'Help · Roles'), f2.contentDocument.title);
+      } finally { f2.remove(); }
+    }));
+
+    // ---- B-14 ---------------------------------------------------------------------------------------------------------
+    const MX = 'B-14 Экспресс на экране 02';
+    t(MX, 'Экран 02: раздел «Экспресс» — открытые заявки, подписи по слотам, срок, переход к согласованию на 17', async () => {
+      await h.asUser('admin'); await nav('Диспетчер');
+      const sec = await waitFor(() => q('[data-sec="express"]')); ok(sec, 'нет раздела «Экспресс»');
+      const rows = all('[data-express-row]');
+      ok(sec.getAttribute('data-disp-express') === String(rows.length), 'счётчик');
+      if (!h.BE()) ok(rows.length >= 1, 'нет открытых заявок в демо');
+      rows.forEach(r => { ok(r.querySelectorAll('[data-ex-slot]').length === 3, r.getAttribute('data-express-row') + ': не 3 слота'); ok(r.querySelector('[data-ex-due]'), 'нет срока'); });
+      ok(sec.textContent.includes('Экспресс · ждут согласования'), 'заголовок');
+      if (rows.length) { rows[0].querySelector('[data-ex-open]').click(); await sleep(900);
+        ok(hash().startsWith('#/s/baseline?view=exp') && q('[data-express]'), 'не открылась вкладка «Экспресс» на 17: ' + hash()); }
+    });
+    t(MX, 'Значок в меню у «02» = заявки, ждущие подписи вашей функции', async () => {
+      await nav('Диспетчер'); await sleep(300);
+      const mine = all('[data-express-row]').filter(r => r.querySelector('[data-ex-mine]')).length;
+      const b = q('nav [data-nav="dispatch"] .v5-badge'); const n = b ? Number(b.textContent) : 0;
+      ok(n === mine, 'значок ' + n + ' ≠ ' + mine);
+      if (!h.BE()) ok(mine >= 1, 'демо-администратор играет все функции — должен быть значок'); // port: FR-136 the backend admin holds no approval function
+    });
+    t(MX, 'Справка «Где найти экспресс?» со схемой экрана 02 и процесса согласования', async () => {
+      await goHash('/help#express-where', 1300); const a = q('[data-help-article="express-where"]'); ok(a, 'нет статьи');
+      ok(a.textContent.includes('02 «Диспетчер»') && a.textContent.includes('17'), 'текст');
+      a.querySelector('[data-help-visual="dispatchMock"]').scrollIntoView(); await sleep(900);
+      ok(await waitFor(() => a.querySelector('[data-visual="dispatchMock"]') && a.querySelector('[data-visual="express"]')), 'нет схем');
+    });
+
+    // ---- help visuals ---------------------------------------------------------------------------------------------
+    const MV = 'Справка: схемы и анимации';
+    const VIS = [['structure', 'flow'], ['structure', 'split'], ['r-book', 'booking'], ['baseline', 'express'], ['thermo', 'coldchain'], ['load', 'truck'], ['r-coverage', 'coverage'], ['roles', 'approvals'], ['driver', 'driver']];
+    t(MV, '9 схем встроены в статьи: SVG без внешних ресурсов, подпись шага, ‹ ▶ ›', async () => {
+      for (const [art, id] of VIS) {
+        await goHash('/help#' + art, 900); const slot = q('[data-help-article="' + art + '"] [data-help-visual="' + id + '"]'); ok(slot, art + ': нет места для ' + id);
+        slot.scrollIntoView(); const f = await waitFor(() => slot.querySelector('[data-visual="' + id + '"]')); ok(f, id + ' не загрузилась');
+        ok(f.querySelector('svg[role="img"]') && f.querySelector('svg').getAttribute('aria-label'), id + ': нет svg / aria-label');
+        ok(!f.querySelector('image, [href^="http"]'), id + ': внешний ресурс');
+        const btn = f.querySelector('[data-hv-next]'); ok(btn && f.querySelector('[data-hv-play]') && f.querySelector('[data-hv-prev]'), id + ': нет управления');
+        const s0 = f.querySelector('[data-hv-step]').getAttribute('data-hv-step'); btn.click(); await sleep(250);
+        ok(f.querySelector('[data-hv-step]').getAttribute('data-hv-step') !== s0, id + ': шаг не меняется');
+        ok(f.querySelector('[data-hv-play]').getAttribute('aria-pressed') === 'false', id + ': «следующий шаг» не ставит на паузу');
+        ok(f.querySelector('[data-hv-cap]').textContent.length > 20, id + ': нет подписи шага');
+      }
+    });
+    t(MV, '▶ / ❚❚: анимация идёт сама и останавливается', async () => {
+      await goHash('/help#structure', 900); const slot = q('[data-help-visual="flow"]'); slot.scrollIntoView(); const f = await waitFor(() => slot.querySelector('[data-visual="flow"]'));
+      const play = f.querySelector('[data-hv-play]'); if (play.getAttribute('aria-pressed') !== 'true') { play.click(); await sleep(100); }
+      const s0 = f.querySelector('[data-hv-step]').getAttribute('data-hv-step'); await sleep(2900);
+      ok(f.querySelector('[data-hv-step]').getAttribute('data-hv-step') !== s0, 'анимация не идёт');
+      play.click(); await sleep(100); const s1 = f.querySelector('[data-hv-step]').getAttribute('data-hv-step'); await sleep(2900);
+      ok(f.querySelector('[data-hv-step]').getAttribute('data-hv-step') === s1 && play.getAttribute('aria-pressed') === 'false', 'пауза не работает');
+    });
+    t(MV, 'Подбор ТС («Схема» на экране 03): качели наклоняются, задняя ось перегружена на шаге 4, после перестановки — норма', async () => {
+      await nav('Загрузка и вес'); const b = await waitFor(() => q('header [data-visual-open="load"]')); ok(b, 'нет кнопки «Схема» на экране'); b.click();
+      const f = await waitFor(() => q('[data-visual-pop] [data-visual="truck"]')); ok(f, 'всплывающее окно без схемы');
+      const tilt = () => Number(f.querySelector('[data-seesaw-tilt]').getAttribute('data-seesaw-tilt'));
+      const t0 = tilt(); for (let i = 0; i < 3; i++) { f.querySelector('[data-hv-next]').click(); await sleep(150); }
+      ok(f.querySelector('[data-axle="rear"]').getAttribute('data-over') === '1' && tilt() > t0, 'нет перегруза задней оси / наклона: ' + tilt());
+      f.querySelector('[data-hv-next]').click(); await sleep(150);
+      ok(f.querySelector('[data-axle="rear"]').getAttribute('data-over') === '0' && f.querySelector('[data-axle="front"]').getAttribute('data-over') === '0', 'после перестановки перегруз');
+      esc(); await sleep(300); ok(!q('[data-visual-pop]'), 'окно не закрылось');
+    });
+    ['DE', 'EN', 'KK'].forEach(code => t(MV, code + ': схемы на языке страницы' + (code === 'KK' ? ' (казахский)' : ' без кириллицы'), async () => {
+      const url = code === 'KK' ? fr.getAttribute('src') + '#/help?lang=kk' : langUrl(code) + '#/help?lang=' + code.toLowerCase();
+      const f2 = await frame(url, d => d.querySelector('[data-help-article="structure"]'));
+      try {
+        const d = f2.contentDocument;
+        for (const [art, id] of VIS) {
+          const slot = d.querySelector('[data-help-article="' + art + '"] [data-help-visual="' + id + '"]'); slot.scrollIntoView();
+          let fig = null; for (let k = 0; k < 40 && !fig; k++) { fig = slot.querySelector('[data-visual]'); await sleep(150); } ok(fig, code + ' ' + id + ' не загрузилась');
+          if (code === 'KK') ok(/[әғқңөұүһі]/i.test(fig.textContent), id + ': нет казахского текста');
+          else { const c = cyr(fig); ok(!c, code + ' ' + id + ': кириллица «' + c + '»'); }
+        }
+      } finally { f2.remove(); }
+    }));
+
+    // ---- FR-159 / FR-160 ----------------------------------------------------------------------------------------------
+    const MR = 'FR-159 / FR-160 Учёт и туры';
+    t(MR, 'Заголовок группы «Учёт и администрирование» открывает обзорную страницу с ярлыками только разрешённых страниц', async () => {
+      await goHash('/s/overview', 500); const a = q('nav [data-nav-records]'); ok(a && a.textContent.trim() === 'Учёт и администрирование', 'нет ссылки в заголовке группы');
+      a.click(); await sleep(1000); ok(q('[data-page="records"]'), 'страница не открылась'); ok(title() === 'Учёт и администрирование · Olymp Logistic', title());
+      const links = all('[data-records-link]').map(x => x.getAttribute('data-records-link')); ok(links.length >= 15, 'ярлыков: ' + links.length);
+      ok(q('main [data-help-link="r-records"]'), 'нет ссылки на справку');
+      await role('warehouse.ast');
+      try {
+        const g = q('nav [data-nav-records]');
+        if (g) { g.click(); await sleep(900);
+          const l2 = all('[data-records-link]').map(x => x.getAttribute('data-records-link')); ok(!l2.includes('/users') && !l2.includes('/audit') && l2.length < links.length, 'склад видит админ-страницы: ' + l2.join(',')); }
+      } finally { await backToAdmin(); }
+    });
+    t(MR, 'Тур «День диспетчера»: старт из справки, подсветка настоящих элементов, переход по экранам, Esc завершает', async () => {
+      await goHash('/help#tours', 1300); ok(all('[data-help-tour]').length === 4, 'туров: ' + all('[data-help-tour]').length);
+      q('[data-help-tour="dispatcher"] [data-tour-start]').click(); const lay = await waitFor(() => q('[data-tour="dispatcher"]')); ok(lay, 'тур не начался');
+      await waitFor(() => q('.tour-hi'), 30); ok(hash().startsWith('#/s/overview') && q('.tour-hi'), 'шаг 1 без подсветки: ' + hash());
+      await sleep(500); const r = q('.tour-hi').getBoundingClientRect(), t1 = q('[data-sec="alarms"]').getBoundingClientRect();
+      ok(Math.abs(r.top + 6 - t1.top) < 6 && Math.abs(r.width - 12 - t1.width) < 6, 'подсветка не на элементе');
+      q('[data-tour-next]').click(); await waitFor(() => hash().startsWith('#/s/dispatch') && q('[data-tour]').getAttribute('data-tour-step') === '1' && q('.tour-hi'));
+      ok(q('[data-tour]').getAttribute('data-tour-step') === '1' && hash().startsWith('#/s/dispatch'), 'шаг 2: ' + hash());
+      ok(q('.tour-pop[role="dialog"]').textContent.includes('Доска рейсов'), 'текст шага');
+      q('[data-tour-back]').click(); await sleep(1200); ok(q('[data-tour]').getAttribute('data-tour-step') === '0', 'назад');
+      esc(); await sleep(300); ok(!q('[data-tour]'), 'Esc не завершил тур');
+    });
+    t(MR, 'Тур «Отклонение QA» с кнопки «Тур» экрана 09 и тур водителя (вкладки приложения из ссылки)', async () => {
+      await nav('Качество'); const b = await waitFor(() => q('header [data-tour-start="qa"]')); ok(b, 'нет кнопки «Тур» на 09'); b.click();
+      ok(await waitFor(() => q('[data-tour="qa"]') && q('.tour-hi')), 'тур QA не показал шаг');
+      for (let i = 0; i < 4; i++) { q('[data-tour-next]').click(); await sleep(1300); }
+      ok(q('[data-tour="qa"]').getAttribute('data-tour-step') === '4' && hash().startsWith('#/s/thermo'), 'последний шаг QA: ' + hash());
+      q('[data-tour-finish]').click(); await sleep(300); ok(!q('[data-tour]'), 'не завершён');
+      await nav('Приложение водителя'); const d = await waitFor(() => q('header [data-tour-start="driver"]')); ok(d, 'нет кнопки «Тур» в приложении водителя'); d.click();
+      ok(await waitFor(() => q('[data-tour="driver"]') && hash().includes('view=shift')), 'тур водителя: ' + hash());
+      q('[data-tour-next]').click(); await waitFor(() => hash().includes('view=route'));
+      ok(hash().includes('view=route') && q('[data-dtab][aria-selected="true"]').textContent.includes('Маршрут'), 'вкладка «Маршрут» не открыта: ' + hash());
+      q('[data-tour-finish]').click(); await sleep(300); await h.asUser('admin');
+    });
+    t(MR, 'Тур клиента «Бронирование» в портале', async () => {
+      await role('kdl.portal');
+      try {
+        await goHash('/book', 1200); const b = await waitFor(() => q('main [data-tour-start="customer"]')); ok(b, 'нет кнопки «Тур» на странице бронирования'); b.click();
+        ok(await waitFor(() => q('[data-tour="customer"]') && q('.tour-hi')), 'тур клиента не начался');
+        for (let i = 0; i < 5; i++) { q('[data-tour-next]').click(); await sleep(1300); }
+        ok(hash().startsWith('#/my-bookings'), 'последний шаг не «Мои бронирования»: ' + hash()); q('[data-tour-finish]').click(); await sleep(300);
+      } finally { await backToAdmin(); }
+    });
+    ['DE', 'EN'].forEach(code => t(MR, code + ': тур на языке страницы', async () => {
+      const f2 = await frame(langUrl(code) + '#/help?lang=' + code.toLowerCase() + '#tours', d => d.querySelector('[data-help-tour="dispatcher"] [data-tour-start]'));
+      try {
+        f2.contentDocument.querySelector('[data-help-tour="dispatcher"] [data-tour-start]').click();
+        let p = null; for (let k = 0; k < 40 && !(p = f2.contentDocument.querySelector('.tour-pop')); k++) await sleep(150);
+        ok(p && !cyr(p), code + ': ' + (p ? cyr(p) : 'нет тура')); ok(p.textContent.includes(code === 'DE' ? 'Weiter' : 'Next'), 'кнопки');
+      } finally { f2.remove(); }
+    }));
+
+    // ---- FR-158 ----------------------------------------------------------------------------------------------------
+    const MF = 'FR-158 Реестр ТС: столбцы, виды, CSV';
+    const ths = () => all('[data-fleet-table] th[data-col]').map(x => x.getAttribute('data-col'));
+    t(MF, 'Выбор столбцов, сохранение вида (по пользователю, на сервере), вид по умолчанию после повторного открытия, удаление', async () => {
+      await goHash('/s/fleet/register', 1400); ok(await waitFor(() => q('[data-fleet-register] table')), 'нет таблицы');
+      ok(ths().includes('model') && !ths().includes('kasko'), 'стандартный набор: ' + ths().join(','));
+      q('[data-fleet-cols] summary').click(); await sleep(200);
+      q('[data-fleet-col="model"]').click(); await sleep(150); q('[data-fleet-col="kasko"]').click(); await sleep(200);
+      ok(!ths().includes('model') && ths().includes('kasko'), 'столбцы не меняются: ' + ths().join(','));
+      const name = 'UI ' + Date.now().toString(36); W().prompt = () => name; q('[data-fleet-save]').click(); await sleep(900);
+      const views = await req('GET', '/api/me/views/fleet'); ok(views.some(v => v.name === name && v.default && !v.cols.includes('model') && v.cols.includes('kasko')), 'вид не сохранён: ' + JSON.stringify(views));
+      await goHash('/s/overview', 500); await goHash('/s/fleet/register', 1400);
+      ok(await waitFor(() => !ths().includes('model') && ths().includes('kasko')), 'вид по умолчанию не применён: ' + ths().join(','));
+      ok(q('[data-fleet-view]').value === name, 'вид не выбран');
+      q('[data-fleet-del]').click(); await sleep(900);
+      ok(!(await req('GET', '/api/me/views/fleet')).some(v => v.name === name) && ths().includes('model'), 'вид не удалён');
+    });
+    t(MF, 'CSV: ровно видимые столбцы, по строке на ТС, без формул', async () => {
+      await goHash('/s/fleet/register', 1000); await waitFor(() => q('[data-fleet-table]'));
+      q('[data-fleet-cols] summary').click(); await sleep(150); q('[data-fleet-col="plate"]').click(); await sleep(200);
+      let blob = null; const orig = W().URL.createObjectURL; W().URL.createObjectURL = b => { blob = b; return 'blob:test'; };
+      try { q('[data-fleet-export]').click(); await sleep(300); } finally { W().URL.createObjectURL = orig; }
+      ok(blob, 'нет файла'); const text = await blob.text(); const lines = text.replace(/^﻿/, '').trim().split(/\r\n/);
+      ok(lines[0].split(';').length === ths().length && !ths().includes('plate'), 'заголовок CSV: ' + lines[0]);
+      ok(lines.length - 1 === all('[data-fleet-table] tbody tr').length, 'строк ' + (lines.length - 1));
+      ok(!lines.slice(1).some(l => /(^|;)[=+@]/.test(l)), 'формула в CSV');
+      q('[data-fleet-col="plate"]').click(); await sleep(150);
+    });
+
+    // ---- FR-173 ------------------------------------------------------------------------------------------------------
+    const MT = 'FR-173 Формы для существующих API';
+    t(MT, 'Линии и тарифы: назначение ТС линии (тот же хаб), сохраняется на сервере', async () => {
+      await goHash('/planning', 1300); const e = await waitFor(() => q('[data-line-veh-edit]')); ok(e, 'нет кнопки назначения ТС'); const sid = e.getAttribute('data-line-veh-edit'); e.click();
+      const opts = (await waitFor(() => { const o = all('[data-line-veh-form="' + sid + '"] [data-line-veh-opt]'); return o.length ? o : null; })) || []; ok(opts.length >= 1, 'нет ТС хаба');
+      const want = opts[0].getAttribute('data-line-veh-opt'); if (!opts[0].checked) opts[0].click(); await sleep(150);
+      q('[data-line-veh-save]').click(); await sleep(1000);
+      ok(q('[data-line-veh="' + sid + '"] [data-line-veh-list]').textContent.includes(want), 'список ТС не обновлён');
+      const s = (await req('GET', '/api/schedules')).find(x => String(x.id) === sid); ok(s && s.vehicle_ids.length >= 1, 'не сохранено');
+    });
+    t(MT, 'Рейс в пути: форма прерывания (тревога + причина ≥ 10) и итог по заказам точки (отказ требует причину)', async () => {
+      const page = await req('GET', '/api/trips?status=in_transit&limit=20'); const tr = (page.items || []).find(x => x.stops.some(s => s.status !== 'delivered'));
+      if (!tr) return; // no DB trip in transit in this data set
+      await goHash('/trips/' + tr.id, 1500); const ab = await waitFor(() => q('[data-trip-abort]')); ok(ab, 'нет «Прервать рейс»');
+      ab.click(); ok(await waitFor(() => q('[data-trip-abort-form]')), 'нет формы');
+      ok(q('[data-abort-submit]').disabled, 'отправка без причины и тревоги');
+      setV(q('[data-abort-reason]'), 'короткая'); await sleep(150); ok(q('[data-abort-submit]').disabled, '< 10 символов');
+      all('[data-trip-abort-form] .btn.ghost').pop().click(); await sleep(200);
+      const st = tr.stops.find(s => s.status !== 'delivered'); const open = q('[data-stop-outcome-open="' + st.id + '"]'); ok(open, 'нет кнопки итога точки'); open.click(); await sleep(400);
+      const sel = q('[data-stop-outcomes="' + st.id + '"] [data-outcome]');
+      if (sel) { setV(sel, 'refused'); await sleep(200); ok(q('[data-outcome-reason]') && q('[data-outcome-submit]').disabled, 'отказ без причины');
+        setV(q('[data-outcome-reason]'), 'Склад получателя закрыт'); await sleep(200); q('[data-outcome-submit]').click(); await sleep(1200);
+        const after = await req('GET', '/api/trips/' + tr.id); const o = (after.orders || []).find(x => String(x.id) === sel.getAttribute('data-outcome')); ok(o && o.status === 'refused', 'итог не сохранён: ' + (o && o.status)); }
     });
 
     return T;
