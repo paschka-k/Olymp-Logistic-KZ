@@ -233,7 +233,15 @@ class Component extends DCLogic {
       let out = '', n; while ((n = w.nextNode())) out += n.textContent + ' '; return out.replace(/\s+/g, ' '); };
     const findBtn = (t, scope = 'button,a') => all(scope).find(b => b.textContent.replace(/\s+/g, ' ').trim().includes(t));
     const click = async (t, scope) => { const b = findBtn(t, scope); if (!b) throw new Error('Кнопка не найдена: «' + t + '»'); b.click(); await sleep(420); };
-    const nav = async t => { const b = all('nav [data-nav]').find(x => x.textContent.includes(t) && /^\d\d/.test(x.textContent.trim())); if (!b) throw new Error('Пункт меню не найден: ' + t); b.click(); await sleep(450); }; // port: FR-134 nav items are links <a data-nav>
+    // port: FR-136 – run against the real backend (scripts/ui_suite_backend.py, VITE_E2E build): the account is switched
+    // like the demo's role selector – the driver app as the driver account (driver:app is driver-only, FR-83), a second /
+    // third signature by another approver (four-eyes). In the browser demo BE() is false and these helpers do nothing.
+    const BE = () => { try { return !!W().__OLYMP_E2E; } catch (e) { return false; } };
+    const asUser = async (u, reopen) => { if (!BE()) return; if (W().__OLYMP_E2E.user() !== u) { W().__OLYMP_E2E.setUser(u); fr.src = fr.getAttribute('src'); await sleep(700);
+        for (let i = 0; i < 80; i++) { try { if (fr.contentWindow.__OLYMP_E2E && fr.contentDocument.querySelector('nav [data-nav]') && fr.contentWindow.__OLYMP) break; } catch (e) {} await sleep(250); } await sleep(500); }
+      if (reopen) await reopen(); };
+    const beNav = async t => { if (!BE()) return; const drv = t === 'Приложение водителя', u = W().__OLYMP_E2E.user(); if (drv && u !== 'driver.v01') await asUser('driver.v01'); else if (!drv && u === 'driver.v01') await asUser('admin'); };
+    const nav = async t => { await beNav(t); const b = all('nav [data-nav]').find(x => x.textContent.includes(t) && /^\d\d/.test(x.textContent.trim())); if (!b) throw new Error('Пункт меню не найден: ' + t); b.click(); await sleep(450); }; // port: FR-134 nav items are links <a data-nav>
     const has = (...ss) => { const T = txt(); ss.forEach(s => { if (!T.includes(s)) throw new Error('Нет текста: «' + s + '»'); }); };
     const not = s => { if (txt().includes(s)) throw new Error('Текст не должен быть виден: «' + s + '»'); };
     const title = () => (D().querySelector('h1') || {}).textContent || '';
@@ -244,7 +252,7 @@ class Component extends DCLogic {
     const mainBtnStarts = id => all('main button').some(b => b.textContent.trim().startsWith(id));
     const gridRow = (...need) => all('main div').filter(d => d.style.gridTemplateColumns && need.every(s => d.textContent.includes(s))).sort((a, b) => a.textContent.length - b.textContent.length)[0];
     const ok = (c, m) => { if (!c) throw new Error(m); };
-    return { W, D, O, all, txt, findBtn, click, nav, has, not, title, type, results, rowBtn, mainBtnStarts, gridRow, ok };
+    return { W, D, O, all, txt, findBtn, click, nav, has, not, title, type, results, rowBtn, mainBtnStarts, gridRow, ok, BE, asUser };
   }
 
   build(fr) {
@@ -264,7 +272,7 @@ class Component extends DCLogic {
     for (let i = 0; i < 5; i++) t('Данные · штрафы', 'Штраф #' + (i + 1) + ': время попадает в смену водителя по журналу ТС', async () => { const o = O(), f = o.FINES[i], m = toMin(f.t), g = f.seg.find(x => m >= x[0] && m < x[1]);
       ok(g, f.id + ': нет смены в ' + f.t); ok(o.STAFF.some(p => p.id === g[2]), f.id + ': водитель не найден'); ok(o.VEH.some(v => v.id === f.veh), f.id + ': ТС не найдено'); });
     for (let i = 0; i < 13; i++) t('Данные · персонал', 'Водитель #' + (i + 1) + ': план на 14 дней, допустимые коды', async () => { const o = O(), p = o.STAFF[i]; ok(p && p.cal.length >= 14 && p.cal.slice(0, 14).split('').every(c => o.CAL[c]), p ? p.name + ': ' + p.cal : 'нет водителя'); });
-    for (let i = 0; i < 23; i++) t('Данные · погода', 'Город #' + (i + 1) + ': прогноз на 7 дней, уровни риска 0–3', async () => { const o = O(), c = o.CITY[i][0], w = o.WX[c]; ok(w && w.length === 7 && w.every(d => d.lvl >= 0 && d.lvl <= 3 && d.min <= d.max), c); });
+    for (let i = 0; i < 23; i++) t('Данные · погода', 'Город #' + (i + 1) + ': прогноз на 7 дней, уровни риска 0–3', async () => { const o = O(), c = o.CITY[i][0], w = o.WX[o.CITY[i][5]]; ok(w && w.length === 7 && w.every(d => d.lvl >= 0 && d.lvl <= 3 && d.min <= d.max), c); }); // port: FR-135 WX is keyed by location id (CITY[i][5])
     for (let i = 0; i < 4; i++) t('Автопарк', 'ТС #' + (i + 1) + ': строка показывает статус страховки и сборов', async () => { if (title().trim() !== 'Автопарк') await nav('Автопарк'); const v = O().VEH[i], fe = O().FEES[v.id] || {};
       const exp = fe.lvl >= 3 ? 'блокирует выпуск' : fe.lvl === 2 ? 'требует действий' : fe.lvl === 1 ? 'скоро срок' : 'в порядке'; const r = gridRow(v.plate, 'ОГПО'); ok(r, 'нет строки ' + v.id); ok(r.textContent.includes(exp), v.id + ': ожидалось «' + exp + '»'); });
     for (let i = 0; i < 4; i++) t('Термостатус', 'ТС #' + (i + 1) + ': карточка показывает температуры', async () => { if (title().trim() !== 'Термостатус') await nav('Термостатус'); const v = O().VEH[i]; const b = all('main button').find(x => x.textContent.trim().startsWith(v.id)); ok(b && b.textContent.includes('°C'), 'нет карточки ' + v.id); });
@@ -349,7 +357,10 @@ class Component extends DCLogic {
     t('FR-24 SLA', 'PW-06 (SLA 89 %) автоматически понижен Silver → Bronze', async () => { const r = pRow('PW-06'); ok(r && r.textContent.includes('Bronze') && r.textContent.includes('понижен с Silver'), 'нет понижения'); });
     t('FR-32 Хаб', 'Фильтр хаба «Алматы» показывает только партнёров зоны «Юг» (после P86)', async () => { const o = O(), exp = o.PARTNERS.filter(p => (o.CITY.find(c => c[0] === p.city) || [0, 'ast'])[1] === 'alm').length; all('header button').find(x => x.textContent.trim() === 'Алматы').click(); await sleep(450); const n = h.D().querySelectorAll('[data-partner]').length; await click('Все хабы', 'header button'); ok(n === exp && n > 0, 'партнёров: ' + n + ', ожидалось ' + exp); });
     t('FR-31 Справочник', 'Караганда снята из точек перевалки → «Города на маршруте»', async () => { h.D().querySelector('[data-sec="Караганда"]').click(); await sleep(420); ok(pRow('PW-03').textContent.includes('Города на маршруте'), 'группа не изменилась'); h.D().querySelector('[data-sec="Караганда"]').click(); await sleep(420); ok(pRow('PW-03').textContent.includes('Точки перевалки'), 'не вернулось'); });
-    t('FR-26 Договоры', 'PW-04: напоминание и продление договора на год', async () => { ok(pRow('PW-04').textContent.includes('договор до 11.2026 · продлить'), 'нет напоминания'); inRow(pRow('PW-04'), 'Продлить договор').click(); await sleep(420); ok(pRow('PW-04').textContent.includes('11.2027'), 'не продлён'); });
+    t('FR-26 Договоры', 'PW-04: напоминание и продление договора на год', async () => { ok(pRow('PW-04').textContent.includes('договор до 11.2026 · продлить'), 'нет напоминания'); inRow(pRow('PW-04'), 'Продлить договор').click(); await sleep(420);
+      if (h.BE()) { const inp = h.D().querySelector('[data-renew-form="PW-04"] input[type="file"]'); ok(inp, 'нет формы договора'); const dt = new (h.W().DataTransfer)(); dt.items.add(new (h.W().File)([new TextEncoder().encode('%PDF-1.4\n% ui suite contract\n%%EOF\n')], 'dogovor-PW-04.pdf', { type: 'application/pdf' })); inp.files = dt.files; inp.dispatchEvent(new (h.W().Event)('change', { bubbles: true })); await sleep(900);
+        await h.asUser('dispatcher.ast', () => nav('Партнёры')); h.D().querySelector('[data-renew-approve="PW-04"]').click(); await sleep(600); await h.asUser('admin', () => nav('Партнёры')); } // port: FR-136 backend – contract file + approval by a second user
+      ok(pRow('PW-04').textContent.includes('11.2027'), 'не продлён'); });
     t('FR-25 Качество', 'Blocked PL-10: снятие блокировки только после закрытия CAPA', async () => { const r = pRow('PL-10'); ok(r.textContent.includes('снятие после закрытия CAPA') && !r.textContent.includes('Снять блокировку'), 'можно снять без CAPA'); });
     t('FR-25 Качество', 'Ссылка PL-10 открывает отклонение DEV-0011 в «Качестве»', async () => { inRow(pRow('PL-10'), 'Открыть в «Качестве»').click(); await sleep(450); ok(title().trim() === 'Качество', 'не открыто'); has('DEV-0011', 'Сырдария Транс'); await nav('Партнёры'); });
     t('FR-20 Мощность', 'R-106 полностью: «Батыс Логистик» — не хватает мощности', async () => { const c = cand('PL-05'); ok(c && c.textContent.includes('мощность: свободно 11 пал., нужно 13'), 'нет проверки мощности'); });
@@ -360,7 +371,9 @@ class Component extends DCLogic {
     t('FR-19 GDP', 'Частично 2–8 °C: Silver Костанай без GDP исключён', async () => { h.D().querySelector('[data-ho-line="L03"]').click(); await sleep(420); ok(cand('PL-04').textContent.includes('нет GDP для 2–8 °C'), 'GDP не проверен'); h.D().querySelector('[data-ho-line="L03"]').click(); await sleep(420); });
     t('Передача', 'Частично только 15–25 °C: Silver Костанай по согласованию', async () => { h.D().querySelector('[data-ho-line="L01"]').click(); await sleep(400); h.D().querySelector('[data-ho-line="L02"]').click(); await sleep(420); ok(cand('PL-04').textContent.includes('Запросить согласование'), 'нет запроса'); });
     t('Передача', 'Запрос → «Согласовать» → передано, 2 из 13 мест', async () => { inRow(cand('PL-04'), 'Запросить').click(); await sleep(450); const r = h.D().querySelector('[data-ho]'); ok(r.textContent.includes('ожидает согласования') && r.textContent.includes('частично · 2 из 13 мест'), 'нет ожидания');
-      inRow(r, 'Согласовать').click(); await sleep(450); ok(h.D().querySelector('[data-ho]').textContent.includes('передано'), 'не согласовано'); });
+      await h.asUser('dispatcher.ast', () => nav('Партнёры')); // port: FR-136 backend – the request is approved by a second user (four-eyes)
+      inRow(h.D().querySelector('[data-ho]'), 'Согласовать').click(); await sleep(450); ok(h.D().querySelector('[data-ho]').textContent.includes('передано'), 'не согласовано');
+      await h.asUser('admin', () => nav('Партнёры')); });
     t('Передача', 'Полная передача остатка R-106 Gold «СтепьЛогистик» с актом и полисом', async () => { await segClick('Полностью'); inRow(cand('PL-01'), 'Передать').click(); await sleep(450); const r = h.D().querySelector('[data-ho]');
       ok(r && r.textContent.includes('R-106 → ТОО «СтепьЛогистик»') && r.textContent.includes('полностью · 11 мест') && r.textContent.includes('Ответственность переходит к партнёру'), 'нет записи'); has('Все места рейса переданы партнёрам.'); });
     t('FR-30 Портал', 'Портал партнёра: принять → сканы → ePOD', async () => { for (const lb of ['Принять груз', 'Отсканировать места', 'Загрузить ePOD']) { inRow(h.D().querySelector('[data-ho]'), lb).click(); await sleep(420); } ok(h.D().querySelector('[data-ho]').textContent.includes('ePOD партнёра загружен'), 'портал не завершён'); });
@@ -438,9 +451,9 @@ class Component extends DCLogic {
     t('Исходные данные', 'Сеть: R1, W, A — проверка Σ плеч ✓', async () => { await toBL(); await blTab('Сеть и объёмы'); ['R1', 'W', 'A'].forEach(id => ok(h.D().querySelector('[data-ring="' + id + '"]').textContent.includes('✓'), id)); });
     t('FR-35…51', 'Список запросов раунда 3 синхронен с платформой (ID и статусы), в «Исходных данных» его больше нет', async () => { await toBL(); not('Запросы FR-35…51'); const P = O().BLFR, st = ['реализовано в v5', 'план v6', 'вопрос к KDL']; ok(P.length === FR3.length, P.length + ' ≠ ' + FR3.length); P.forEach((f, i) => ok(FR3[i][0] === f[0] && FR3[i][6] === st[f[6]], f[0] + ': ' + FR3[i][6] + ' ≠ ' + st[f[6]])); });
     const exCard = id => h.D().querySelector('[data-express="' + id + '"]');
-    t('FR-41 Экспресс', '3 подписи → «согласовано · экспресс»', async () => { await toBL(); await blTab('Экспресс'); for (let k = 0; k < 3; k++) { exCard('EX-0311').querySelectorAll('button')[k].click(); await sleep(300); } ok(exCard('EX-0311').textContent.includes('согласовано'), exCard('EX-0311').textContent.slice(0, 120)); });
-    t('FR-41 Экспресс', 'Одна подпись → «1 / 3 подписи»', async () => { await toBL(); await blTab('Экспресс'); exCard('EX-0313').querySelectorAll('button')[0].click(); await sleep(350); ok(exCard('EX-0313').textContent.includes('1 / 3'), 'нет 1 / 3'); });
-    t('FR-41 Экспресс', 'Отклонение → регулярный рейс, подписи больше не принимаются', async () => { await toBL(); await blTab('Экспресс'); [...exCard('EX-0312').querySelectorAll('button')].find(b => b.textContent.includes('Отклонить')).click(); await sleep(350); exCard('EX-0312').querySelectorAll('button')[0].click(); await sleep(300); const tx = exCard('EX-0312').textContent; ok(tx.includes('регулярный рейс') && !tx.includes('✓'), tx.slice(0, 160)); });
+    t('FR-41 Экспресс', '3 подписи → «согласовано · экспресс»', async () => { await toBL(); await blTab('Экспресс'); for (let k = 0; k < 3; k++) { await h.asUser(['ceo', 'head.analytics', 'head.logistics'][k], async () => { await toBL(); await blTab('Экспресс'); }); exCard('EX-0311').querySelectorAll('button')[k].click(); await sleep(300); } ok(exCard('EX-0311').textContent.includes('согласовано'), exCard('EX-0311').textContent.slice(0, 120)); }); // port: FR-136 backend – each slot signed by its approver (four-eyes)
+    t('FR-41 Экспресс', 'Одна подпись → «1 / 3 подписи»', async () => { await h.asUser('ceo'); await toBL(); await blTab('Экспресс'); exCard('EX-0313').querySelectorAll('button')[0].click(); await sleep(350); ok(exCard('EX-0313').textContent.includes('1 / 3'), 'нет 1 / 3'); }); // port: FR-136 backend – slot 1 signed by the CEO account
+    t('FR-41 Экспресс', 'Отклонение → регулярный рейс, подписи больше не принимаются', async () => { await h.asUser('ceo'); await toBL(); await blTab('Экспресс'); [...exCard('EX-0312').querySelectorAll('button')].find(b => b.textContent.includes('Отклонить')).click(); await sleep(350); exCard('EX-0312').querySelectorAll('button')[0].click(); await sleep(300); const tx = exCard('EX-0312').textContent; await h.asUser('admin'); ok(tx.includes('регулярный рейс') && !tx.includes('✓'), tx.slice(0, 160)); }); // port: FR-136 backend – an approver rejects
     t('FR-37 Справочник', 'Атырау и Караганда — точки перевалки, Шымкент — город на маршруте', async () => { await nav('Партнёры'); const g = c => { const b = h.D().querySelector('[data-sec="' + c + '"]'); return b ? b.getAttribute('aria-pressed') : null; }; ok(g('Караганда') === 'true', 'Караганда'); ok(g('Шымкент') !== 'true', 'Шымкент'); ok(g('Атырау') !== 'false' , 'Атырау'); });
     t('Планирование', 'Факторы планирования из Fragenkatalog (F22, E20, B7)', async () => { await nav('Планирование'); has('9:00–17:00', 'KazAvtoZhol', 'вс — ТО'); });
     ['DE', 'EN'].forEach(code => t('Языки', code + ': «Исходные данные» — все вкладки без русского текста', async () => { const src = fr.getAttribute('src'), url = src.endsWith('.dc.html') ? src.replace('v5.dc.html', 'v5%20' + code + '.dc.html') : src.replace('.html', '-' + code.toLowerCase() + '.html');
@@ -477,7 +490,7 @@ class Component extends DCLogic {
     t('Затраты · учёт', 'Страховки и налоги по 4 ТС', async () => { await toC(); await cTab('Страховки, налоги, учёт'); ok(all('[data-ins]').length === 4, 'строк'); has('ОГПО и КАСКО истекают через 24 дня'); });
     t('Затраты · учёт', 'Зимний простой Запада → рекомендация не снимать с учёта (лизинг)', async () => { all('[data-cidle]').find(b => b.textContent.includes('Запад')).click(); await sleep(400); const r = h.D().querySelector('[data-ins="V02"]').textContent; all('[data-cidle]').find(b => b.textContent.includes('Запад')).click(); await sleep(300); ok(r.includes('2 мес') && r.includes('не снимать с учёта'), r.slice(0, 160)); });
     t('Затраты · свой/внешний', '7 перевозок, у каждой выбран более дешёвый вариант', async () => { await toC(); await cTab('Свой или внешний'); ok(all('[data-own]').length === 7, 'строк'); });
-    t('Затраты · свой/внешний', 'Разница > 50 % требует 2 подписей', async () => { const r = all('[data-own]').find(x => x.textContent.includes('нужны 2 подписи')); ok(r, 'нет строки > 50 %'); const id = r.getAttribute('data-own'); for (let k = 0; k < 2; k++) { h.D().querySelector('[data-own="' + id + '"]').querySelectorAll('button')[k].click(); await sleep(320); } ok(h.D().querySelector('[data-own="' + id + '"]').textContent.includes('согласовано 2/2'), 'не согласовано'); });
+    t('Затраты · свой/внешний', 'Разница > 50 % требует 2 подписей', async () => { const r = all('[data-own]').find(x => x.textContent.includes('нужны 2 подписи')); ok(r, 'нет строки > 50 %'); const id = r.getAttribute('data-own'); for (let k = 0; k < 2; k++) { await h.asUser(['head.logistics', 'fin.controller'][k], async () => { await toC(); await cTab('Свой или внешний'); }); h.D().querySelector('[data-own="' + id + '"]').querySelectorAll('button')[k].click(); await sleep(320); } /* port: FR-136 backend – one approver per slot (four-eyes) */ const done = h.D().querySelector('[data-own="' + id + '"]').textContent; await h.asUser('admin', async () => { await toC(); await cTab('Свой или внешний'); }); ok(done.includes('согласовано 2/2'), 'не согласовано'); });
     t('Затраты · водители', 'FR-46: 7 водителей, ставки по кольцам', async () => { await cTab('Водители'); ok(all('[data-cdrv]').length === 4, 'строк'); has('7 водителей', '1 814 ч'); });
     ['DE', 'EN'].forEach(code => t('Языки', code + ': «Затраты» — все вкладки без русского текста', async () => { const src = fr.getAttribute('src'), url = src.endsWith('.dc.html') ? src.replace('v5.dc.html', 'v5%20' + code + '.dc.html') : src.replace('.html', '-' + code.toLowerCase() + '.html');
       const f2 = document.createElement('iframe'); f2.style.cssText = 'position:fixed;left:-3000px;top:0;width:1400px;height:900px;border:0'; f2.src = url; document.body.appendChild(f2);
@@ -510,11 +523,12 @@ class Component extends DCLogic {
     t('FR-66 Профиль', 'Профиль: ДОПОГ отсутствует, заработок по J46', async () => { has('рейсы с опасным грузом недоступны', '344 900 ₸'); });
     t('Водитель · ePOD', '4 шага доставки → ePOD и акт в ленте', async () => { await dTab('Точка'); for (let k = 0; k < 4; k++) { const b = all('[data-phone] button').find(x => /Подтвердить температуру|Начать выгрузку|Сделать фото|Подпись получена/.test(x.textContent)); if (b) { b.click(); await sleep(250); } } ok(all('[data-drv-ev]').slice(0, 2).map(x => x.textContent).join(' ').includes('ePOD Караганда'), 'нет ePOD'); });
     t('Водитель → диспетчер', 'Диспетчер видит ленту приложения (5 событий) и переходит в приложение', async () => { await nav('Диспетчер'); const w = h.D().querySelector('[data-disp-drv]'); ok(w && w.querySelectorAll('[style*="grid-template-columns"]').length >= 5, 'нет ленты'); await click('Приложение водителя →'); ok(title().trim() === 'Приложение водителя', 'не открыто'); });
-    t('FR-13 Казахский', 'Вкладки приложения на KZ', async () => { all('main button').find(x => x.textContent.trim() === 'KZ').click(); await sleep(250); ok(all('[data-dtab]').some(b => b.textContent.trim() === 'Ауысым'), 'нет KZ'); all('main button').find(x => x.textContent.trim() === 'RU').click(); await sleep(250); });
+    t('FR-13 Казахский', 'Вкладки приложения на KZ', async () => { if (h.BE()) await nav('Приложение водителя'); /* port: FR-136 backend – «Приложение водителя →» opened it as the dispatcher */ all('main button').find(x => x.textContent.trim() === 'KZ').click(); await sleep(250); ok(all('[data-dtab]').some(b => b.textContent.trim() === 'Ауысым'), 'нет KZ'); all('main button').find(x => x.textContent.trim() === 'RU').click(); await sleep(250); });
     ['DE', 'EN'].forEach(code => t('Языки', code + ': приложение водителя — все вкладки без русского текста', async () => { const src = fr.getAttribute('src'), url = src.endsWith('.dc.html') ? src.replace('v5.dc.html', 'v5%20' + code + '.dc.html') : src.replace('.html', '-' + code.toLowerCase() + '.html');
+      await h.asUser('driver.v01'); // port: FR-136 backend – the driver app runs as the driver account (FR-83)
       const f2 = document.createElement('iframe'); f2.style.cssText = 'position:fixed;left:-3000px;top:0;width:1400px;height:900px;border:0'; f2.src = url; document.body.appendChild(f2);
-      try { for (let k = 0; k < 60; k++) { try { if (f2.contentDocument.querySelectorAll('nav [data-nav]').length > 10) break; } catch (e) {} await sleep(200); } await sleep(450); // port: FR-134 nav items are links <a data-nav>
-        const d = f2.contentDocument, nb = [...d.querySelectorAll('nav [data-nav]')].filter(b => /^\d\d/.test(b.textContent.trim())); nb[12].click(); await sleep(450); // port: FR-134 nav items are links <a data-nav>
+      try { for (let k = 0; k < 60; k++) { try { if (f2.contentDocument.querySelectorAll('nav [data-nav]').length > (h.BE() ? 3 : 10)) break; } catch (e) {} await sleep(200); } await sleep(450); // port: FR-134 nav items are links <a data-nav>; FR-136 the driver has fewer screens
+        const d = f2.contentDocument, nb = [...d.querySelectorAll('nav [data-nav]')].filter(b => /^\d\d/.test(b.textContent.trim())); (h.BE() ? d.querySelector('nav [data-nav="driver"]') : nb[12]).click(); await sleep(450); // port: FR-134 nav items are links <a data-nav>; FR-136 by key
         const tabs = [...d.querySelectorAll('[data-dtab]')]; ok(tabs.length === 6, 'вкладок ' + tabs.length);
         for (const tb of tabs) { tb.click(); await sleep(300); const w = d.createTreeWalker(d.querySelector('main'), NodeFilter.SHOW_TEXT); let x, bad = ''; while ((x = w.nextNode())) { const m = x.textContent.match(/[А-Яа-яЁё]{2,}/); if (m) { bad = m[0]; break; } } ok(!bad, code + ' · ' + tb.textContent.trim() + ': «' + bad + '»'); }
       } finally { f2.remove(); } }));
@@ -582,17 +596,30 @@ class Component extends DCLogic {
     for (let i = 0; i < 60; i++) { try { if (fr.contentWindow.__OLYMP && fr.contentDocument.querySelectorAll('nav [data-nav]').length > 10) break; } catch (e) {} await sleep(250); } // port: FR-134 nav items are links <a data-nav>
     await sleep(500);
     const T = this.build(fr);
+    const RB = this.resetBefore || {}, resetDone = new Set(); // port: FR-136 (4) – groups that start from the seed state of their keys
     for (let i = 0; i < T.length; i++) {
       if (this.stop) return;
       const tt = T[i], s0 = performance.now(); let r;
+      if (RB[tt.mod] && !resetDone.has(tt.mod)) { resetDone.add(tt.mod); try { await this.resetGroup(fr, RB[tt.mod]); } catch (e) { /* reported by the tests of the group */ } }
       if (i % 5 === 0) this.setState({ current: (i + 1) + '. ' + tt.name, secs: Math.round((performance.now() - t0) / 1000) });
-      try { await tt.fn(); r = { st: 'ok' }; } catch (e) { r = { st: 'fail', err: e.message }; }
+      // port: FR-136 – a test that never settles (e.g. a request of a reloaded frame) fails after 120 s instead of stopping the run
+      try { await Promise.race([tt.fn(), sleep(120000).then(() => { throw new Error('Тайм-аут теста (120 с)'); })]); r = { st: 'ok' }; } catch (e) { r = { st: 'fail', err: e.message }; }
       r.ms = Math.round(performance.now() - s0);
       this.setState(s => ({ res: { ...s.res, [i]: r } }));
     }
     this.setState({ running: false, current: 'готово', findings: this.findings(), secs: Math.round((performance.now() - t0) / 1000) });
     const fin = this.state.res, fails = T.map((x, i) => fin[i] && fin[i].st === 'fail' ? (i + 1) + '. ' + x.mod + ' · ' + x.name + ' — ' + fin[i].err : null).filter(Boolean);
     window.__TESTS = { done: true, total: T.length, passed: T.length - fails.length, failed: fails.length, failures: fails };
+  }
+
+  // port: FR-136 (4) – reset the state keys of a module group (POST /api/v5/reset {keys}; demo: mock API, backend: as admin) and
+  // reload the platform, so a failure in an earlier group does not cascade into this one
+  async resetGroup(fr, keys) {
+    const w = fr.contentWindow, req = w.__OLYMP_E2E ? (m, p, b) => w.__OLYMP_DEMO_REQ_AS('admin', m, p, b) : w.__OLYMP_DEMO_REQ;
+    await req('POST', '/api/v5/reset', { keys });
+    fr.src = fr.getAttribute('src'); await sleep(600);
+    for (let i = 0; i < 60; i++) { try { if (fr.contentWindow.__OLYMP && fr.contentDocument.querySelectorAll('nav [data-nav]').length > 10) break; } catch (e) { /* loading */ } await sleep(250); }
+    await sleep(400);
   }
 
   renderVals() {
@@ -860,7 +887,7 @@ class Component extends DCLogic {
     // ---- Справка / Help & how-to (route /help): structure, 17 screens, records pages, search, context links ----
     const MH = 'Справка';
     const SCR = ['overview', 'dispatch', 'load', 'ship', 'thermo', 'weather', 'security', 'docs', 'quality', 'fleet', 'partners', 'staff', 'driver', 'planning', 'reports', 'costs', 'baseline'];
-    const REC = ['r-inbox', 'r-coverage', 'r-summary', 'r-bookings', 'r-dispatch', 'r-trips', 'r-orders', 'r-temperature', 'r-alarms', 'r-crm', 'r-customers', 'r-tasks', 'r-fleet', 'r-drivers', 'r-planning', 'r-users', 'r-integrations', 'r-audit'];
+    const REC = ['r-inbox', 'r-coverage', 'r-bookings', 'r-dispatch', 'r-trips', 'r-orders', 'r-temperature', 'r-alarms', 'r-crm', 'r-customers', 'r-tasks', 'r-fleet', 'r-drivers', 'r-planning', 'r-users', 'r-integrations', 'r-audit'];
     const goHelp = async () => { const a = all('nav a').find(x => x.hasAttribute('data-nav-help')); ok(a, 'нет пункта «Справка» в нижнем меню'); a.click(); await sleep(500); ok(q('[data-page="help"]'), 'справка не открылась'); };
     const art = k => q('[data-help-article="' + k + '"]');
     const recLinks = [];
@@ -896,10 +923,10 @@ class Component extends DCLogic {
       ok(d.textContent.includes('◀') && d.textContent.includes('▶'), 'нет стрелок потоков данных');
       [...d.querySelectorAll('[data-help-to="docs"]')][0].click(); await sleep(400); ok(q('[data-help-current]').getAttribute('data-help-article') === 'docs', 'переход по схеме');
     });
-    t(MH, 'Роли и права: матрица из rbac.py (32 права × 7 ролей), отмечена ваша роль', async () => {
-      const m = q('[data-help-matrix]'); ok(m && m.querySelectorAll('[data-perm]').length === 32, 'прав: ' + (m ? m.querySelectorAll('[data-perm]').length : 0));
+    t(MH, 'Роли и права: матрица из rbac.py (35 прав × 7 ролей), отмечена ваша роль', async () => {
+      const m = q('[data-help-matrix]'); ok(m && m.querySelectorAll('[data-perm]').length === 35, 'прав: ' + (m ? m.querySelectorAll('[data-perm]').length : 0)); // lane I: + partner:portal (FR-108); FR-137: matrix generated from rbac.py incl. the two override permissions
       const adm = [...m.querySelectorAll('[data-perm]')].filter(r => r.querySelectorAll('td')[1].textContent === '✓').map(r => r.getAttribute('data-perm'));
-      ok(adm.length === 31 && !adm.includes('portal'), 'администратор: ' + adm.length); ok(q('.help-role.on[data-role="admin"]'), 'роль не отмечена');
+      ok(adm.length === 32 && !adm.includes('portal') && !adm.includes('driver:app'), 'администратор: ' + adm.length); // FR-83: driver:app only for drivers ok(q('.help-role.on[data-role="admin"]'), 'роль не отмечена');
     });
     t(MH, 'Поиск фильтрует содержание и статьи; «ничего не найдено»; очистка возвращает всё', async () => {
       const total = all('[data-help-article]').length; ok(total >= 45, 'статей: ' + total);
@@ -920,8 +947,9 @@ class Component extends DCLogic {
       }
     });
     t(MH, 'Каждая страница нижнего меню имеет ссылку «Справка» на существующую статью', async () => {
+      await h.asUser('admin'); // port: FR-136 backend – back from the driver account (previous test)
       const links = all('nav a').filter(a => !a.hasAttribute('data-nav-help') && !a.hasAttribute('data-nav') && !a.hasAttribute('data-bnav')).map(a => a.getAttribute('href')); // port: FR-134/FR-133 v5 items + bottom bar are links too
-      ok(links.length >= 17, 'пунктов: ' + links.length);
+      ok(links.length >= 15, 'пунктов: ' + links.length); // FR-132: summary / dispatcher / temperature / fleet are screen tabs now
       for (const href of links) {
         const a = all('nav a').find(x => x.getAttribute('href') === href); a.click(); await sleep(450);
         const l = q('main [data-help-link], .main [data-help-link]'); ok(l, href + ': нет ссылки «Справка»'); recLinks.push(l.getAttribute('data-help-link'));
@@ -1018,17 +1046,24 @@ class Component extends DCLogic {
       const log = O().doc.smsLog; ok(log.length >= 2 && log.some(m => m.type === 'IN') && log.some(m => m.type === 'HB'), JSON.stringify(log.map(m => m.type)));
       ok(log.every(m => /^OL1 R-103 V01 [A-Z]{2} \d{6} \S+ \d+ [0-9a-f]{12}$/.test(m.text) && m.text.length <= 160), 'формат OL1');
       ok(O().doc.drvEv.find(e => e.id === eid).sms > 0, 'событие не отмечено как SMS'); ok(all('[data-dsms-msg]').length >= 2, 'нет списка SMS в телефоне');
-      const inc = O().doc.inbox.find(r => r.source === 'sms_gateway' && r.kind === 'security_event'); ok(inc && inc.lvl === 3, 'ДТП по SMS не дошло до «Безопасности»');
-      await goCov(); const r = q('[data-contact="V01"]'); ok(r && r.getAttribute('data-lvl') === '2' && r.textContent.includes('нет связи вне известных зон'), r ? r.textContent : 'нет строки');
+      const inc = (h.BE() ? (await fr.contentWindow.__OLYMP_DEMO_REQ_AS('admin', 'GET', '/api/v5/state')).doc.inbox : O().doc.inbox).find(r => r.source === 'sms_gateway' && r.kind === 'security_event'); // port: FR-136 backend – the driver's state has no inbox (FR-81) ok(inc && inc.lvl === 3, 'ДТП по SMS не дошло до «Безопасности»');
+      await h.asUser('admin'); // port: FR-136 backend – the coverage page as the office (the phone ran as the driver account)
+      await goCov(); const r = q('[data-contact="V01"]');
+      // port: FR-136 backend – the +30 min offline time is simulated in the phone (client state of the driver's browser); the office
+      // session sees the real last contact (the SMS just received) – the level-2 rule is covered by pytest (test_coverage_sms)
+      if (!h.BE()) ok(r && r.getAttribute('data-lvl') === '2' && r.textContent.includes('нет связи вне известных зон'), r ? r.textContent : 'нет строки');
       ok(all('[data-sms-log]').length >= 2, 'нет принятых SMS');
-      await nav('Обзор'); has('V01 · R-103: нет данных');
+      await nav('Обзор'); if (!h.BE()) has('V01 · R-103: нет данных');
     });
     t(MC, 'Сеть вернулась: полная синхронизация без дублей, «доставлено · SMS + синхр.»', async () => {
-      await nav('Приложение водителя'); const n = O().doc.drvEv.length; q('[data-dnet]').click(); await sleep(600);
+      await nav('Приложение водителя'); const n = O().doc.drvEv.length;
+      if (h.BE() && !q('[data-dsms]')) { q('[data-dnet]').click(); await sleep(400); } // port: FR-136 backend – the account switch reloaded the phone (online): offline first
+      q('[data-dnet]').click(); await sleep(600);
       ok(!O().doc.drvEv.some(e => e.q) && O().doc.drvEv.length === n, 'дубли или очередь'); has('доставлено · SMS + синхр.');
       ok(!q('[data-dsms]'), 'SMS-режим остался');
     });
     t(MC, 'Симуляции: ожидаемая зона = уровень 1, окно превышено + холодный груз = уровень 3 в общем списке', async () => {
+      await h.asUser('admin'); // port: FR-136 backend – the coverage page as the office
       await goCov(); q('[data-covsim="exp"]').click(); await sleep(300);
       const r = q('[data-contact="V04"]'); ok(r.getAttribute('data-lvl') === '1' && r.textContent.includes('ожидаемо вне зоны, SMS-канал активен'), r.textContent);
       q('[data-covsim="late"]').click(); await sleep(300); ok(q('[data-contact="V04"]').getAttribute('data-lvl') === '3', 'не уровень 3');
@@ -1523,7 +1558,7 @@ class Component extends DCLogic {
         if (D2().querySelectorAll('nav [data-nav]').length < 10) { await role(f2, 'admin'); await go(f2, '/s/overview', 900); }
         const routes = [...new Set([...D2().querySelectorAll('nav a[href]')].map(a => (a.getAttribute('href') || '').replace(/^#/, '')).filter(h => h.startsWith('/')))];
         ok(routes.filter(r => r.startsWith('/s/')).length === 17, lang + ': экранов в меню ' + routes.filter(r => r.startsWith('/s/')).length);
-        for (const r of routes.concat(['/account', '/help'])) { await go(f2, r); scan(r); }
+        for (const r of routes.concat(['/account', '/help', '/s/dispatch/plan', '/s/thermo/journal', '/s/fleet/register'])) { await go(f2, r); scan(r); } // FR-132: records functions are screen tabs
         await go(f2, '/trips'); const tl = D2().querySelector('main a[href*="/trips/"]');
         if (tl) { await go(f2, tl.getAttribute('href').replace(/^#/, '')); scan('/trips/:id'); }
         await go(f2, '/bookings'); const all1 = [...D2().querySelectorAll('main .seg-group button')]; if (all1.length) { all1[all1.length - 1].click(); await sleep(500); } scan('/bookings (all)');
@@ -1565,7 +1600,7 @@ class Component extends DCLogic {
   const baseBuild = Component.prototype.build;
   Component.prototype.build = function (fr) {
     const T = baseBuild.call(this, fr);
-    const h = this.helpers(fr), { D, all, nav, has, ok } = h;
+    const h = this.helpers(fr), { D, O, all, nav, has, ok } = h;
     const t = (mod, name, fn) => T.push({ mod, name, fn });
     const q = sel => D().querySelector(sel);
     const HMS = /^\d\d:\d\d:\d\d$/;
@@ -1612,9 +1647,9 @@ class Component extends DCLogic {
         const t0 = Date.now(); let ban = null;
         while (Date.now() - t0 < 10000 && !ban) { await sleep(250); ban = d2.querySelector('[data-alarm-banner]'); }
         ok(ban, 'нет баннера во второй сессии за 10 с');
-        ok(/Новые тревоги уровня ≥ 2/.test(ban.textContent) && /Безопасность · INC-04\d\d/.test(ban.textContent), ban.textContent);
+        ok(/Новые тревоги уровня ≥ 2/.test(ban.textContent) && /Безопасность · (INC-04\d\d|ALM-\d+)/.test(ban.textContent), ban.textContent); // port: FR-136 backend – alarm store ids ALM-<n> (FR-101)
         ok(+d2.querySelector('[data-alarm-count]').getAttribute('data-alarm-count') === before + 1, 'счётчик тревог не вырос');
-        const id = ban.textContent.match(/INC-04\d\d/)[0];
+        const id = ban.textContent.match(/INC-04\d\d|ALM-\d+/)[0]; // port: FR-136 backend – ALM-<n>
         d2.querySelector('[data-banner-alarm]').click(); await sleep(450);
         ok(d2.querySelector('section[data-screen="security"]') && !d2.querySelector('[data-alarm-banner]'), 'переход к тревоге');
         has(id); // the acting session shows it too
@@ -1653,6 +1688,954 @@ class Component extends DCLogic {
       ok(parseInt(min, 10) >= 1000 && fr.contentWindow.getComputedStyle(row).minWidth === min, 'минимальная ширина таблицы: ' + min);
       ok(box.tabIndex === 0, 'таблица не доступна с клавиатуры');
     });
+
+    // ---- lane F: FR-81 role projection, FR-82 partner contacts, FR-85 approval functions, FR-89 no names in the state
+    const MP = 'FR-81/82/85/89 Приватность';
+    const as = (user, m, p, b) => fr.contentWindow.__OLYMP_DEMO_REQ_AS(user, m, p, b);
+    const req = (m, p, b) => fr.contentWindow.__OLYMP_DEMO_REQ(m, p, b);
+    const status = async f => { try { await f(); return 200; } catch (e) { return e.status || 0; } };
+    t(MP, 'Водитель: в /state нет затрат, штрафов, SMS-очереди и входящих (ключи только в withheld)', async () => {
+      const s = await as('driver.v01', 'GET', '/api/v5/state');
+      ['cAp', 'cApBy', 'fineSt', 'fineInbox', 'smsOut', 'inbox', 'urg'].forEach(k => { ok(!(k in s.doc), 'ключ ' + k); ok(s.withheld && k in s.withheld, 'нет в withheld: ' + k); });
+      ok('drv' in s.doc && 'drvEv' in s.doc, 'нет данных приложения водителя');
+    });
+    t(MP, 'Справочник: у водителя нет штрафов, персонала, затрат и телефонов; у аудитора штрафы есть, телефонов нет', async () => {
+      const r = await as('driver.v01', 'GET', '/api/v5/ref?lang=ru');
+      ['FINES', 'STAFF', 'PCOST', 'CP', 'PNAMES'].forEach(k => ok(!(k in r), 'ключ ' + k));
+      ok(r.DRV.D1.name === 'D1', 'имя водителя видно без drivers:read');
+      ok(!/\+7[ (]/.test(JSON.stringify(r)), 'телефон в справочнике водителя');
+      const a = await as('auditor', 'GET', '/api/v5/ref?lang=ru');
+      ok(a.FINES.length > 0 && !/\+7[ (]/.test(JSON.stringify(a)), 'аудитор: штрафы / телефоны');
+      for (const u of ['warehouse.ast', 'dispatcher.ast']) ok(!/\+7[ (]/.test(JSON.stringify(await as(u, 'GET', '/api/v5/ref?lang=ru'))), 'телефон в справочнике ' + u);
+    });
+    t(MP, 'Только чтение: аудитор не выполняет действия (403), список действий пуст', async () => {
+      ok((await as('auditor', 'GET', '/api/v5/state')).actions.length === 0, 'у аудитора есть действия');
+      ok(await status(() => as('auditor', 'POST', '/api/v5/act', { action: 'inbox.ack', payload: { id: 'IN-0001' } })) === 403, 'аудитор выполнил действие');
+    });
+    t(MP, 'Подписи по бизнес-функции: диспетчер не подписывает «свой / внешний» (403)', async () => {
+      ok(await status(() => as('dispatcher.ast', 'POST', '/api/v5/act', { action: 'costs.sign', payload: { id: 'OW-3', i: 0 } })) === 403, 'диспетчер подписал');
+    });
+    t(MP, 'В документе подписи — ссылки на пользователя (u:<id>), имя приходит через /api/v5/people', async () => {
+      const s0 = await req('GET', '/api/v5/state');
+      const free = ['OW-1', 'OW-2', 'OW-3', 'OW-4', 'OW-5', 'OW-6', 'OW-7'].find(id => !(s0.doc.cAp || {})[id] || !(s0.doc.cAp[id] || [])[0]);
+      const signer = h.BE() ? 'head.logistics' : null; // port: FR-136 backend – slot 0 = head of logistics (four-eyes, FR-85)
+      if (free) await (signer ? as(signer, 'POST', '/api/v5/act', { action: 'costs.sign', payload: { id: free, i: 0 }, lang: 'ru' }) : req('POST', '/api/v5/act', { action: 'costs.sign', payload: { id: free, i: 0 }, lang: 'ru' }));
+      const s = await req('GET', '/api/v5/state');
+      const by =Object.values(s.doc.cApBy || {}).flat().filter(Boolean).concat(Object.values(s.doc.exAp || {}).flatMap(x => x.by || []).filter(Boolean));
+      ok(by.length > 0, 'нет подписей после сценария');
+      ok(by.every(b => /^u:\d+$/.test(b.uid) && !('name' in b)), JSON.stringify(by.slice(0, 2)));
+      ok(!JSON.stringify(s.doc).includes('Admin (Demo)'), 'имя пользователя в документе');
+      const p = await req('GET', '/api/v5/people?ids=' + by[0].uid); ok(p[by[0].uid] === (signer ? 'Руководитель логистики (демо)' : 'Admin (Demo)'), JSON.stringify(p)); // port: FR-136 backend signer
+    });
+    t(MP, 'Контакты партнёра: номера скрыты, при звонке открываются и пишутся в журнал (pii.read)', async () => {
+      await nav('Партнёры'); const row = q('[data-partner="PL-01"]');
+      [...row.querySelectorAll('button')].find(x => x.textContent.includes('Контакты')).click(); await sleep(500);
+      const m = q('[data-contacts]'); ok(m, 'нет окна'); const rows = [...m.querySelectorAll('[data-contact]')];
+      ok(rows.length === 3 && rows.every(x => /\+7 \(7172\) ••-••-\d\d/.test(x.textContent) && /моб\. \+7 7\d\d ••• •• \d\d/.test(x.textContent)), rows.map(x => x.textContent).join(' | '));
+      has('Номера скрыты; полный номер открывается при звонке и записывается в журнал аудита.');
+      [...rows[1].querySelectorAll('button')].find(x => x.textContent.includes('Позвонить')).click(); await sleep(600);
+      ok(/\+7 7\d\d \d{3} \d\d \d\d/.test(q('[data-contacts]').querySelectorAll('[data-contact]')[1].textContent), 'номер не открыт');
+      const au = await req('GET', '/api/audit?action=pii.read'); ok(au.length && au[0].entity === 'partner_contact' && !/\+7/.test(JSON.stringify(au[0].details)), JSON.stringify(au[0] || {}));
+      [...q('[data-contacts]').querySelectorAll('button')].find(x => x.textContent.includes('Закрыть')).click(); await sleep(350);
+    });
+    t(MP, 'Контакты на DE/EN: роли и имена латиницей, номера скрыты', async () => {
+      for (const l of ['de', 'en']) {
+        const r = await req('GET', '/api/v5/partners/PW-03/contacts?lang=' + l);
+        ok(r.contacts.length === 3 && !/[А-Яа-яЁё]/.test(JSON.stringify(r.contacts)) && r.contacts.every(c => c.tel.includes('•')), l + ': ' + JSON.stringify(r.contacts[0]));
+      }
+      ok(await status(() => as('auditor', 'POST', '/api/v5/partners/PW-03/contacts/71/reveal')) === 403, 'аудитор открыл номер');
+    });
+    // ---- FR-71 / FR-73 / FR-78 / FR-83: live operations data, master data, driver app bound to the own trip
+    const ML = 'FR-71/78/83 Живые данные';
+    const demoReq = () => fr.contentWindow.__OLYMP_DEMO_REQ;
+    const rejects = async (p) => { try { await p; return null; } catch (e) { return e; } };
+    const goHash = async (h, ms = 900) => { fr.contentWindow.location.hash = '#' + h; await sleep(ms); };
+    const reloadDemo = async () => { fr.src = fr.getAttribute('src'); await sleep(600);
+      for (let i = 0; i < 60; i++) { try { if (fr.contentWindow.__OLYMP && fr.contentDocument.querySelectorAll('nav [data-nav]').length > 10) break; } catch (e) { /* loading */ } await sleep(250); } // port: FR-134 nav items are links <a data-nav>
+      await sleep(400); };
+    const setVal = (el, v) => { const proto = el.tagName === 'SELECT' ? fr.contentWindow.HTMLSelectElement.prototype : fr.contentWindow.HTMLInputElement.prototype;
+      Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, v); el.dispatchEvent(new fr.contentWindow.Event(el.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true })); };
+    t(ML, 'FR-83: driver:app только у водителя — администратор получает 403, просмотр демо идёт от имени driver.v01', async () => {
+      const req = demoReq();
+      let e = await rejects(req('POST', '/api/v5/act', { action: 'driver.check', payload: { trip: 'R-103', id: 'c2' }, lang: 'ru' }));
+      ok(e && e.status === 403, 'администратор выполнил действие водителя');
+      // port: FR-136 backend – no admin preview on the server: the driver account itself (FR-83)
+      const drq = h.BE() ? (m, p, b) => fr.contentWindow.__OLYMP_DEMO_REQ_AS('driver.v01', m, p, b) : (m, p, b) => req(m, p, b && { ...b, preview: true });
+      const r = await drq('POST', '/api/v5/act', { action: 'driver.check', payload: { trip: 'R-103', id: 'c2' }, lang: 'ru' });
+      ok(r.doc.drvChk['R-103:c2'] === true && !('drvStep' in r.doc) && !('dChk' in r.doc), 'нет состояния рейса drv[R-103]');
+      await drq('POST', '/api/v5/act', { action: 'driver.check', payload: { trip: 'R-103', id: 'c2' }, lang: 'ru' });
+      e = await rejects(drq('POST', '/api/v5/act', { action: 'driver.signSheet', payload: { trip: 'R-102' }, lang: 'ru' }));
+      ok(e && e.status === 403 && /Not your trip/.test(e.message), 'чужой рейс: ' + (e && e.message));
+      e = await rejects(drq('POST', '/api/v5/act', { action: 'driver.step', payload: { trip: 'R-103', step: 0 }, lang: 'ru' }));
+      ok(e && e.status === 422, 'шаг без точки маршрута принят');
+      e = await rejects(drq('POST', '/api/v5/act', { action: 'driver.scan', payload: { trip: 'R-103', stop: '1', id: 'L18' }, lang: 'ru' }));
+      ok(e && e.status === 404, 'место другой точки принято');
+      const a = (await req('GET', '/api/audit?action=v5.driver.check'))[0]; ok(a && (h.BE() ? a.username === 'driver.v01' : a.details.preview_by === 'admin'), 'аудит просмотра: ' + JSON.stringify(a)); // port: FR-136 backend – done by the driver
+    });
+    t(ML, 'FR-83: телефон привязан к рейсу R-103 · V01 (из живого слоя), шаги несут рейс и точку', async () => {
+      await nav('Приложение водителя');
+      ok(O().ME && O().ME.trip === 'R-103' && (O().ME.preview === true || h.BE()), 'ME: ' + JSON.stringify(O().ME)); // port: FR-136 backend – the driver's own trip
+      has('R-103 · V01 · А. Нурланов', 'Филиал Караганда');
+      ok(!q('[data-drv-none]'), 'показано «нет активного рейса»');
+    });
+    t(ML, 'FR-71: заказ и рейс, созданные в демо (R-26-…, ORD-26-…), видны на «Диспетчер» и «Загрузка»; R-106 — без изменений', async () => {
+      const req = demoReq();
+      await nav('Загрузка и вес'); const on106 = all('main button[data-order][aria-pressed="true"]').length;
+      const sites = await req('GET', '/api/sites'); const site = sites.find(x => x.city === 'Караганда');
+      const o = await req('POST', '/api/orders', { site_id: site.id, description: 'Live order', temp_class: 'cold', pallets: 1, weight_kg: 120 });
+      const tr = await req('POST', '/api/trips', { hub_id: site.hub_id, order_ids: [] });
+      ok(/^ORD-26-/.test(o.number) && /^R-26-/.test(tr.number), o.number + ' ' + tr.number);
+      await reloadDemo();
+      await nav('Диспетчер');
+      const row = q('[data-open-order="' + o.number + '"]'); ok(row && row.textContent.includes('Live order'), 'заказ не в «Нераспределённых»');
+      ok(all('[data-lane="plan"] .v5-ops-card').some(c => c.textContent.includes(tr.number)), 'рейс не на доске');
+      await nav('Загрузка и вес');
+      const chips = all('[data-load-trips] button').map(b => b.textContent.trim()); ok(chips.includes(tr.number) && chips.includes('R-106'), 'выбор рейса: ' + chips.join());
+      ok(all('main button[data-order][aria-pressed="true"]').length === on106, 'R-106 изменился');
+      all('[data-load-trips] button').find(b => b.textContent.trim() === tr.number).click(); await sleep(500);
+      has('Заказы рейса ' + tr.number);
+      const b = q('main button[data-order="' + o.number + '"]'); ok(b && b.getAttribute('aria-pressed') === 'false', 'открытый заказ хаба не в списке');
+      all('[data-load-trips] button').find(x => x.textContent.trim() === 'R-106').click(); await sleep(500);
+      has('Заказы рейса R-106 · Астана → Костанай → Актобе');
+      const req2 = demoReq(); // the page was reloaded: the API of the new window (the old one never resolves)
+      await req2('POST', '/api/trips/' + tr.id + '/status', { status: 'cancelled' }); await req2('POST', '/api/orders/' + o.id + '/cancel', {});
+    });
+    t(ML, 'FR-78: «Справочники» — версии, уровень партнёра ждёт второго пользователя, история', async () => {
+      await goHash('/master-data');
+      ok(h.title().trim() === 'Справочники', 'заголовок: ' + h.title());
+      const kinds = all('[data-mkind]').map(b => b.textContent.trim()); ok(['Партнёры', 'Параметры затрат', 'Города', 'Пороги тревог'].every(k => kinds.includes(k)), kinds.join());
+      const req = demoReq();
+      const r = await req('POST', '/api/master/partner/PW-01', { data: { tier: 'silver' } }); ok(r.status === 'pending' && r.changed.join() === 'tier', JSON.stringify(r));
+      let e = await rejects(req('POST', '/api/master/partner/PW-01', { data: { bin: '123456789012' } })); ok(e && e.status === 422, 'неверный БИН принят');
+      await goHash('/s/overview', 500); await goHash('/master-data');
+      const row = q('[data-mrow="PW-01"]'); ok(row && row.querySelector('[data-mpending]'), 'нет «ждёт 2-й подписи»');
+      [...row.querySelectorAll('button')].find(b => b.textContent.includes('Подтвердить')).click(); await sleep(500);
+      has('Four-eyes rule');
+      e = await rejects(req('POST', '/api/master/partner/PW-01/' + r.version + '/approve', {})); ok(e && e.status === 409, 'тот же пользователь подтвердил');
+      await req('POST', '/api/master/partner/PW-01/' + r.version + '/reject', {});
+      all('[data-mkind]').find(b => b.textContent.trim() === 'Параметры затрат').click(); await sleep(500);
+      ok(q('[data-mrow="diesel"]') && q('[data-mrow="diesel"]').textContent.includes('340'), 'нет цены дизеля 340');
+      const c = await req('POST', '/api/master/cost/CP', { data: { diesel: 410 }, valid_from: '2026-11-01' }); ok(c.status === 'active', 'цена не сохранена');
+      const past = await req('GET', '/api/master/cost/at?day=2026-10-15'), next = await req('GET', '/api/master/cost/at?day=2026-11-02');
+      ok(past.params.diesel === 340 && next.params.diesel === 410, 'действие по дате: ' + past.params.diesel + ' / ' + next.params.diesel);
+    });
+    t(ML, 'FR-78: новая машина с камерами в «Автопарк» — видна на экране «Автопарк» и в подборе ТС', async () => {
+      await goHash('/fleet'); q('[data-veh-new]').click(); await sleep(300);
+      const f = q('[data-veh-form="new"]'); ok(f, 'нет формы'); const inp = [...f.querySelectorAll('input')];
+      setVal(inp[0], 'V31'); setVal(inp[1], '731 TST 02'); setVal(inp[2], 'Isuzu NQR · рефрижератор'); setVal(inp[3], '5000'); setVal(inp[4], '8');
+      const fz = f.querySelector('[data-veh-tc="frozen"]'); fz.click(); await sleep(150);
+      [...f.querySelectorAll('button')].find(b => b.textContent.includes('Сохранить')).click(); await sleep(700);
+      ok(all('main table tr').some(r => r.textContent.includes('V31') && r.textContent.includes('731 TST 02')), 'машина не в таблице');
+      await reloadDemo(); await nav('Автопарк');
+      ok(q('[data-fleet-row="V31"]'), 'нет на экране «Автопарк»');
+      await nav('Загрузка и вес');
+      ok(all('[data-sim]').some(r => r.getAttribute('data-sim').startsWith('V31:')), 'нет в подборе ТС');
+    });
+    // ---- lane G: FR-91 … FR-100 trip flow, Go/No-Go release, server load check
+    const MG = 'FR-91…100 Рейсы и Go/No-Go';
+    const pressG = async sel => { const e = q(sel); if (!e) throw new Error('Нет элемента ' + sel); e.click(); await sleep(420); };
+    t(MG, 'FR-99: план не помещается (3,5 т · 1 зона) — сервер отклоняет; с обоснованием сохраняется с отметкой перегруза', async () => {
+      // known state: the v5.2 load list of R-106 (earlier tests hand orders to partners, tick / untick orders …)
+      await demoReq()('POST', '/api/v5/reset'); await reloadDemo();
+      await nav('Загрузка и вес'); await pressG('[data-ltype="t35"]'); await pressG('[data-lzones="1"]');
+      const save = () => all('main button').find(b => b.textContent.includes('Сохранить как план R-106'));
+      ok(save() && save().disabled, 'сохранение без обоснования доступно');
+      const inp = q('[data-plan-reason]'); ok(inp, 'нет поля обоснования');
+      const e = await rejects(demoReq()('POST', '/api/v5/act', { action: 'load.plan', payload: { trip: 'R-106', type: 't35', zones: 1, regime: 'auto' }, lang: 'ru' }));
+      ok(e && e.status === 409 && e.message.includes('План не помещается'), 'сервер принял неподходящий план: ' + (e && e.message));
+      setVal(inp, 'Паллеты переложены на рампе'); await sleep(250);
+      ok(!save().disabled, 'кнопка не активна с обоснованием'); save().click(); await sleep(600);
+      const p = O().doc.loadPlan['R-106']; ok(p && p.type === 't35' && p.override && p.override.codes.includes('mixed'), JSON.stringify(p));
+      ok(O().doc.audit[0].text.includes('тип ТС запланирован — 3,5 т · 1 зона'), 'нет записи в журнале');
+      await pressG('[data-ltype="V02"]');
+    });
+    t(MG, 'FR-99: подходящий тип (12,5 т · 2 зоны) сохраняется без обоснования', async () => {
+      await pressG('[data-ltype="t125"]'); await pressG('[data-lzones="2"]');
+      ok(!q('[data-plan-reason]'), 'поле обоснования у подходящего типа');
+      const b = all('main button').find(x => x.textContent.includes('Сохранить как план R-106')); ok(b && !b.disabled, 'кнопка недоступна'); b.click(); await sleep(600);
+      const p = O().doc.loadPlan['R-106']; ok(p && p.type === 't125' && !p.override, JSON.stringify(p));
+      await pressG('[data-ltype="V02"]');
+    });
+    t(MG, 'FR-91: отзыв выпуска — без выпуска 409, неверная причина 422; после выпуска R-106 «Отозвать выпуск» снимает допуск', async () => {
+      const req = demoReq();
+      let e = await rejects(req('POST', '/api/v5/act', { action: 'docs.revoke', payload: { trip: 'R-106', reason: 'weather' }, lang: 'ru' }));
+      ok(e && e.status === 409, 'отзыв без выпуска: ' + (e && e.status));
+      e = await rejects(req('POST', '/api/v5/act', { action: 'docs.revoke', payload: { trip: 'R-106', reason: 'bogus' }, lang: 'ru' }));
+      ok(e && (e.status === 422 || e.status === 409), 'неверная причина: ' + (e && e.status));
+      // make R-106 releasable: buran-free window, packages rescanned, documents generated
+      await rejects(req('POST', '/api/v5/act', { action: 'dispatch.replan', payload: { trip: 'R-106' }, lang: 'ru' }));
+      for (const o of ['2281', '2282', '2290', '2291', '2292', '2295']) await rejects(req('POST', '/api/v5/act', { action: 'load.rescan', payload: { order: o }, lang: 'ru' }));
+      await rejects(req('POST', '/api/v5/act', { action: 'docs.generate_all', payload: { trip: 'R-106' }, lang: 'ru' }));
+      await reloadDemo(); await nav('Документы РК');
+      all('main button').find(b => b.textContent.trim().startsWith('R-106')).click(); await sleep(400);
+      const rel = q('[data-release="R-106"]'); ok(rel && !rel.disabled, 'выпуск R-106 недоступен: ' + all('[data-gate="no"]').map(g => g.textContent).join(' | '));
+      rel.click(); await sleep(600);
+      ok(O().doc.released['R-106'], 'R-106 не выпущен');
+      const row = q('[data-revoke-row]'); ok(row, 'нет «Отозвать выпуск»');
+      setVal(row.querySelector('select'), 'vehicle'); await sleep(150);
+      q('[data-revoke="R-106"]').click(); await sleep(600);
+      ok(!O().doc.released['R-106'] && O().doc.relRev['R-106'].why === 'vehicle', JSON.stringify(O().doc.relRev));
+      const n = q('[data-rel-revoked="R-106"]'); ok(n && n.textContent.includes('Выпуск отозван') && n.textContent.includes('транспорт'), n ? n.textContent : 'нет отметки');
+      ok(O().doc.audit[0].text.includes('выпуск отозван'), 'нет записи в журнале');
+    });
+    t(MG, 'FR-91: выезд демо-рейса без выпуска — 409 с названием проверки; с обоснованием руководителя — в пути и запись в аудите', async () => {
+      const req = demoReq();
+      const sites = await req('GET', '/api/sites'); const site = sites.find(x => x.city === 'Караганда');
+      const veh = (await req('GET', '/api/vehicles')).find(v => v.code === 'V04');
+      const drv = (await req('GET', '/api/drivers')).find(d => d.is_active && d.hub_id === site.hub_id);
+      const o = await req('POST', '/api/orders', { site_id: site.id, description: 'Go/No-Go test', temp_class: 'cold', pallets: 1, weight_kg: 80 });
+      const later = h.BE() ? { planned_departure: new Date(Date.now() + 3 * 86400000).toISOString(), eta: new Date(Date.now() + 3 * 86400000 + 6 * 3600000).toISOString() } : {}; // port: FR-136 backend – V04 is busy on the seeded R-102 today
+      const tr = await req('POST', '/api/trips', { hub_id: site.hub_id, vehicle_id: veh.id, driver_id: drv.id, order_ids: [o.id], ...later });
+      await req('POST', '/api/trips/' + tr.id + '/status', { status: 'loading' });
+      let e = await rejects(req('POST', '/api/trips/' + tr.id + '/status', { status: 'in_transit' }));
+      ok(e && e.status === 409 && e.message.includes('Go/No-Go release'), 'выезд без выпуска: ' + (e && e.message));
+      e = await rejects(req('POST', '/api/trips/' + tr.id + '/status', { status: 'in_transit', override_reason: 'short' }));
+      ok(e && e.status === 422, 'короткое обоснование принято');
+      await goHash('/trips/' + tr.id);
+      const box = q('[data-depart-override]'); ok(box, 'нет поля обоснования выезда');
+      setVal(box.querySelector('input'), 'Срочная поставка, решение руководителя'); await sleep(200);
+      box.querySelector('button').click(); await sleep(700);
+      const t2 = await req('GET', '/api/trips/' + tr.id); ok(t2.status === 'in_transit' && t2.departed_at, 'статус: ' + t2.status);
+      const a = (await req('GET', '/api/audit?action=trip.release_override'))[0]; ok(a && a.entity_id === tr.number, 'нет записи trip.release_override');
+      // FR-98: arrival at the stop is stored and shown
+      const s = t2.stops[0]; const t3 = await req('POST', '/api/trips/' + tr.id + '/stops/' + s.id + '/arrive');
+      ok(t3.stops[0].status === 'arrived' && t3.stops[0].arrived_at, 'прибытие не сохранено');
+    });
+    t(MG, 'FR-100: KPI «тревоги» считают все открытые тревоги, список — не больше 20', async () => {
+      const req = demoReq();
+      const ov = await req('GET', '/api/overview'); const al = (await req('GET', '/api/alarms')).filter(a => a.status !== 'resolved');
+      ok(ov.kpi.open_alarms === al.length && ov.alarms.length <= 20, ov.kpi.open_alarms + ' / ' + al.length);
+      ok(ov.kpi.trips_today <= ov.trips.length, 'рейсов сегодня больше, чем рейсов');
+    });
+    ['DE', 'EN'].forEach(code => t(MG, code + ': обоснование плана и отзыв выпуска без русского текста', async () => {
+      const url = fr.getAttribute('src').replace('.html', '-' + code.toLowerCase() + '.html');
+      const f2 = document.createElement('iframe'); f2.style.cssText = 'position:fixed;left:-3000px;top:0;width:1400px;height:900px;border:0'; f2.src = url; document.body.appendChild(f2);
+      try {
+        for (let k = 0; k < 60; k++) { try { if (f2.contentDocument.querySelectorAll('nav [data-nav]').length > 10) break; } catch (e) { /* loading */ } await sleep(200); } await sleep(450); // port: FR-134 nav items are links <a data-nav>
+        const d = f2.contentDocument, go = async (no) => { [...d.querySelectorAll('nav [data-nav]')].find(b => b.textContent.trim().startsWith(no)).click(); await sleep(450); };
+        await go('03');
+        const pr = async s => { const e = d.querySelector(s); ok(e, 'нет ' + s); e.click(); await sleep(350); };
+        await pr('[data-ltype="t35"]'); await pr('[data-lzones="1"]');
+        const inp = d.querySelector('[data-plan-reason]'); ok(inp && !/[А-Яа-яЁё]/.test(inp.placeholder) && (code === 'DE' ? /Begründung/ : /Reason/).test(inp.placeholder), inp ? inp.placeholder : 'нет поля');
+        let bad = cyr(d); ok(!bad, code + ' load: «' + bad + '»');
+        await go('08');
+        [...d.querySelectorAll('main button')].find(b => b.textContent.trim().startsWith('R-106')).click(); await sleep(400);
+        const n = d.querySelector('[data-rel-revoked="R-106"]'); ok(n && (code === 'DE' ? /Freigabe zurückgezogen/ : /Release withdrawn/).test(n.textContent), n ? n.textContent : 'нет отметки');
+        bad = cyr(d); ok(!bad, code + ' docs: «' + bad + '»');
+      } finally { f2.remove(); }
+    }));
+    t(ML, 'Сброс демо после проверок живых данных', async () => {
+      try { localStorage.removeItem('olymp-demo-state-v2'); } catch (e) { /* storage unavailable */ }
+      await reloadDemo(); ok(all('nav [data-nav]').length >= 17, 'демо не загрузилось');
+    });
+    return T;
+  };
+})();
+
+// ---- lane H: FR-101 … FR-106 cold chain, alarms & quality (single alarm store, resolution rules, risks apart from alarms,
+// chamber sensors and thermochron upload). The browser demo mirrors the server rules (demo/v5/security.ts, mockApi.ts).
+(() => {
+  const baseBuild = Component.prototype.build;
+  Component.prototype.build = function (fr) {
+    const T = baseBuild.call(this, fr);
+    const h = this.helpers(fr), { D, O, all, nav, has, ok } = h;
+    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const q = sel => D().querySelector(sel);
+    const req = (m, p, b) => fr.contentWindow.__OLYMP_DEMO_REQ(m, p, b);
+    const rejects = async (p) => { try { await p; return null; } catch (e) { return e; } };
+    const goHash = async (hh, ms = 900) => { fr.contentWindow.location.hash = '#' + hh; await sleep(ms); };
+    const setVal = (el, v) => { const proto = el.tagName === 'SELECT' ? fr.contentWindow.HTMLSelectElement.prototype : fr.contentWindow.HTMLInputElement.prototype;
+      Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, v); el.dispatchEvent(new fr.contentWindow.Event(el.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true })); };
+    const btn = (root, text) => [...root.querySelectorAll('button')].find(b => b.textContent.trim() === text);
+    const frame = async (url, ready) => {
+      const f2 = document.createElement('iframe'); f2.style.cssText = 'position:fixed;left:-3000px;top:0;width:1400px;height:900px;border:0'; f2.src = url; document.body.appendChild(f2);
+      for (let k = 0; k < 80; k++) { try { if (ready(f2.contentDocument)) break; } catch (e) { /* loading */ } await sleep(200); }
+      await sleep(450); return f2;
+    };
+    const langUrl = code => fr.getAttribute('src').replace('.html', code === 'RU' ? '.html' : '-' + code.toLowerCase() + '.html');
+    const cyr = d => { const w = d.createTreeWalker(d.body, NodeFilter.SHOW_TEXT, { acceptNode: x => /^(SCRIPT|STYLE|TEMPLATE)$/.test(x.parentElement.tagName) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+      let x; while ((x = w.nextNode())) { const m = x.textContent.match(/[А-Яа-яЁё]{3,}/); if (m) return m[0]; } return ''; };
+
+    const MH = 'FR-101…106 Холодовая цепь и тревоги';
+    // port: FR-136 backend – incidents live in the alarm store (ALM-<n>, R.ALM) on the server, in extraInc in the browser demo
+    const newestInc = () => (h.BE() ? [...(O().ALM || [])].sort((a, b) => +b.id.slice(4) - +a.id.slice(4))[0].id : O().doc.extraInc[0].id);
+    t(MH, 'FR-105: уровень 3 — сначала «Принять», закрытие только с категорией и текстом ≥ 10 символов', async () => {
+      await nav('Безопасность'); q('main [data-act="panic"]').click(); await sleep(500);
+      const id = newestInc(), row = () => q('[data-inc="' + id + '"]');
+      ok(row() && row().getAttribute('data-status') === 'new', 'нет нового инцидента ' + id);
+      ok(!btn(row(), 'Закрыть'), 'уровень 3 закрывается без принятия');
+      btn(row(), 'Принять').click(); await sleep(450);
+      btn(row(), 'Закрыть').click(); await sleep(300);
+      const f = row().querySelector('[data-close-form]'); ok(f, 'нет формы закрытия');
+      const go = () => btn(row(), 'Закрыть инцидент');
+      ok(go().disabled, 'закрытие без текста возможно');
+      setVal(f.querySelector('[data-close-note]'), 'коротко'); await sleep(150); ok(go().disabled, 'закрытие с текстом < 10 символов');
+      setVal(f.querySelector('[data-close-cat]'), 'false_alarm');
+      setVal(f.querySelector('[data-close-note]'), 'Проверка кнопки, водитель на связи'); await sleep(150);
+      ok(!go().disabled, 'кнопка не активна'); go().click(); await sleep(500);
+      ok(row().getAttribute('data-status') === 'closed' && !row().querySelector('[data-close-form]'), row().textContent);
+    });
+    t(MH, 'FR-105: демо-API как сервер — без категории 422, короткий текст 422, уровень 3 без принятия 409', async () => {
+      await nav('Безопасность'); q('main [data-act="panic"]').click(); await sleep(500);
+      const id = newestInc();
+      let e = await rejects(req('POST', '/api/v5/act', { action: 'security.incident', payload: { id, to: 'closed' }, lang: 'ru' }));
+      ok(e && e.status === 422, 'без категории: ' + (e && e.status));
+      e = await rejects(req('POST', '/api/v5/act', { action: 'security.incident', payload: { id, to: 'closed', cat: 'other', note: 'коротко' }, lang: 'ru' }));
+      ok(e && e.status === 422, 'короткий текст: ' + (e && e.status));
+      e = await rejects(req('POST', '/api/v5/act', { action: 'security.incident', payload: { id, to: 'closed', cat: 'other', note: 'Достаточно длинный текст' }, lang: 'ru' }));
+      ok(e && e.status === 409, 'уровень 3 без принятия: ' + (e && e.status));
+      const r = await req('POST', '/api/v5/act', { action: 'security.panic', payload: { veh: 'V04' }, lang: 'ru' });
+      const txt = h.BE() ? (await req('GET', '/api/v5/coldchain?lang=ru')).ALM.sort((a, b) => +b.id.slice(4) - +a.id.slice(4))[0].text : r.doc.extraInc[0].text; // port: FR-136 backend – alarm store
+      ok(txt.startsWith('V04 · '), 'тест кнопки выбранной машины: ' + txt);
+    });
+    t(MH, 'FR-101: «Обзор» — тревоги и риски (погода, дороги, загрузка) раздельными списками', async () => {
+      await nav('Обзор');
+      const al = q('[data-alert-list="alarms"]'), rk = q('[data-alert-list="risks"]');
+      ok(al, 'нет списка тревог');
+      if (rk) ok(rk.textContent.includes('Риски') && !rk.querySelector('.v5-ops-src') === false, rk.textContent.slice(0, 200)); // risks only when there are some
+      ok(!rk || [...rk.querySelectorAll('.v5-ops-src')].every(s => !/^Безопасность ·/.test(s.textContent)), 'инцидент в списке рисков');
+      ok(![...al.querySelectorAll('.v5-ops-src')].some(s => /^(Погода|Загрузка) ·/.test(s.textContent)), 'риск в списке тревог');
+    });
+    t(MH, 'FR-105: «Тревоги» — решение требует категорию и ≥ 10 символов; уровень 3 — после принятия', async () => {
+      const a = (await req('GET', '/api/alarms')).find(x => x.level < 3 && x.status !== 'resolved');
+      ok(a && a.code === 'ALM-' + a.id, 'нет полей единого хранилища');
+      let e = await rejects(req('POST', '/api/alarms/' + a.id + '/resolve', { resolution: 'Проверено по телефону' }));
+      ok(e && e.status === 422, 'без категории: ' + (e && e.status));
+      const crit = (await req('GET', '/api/alarms')).find(x => x.level === 3 && x.status === 'open');
+      if (crit) { e = await rejects(req('POST', '/api/alarms/' + crit.id + '/resolve', { resolution: 'Проверено по телефону', category: 'other' })); ok(e && e.status === 409, 'уровень 3 без принятия'); }
+      await goHash('/alarms');
+      const row = all('.alarm-row').find(r => r.textContent.includes(a.message)); ok(row, 'нет строки тревоги');
+      const go = btn(row, 'Решить'); ok(go && go.disabled, 'решение без текста возможно');
+      setVal(row.querySelector('input'), 'Водитель подтвердил, всё в норме'); await sleep(200);
+      ok(!btn(row, 'Решить').disabled, 'кнопка не активна'); btn(row, 'Решить').click(); await sleep(600);
+      const r = (await req('GET', '/api/alarms?include_resolved=true')).find(x => x.id === a.id);
+      ok(r.status === 'resolved' && r.resolution_category === 'resolved_on_site', JSON.stringify(r));
+    });
+    t(MH, 'FR-102: датчики камер ТС и загрузка файла термохрона (минуты вне диапазона по файлу)', async () => {
+      const v = (await req('GET', '/api/vehicles')).find(x => x.temp_classes.includes('cold') && x.temp_classes.includes('ambient'));
+      const s = await req('PUT', '/api/vehicles/' + v.id + '/sensors', { sensors: [{ sensor: 'Temperature 1', temp_class: 'cold' }, { sensor: 'Temperature 2', temp_class: 'ambient' }] });
+      ok(s.length === 2 && s[0].temp_class === 'cold', JSON.stringify(s));
+      const vals = [18, 17.5, 16, 14.5, 14, 14.8, 15.6, 16, 17, 18, 19, 20];
+      const csv = 'time;celsius\n' + vals.map((c, i) => '2026-10-05 08:' + String(i * 5).padStart(2, '0') + ';' + String(c).replace('.', ',')).join('\n');
+      const r = await req('POST', '/api/temperature/thermochron', { vehicle_id: v.id, temp_class: 'ambient', logger: 'TH-77', csv });
+      ok(r.readings === 12 && r.excursion_min === 15, JSON.stringify(r));
+      const r2 = await req('POST', '/api/temperature/thermochron', { vehicle_id: v.id, temp_class: 'ambient', logger: 'TH-77', csv });
+      ok(r2.readings === 0 && r2.duplicates === 12, 'повторная загрузка: ' + JSON.stringify(r2));
+      await goHash('/temperature');
+      [...D().querySelectorAll('main .seg')].find(b => b.textContent.startsWith(v.code + ' ')).click(); await sleep(600);
+      const tools = q('[data-chamber-tools="' + v.code + '"]'); ok(tools, 'нет блока датчиков / термохрона');
+      ok(tools.textContent.includes('Датчики камер') && tools.querySelectorAll('input').length >= 3, tools.textContent.slice(0, 160));
+      has('термохрон');
+    });
+    ['DE', 'EN'].forEach(code => t(MH, code + ': закрытие инцидента и списки тревог / рисков без русского текста', async () => {
+      const f2 = await frame(langUrl(code) + '#/s/security?lang=' + code.toLowerCase(), d => d.querySelectorAll('[data-inc]').length > 3);
+      try {
+        const d = f2.contentDocument;
+        const row = [...d.querySelectorAll('[data-inc]')].find(r => r.getAttribute('data-status') !== 'closed' && [...r.querySelectorAll('button')].some(b => /^(Schließen|Close)$/.test(b.textContent.trim())));
+        ok(row, 'kein / no incident to close');
+        [...row.querySelectorAll('button')].find(b => /^(Schließen|Close)$/.test(b.textContent.trim())).click(); await sleep(400);
+        ok(row.querySelector('[data-close-form]'), 'no close form');
+        let bad = cyr(d); ok(!bad, code + ' security: «' + bad + '»');
+        f2.contentWindow.location.hash = '#/s/overview?lang=' + code.toLowerCase(); await sleep(900);
+        ok(d.querySelector('[data-alert-list="alarms"]'), 'no alarm list');
+        bad = cyr(d); ok(!bad, code + ' overview: «' + bad + '»');
+      } finally { f2.remove(); }
+    }));
+    t(MH, 'Сброс демо после проверок холодовой цепи', async () => {
+      try { localStorage.removeItem('olymp-demo-state-v2'); } catch (e) { /* storage unavailable */ }
+      fr.src = fr.getAttribute('src'); await sleep(600);
+      for (let i = 0; i < 60; i++) { try { if (fr.contentWindow.__OLYMP && fr.contentDocument.querySelectorAll('nav [data-nav]').length > 10) break; } catch (e) { /* loading */ } await sleep(250); }
+      await sleep(400); ok(all('nav [data-nav]').length >= 17, 'демо не загрузилось');
+    });
+    return T;
+  };
+})();
+
+// ---- lane I: FR-107 … FR-113 delivery, driver app, coverage & SMS (ePOD evidence: photo + signature in the object store,
+// device / server time, hash check; measured dead zones; SMS acknowledgement deadline; tracking timeline). The browser demo
+// mirrors the server (demo/v5/driver.ts, demo/v5/objects.ts, demo/v5/coverage.ts, mockApi.ts).
+(() => {
+  const baseBuild = Component.prototype.build;
+  Component.prototype.build = function (fr) {
+    const T = baseBuild.call(this, fr);
+    const h = this.helpers(fr), { D, all, nav, has, ok } = h;
+    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const q = sel => D().querySelector(sel);
+    const MI = 'Доставка · ePOD и связь (FR-107…113)';
+    const W = () => fr.contentWindow;
+    const setVal = (el, v) => { Object.getOwnPropertyDescriptor(W().HTMLInputElement.prototype, 'value').set.call(el, v); el.dispatchEvent(new (W().Event)('input', { bubbles: true })); };
+    const dTab = async l => { const b = all('[data-dtab]').find(x => x.textContent.trim() === l); ok(b, 'нет вкладки ' + l); b.click(); await sleep(350); };
+    const phoneBtn = re => all('[data-phone] button').find(x => re.test(x.textContent));
+    const frame = async (url, ready) => {
+      const f2 = document.createElement('iframe'); f2.style.cssText = 'position:fixed;left:-3000px;top:0;width:1400px;height:900px;border:0'; f2.src = url; document.body.appendChild(f2);
+      for (let k = 0; k < 80; k++) { try { if (ready(f2.contentDocument)) break; } catch (e) { /* loading */ } await sleep(200); }
+      await sleep(450); return f2;
+    };
+    const langUrl = code => fr.getAttribute('src').replace('.html', '-' + code.toLowerCase() + '.html');
+    const cyr = d => { const w = d.createTreeWalker(d.body, NodeFilter.SHOW_TEXT, { acceptNode: x => /^(SCRIPT|STYLE|TEMPLATE)$/.test(x.parentElement.tagName) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+      let x; while ((x = w.nextNode())) { const m = x.textContent.match(/[А-Яа-яЁё]{3,}/); if (m) return m[0]; } return ''; };
+    const fresh = async () => {
+      try { localStorage.removeItem('olymp-demo-state-v2'); } catch (e) { /* storage unavailable */ }
+      fr.src = fr.getAttribute('src'); await sleep(600);
+      for (let i = 0; i < 60; i++) { try { if (fr.contentWindow.__OLYMP && fr.contentDocument.querySelectorAll('nav [data-nav]').length > 10) break; } catch (e) { /* loading */ } await sleep(250); } // port: FR-134 nav items are links <a data-nav>
+      await sleep(400);
+    };
+    const pngFile = () => { const b = new Uint8Array(64); b.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]); for (let i = 8; i < 64; i++) b[i] = (i * 37 + Date.now()) & 255; return new (W().File)([b], 'photo.png', { type: 'image/png' }); };
+    const pick = (input, file) => { const dt = new (W().DataTransfer)(); dt.items.add(file); input.files = dt.files; input.dispatchEvent(new (W().Event)('change', { bubbles: true })); };
+    const drawOn = cv => {
+      const r = cv.getBoundingClientRect(), P = W().PointerEvent || W().MouseEvent;
+      const ev = (type, x, y) => cv.dispatchEvent(new P(type, { bubbles: true, clientX: r.left + x, clientY: r.top + y, pointerId: 1, pointerType: 'mouse', buttons: 1 }));
+      ev('pointerdown', 10, 10); for (let k = 1; k <= 8; k++) ev('pointermove', 10 + k * 20, 10 + (k % 2) * 30); ev('pointerup', 180, 40);
+    };
+    const wait = async (fn, ms = 4000) => { for (let i = 0; i < ms / 100; i++) { if (fn()) return true; await sleep(100); } return false; };
+
+    t(MI, 'Свежее демо; приложение водителя: шаг «фото» — выбор файла, хэш SHA-256 из хранилища объектов', async () => {
+      await fresh(); await nav('Приложение водителя'); await dTab('Точка');
+      for (const re of [/Начать выгрузку/, /Подтвердить температуру/]) { const b = phoneBtn(re); ok(b, 'нет кнопки ' + re); b.click(); await sleep(350); }
+      const inp = q('[data-dphoto]'); ok(inp && inp.type === 'file' && inp.getAttribute('aria-label'), 'нет поля фото');
+      ok(q('[data-dphoto-st]').getAttribute('data-dphoto-st') === 'none', 'фото уже есть');
+      pick(inp, pngFile()); ok(await wait(() => q('[data-dphoto-st="ok"]')), 'фото не загружено');
+      ok(/фото сохранено · SHA-256 [0-9a-f]{12}…/.test(q('[data-dphoto-st]').textContent), q('[data-dphoto-st]').textContent);
+      phoneBtn(/Сделать фото/).click(); await sleep(450);
+    });
+    t(MI, 'Шаг «подпись»: ФИО и должность получателя, подпись пальцем → ePOD; ФИО не попадает в журнал аудита', async () => {
+      ok(q('[data-dsign]') && q('[data-dsigner]') && q('[data-dsigner-role]'), 'нет полей подписи');
+      setVal(q('[data-dsigner]'), 'Получатель Тестовый'); setVal(q('[data-dsigner-role]'), 'кладовщик'); drawOn(q('[data-dsign]')); await sleep(200);
+      q('[data-dsign-ok]').click();
+      ok(await wait(() => all('[data-drv-ev]').slice(0, 2).map(x => x.textContent).join(' ').includes('ePOD Караганда')), 'нет ePOD в ленте');
+      const audit = await (h.BE() ? W().__OLYMP_DEMO_REQ_AS('admin', 'GET', '/api/audit?action=v5.driver.step') : W().__OLYMP_DEMO_REQ('GET', '/api/audit?action=v5.driver.step')); // port: FR-136 backend – read by the office
+      ok(audit.length && !JSON.stringify(audit).includes('Получатель Тестовый'), 'ФИО в журнале аудита');
+    });
+    t(MI, 'Запись ePOD: время устройства и сервера, SHA-256 подписи и фото, хэш-проверка совпадает', async () => {
+      ok(await wait(() => q('[data-depod]')), 'нет записи ePOD');
+      const r = q('[data-depod]').textContent;
+      ok(r.includes('ePOD · запись доказательства · окончательный'), r);
+      ok(/время устройства: \d\d\.\d\d.*получено сервером: \d\d\.\d\d/.test(q('[data-depod-time]').textContent), q('[data-depod-time]').textContent);
+      ok(/SHA-256 [0-9a-f]{12}… · хэш-проверка ✓ совпадает/.test(q('[data-depod-sig]').textContent), q('[data-depod-sig]').textContent);
+      ok(/SHA-256 [0-9a-f]{12}… · хэш-проверка ✓ совпадает/.test(q('[data-depod-photo]').textContent), q('[data-depod-photo]').textContent);
+      const list = await (h.BE() ? W().__OLYMP_DEMO_REQ_AS('admin', 'GET', '/api/epod?trip=R-103') : W().__OLYMP_DEMO_REQ('GET', '/api/epod?trip=R-103')); // port: FR-136 backend – read by the office
+      ok(list.items.length === 1 && list.items[0].signer_role === 'кладовщик' && !JSON.stringify(list).includes('Получатель Тестовый'), JSON.stringify(list).slice(0, 200));
+    });
+    t(MI, 'Хранилище объектов: тип по содержимому (SVG / подмена типа → 415), пустой файл → 422', async () => {
+      const R = W().__OLYMP_DEMO_REQ;
+      const svg = btoa('<svg onload=alert(1)>');
+      let e = null; try { await R('POST', '/api/objects', { kind: 'photo', content_type: 'image/png', data: svg }); } catch (x) { e = x; }
+      ok(e && e.status === 415, 'svg: ' + (e && e.status));
+      e = null; try { await R('POST', '/api/objects', { kind: 'photo', content_type: 'image/png', data: '' }); } catch (x) { e = x; }
+      ok(e && e.status === 422, 'пусто: ' + (e && e.status));
+    });
+    t(MI, 'Покрытие связи: «Измерено по телематике» — модель vs измерено, предложение принимает аналитик', async () => {
+      await h.asUser('admin'); // port: FR-136 backend – back from the driver account
+      const a = all('nav a').find(x => x.textContent.includes('Покрытие связи')); ok(a, 'нет пункта меню'); a.click(); await sleep(700);
+      ok(await wait(() => q('[data-measured="URA-ATY"]')), 'нет предложения');
+      const row = q('[data-measured="URA-ATY"]'); ok(row.getAttribute('data-st') === 'proposed', row.getAttribute('data-st'));
+      ok(/Уральск – Атырау.*нет сети.*2G.*6.*предложение 2026-10/.test(row.textContent.replace(/\s+/g, ' ')), row.textContent);
+      q('[data-measured-accept="1"]').click(); ok(await wait(() => q('[data-measured="URA-ATY"][data-st="accepted"]')), 'не принято');
+      has('подтверждено (телематика)');
+      ok(await wait(() => q('[data-measured-line="URA-ATY"][data-cls="2g"]')), 'на карте нет измеренного участка');
+    });
+    t(MI, 'SMS водителю CHKT: срок подтверждения 15 мин виден в очереди', async () => {
+      const f = q('[data-sms-form]'); ok(f, 'нет формы SMS');
+      const sel = f.querySelector('[data-f="sms-code"]'); Object.getOwnPropertyDescriptor(W().HTMLSelectElement.prototype, 'value').set.call(sel, 'CHKT'); sel.dispatchEvent(new (W().Event)('change', { bubbles: true })); await sleep(150);
+      f.querySelector('[data-sms-send]').click(); ok(await wait(() => all('[data-sms-out]').some(r => r.textContent.includes('ждём подтверждение до'))), 'нет срока подтверждения');
+    });
+    t(MI, 'Отслеживание: своя ETA, история событий без персональных данных, температурный режим', async () => {
+      let token = null; try { token = (JSON.parse(localStorage.getItem('olymp-demo-state-v2') || '{}').orders || []).filter(o => o.trip_id).map(o => o.tracking_token).find(Boolean); } catch (e) { /* none */ }
+      if (h.BE()) token = ((await W().__OLYMP_DEMO_REQ('GET', '/api/orders?limit=200')).items || []).filter(o => o.trip_id).map(o => o.tracking_token).find(Boolean); // port: FR-136 backend – from the server
+      ok(token, 'нет ссылки отслеживания');
+      const f2 = await frame(fr.getAttribute('src') + '#/track/' + token, d => d.querySelector('[data-trk-events]'));
+      try {
+        const d = f2.contentDocument;
+        ok(d.querySelector('[data-trk-events] [data-trk-ev="created"]') && d.querySelector('[data-trk-ev="planned"]'), 'нет истории');
+        ok(d.querySelector('[data-trk-temp="ok"]') && d.body.textContent.includes('Температурный режим'), 'нет температурного режима');
+        const card = d.querySelector('.card').textContent; ok(!/\+7|V0\d\b|\d{3}\s?[A-Z]{2,3}\s?\d{2}/.test(card), 'персональные данные / госномер в отслеживании: ' + card.slice(0, 200));
+      } finally { f2.remove(); }
+    });
+    ['DE', 'EN'].forEach(code => t(MI, code + ': приложение водителя (шаг подписи) и «Измерено по телематике» без русского текста', async () => {
+      await h.asUser('driver.v01'); // port: FR-136 backend – the driver app as the driver account (FR-83)
+      let f2 = await frame(langUrl(code) + '#/s/driver?lang=' + code.toLowerCase(), d => d.querySelector('[data-phone]'));
+      try {
+        let d = f2.contentDocument; const fw = f2.contentWindow;
+        const tab = [...d.querySelectorAll('[data-dtab]')].find(b => /^(Stopp|Stop)$/.test(b.textContent.trim())); ok(tab, 'no stop tab'); tab.click(); await sleep(350);
+        const settle = async (pred) => { for (let i = 0; i < 40 && !pred(); i++) await sleep(150); };
+        const next = d.querySelector('[data-phone] [data-dnext]'); // stop done in an earlier run (shared demo state) → next stop
+        if (next) { next.click(); await settle(() => !d.querySelector('[data-phone] [data-dnext]')); }
+        for (let k = 0; k < 4 && !d.querySelector('[data-dsign]'); k++) {
+          const b = [...d.querySelectorAll('[data-phone] .ph-main')].find(x => !x.hasAttribute('data-dsign-ok')); if (!b) break;
+          const before = b.textContent; b.click(); await settle(() => d.querySelector('[data-dsign]') || ([...d.querySelectorAll('[data-phone] .ph-main')][0] || {}).textContent !== before);
+        }
+        ok(d.querySelector('[data-dsign]'), 'no signature pad');
+        ok(d.body.textContent.includes(code === 'DE' ? 'Name des Empfängers' : 'Consignee name'), 'no consignee label');
+        let bad = cyr(d); ok(!bad, code + ' driver: «' + bad + '»');
+        if (h.BE()) { f2.remove(); await h.asUser('admin'); f2 = await frame(langUrl(code) + '#/coverage?lang=' + code.toLowerCase(), x => x.querySelector('[data-sec="cov-measured"]')); d = f2.contentDocument; } // port: FR-136 backend – coverage as the office
+        else fw.location.hash = '#/coverage?lang=' + code.toLowerCase();
+        for (let k = 0; k < 40 && !d.querySelector('[data-sec="cov-measured"]'); k++) await sleep(150);
+        ok(d.querySelector('[data-sec="cov-measured"]') && d.body.textContent.includes(code === 'DE' ? 'Gemessen per Telematik' : 'Measured from telematics'), 'no measured section');
+        bad = cyr(d); ok(!bad, code + ' coverage: «' + bad + '»');
+      } finally { f2.remove(); }
+    }));
+    t(MI, 'Сброс демо после проверок доставки', async () => { await fresh(); ok(all('nav [data-nav]').length >= 17, 'демо не загрузилось'); });
+    return T;
+  };
+})();
+
+// ---- lane J: FR-85 gate, FR-114 ESUTD readiness, FR-116/125 cost ledger, FR-117 partner logger records. The browser demo
+// mirrors the server rules (demo/v5/costs.ts, partners.ts, driver.ts, mockApi.ts).
+(() => {
+  const baseBuild = Component.prototype.build;
+  Component.prototype.build = function (fr) {
+    const T = baseBuild.call(this, fr);
+    const h = this.helpers(fr), { D, O, all, nav, ok } = h;
+    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const q = sel => D().querySelector(sel);
+    const req = (m, p, b) => fr.contentWindow.__OLYMP_DEMO_REQ(m, p, b);
+    const rejects = async (p) => { try { await p; return null; } catch (e) { return e; } };
+    const goHash = async (hh, ms = 900) => { fr.contentWindow.location.hash = '#' + hh; await sleep(ms); };
+    const setVal = (el, v) => { const proto = el.tagName === 'TEXTAREA' ? fr.contentWindow.HTMLTextAreaElement.prototype : fr.contentWindow.HTMLInputElement.prototype;
+      Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, v); el.dispatchEvent(new fr.contentWindow.Event('input', { bubbles: true })); };
+    const btn = (root, text) => [...root.querySelectorAll('button')].find(b => b.textContent.trim() === text);
+    const frame = async (url, ready) => {
+      const f2 = document.createElement('iframe'); f2.style.cssText = 'position:fixed;left:-3000px;top:0;width:1400px;height:900px;border:0'; f2.src = url; document.body.appendChild(f2);
+      for (let k = 0; k < 80; k++) { try { if (ready(f2.contentDocument)) break; } catch (e) { /* loading */ } await sleep(200); }
+      await sleep(600); return f2;
+    };
+    const langUrl = code => fr.getAttribute('src').replace('.html', code === 'RU' ? '.html' : '-' + code.toLowerCase() + '.html');
+    const cyr = el => { const w = el.ownerDocument.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      let x; while ((x = w.nextNode())) { const m = x.textContent.match(/[А-Яа-яЁё]{3,}/); if (m) return m[0]; } return ''; };
+    const cTab = async (label) => { const b = all('[data-ctab]').find(x => x.textContent.trim() === label); if (!b) throw new Error('Нет вкладки ' + label); b.click(); await sleep(400); };
+    // the lane H block resets the demo at its end: set up through the demo API, then reload the page (state is kept)
+    const reload = async () => {
+      fr.src = fr.getAttribute('src'); await sleep(600);
+      for (let i = 0; i < 60; i++) { try { if (fr.contentWindow.__OLYMP && fr.contentDocument.querySelectorAll('nav [data-nav]').length > 10) break; } catch (e) { /* loading */ } await sleep(250); }
+      await sleep(400);
+    };
+    const act = (action, payload) => req('POST', '/api/v5/act', { action, payload, lang: 'ru' });
+
+    const MJ = 'Lane J · затраты, ЕСУТД, GDP';
+    // FR-136 (4): the group starts from the seed state of the cost approvals (no cascade from earlier groups)
+    Component.prototype.resetBefore = { ...(Component.prototype.resetBefore || {}), [MJ]: ['cAp', 'cApBy', 'cApSt', 'cEx'] };
+    t(MJ, 'FR-85: исполнение решения «свой / внешний» — при разнице > 50 % только после 2/2, внешний → заказ XO-…', async () => {
+      let e = await rejects(act('costs.execute', { id: 'OW-1', mode: 'external' }));
+      ok(e && e.status === 409 && /\(0\/2\)/.test(e.message), 'без подписей: ' + (e && e.status + ' ' + e.message));
+      const signAs = (u, i) => (h.BE() ? fr.contentWindow.__OLYMP_DEMO_REQ_AS(u, 'POST', '/api/v5/act', { action: 'costs.sign', payload: { id: 'OW-1', i }, lang: 'ru' }) : act('costs.sign', { id: 'OW-1', i })); // port: FR-136 backend – four-eyes
+      await signAs('head.logistics', 0);
+      e = await rejects(act('costs.execute', { id: 'OW-1', mode: 'external' }));
+      ok(e && e.status === 409 && /\(1\/2\)/.test(e.message), '1/2: ' + (e && e.status + ' ' + e.message));
+      await signAs('fin.controller', 1); // demo: one account plays both approver roles (the server needs 2 users)
+      await reload(); await nav('Затраты'); await cTab('Свой или внешний');
+      const done = all('[data-own]').find(r => r.textContent.includes('согласовано 2/2') && r.querySelector('[data-own-exec]'));
+      ok(done, 'нет согласованной перевозки с кнопками исполнения');
+      btn(done.querySelector('[data-own-exec]'), 'Исполнить: внешний перевозчик').click(); await sleep(500);
+      const id = done.getAttribute('data-own'), row = q('[data-own="' + id + '"]');
+      ok(/исполнено · заказ внешнему перевозчику XO-\d+/.test(row.textContent), row.textContent.slice(0, 200));
+      ok(!row.querySelector('[data-own-exec]'), 'повторное исполнение доступно');
+      const cheap = all('[data-own]').find(r => r.textContent.includes('решение диспетчера') && r.querySelector('[data-own-exec]'));
+      ok(cheap, 'нет перевозки ≤ 50 %'); btn(cheap.querySelector('[data-own-exec]'), 'Исполнить: свой рейс').click(); await sleep(500);
+      ok(q('[data-own="' + cheap.getAttribute('data-own') + '"]').textContent.includes('исполнено · свой рейс'), 'свой рейс не исполнен');
+    });
+    t(MJ, 'FR-125: заявка в сервис закрывается только с фактической стоимостью (демо-API как сервер: 422)', async () => {
+      const r = await act('partners.call', { trip: 'R-106', pid: 'PW-04' });
+      const tk = r.doc.tickets.find(k => k.st === 'open');
+      ok(tk, 'нет открытой заявки');
+      const e = await rejects(act('partners.closeTicket', { id: tk.id }));
+      ok(e && e.status === 422 && e.message === 'Укажите фактическую стоимость ремонта', 'без стоимости: ' + (e && e.status + ' ' + e.message));
+      await reload(); await nav('Партнёры'); await sleep(300);
+      const row = q('[data-ticket="' + tk.id + '"]'); ok(row && row.querySelector('[data-ticket-cost]'), 'нет поля стоимости');
+      setVal(row.querySelector('[data-ticket-cost]'), '97500'); await sleep(150);
+      btn(row, 'Закрыть заявку · акт работ').click(); await sleep(600);
+      ok(q('[data-ticket="' + tk.id + '"]').textContent.includes('факт 97 500 ₸'), q('[data-ticket="' + tk.id + '"]').textContent.slice(0, 200));
+    });
+    t(MJ, 'FR-125: «Затраты» — план / факт по ТС из журнала затрат, импорт выписки платных дорог без дублей', async () => {
+      await nav('Затраты'); await cTab('Сводка');
+      const box = q('[data-cost-actual]'); ok(box, 'нет блока «План / факт»');
+      ok(box.textContent.includes('План / факт по ТС') && box.querySelectorAll('[data-cost-act]').length >= 4, box.textContent.slice(0, 200));
+      const ta = box.querySelector('[data-toll-import] textarea'); ok(ta, 'нет импорта выписки');
+      setVal(ta, 'дата;ТС;сумма;референс\n03.10.2026;V03;1 250;KT-77\n04.10.2026;ZZ999;100;KT-78'); await sleep(150);
+      btn(box.querySelector('[data-toll-import]'), 'Импортировать').click(); await sleep(900);
+      ok(q('[data-cost-actual]').textContent.includes('Импортировано: 1 · повторы: 0 · ошибки: 1'), q('[data-cost-actual]').textContent.slice(-300));
+      const v3 = q('[data-cost-act="V03"]'); ok(v3 && v3.textContent.includes('1 250 ₸'), v3 && v3.textContent);
+      const again = await req('POST', '/api/costs/tolls', { csv: '03.10.2026;V03;1 250;KT-77' });
+      ok(again.imported === 0 && again.duplicates === 1, JSON.stringify(again));
+      const a = await req('GET', '/api/costs/actuals?month=2026-10');
+      ok(Math.round(a.total) === Math.round(Object.values(a.by_category).reduce((x, y) => x + y, 0)), 'итог ≠ сумме категорий');
+    });
+    t(MJ, 'FR-117: передача партнёру — логгер, температура и пломба на приёме и при ePOD записаны', async () => {
+      const ho = (await act('partners.handover', { trip: 'R-106', pid: 'PL-01', mode: 'full' })).doc.hos[0];
+      ok(ho && ho.st === 'done', 'передача Gold не выполнена');
+      const e = await rejects(act('partners.portal', { id: ho.id }));
+      ok(e && e.status === 409 && e.message.includes('ePOD партнёра не может быть окончательным'), 'без логгера: ' + (e && e.message));
+      await reload(); await nav('Партнёры'); await sleep(300);
+      const row = () => q('[data-ho="' + ho.id + '"]');
+      ok(row().querySelector('[data-ho-logger]'), 'нет полей логгера');
+      for (const lb of ['Принять груз', 'Отсканировать места', 'Загрузить ePOD']) { btn(row(), lb).click(); await sleep(450); }
+      ok(row().textContent.includes('ePOD партнёра загружен'), 'портал не завершён');
+      const r = (O().doc.hos || []).find(x => x.id === ho.id);
+      ok(r.lg && r.lg.pickup && r.lg.delivery && r.lg.pickup.logger && r.lg.delivery.seal, JSON.stringify(r.lg || {}));
+      const lg = q('[data-ho-lg="' + ho.id + '"]'); ok(lg && /приём: .+ °C · пломба .+доставка: /.test(lg.textContent), lg && lg.textContent);
+    });
+    t(MJ, 'FR-114: интеграции — сроки ЕСУТД 01.01.2027 / 01.06.2027 с обратным отсчётом и готовность по хабам', async () => {
+      await goHash('/integrations', 1500);
+      const p = q('[data-esutd-panel]'); ok(p, 'нет панели ЕСУТД');
+      ok(p.querySelector('[data-esutd-deadline="medcheck"]').textContent.includes('01.01.2027') && p.textContent.includes('осталось 87 дн.'), p.textContent.slice(0, 300));
+      ok(p.querySelector('[data-esutd-deadline="esutd_waybill"]').textContent.includes('01.06.2027'), 'нет 01.06.2027');
+      ok(p.querySelectorAll('[data-esutd-hub]').length >= 1 && /\d+ %/.test(p.querySelector('[data-esutd-hub]').textContent), 'нет готовности по хабам');
+      await goHash('/s/overview');
+    });
+    ['DE', 'EN'].forEach(code => t(MJ, code + ': план / факт, исполнение решений и логгер передачи без русского текста', async () => {
+      const f2 = await frame(langUrl(code) + '#/s/costs?lang=' + code.toLowerCase(), d => d.querySelector('[data-cost-actual]'));
+      try {
+        const d = f2.contentDocument;
+        let bad = cyr(d.querySelector('[data-cost-actual]')); ok(!bad, code + ' costs: «' + bad + '»');
+        ok(d.querySelector('[data-cost-actual]').textContent.includes(code === 'DE' ? 'Plan / Ist je Fahrzeug' : 'Plan / actual per vehicle'), 'heading');
+        const tabs = [...d.querySelectorAll('[data-ctab]')]; tabs[tabs.length - 2].click(); await sleep(500);
+        const own = [...d.querySelectorAll('[data-own]')].find(r => /ausgeführt|executed/.test(r.textContent)); ok(own, 'no executed decision shown');
+        bad = cyr(own); ok(!bad, code + ' own: «' + bad + '»');
+        f2.contentWindow.location.hash = '#/s/partners?lang=' + code.toLowerCase(); await sleep(1200);
+        const lg = d.querySelector('[data-ho-lg]'); ok(lg, 'no logger record');
+        bad = cyr(lg); ok(!bad, code + ' logger: «' + bad + '»');
+        ok(lg.textContent.includes(code === 'DE' ? 'Plombe' : 'seal'), lg.textContent);
+      } finally { f2.remove(); }
+    }));
+    return T;
+  };
+})();
+
+// ---- lane K: FR-118 … FR-124, FR-126, FR-127 – resources, staff, partners & planning on live data (availability
+// calendar, ticket drafts, data-based urgent trip U-<n>, controlled renewals with contract hash, measured SLA, fine
+// attribution at offence time, fine ledger + payroll export, notifications with ack, express deadline, tender leads).
+// The browser demo mirrors the server rules (demo/v5/*.ts, mockApi.ts lane K block).
+(() => {
+  const baseBuild = Component.prototype.build;
+  Component.prototype.build = function (fr) {
+    const T = baseBuild.call(this, fr);
+    const h = this.helpers(fr), { D, O, all, nav, has, ok } = h;
+    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const q = sel => D().querySelector(sel);
+    const req = (m, p, b) => fr.contentWindow.__OLYMP_DEMO_REQ(m, p, b);
+    const rejects = async (p) => { try { await p; return null; } catch (e) { return e; } };
+    const act = (action, payload, extra) => req('POST', '/api/v5/act', { action, payload, lang: 'ru', ...(extra || {}) });
+    const goHash = async (hh, ms = 900) => { fr.contentWindow.location.hash = '#' + hh; await sleep(ms); };
+    const btnT = (root, re) => [...root.querySelectorAll('button')].find(b => re.test(b.textContent.trim()));
+    const pRow = id => q('[data-partner="' + id + '"]');
+    const fineRow = k => q('[data-fine="' + k + '"]');
+    const frame = async (url, ready) => {
+      const f2 = document.createElement('iframe'); f2.style.cssText = 'position:fixed;left:-3000px;top:0;width:1400px;height:900px;border:0'; f2.src = url; document.body.appendChild(f2);
+      for (let k = 0; k < 80; k++) { try { if (ready(f2.contentDocument)) break; } catch (e) { /* loading */ } await sleep(200); }
+      await sleep(450); return f2;
+    };
+    const langUrl = code => fr.getAttribute('src').replace('.html', code === 'RU' ? '.html' : '-' + code.toLowerCase() + '.html');
+    const cyr = d => { const w = d.createTreeWalker(d.body, NodeFilter.SHOW_TEXT, { acceptNode: x => /^(SCRIPT|STYLE|TEMPLATE)$/.test(x.parentElement.tagName) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+      let x; while ((x = w.nextNode())) { const m = x.textContent.replace(/ШТ-\d+/g, '').match(/[А-Яа-яЁё]{3,}/); if (m) return m[0]; } return ''; };
+
+    const MK = 'FR-118…127 Ресурсы, персонал, партнёры';
+    // FR-136 (4): partners, fines, staff and express start from their seed state
+    Component.prototype.resetBefore = { ...(Component.prototype.resetBefore || {}), [MK]: ['pRenew', 'pRenewReq', 'pTasks', 'pUnblock', 'hos', 'capUsed', 'tickets', 'wsCalls',
+      'vehSt', 'fineImp', 'fineSt', 'fineLed', 'fineAttr', 'exAp', 'urg', 'urgV', 'booked'] };
+    t(MK, 'FR-121: продление договора — загрузка договора (SHA-256), ожидание второго согласования, затем 11.2027', async () => {
+      await nav('Партнёры');
+      const r = pRow('PW-04'); ok(r && r.textContent.includes('договор до 11.2026 · продлить'), 'нет напоминания');
+      btnT(r, /^Продлить договор$/).click(); await sleep(700);
+      if (h.BE()) { const inp = q('[data-renew-form="PW-04"] input[type="file"]'); ok(inp, 'нет формы договора'); const dt = new (h.W().DataTransfer)(); dt.items.add(new (h.W().File)([new TextEncoder().encode('%PDF-1.4\n% ui suite contract\n%%EOF\n')], 'dogovor-PW-04.pdf', { type: 'application/pdf' })); inp.files = dt.files; inp.dispatchEvent(new (h.W().Event)('change', { bubbles: true })); await sleep(900); } // port: FR-136 backend – the signed contract file
+      ok(pRow('PW-04').textContent.includes('продление до 11.2027') && pRow('PW-04').textContent.includes('ожидает второго согласования') && /SHA-256 [0-9a-f]{12}/.test(pRow('PW-04').textContent), pRow('PW-04').textContent.slice(0, 300));
+      ok(!O().doc.pRenew['PW-04'] && O().doc.pRenewReq['PW-04'].st === 'wait', 'продлено без второго согласования');
+      await h.asUser('dispatcher.ast', () => nav('Партнёры')); // port: FR-136 backend – approved by a second user (four-eyes)
+      btnT(pRow('PW-04'), /^Согласовать продление$/).click(); await sleep(600);
+      await h.asUser('admin', () => nav('Партнёры'));
+      ok(O().doc.pRenew['PW-04'] === '11.2027' && pRow('PW-04').textContent.includes('11.2027') && !pRow('PW-04').textContent.includes('ожидает второго'), pRow('PW-04').textContent.slice(0, 200));
+    });
+    t(MK, 'FR-121: демо-API как сервер — без договора 422, чужой номер документа 404, повтор 409', async () => {
+      let e = await rejects(act('partners.renew', { pid: 'PL-06', ins: '2027-12-31' }));
+      ok(e && (e.status === 422 || e.status === 409), 'без договора: ' + (e && e.status));
+      const up = await req('POST', '/api/v5/partners/PW-04/contract', { file_name: 'x.pdf', content_b64: 'JVBERi0xLjQKJSUlRU9GCg==' });
+      ok(/^[0-9a-f]{64}$/.test(up.sha256), JSON.stringify(up));
+      e = await rejects(req('POST', '/api/v5/partners/PW-04/contract', { file_name: 'x.exe', content_b64: 'TVpQAA==' }));
+      ok(e && e.status === 422, 'не PDF: ' + (e && e.status));
+      e = await rejects(act('partners.renew', { pid: 'PW-04', contract: up.id, ins: '2027-12-31' }));
+      ok(e && e.status === 409, 'не к сроку: ' + (e && e.status));
+    });
+    t(MK, 'FR-118: дефект в конце смены → один черновик заявки; вызов сервиса берёт черновик (одна заявка)', async () => {
+      const dact = (a, pl) => (h.BE() ? fr.contentWindow.__OLYMP_DEMO_REQ_AS('driver.v01', 'POST', '/api/v5/act', { action: a, payload: pl, lang: 'ru' }) : act(a, pl, { preview: true })); // port: FR-136 backend – the driver account
+      const r0 = await dact('driver.endShift', { trip: 'R-103', defect: true });
+      let e = await rejects(dact('driver.endShift', { trip: 'R-103', defect: true }));
+      ok(e && e.status === 409, 'смена закрыта дважды');
+      const state = await req('GET', '/api/v5/state');
+      const drafts = state.doc.tickets.filter(x => x.st === 'draft' && x.veh === 'V01');
+      ok(drafts.length === 1 && drafts[0].src === 'defect' && r0.version, JSON.stringify(drafts));
+      ok(!(state.doc.vehSt || {}).V01, 'черновик сразу ставит ТС в сервис');
+      await nav('Партнёры');
+      for (let i = 0; i < 30 && !q('[data-ticket="' + drafts[0].id + '"]'); i++) await sleep(300); // FR-131 polling picks the change up
+      const k = q('[data-ticket="' + drafts[0].id + '"]'); ok(k && k.textContent.includes('черновик из приложения водителя') && k.textContent.includes('Отклонить черновик'), k ? k.textContent : 'нет черновика');
+      const r = await act('partners.call', { trip: 'R-103', pid: 'PW-03' });
+      const v1 = r.doc.tickets.filter(x => x.veh === 'V01' && x.st !== 'closed');
+      ok(v1.length === 1 && v1[0].id === drafts[0].id && v1[0].st === 'open' && v1[0].pid === 'PW-03' && r.doc.wsCalls['PW-03'] === drafts[0].id, JSON.stringify(v1));
+      e = await rejects(act('partners.call', { trip: 'R-103', pid: 'PW-03' }));
+      ok(e && e.status === 409, 'вызов дважды по одной заявке');
+      await act('partners.closeTicket', { id: drafts[0].id, cost: 45000 });
+      const again = await act('partners.call', { trip: 'R-103', pid: 'PW-03' }); // FR-121: once per ticket – a new ticket after closing
+      ok(again.doc.tickets[0].pid === 'PW-03' && again.doc.tickets[0].id !== drafts[0].id, 'повторный вызов после закрытия');
+      await act('partners.closeTicket', { id: again.doc.tickets[0].id, cost: 45000 });
+    });
+    t(MK, 'FR-120: срочный рейс — занятость ТС из рейсов (без констант), нет ТС → субподряд', async () => {
+      await nav('Персонал');
+      ok(q('[data-urg-veh="V02"]').textContent.includes('закреплена за R-106 (08.10)'), q('[data-urg-veh="V02"]').textContent);
+      has('Нет свободной ТС с нужными параметрами');
+      const s = [...D().querySelectorAll('main .seg, main [role="radio"], main button')].find(b => b.textContent.trim() === 'Алматы'); s.click(); await sleep(450);
+      ok(q('[data-urg-veh="V03"]').textContent.includes('погрузка R-104'), q('[data-urg-veh="V03"]').textContent);
+      [...D().querySelectorAll('main button')].find(b => b.textContent.trim() === 'Астана').click(); await sleep(300);
+    });
+    t(MK, 'FR-120: свободная ТС в хабе → назначение создаёт рейс U-1, он виден в «Диспетчере»', async () => {
+      const hub = (await req('GET', '/api/hubs')).find(x => /Астана/.test(x.city) || x.code === 'AST');
+      await req('POST', '/api/vehicles', { code: 'K77', plate: 'K 777 AST', model: 'Test reefer', hub_id: hub.id, capacity_kg: 6000, pallets: 14, temp_classes: ['cold', 'ambient'] });
+      fr.src = fr.getAttribute('src'); await sleep(600); // the live view (/api/v5/ops) is loaded on start
+      for (let i = 0; i < 60; i++) { try { if (fr.contentWindow.__OLYMP && fr.contentDocument.querySelectorAll('nav [data-nav]').length > 10) break; } catch (e) { /* loading */ } await sleep(250); }
+      await sleep(400); await nav('Персонал'); await sleep(400);
+      const b = [...D().querySelectorAll('main button')].find(x => x.textContent.startsWith('Назначить: '));
+      ok(b && b.textContent.includes('K77'), b ? b.textContent : 'нет кнопки назначения');
+      b.click(); await sleep(800);
+      const urg = O().doc.urg, key = Object.keys(urg)[0];
+      ok(key && urg[key] === 'U-1' && O().doc.urgV[key] === 'K77', JSON.stringify(urg));
+      ok(q('[data-staff="' + key + '"]').textContent.includes('Срочный рейс U-1'), 'нет статуса в таблице');
+      await nav('Диспетчер'); has('U-1');
+    });
+    t(MK, 'FR-122: штраф по ТС без назначения в момент нарушения — «не определён», уведомление 409', async () => {
+      const r = await act('inbox.add', { kind: 'traffic_fine', title: 'SMS 1414: постановление по V02', veh: 'V02', data: { date: '05.10.2026', time: '03:10', amount: 7000, offence: 'speed20' } });
+      const f = r.doc.fineInbox[0]; ok(f.att && f.att.un === true, JSON.stringify(f.att));
+      await nav('Отчёты');
+      for (let i = 0; i < 30 && !fineRow(f.k); i++) await sleep(300); // FR-131 polling picks the change up
+      const row = fineRow(f.k); ok(row && row.textContent.includes('не определён') && row.textContent.includes('Водитель не определён'), row ? row.textContent : 'нет строки');
+      row.click(); await sleep(400); ok(q('[data-fine-attr]'), 'нет формы привязки');
+      const e = await rejects(act('reports.notify', { id: f.k })); ok(e && e.status === 409, 'уведомление без водителя: ' + (e && e.status));
+    });
+    t(MK, 'FR-123/124: оплата → запрос возмещения → подтверждение водителем → удержание → выгрузка в зарплату (один раз)', async () => {
+      await nav('Отчёты'); await h.click('Импорт постановлений');
+      ok(q('[data-fine-rem]') && [...all('[data-fine-rem]')].some(x => x.textContent.includes('ШТ-1024') && x.textContent.includes('напоминание за 2 дня')), 'текст «напоминание отправлено» без уведомления');
+      fineRow('1024').click(); await sleep(400);
+      ok(!q('[data-fine-deduct]'), 'удержание до подтверждения');
+      await h.click('Оплатить со скидкой 50 %'); await sleep(200);
+      ok(q('[data-fine-paid]').textContent.includes('7 375 ₸'), q('[data-fine-paid]') ? q('[data-fine-paid]').textContent : 'нет оплаты');
+      q('[data-fine-recharge]').click(); await sleep(600);
+      ok(O().doc.fineLed['1024'].st === 'recharge', 'нет запроса возмещения');
+      await nav('Приложение водителя'); await sleep(300);
+      const tab = all('[data-dtab]').find(x => x.textContent.trim() === 'Ещё'); ok(tab, 'нет вкладки «Ещё»'); tab.click(); await sleep(400);
+      const ack = q('[data-dfine-ok="1024"]'); ok(ack, 'нет сообщения в приложении водителя');
+      ack.click(); await sleep(600);
+      const led = h.BE() ? (await fr.contentWindow.__OLYMP_DEMO_REQ_AS('admin', 'GET', '/api/v5/state')).doc.fineLed : O().doc.fineLed; // port: FR-136 backend – the driver's state has no fine ledger (FR-81)
+      ok(led['1024'].st === 'ack', 'водитель не подтвердил');
+      await nav('Отчёты'); fineRow('1024').click(); await sleep(400);
+      q('[data-fine-deduct]').click(); await sleep(600);
+      ok(fineRow('1024').textContent.includes('Удержано · ведомость'), fineRow('1024').textContent);
+      const pb = btnT(q('[data-payroll]'), /^Выгрузка удержаний в зарплату/); ok(pb && /· 1$/.test(pb.textContent.trim()), pb ? pb.textContent : 'нет кнопки выгрузки');
+      pb.click(); await sleep(600);
+      const id = O().doc.fineLed['1024'].exp; ok(id === 1, 'нет номера выгрузки');
+      const csv = await req('GET', '/api/v5/fines/payroll/1.csv'); ok(csv.includes('D2;ШТ-1024;7375;') && !csv.includes('Нурланов'), csv);
+      const e = await rejects(act('reports.payrollExport', { period: O().doc.fineLed['1024'].period })); ok(e && e.status === 409, 'выгрузка дважды');
+    });
+    t(MK, 'FR-124: уведомление водителю видно только ему, подтверждение с временем', async () => {
+      await act('reports.notify', { id: '1018' }).catch(() => null);
+      const r = await rejects(act('reports.notify', { id: '1021' })); ok(r && r.status === 409, 'D1 без учётной записи приложения');
+      const mine = (await req('GET', '/api/notifications')).items; ok(!mine.some(n => n.kind === 'fine'), 'админ видит личные сообщения водителя');
+      const n = h.BE() ? (await fr.contentWindow.__OLYMP_DEMO_REQ_AS('driver.v01', 'GET', '/api/v5/res')).NOTIF.find(x => x.kind === 'fine_recharge') // port: FR-136 backend – the driver's own notifications (no admin preview NOTIF_DRV)
+        : (await req('GET', '/api/v5/res')).NOTIF_DRV.find(x => x.kind === 'fine_recharge');
+      ok(n && n.ack, 'подтверждение без времени: ' + JSON.stringify(n));
+    });
+    t(MK, 'FR-126: экспресс — срок подписи, уведомления подписантам, 3/3 создаёт заказ', async () => {
+      await nav('Исходные данные'); [...D().querySelectorAll('[data-bltab]')].find(b => b.textContent.includes('Экспресс')).click(); await sleep(400);
+      // port: FR-136 backend – one approver per slot (ceo · head.analytics · head.logistics), notifications per approver
+      const BLU = ['ceo', 'head.analytics', 'head.logistics'], sx = (id, i) => (h.BE() ? fr.contentWindow.__OLYMP_DEMO_REQ_AS(BLU[i], 'POST', '/api/v5/act', { action: 'baseline.exSign', payload: { id, i }, lang: 'ru' }) : act('baseline.exSign', { id, i }));
+      const r = await sx('EX-0313', 0);
+      ok(r.doc.exAp['EX-0313'].due, 'нет срока');
+      const ns = h.BE() ? [].concat(...await Promise.all(BLU.slice(1).map(async u => (await fr.contentWindow.__OLYMP_DEMO_REQ_AS(u, 'GET', '/api/notifications')).items))).filter(n => n.ref === 'express:EX-0313')
+        : (await req('GET', '/api/notifications')).items.filter(n => n.ref === 'express:EX-0313');
+      ok(ns.length === 2 && ns.every(n => n.kind === 'express'), 'уведомления: ' + ns.length);
+      await sx('EX-0311', 0); await sx('EX-0311', 1);
+      const r3 = await sx('EX-0311', 2);
+      ok(/^ORD-26-\d{6}$/.test(r3.doc.exAp['EX-0311'].order || ''), JSON.stringify(r3.doc.exAp['EX-0311']));
+      const ords = await req('GET', '/api/orders?limit=200'); ok((ords.items || ords).filter(o => o.express_ref === 'EX-0311').length === 1, 'не один заказ');
+      for (let i = 0; i < 30 && !D().body.textContent.includes('1 / 3 подписи · до '); i++) await sleep(300); // FR-131 polling picks the change up
+      has('1 / 3 подписи · до ');
+    });
+    t(MK, 'FR-127: тендер во «Входящих» → лид CRM с № и сроком; второй лид с тем же БИН → тот же клиент', async () => {
+      const r = await act('inbox.add', { kind: 'tender', title: 'Тендер СК-Фармация: доставка вакцин', lvl: 1, data: { bin: '990140000555', deadline: '25.11.2026', tender_no: 'SKF-77' } });
+      const rec = r.doc.inbox[0]; ok(rec.to === 'crm' && /^L-\d+$/.test(rec.link || ''), JSON.stringify(rec));
+      await goHash('/crm'); await sleep(300);
+      ok([...D().querySelectorAll('[data-lead-tender]')].some(x => x.textContent.includes('SKF-77')), 'нет лида с № тендера');
+      const tasks = await req('GET', '/api/tasks?mine=false'); ok(tasks.some(x => x.title.startsWith('Подготовить заявку: тендер SKF-77') && x.due_date === '2026-11-22'), 'нет задачи «подготовить заявку»');
+      const a = await req('POST', '/api/leads', { company: 'BIN Test A', contact_name: 'Закупки', source: 'tender', bin: '990140000777', deadline: '2026-12-01', tender_no: 'T-1' });
+      const b = await req('POST', '/api/leads', { company: 'BIN Test B', contact_name: 'Закупки', source: 'tender', bin: '990140000777' });
+      const c1 = await req('POST', '/api/leads/' + a.id + '/convert'), c2 = await req('POST', '/api/leads/' + b.id + '/convert');
+      ok(!c1.matched && c2.matched && c1.customer.id === c2.customer.id && c2.onboarding.suggested_username, JSON.stringify(c2.onboarding));
+    });
+    ['DE', 'EN'].forEach(code => t(MK, code + ': «Партнёры», «Персонал», «Отчёты», «Планирование» без русского текста (новые элементы)', async () => {
+      const f2 = await frame(langUrl(code) + '#/s/partners?lang=' + code.toLowerCase(), d => d.querySelectorAll('[data-partner]').length > 5);
+      try {
+        const d = f2.contentDocument;
+        let bad = cyr(d); ok(!bad, code + ' partners: «' + bad + '»');
+        for (const s of ['staff', 'reports', 'planning', 'driver']) {
+          f2.contentWindow.location.hash = '#/s/' + s + '?lang=' + code.toLowerCase(); await sleep(900);
+          bad = cyr(d); ok(!bad, code + ' ' + s + ': «' + bad + '»');
+        }
+      } finally { f2.remove(); }
+    }));
+    t(MK, 'Сброс демо после проверок ресурсов и персонала', async () => {
+      try { localStorage.removeItem('olymp-demo-state-v2'); } catch (e) { /* storage unavailable */ }
+      fr.src = fr.getAttribute('src'); await sleep(600);
+      for (let i = 0; i < 60; i++) { try { if (fr.contentWindow.__OLYMP && fr.contentDocument.querySelectorAll('nav [data-nav]').length > 10) break; } catch (e) { /* loading */ } await sleep(250); }
+      await sleep(400); ok(all('nav [data-nav]').length >= 17, 'демо не загрузилось');
+    });
+    return T;
+  };
+})();
+
+// Lane L: FR-132 one navigation model · FR-137 access matrix from the backend · FR-135 locations, Kazakh UI,
+// system texts as message keys (demo build).
+(() => {
+  const baseBuild = Component.prototype.build;
+  Component.prototype.build = function (fr) {
+    const T = baseBuild.call(this, fr);
+    const h = this.helpers(fr), { D, W, all, nav, ok } = h;
+    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const q = sel => D().querySelector(sel);
+    const goHash = async (hh, ms = 900) => { W().location.hash = '#' + hh; await sleep(ms); };
+    const setVal = async (sel, v, doc) => { const e = (doc || D()).querySelector(sel); if (!e) throw new Error('Нет поля ' + sel); const W2 = e.ownerDocument.defaultView;
+      Object.getOwnPropertyDescriptor(e.tagName === 'SELECT' ? W2.HTMLSelectElement.prototype : W2.HTMLInputElement.prototype, 'value').set.call(e, v);
+      e.dispatchEvent(new W2.Event(e.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true })); await sleep(300); };
+    const frame = async (url, ready) => {
+      const f2 = document.createElement('iframe'); f2.style.cssText = 'position:fixed;left:-3000px;top:0;width:1400px;height:900px;border:0'; f2.src = url; document.body.appendChild(f2);
+      for (let k = 0; k < 80; k++) { try { if (ready(f2.contentDocument)) break; } catch (e) { /* loading */ } await sleep(200); }
+      await sleep(450); return f2;
+    };
+    const langUrl = code => fr.getAttribute('src').replace('.html', code === 'RU' ? '.html' : '-' + code.toLowerCase() + '.html');
+    const sideLabels = d => [...d.querySelectorAll('nav a[href]')].filter(a => !a.hasAttribute('data-bnav'))
+      .map(a => a.textContent.replace(/^\s*(\d\d|·|\?)\s*/, '').replace(/\d+\s*$/, '').trim());
+    const dupes = ls => ls.filter((x, i) => ls.findIndex(y => y.toLowerCase() === x.toLowerCase()) !== i);
+    const waitNav = async (d, n = 10) => { for (let i = 0; i < 60; i++) { try { if (d().querySelectorAll('nav [data-nav]').length >= n) break; } catch (e) { /* loading */ } await sleep(200); } await sleep(300); };
+    const asRole = async r => { await setVal('.demo-role select', r); await sleep(900);
+      for (let i = 0; i < 60; i++) { try { if (D().querySelector('nav a')) break; } catch (e) { /* loading */ } await sleep(200); } await sleep(300); };
+
+    const MN = 'FR-132 Одна навигация';
+    t(MN, 'RU: в боковом меню нет двух пунктов с одинаковым названием; группа 2 без «Диспетчер / Термостатус / Автопарк / Сводка по рейсам»', async () => {
+      await goHash('/s/overview', 600);
+      const ls = sideLabels(D()); ok(!dupes(ls).length, 'повторы: ' + dupes(ls).join(', '));
+      const rec = all('nav a[href]').filter(a => !a.hasAttribute('data-nav') && !a.hasAttribute('data-bnav')).map(a => a.getAttribute('href').replace(/^#/, ''));
+      ['/dispatch', '/temperature', '/fleet', '/summary'].forEach(r => ok(!rec.includes(r), 'в меню осталось ' + r));
+      ok(all('nav [data-nav]').length === 17, 'экранов: ' + all('nav [data-nav]').length);
+    });
+    ['DE', 'EN'].forEach(code => t(MN, code + ': no duplicate sidebar labels', async () => {
+      const f2 = await frame(langUrl(code) + '#/s/overview?lang=' + code.toLowerCase(), d => d.querySelectorAll('nav [data-nav]').length === 17);
+      try { const ls = sideLabels(f2.contentDocument); ok(ls.length > 25, 'items: ' + ls.length); ok(!dupes(ls).length, code + ' duplicates: ' + dupes(ls).join(', ')); } finally { f2.remove(); }
+    }));
+    t(MN, 'Номера 01–17 уникальны и совпадают в меню, в заголовке экрана (eyebrow) и в справке', async () => {
+      const items = all('nav [data-nav]').map(a => [a.getAttribute('data-nav'), a.querySelector('.nav-no').textContent.trim()]);
+      ok(items.map(x => x[1]).join(',') === Array.from({ length: 17 }, (_, i) => String(i + 1).padStart(2, '0')).join(','), 'номера: ' + items.map(x => x[1]).join(','));
+      for (const [k, no] of [items[3], items[4], items[10], items[11], items[15], items[16]]) {
+        await goHash('/s/' + k, 500); const eb = q('header .eyebrow').textContent.trim(); ok(eb.startsWith(no + ' · '), k + ': eyebrow «' + eb + '» ≠ ' + no);
+      }
+      await goHash('/help', 700);
+      items.forEach(([k, no]) => { const b = q('[data-help-article="' + k + '"] .help-badge'); ok(b && b.textContent === no, k + ': справка ' + (b ? b.textContent : 'нет') + ' ≠ ' + no); });
+    });
+    t(MN, 'Старые адреса /dispatch, /temperature, /fleet, /summary ведут на вкладки экранов 02 / 05 / 10 и на «Обзор»', async () => {
+      for (const [from, to, sel] of [['/dispatch', '/s/dispatch/plan', '[data-screen-tab="dispatch/plan"]'], ['/temperature', '/s/thermo/journal', '[data-screen-tab="thermo/journal"]'],
+        ['/fleet', '/s/fleet/register', '[data-screen-tab="fleet/register"]'], ['/summary', '/s/overview', 'section[data-screen="overview"]']]) {
+        await goHash(from, 900); ok(W().location.hash.startsWith('#' + to), from + ' → ' + W().location.hash); ok(q(sel), from + ': нет ' + sel);
+      }
+    });
+    t(MN, 'Вкладки: «Реестр ТС» на экране «Автопарк» — один заголовок h1, номер 10, кнопка «+ Транспортное средство»', async () => {
+      await nav('Автопарк'); const tabs = all('[data-subtabs="fleet"] a').map(a => a.textContent.trim()); ok(tabs.join('|') === 'Автопарк|Реестр ТС', tabs.join('|'));
+      all('[data-subtabs="fleet"] a')[1].click(); await sleep(700);
+      ok(all('h1').length === 1 && q('h1').textContent === 'Автопарк', 'h1: ' + all('h1').map(x => x.textContent).join(' / '));
+      ok(q('header .eyebrow').textContent.startsWith('10 · '), 'eyebrow'); ok(q('[data-veh-new]'), 'нет кнопки новой машины'); ok(q('main table'), 'нет таблицы реестра');
+      ok(q('nav [data-nav="fleet"]').classList.contains('on'), 'пункт меню не подсвечен на вкладке');
+      all('[data-subtabs="fleet"] a')[0].click(); await sleep(600); ok(q('section[data-screen="fleet"]'), 'назад на экран');
+      await nav('Термостатус'); ok(all('[data-subtabs="thermo"] a').map(a => a.textContent.trim()).join('|') === 'Термостатус|Журнал температур', 'вкладки 05');
+      await nav('Диспетчер'); ok(all('[data-subtabs="dispatch"] a').map(a => a.textContent.trim()).join('|') === 'Диспетчер|Планирование рейсов', 'вкладки 02');
+    });
+
+    const MA = 'FR-137 Права из backend';
+    t(MA, 'Матрица ролей и прав в справке = rbac.py (35 прав, администратор 32)', async () => {
+      await goHash('/help', 700); const m = q('[data-help-matrix]'); ok(m && m.querySelectorAll('[data-perm]').length === 35, 'прав: ' + (m ? m.querySelectorAll('[data-perm]').length : 0));
+      ok(m.querySelector('[data-perm="trips:override_release"]') && m.querySelector('[data-perm="trips:override_load"]'), 'нет прав override');
+    });
+    t(MA, '«Кто может открыть»: Диспетчер (02) — без роли «Водитель»; Приложение водителя (13) — с ней', async () => {
+      const acc = k => q('[data-help-article="' + k + '"] .help-access').textContent;
+      ok(!acc('dispatch').includes('Водитель'), 'диспетчер: ' + acc('dispatch')); ok(acc('driver').includes('Водитель'), 'водитель: ' + acc('driver'));
+      ok(acc('r-fleet').includes('Финансы') && !acc('r-dispatch').includes('Склад'), 'вкладки: ' + acc('r-fleet') + ' / ' + acc('r-dispatch'));
+    });
+    t(MA, 'Водитель видит ровно «Приложение водителя» и «Покрытие связи»; другие экраны недоступны', async () => {
+      await asRole('driver.v01');
+      try {
+        const scr = all('nav [data-nav]').map(a => a.getAttribute('data-nav')); ok(scr.join(',') === 'driver', 'экраны: ' + scr.join(','));
+        const pages = all('nav a[href]').filter(a => !a.hasAttribute('data-nav') && !a.hasAttribute('data-bnav') && !a.hasAttribute('data-nav-help')).map(a => a.getAttribute('href').replace(/^#/, ''));
+        ok(pages.join(',') === '/coverage', 'страницы: ' + pages.join(','));
+        for (const r of ['/s/dispatch', '/s/docs', '/s/weather', '/s/partners', '/trips', '/alarms']) { await goHash(r, 600); ok(!W().location.hash.startsWith('#' + r), r + ' открылся у водителя'); }
+        await goHash('/s/driver', 700); ok(q('section[data-screen="driver"]'), 'приложение водителя не открылось');
+      } finally { await asRole('admin'); await waitNav(D, 17); await goHash('/s/overview', 500); }
+    });
+
+
+    const ML5 = 'FR-135 Справочник мест, казахский, системные тексты';
+    const req = (m, p, b) => W().__OLYMP_DEMO_REQ(m, p, b);
+    const act = (action, payload) => req('POST', '/api/v5/act', { action, payload, lang: 'ru' });
+    const cyrD = d => { const w = d.createTreeWalker(d.body, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, { acceptNode: x => (x.nodeType === 1 && /^(SCRIPT|STYLE|TEMPLATE|NOSCRIPT)$/.test(x.tagName)) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+      for (let x = w.nextNode(); x; x = w.nextNode()) {
+        if (x.nodeType === 3) { const m = x.nodeValue.match(/[Ѐ-ӿ]{2,}/); if (m) return x.nodeValue.trim().slice(0, 80); }
+        else for (const a of ['placeholder', 'title', 'aria-label', 'alt']) { const v = x.getAttribute(a); if (v && /[Ѐ-ӿ]{2,}/.test(v)) return '@' + a + ' ' + v.slice(0, 80); }
+      } return ''; };
+    t(ML5, 'Справочник мест: LOC с id KZ-…, названия ru/kk/de/en, КАТО, координаты, хаб; прогноз WX по id', async () => {
+      const o = W().__OLYMP, ast = (o.LOC || []).find(l => l.id === 'KZ-AST'), kar = (o.LOC || []).find(l => l.id === 'KZ-KAR');
+      ok(ast && ast.ru === 'Астана' && ast.kk === 'Астана' && ast.de === 'Astana' && ast.kato === '710000000' && ast.hub === 'ast' && ast.lat > 51, JSON.stringify(ast));
+      ok(kar && kar.kk === 'Қарағанды' && kar.aliases.includes('Karagandy'), JSON.stringify(kar));
+      ok(Object.keys(o.WX).every(k => /^KZ-[A-Z]{3}$/.test(k)) && o.WX['KZ-KOS'].length === 7, 'WX: ' + Object.keys(o.WX).slice(0, 3).join(','));
+      ok(o.CITY.every(c => /^KZ-/.test(c[5])), 'CITY без id');
+    });
+    t(ML5, 'Входящие: «Қарағанды» и «Karaganda» маршрутизируются как «Караганда» (city_id KZ-KAR)', async () => {
+      for (const c of ['Қарағанды', 'Karaganda']) {
+        const r = await act('inbox.add', { kind: 'road_closure', source: 'police_manual', title: 'Проверка места ' + c, city: c });
+        const m = r.doc.roadMsg.find(x => x.title === 'Проверка места ' + c) || r.doc.roadMsg[0];
+        ok(m && m.city === 'Караганда', c + ' → ' + (m && m.city));
+        const rec = r.doc.inbox.find(x => x.title === 'Проверка места ' + c);
+        ok(rec && rec.city_id === 'KZ-KAR' && rec.to === 'weather', JSON.stringify(rec && { city: rec.city, id: rec.city_id, to: rec.to }));
+      }
+    });
+    ['DE', 'EN'].forEach(code => t(ML5, code + ': входящее сообщение на русском и запись журнала из RU-сессии — без кириллицы, оригинал при наведении', async () => {
+      await act('inbox.add', { kind: 'road_closure', source: 'police_manual', title: 'ДТП на трассе, объезд через Темиртау', city: 'Караганда' });
+      const f2 = await frame(langUrl(code) + '#/inbox?lang=' + code.toLowerCase(), d => d.querySelectorAll('[data-inbox]').length > 0);
+      try {
+        const d = f2.contentDocument, row = [...d.querySelectorAll('[data-inbox]')].find(r => r.querySelector('[data-orig="ДТП на трассе, объезд через Темиртау"]'));
+        ok(row, 'нет строки с оригиналом в data-orig');
+        ok(/DTP na trasse/.test(row.textContent), row.textContent.slice(0, 120));
+        let bad = cyrD(d); ok(!bad, code + ' /inbox: «' + bad + '»');
+        f2.contentWindow.location.hash = '#/s/security?lang=' + code.toLowerCase(); await sleep(1000);
+        const log = d.querySelector('[data-log]'); ok(log, 'нет журнала');
+        ok(log.textContent.includes(code === 'DE' ? 'Eingang · IN-' : 'Inbox · IN-') && log.textContent.includes(code === 'DE' ? 'Straßensperrung' : 'road closure'), log.textContent.slice(0, 160));
+        ok(log.textContent.includes(code === 'DE' ? 'System · Vorfall INC-0405 erstellt (ADR)' : 'System · incident INC-0405 created (ADR)') || !log.textContent.includes('INC-0405'), 'начальная запись не переведена');
+        bad = cyrD(d); ok(!bad, code + ' security: «' + bad + '»');
+      } finally { f2.remove(); }
+    }));
+    t(ML5, 'DE: защитная транслитерация DOM отключена — новый кириллический узел не меняется (системные тексты переводятся явно)', async () => {
+      const f2 = await frame(langUrl('DE') + '#/s/overview?lang=de', d => d.querySelectorAll('nav [data-nav]').length === 17);
+      try {
+        const d = f2.contentDocument, p = d.createElement('p'); p.textContent = 'Проверка сети'; d.querySelector('main').appendChild(p); await sleep(400);
+        ok(p.textContent === 'Проверка сети', 'узел транслитерирован: ' + p.textContent);
+        p.remove(); ok(!cyrD(d), 'кириллица на DE-экране: ' + cyrD(d));
+      } finally { f2.remove(); }
+    });
+    t(ML5, 'KK: переключатель языка, меню и «Обзор» на казахском, недостающие тексты — на русском', async () => {
+      const kk = all('.lang-row [role="button"]').find(b => b.textContent.trim() === 'KK'); ok(kk, 'нет кнопки KK'); kk.click(); await sleep(900);
+      try {
+        await goHash('/s/overview', 700);
+        ok(q('html').getAttribute('lang') === 'kk', 'lang=' + q('html').getAttribute('lang'));
+        ok(q('nav [data-nav="overview"]').textContent.includes('Шолу') && q('nav [data-nav="driver"]').textContent.includes('Жүргізуші қолданбасы'), q('nav [data-nav="overview"]').textContent);
+        ok(q('h1').textContent === 'Шолу', 'h1 ' + q('h1').textContent);
+        ok(all('nav a').some(a => a.textContent.includes('Кіріс хабарлар')), 'группа 2 не на казахском');
+        ok(D().body.textContent.includes('Нақты уақыттағы рейстер'), 'Обзор не на казахском');
+        await goHash('/s/costs', 700); ok(q('h1').textContent === 'Шығындар', 'h1 ' + q('h1').textContent);
+        ok(/[А-Яа-я]/.test(q('main').textContent), 'нет русского фолбэка');
+      } finally {
+        const ru = all('.lang-row [role="button"]').find(b => b.textContent.trim() === 'RU'); ru.click(); await sleep(900); await goHash('/s/overview', 600);
+      }
+      ok(q('h1').textContent === 'Обзор', 'не вернулся RU');
+    });
+
     return T;
   };
 })();
