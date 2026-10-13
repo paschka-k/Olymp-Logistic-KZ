@@ -3444,6 +3444,115 @@ class Component extends DCLogic {
     return T;
   };
 })();
+
+// FR-149: contracts and e-signature – portal (open text, hash, NCALayer not running, demo signature, booking on account),
+// staff (CRM → Customers → Contracts: generate from a template version, send, void, audit without names), DE / EN.
+(() => {
+  const baseBuild = Component.prototype.build;
+  Component.prototype.build = function (fr) {
+    const T = baseBuild.call(this, fr);
+    const h = this.helpers(fr), { D, W, all, ok } = h;
+    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const q = sel => D().querySelector(sel);
+    const waitFor = async (fn, n = 40) => { for (let i = 0; i < n; i++) { try { const v = fn(); if (v) return v; } catch (e) { /* not yet */ } await sleep(150); } return null; };
+    const setSel = async (sel, v, doc) => { const d = doc || D(), s = d.querySelector(sel); if (!s) throw new Error('Нет поля ' + sel); const set = Object.getOwnPropertyDescriptor(d.defaultView.HTMLSelectElement.prototype, 'value').set; set.call(s, v); s.dispatchEvent(new (d.defaultView.Event)('change', { bubbles: true })); await sleep(900); };
+    const setIn = (el, v) => { const set = Object.getOwnPropertyDescriptor(el.ownerDocument.defaultView.HTMLInputElement.prototype, 'value').set; set.call(el, v); el.dispatchEvent(new (el.ownerDocument.defaultView.Event)('input', { bubbles: true })); el.dispatchEvent(new (el.ownerDocument.defaultView.Event)('change', { bubbles: true })); };
+    const become = async (u) => { if (h.BE()) { await h.asUser(u); } else { await setSel('.demo-role select', u); } for (let i = 0; i < 60; i++) { try { if (D().querySelector('nav a') || D().querySelector('[data-page]')) break; } catch (e) { /* loading */ } await sleep(200); } };
+    const req = async (m, p, b) => { try { return await W().__OLYMP_DEMO_REQ(m, p, b); } catch (e) { return { error: String(e && e.message || e), status: e && e.status, detail: e && e.detail }; } };
+    const reqAs = async (u, m, p, b) => { try { return await W().__OLYMP_DEMO_REQ_AS(u, m, p, b); } catch (e) { return { error: String(e && e.message || e), status: e && e.status }; } };
+    const bookBody = { destination: { city_id: 'KZ-TAR', street: 'улица Абая', house: '10' }, pickup: { city_id: 'KZ-ALA', street: 'улица Абая', house: '5' }, temp_class: 'cold', pallets: 1, weight_kg: 100, goods: ['ivd'], lang: 'ru' };
+    const bookOnAccount = async () => {
+      const av = await req('POST', '/api/portal/availability', bookBody); if (av.error) return av;
+      const s = av.slots.find(x => x.available); if (!s) return { error: 'no slot', status: 0 };
+      return req('POST', '/api/portal/bookings', { ...bookBody, schedule_id: s.schedule_id, departure_date: s.date, payment: 'on_account' });
+    };
+    const cyrIn = el => { const w = el.ownerDocument.createTreeWalker(el, NodeFilter.SHOW_TEXT); let x; while ((x = w.nextNode())) { const m = x.textContent.match(/[А-Яа-яЁё]{2,}/); if (m) return m[0]; } return ''; };
+    const M = 'Договоры и ЭЦП · FR-149';
+    const CT = 'CT-26-000001';
+    t(M, 'Портал: раздел «Договоры» в «Мои бронирования» — отправленный рамочный договор, нет действующего, текст и хеш SHA-256', async () => {
+      await become('kdl.portal'); W().location.hash = '#/my-bookings'; await sleep(900);
+      const sec = await waitFor(() => q('[data-portal-contracts] [data-ct-table]')); ok(sec, 'нет раздела договоров');
+      const row = q('[data-ct-row="' + CT + '"]'); ok(row && row.getAttribute('data-ct-status') === 'sent' && /Отправлен клиенту/.test(row.textContent), 'договор ' + CT + ' не в статусе «отправлен»: ' + (row && row.textContent));
+      ok(q('[data-ct-framework=""]') && /Нет действующего рамочного договора/.test(q('[data-ct-framework=""]').textContent), 'нет пометки «нет действующего договора»');
+      const hash = row.querySelector('[data-ct-hash]').getAttribute('data-ct-hash'); ok(/^[0-9a-f]{64}$/.test(hash), 'хеш не SHA-256: ' + hash);
+      q('[data-ct-open="' + CT + '"]').click(); const sheet = await waitFor(() => q('[data-contract-sheet="' + CT + '"]')); ok(sheet, 'текст договора не открылся');
+      ok(/Рамочный договор № CT-26-000001/.test(sheet.textContent) && /KDL Olymp/.test(sheet.textContent) && /БИН 000000000001/.test(sheet.textContent), 'в тексте нет данных компании');
+      ok(!/Отдел закупок/.test(sheet.textContent), 'контактное лицо попало в договор');
+      ok(sheet.querySelector('[data-ct-hash]').getAttribute('data-ct-hash') === hash && sheet.querySelector('[data-ct-print]'), 'хеш в карточке отличается / нет печати');
+      q('[data-ct-close]').click(); await sleep(300); ok(!q('[data-contract-sheet]'), 'лист не закрылся');
+    });
+    t(M, 'Бронирование «в кредит» без подписанного договора → 409 contract_required; поле «Оплата» в форме подтверждения', async () => {
+      const r = await bookOnAccount(); ok(r.status === 409, 'ожидался 409, получено: ' + JSON.stringify(r).slice(0, 120));
+      if (r.detail) ok(r.detail.code === 'contract_required', 'код ошибки: ' + JSON.stringify(r.detail));
+      W().location.hash = '#/book'; await sleep(700);
+      ok(await waitFor(() => q('[data-book-form]')), 'нет формы бронирования');
+    });
+    t(M, 'Кнопка «Подписать ЭЦП (NCALayer)» без NCALayer → понятное сообщение «NCALayer не запущен»', async () => {
+      W().location.hash = '#/my-bookings'; await sleep(900); await waitFor(() => q('[data-ct-sign="' + CT + '"]'));
+      q('[data-ct-sign="' + CT + '"]').click();
+      const err = await waitFor(() => { const e = q('[data-portal-contracts] .err'); return e && /NCALayer/.test(e.textContent) ? e : null; }, 60);
+      ok(err && /NCALayer не запущен/.test(err.textContent), 'нет сообщения о NCALayer: ' + (err ? err.textContent : 'нет'));
+      ok(q('[data-ct-row="' + CT + '"]').getAttribute('data-ct-status') === 'sent', 'статус изменился без подписи');
+    });
+    t(M, '«Подписать (демо)» → статус «Подписан», подписант компания + БИН, действующий рамочный договор; бронирование «в кредит» → 201', async () => {
+      q('[data-ct-sign-demo="' + CT + '"]').click();
+      const done = await waitFor(() => q('[data-ct-signed="' + CT + '"]')); ok(done && /Договор подписан; подпись проверена/.test(done.textContent), 'нет подтверждения подписи');
+      const row = await waitFor(() => q('[data-ct-row="' + CT + '"][data-ct-status="signed"]')); ok(row && /KDL Olymp · BIN 000000000001/.test(row.textContent), 'строка: ' + (row ? row.textContent : 'не подписан'));
+      ok(!row.querySelector('[data-ct-sign]') && !row.querySelector('[data-ct-sign-demo]'), 'кнопки подписи остались');
+      ok(q('[data-ct-framework="' + CT + '"]'), 'нет пометки действующего рамочного договора');
+      const r = await bookOnAccount(); ok(r.number && r.payment === 'on_account', 'бронирование в кредит: ' + JSON.stringify(r).slice(0, 160));
+      W().location.hash = '#/book'; await sleep(500); W().location.hash = '#/my-bookings'; await sleep(900); // re-open: the list is loaded on mount
+      ok(await waitFor(() => q('[data-booking="' + r.number + '"]')), 'бронирование ' + r.number + ' не в списке');
+      ok(q('[data-booking="' + r.number + '"] [data-bk-payment="on_account"]'), 'в «Мои бронирования» нет пометки «в кредит»');
+    });
+    t(M, 'CRM → Клиенты → «Договоры»: сформировать из шаблона (версия, язык) → черновик с хешем → отправить → аннулировать; аудит без названий', async () => {
+      await become('admin'); W().location.hash = '#/customers'; await sleep(900);
+      const row = await waitFor(() => all('[data-customer]').find(r => /KDL Olymp/.test(r.textContent))); ok(row, 'нет клиента KDL Olymp');
+      row.querySelector('[data-ct-toggle]').click(); const box = await waitFor(() => q('[data-ct-customer]')); ok(box, 'раздел договоров не открылся');
+      ok(await waitFor(() => q('[data-ct-row="' + CT + '"][data-ct-status="signed"]')), 'подписанный договор не виден сотруднику');
+      const tpl = await waitFor(() => [...q('[data-ct-template]').options].find(o => /framework v1 · EN/.test(o.textContent))); ok(tpl, 'нет шаблона framework EN v1: ' + [...q('[data-ct-template]').options].map(o => o.textContent).join(' | '));
+      await setSel('[data-ct-template]', tpl.value); setIn(q('[data-ct-from]'), '2026-11-01'); setIn(q('[data-ct-to]'), '2027-10-31'); setIn(q('[data-ct-discount]'), '7.5'); await sleep(200);
+      q('[data-ct-gen]').click(); const sheet = await waitFor(() => q('[data-contract-sheet]')); ok(sheet, 'договор не сформирован');
+      ok(/Framework contract no\. CT-26-/.test(sheet.textContent) && /7\.5 % discount/.test(sheet.textContent) && /01\.11\.2026/.test(sheet.textContent), 'текст EN: ' + sheet.textContent.slice(0, 200));
+      const no = sheet.getAttribute('data-contract-sheet'); q('[data-ct-close]').click(); await sleep(300);
+      const r2 = await waitFor(() => q('[data-ct-row="' + no + '"]')); ok(r2 && r2.getAttribute('data-ct-status') === 'draft', 'черновик не в списке');
+      r2.querySelector('[data-ct-send]').click(); ok(await waitFor(() => q('[data-ct-row="' + no + '"][data-ct-status="sent"]')), 'не отправлен');
+      W().prompt = () => 'Условия пересогласованы'; q('[data-ct-void="' + no + '"]').click(); ok(await waitFor(() => q('[data-ct-row="' + no + '"][data-ct-status="void"]')), 'не аннулирован');
+      ok(!q('[data-ct-row="' + no + '"] [data-ct-send]') && !q('[data-ct-row="' + no + '"] [data-ct-void]'), 'действия остались у аннулированного');
+      const au = await req('GET', '/api/audit?limit=40'); const rows = (au.items || au).filter(x => x.entity === 'contract' && x.entity_id === no);
+      const acts = rows.map(x => x.action); ok(acts.includes('contract.generated') && acts.includes('contract.sent') && acts.includes('contract.void'), 'аудит: ' + acts.join(','));
+      ok(rows.every(x => !/KDL|Olymp|Отдел/.test(JSON.stringify(x.details)) && /hash/.test(JSON.stringify(x.details))), 'аудит содержит название или не содержит хеша');
+      const bad = await reqAs('dispatcher.ast', 'POST', '/api/contracts/templates', { code: 'x', lang: 'ru', kind: 'framework', title: 'abc', body: 'x'.repeat(30) + '{{contact_phone}}' }); ok(bad.status === 422, 'неизвестный плейсхолдер принят: ' + JSON.stringify(bad).slice(0, 80));
+      const nope = await reqAs('kdl.portal', 'GET', '/api/contracts/templates'); ok(nope.status === 403, 'клиент видит шаблоны');
+    });
+    ['DE', 'EN'].forEach(code => t(M, code + ': раздел договоров и сообщение NCALayer без кириллицы', async () => {
+      const kdl = (await req('GET', '/api/customers')).find(c => c.company === 'KDL Olymp');
+      const tpls = await req('GET', '/api/contracts/templates'); const tpl = tpls.find(x => x.code === 'framework' && x.lang === code.toLowerCase() && x.active);
+      const c = await req('POST', '/api/customers/' + kdl.id + '/contracts', { template_id: tpl.id, valid_from: '2026-12-01' }); ok(c.number, 'договор не создан: ' + JSON.stringify(c).slice(0, 100));
+      await req('POST', '/api/contracts/' + c.id + '/send');
+      const lc = code.toLowerCase(), f2 = document.createElement('iframe'); f2.style.cssText = 'position:fixed;left:-3000px;top:0;width:1400px;height:900px;border:0';
+      f2.src = fr.getAttribute('src').replace('.html', '-' + lc + '.html') + '#/?lang=' + lc; document.body.appendChild(f2);
+      try {
+        for (let k = 0; k < 60; k++) { try { if (f2.contentDocument.querySelector('.demo-role select')) break; } catch (e) { /* loading */ } await sleep(200); } await sleep(500);
+        await setSel('.demo-role select', 'kdl.portal', f2.contentDocument); await sleep(900);
+        f2.contentWindow.location.hash = '#/my-bookings'; await sleep(900);
+        const d = f2.contentDocument; const sec = await waitFor(() => d.querySelector('[data-portal-contracts] [data-ct-row="' + c.number + '"]')); ok(sec, 'нет договора ' + c.number + ' в ' + code);
+        const txt = d.querySelector('[data-portal-contracts]').textContent;
+        ok(code === 'DE' ? /Verträge/.test(txt) && /An Kunden gesendet/.test(txt) && /Rahmenvertrag/.test(txt) : /Contracts/.test(txt) && /Sent to customer/.test(txt) && /Framework contract/.test(txt), code + ': ' + txt.slice(0, 160));
+        d.querySelector('[data-ct-sign="' + c.number + '"]').click();
+        const err = await waitFor(() => { const e = d.querySelector('[data-portal-contracts] .err'); return e && /NCALayer/.test(e.textContent) ? e : null; }, 60);
+        ok(err && (code === 'DE' ? /NCALayer läuft nicht/.test(err.textContent) : /NCALayer is not running/.test(err.textContent)), code + ': ' + (err ? err.textContent : 'нет сообщения'));
+        const bad = cyrIn(d.querySelector('[data-portal-contracts]')); ok(!bad, code + ': «' + bad + '»');
+        d.querySelector('[data-ct-open="' + c.number + '"]').click(); const sheet = await waitFor(() => d.querySelector('[data-contract-sheet="' + c.number + '"]')); ok(sheet, 'текст не открылся');
+        ok(code === 'DE' ? /Rahmenvertrag Nr\./.test(sheet.textContent) : /Framework contract no\./.test(sheet.textContent), 'текст не на языке шаблона');
+        const bad2 = cyrIn(sheet); ok(!bad2, code + ' текст: «' + bad2 + '»');
+        await setSel('.demo-role select', 'admin', d); await sleep(900);
+      } finally { f2.remove(); }
+    }));
+    t(M, 'Сброс: снова администратор', async () => { await become('admin'); W().location.hash = '#/s/overview'; await sleep(600); ok(D().querySelectorAll('nav [data-nav]').length >= 17, 'нет меню администратора'); });
+    return T;
+  };
+})();
 </script>
 </body>
 </html>
