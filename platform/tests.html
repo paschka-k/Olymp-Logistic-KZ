@@ -220,6 +220,22 @@ const FR2 = [
 ];
 const PRIO = { 'Высокий': ['var(--color-accent-900)', 'var(--color-bg)', 'var(--color-accent-900)'], 'Средний': ['var(--color-accent-200)', 'var(--color-accent-900)', 'var(--color-accent-400)'], 'Низкий': ['transparent', 'var(--color-neutral-800)', 'var(--color-divider)'] };
 
+// port: FR-171 – CI sharding: ?shard=k/n runs the k-th of n contiguous slices of the ordered test list, cut only where the
+// module changes (a module's tests share state); each shard runs on its own fresh stack. ?shard=k/n&cuts=i,j overrides the
+// automatic cut points (1-based test numbers that start a shard).
+function shardRange(T, search) {
+  const m = /[?&]shard=(\d+)\/(\d+)/.exec(search || ''); if (!m) return [0, T.length];
+  const k = Math.max(1, +m[1]), n = Math.max(1, +m[2]); if (n === 1) return [0, T.length];
+  const fixed = /[?&]cuts=([\d,]+)/.exec(search || '');
+  let cuts;
+  if (fixed) cuts = fixed[1].split(',').map(x => +x - 1);
+  else {
+    const starts = []; for (let i = 1; i < T.length; i++) if (T[i].mod !== T[i - 1].mod) starts.push(i);
+    cuts = []; for (let j = 1; j < n; j++) { const target = Math.round(j * T.length / n); cuts.push(starts.reduce((a, b) => Math.abs(b - target) < Math.abs(a - target) ? b : a, starts[0] || T.length)); }
+  }
+  const b = [0, ...cuts, T.length].sort((x, y) => x - y);
+  return [b[k - 1], b[Math.min(k, b.length - 1)]];
+}
 class Component extends DCLogic {
   state = { res: {}, running: false, current: '—', onlyFail: false, findings: [], secs: 0, bugF: 'all' };
   frame = React.createRef();
@@ -597,7 +613,8 @@ class Component extends DCLogic {
     await sleep(500);
     const T = this.build(fr);
     const RB = this.resetBefore || {}, resetDone = new Set(); // port: FR-136 (4) – groups that start from the seed state of their keys
-    for (let i = 0; i < T.length; i++) {
+    const [lo, hi] = shardRange(T, typeof location !== 'undefined' ? location.search : ''); // port: FR-171 – CI shards (?shard=k/n)
+    for (let i = lo; i < hi; i++) {
       if (this.stop) return;
       const tt = T[i], s0 = performance.now(); let r;
       if (RB[tt.mod] && !resetDone.has(tt.mod)) { resetDone.add(tt.mod); try { await this.resetGroup(fr, RB[tt.mod]); } catch (e) { /* reported by the tests of the group */ } }
@@ -609,7 +626,7 @@ class Component extends DCLogic {
     }
     this.setState({ running: false, current: 'готово', findings: this.findings(), secs: Math.round((performance.now() - t0) / 1000) });
     const fin = this.state.res, fails = T.map((x, i) => fin[i] && fin[i].st === 'fail' ? (i + 1) + '. ' + x.mod + ' · ' + x.name + ' — ' + fin[i].err : null).filter(Boolean);
-    window.__TESTS = { done: true, total: T.length, passed: T.length - fails.length, failed: fails.length, failures: fails };
+    window.__TESTS = { done: true, total: hi - lo, passed: hi - lo - fails.length, failed: fails.length, failures: fails, range: [lo + 1, hi], all: T.length };
   }
 
   // port: FR-136 (4) – reset the state keys of a module group (POST /api/v5/reset {keys}; demo: mock API, backend: as admin) and
@@ -1339,7 +1356,7 @@ class Component extends DCLogic {
       }[lang];
       L.forEach(x => ok(T2.includes(x), lang + ': нет «' + x + '»'));
       ok(s.querySelectorAll('[data-clause]').length === 9, 'пунктов: ' + s.querySelectorAll('[data-clause]').length);
-      const p = [...s.querySelectorAll('[data-offer-price] td')].map(td => num(td.textContent)); const [fr0, net, vat] = p, gross = p[p.length - 1];
+      const p = [...s.querySelectorAll('[data-offer-price] tr')].filter(tr => !tr.querySelector('[data-offer-price-list]')).map(tr => tr.querySelectorAll('td')).map(c => c[c.length - 1]).map(td => num(td.textContent.split('(')[0])); const [fr0, net, vat] = p, gross = p[p.length - 1]; // FR-148: price-list row + «(discount … included)» are not amounts
       ok(p.length >= 4 && fr0 <= net && Math.abs(vat - Math.round(net * 0.16)) <= 1 && gross >= net + vat, 'цена: ' + p.join(' / '));
       ok(!T2.includes('Отдел закупок') && !T2.includes('@'), 'персональные данные контактного лица на странице');
       ok(s.querySelector('.offer-watermark').textContent === (lang === 'ru' ? 'ОБРАЗЕЦ' : 'SAMPLE'), 'водяной знак');
@@ -2705,6 +2722,23 @@ class Component extends DCLogic {
         bad = cyrD(d); ok(!bad, code + ' security: «' + bad + '»');
       } finally { f2.remove(); }
     }));
+    // BUG-34: connector messages (demo «test messages») are translated (message parts), not transliterated; free text
+    // keeps the transliteration with a labelled original on hover
+    const B34 = { DE: ['Unwetterwarnung: Atyrau, Wind 23–28 m/s, Staubsturm', 'Sicherheitszentrale: Laderaumtür außerhalb des Lieferpunkts geöffnet'],
+      EN: ['Storm warning: Atyrau, wind 23–28 m/s, dust storm', 'Security centre: cargo door opened away from the delivery point'],
+      KK: ['Дауыл ескертуі: Атырау, жел 23–28 м/с, шаңды дауыл', 'Күзет орталығы: жүк бөлімінің есігі жеткізу нүктесінен тыс ашылды'] };
+    ['DE', 'EN', 'KK'].forEach(code => t(ML5, code + ': BUG-34 демо-сообщения коннекторов переведены (шторм, охрана), без транслитерации', async () => {
+      await act('inbox.demo', {}).catch(() => null) // 409 = already received
+      const f2 = await frame(langUrl(code === 'KK' ? 'RU' : code) + '#/inbox?lang=' + code.toLowerCase(), d => d.querySelectorAll('[data-inbox]').length > 0);
+      try {
+        await sleep(code === 'KK' ? 900 : 300) // Kazakh catalogue is a lazy chunk
+        const d = f2.contentDocument, txt = [...d.querySelectorAll('[data-inbox]')].map(r => r.textContent).join(' | ');
+        for (const want of B34[code]) ok(txt.includes(want), code + ': нет «' + want + '» · ' + txt.slice(0, 200));
+        ok(!/Shtormovoe|Okhrannyy/.test(txt), code + ': транслитерация вместо перевода');
+        if (code !== 'KK') { const bad = cyrD(d); ok(!bad, code + ' /inbox: «' + bad + '»');
+          const ext = d.querySelector('.ext-text[data-orig]'); ok(!ext || /Russ/.test(ext.getAttribute('data-orig-label') || ''), 'подсказка без пометки «оригинал (русский)»'); }
+      } finally { f2.remove(); }
+    }));
     t(ML5, 'DE: защитная транслитерация DOM отключена — новый кириллический узел не меняется (системные тексты переводятся явно)', async () => {
       const f2 = await frame(langUrl('DE') + '#/s/overview?lang=de', d => d.querySelectorAll('nav [data-nav]').length === 17);
       try {
@@ -2728,6 +2762,45 @@ class Component extends DCLogic {
         const ru = all('.lang-row [role="button"]').find(b => b.textContent.trim() === 'RU'); ru.click(); await sleep(900); await goHash('/s/overview', 600);
       }
       ok(q('h1').textContent === 'Обзор', 'не вернулся RU');
+    });
+    // ---- FR-170: Kazakh UI on all screens (the i18n report in CI is the main guard: 100 % of the scanned texts)
+    const KK_H1 = { overview: 'Шолу', dispatch: 'Диспетчер', load: 'Тиеу және салмақ', ship: 'Жөнелтілімдер және таңбалау', thermo: 'Термомәртебе',
+      weather: 'Ауа райы 3–7 күн', security: 'Қауіпсіздік', docs: 'ҚР құжаттары', quality: 'Сапа', fleet: 'Автопарк', partners: 'Серіктестер',
+      staff: 'Персонал', driver: 'Жүргізуші қолданбасы', planning: 'Жоспарлау', reports: 'Есептер', costs: 'Шығындар', baseline: 'Бастапқы деректер' };
+    // Russian UI texts that have a Kazakh translation – none of them may remain as a text node on a Kazakh screen
+    // (reference / scenario data – report catalogue, tooltips, playbooks – keeps the data language RU and is not sampled)
+    const RU_SAMPLE = ['Нераспределённые заказы', 'Проверки перед выпуском (Go / No-Go)', 'Вес, объём и осевые нагрузки', 'Правила тревог холодовой цепи',
+      'Отклонения', 'Реестр калибровки логгеров', 'Где сейчас каждый водитель', 'Сценарии', 'Мощность парка · 7 дней', 'Отчёт по водителям · 30 дней',
+      'Текущие затраты по позициям', 'Погодный риск по рейсам', 'Покрытие маршрутов партнёрами и рефсервисом', 'Заявки в сервис', 'Передачи партнёрам',
+      'Входящие · внешние сообщения', 'Сверка ответов с платформой v3', 'Сформировать все', 'Импорт термохрона', 'Обновить', 'Тип ТС', 'Всего ТС', 'Нет данных',
+      'Показания', 'Записать показание', 'Датчики камер (телематика)', 'Новый рейс', 'Создать рейс', 'Новый заказ', 'Показать ПДн', 'Справочники', 'Новый пользователь'];
+    const ruLeft = () => { const w = D().createTreeWalker(D().querySelector('main') || D().body, NodeFilter.SHOW_TEXT); let x; const out = [];
+      while ((x = w.nextNode())) { const s = x.textContent.trim(); if (s && RU_SAMPLE.includes(s)) out.push(s); } return out; };
+    const toKk = async () => { const b = all('.lang-row [role="button"]').find(x => x.textContent.trim() === 'KK'); ok(b, 'нет кнопки KK'); b.click(); await sleep(1200); };
+    const toRu = async () => { const b = all('.lang-row [role="button"]').find(x => x.textContent.trim() === 'RU'); b.click(); await sleep(900); await goHash('/s/overview', 600); };
+    t(ML5, 'FR-170 KK: все 17 экранов — заголовок на казахском, ни одного русского текста из выборки', async () => {
+      await toKk();
+      try {
+        for (const [key, h1] of Object.entries(KK_H1)) {
+          await goHash('/s/' + key, 900);
+          ok(q('h1') && q('h1').textContent.trim() === h1, key + ': h1 «' + (q('h1') && q('h1').textContent) + '»');
+          const left = ruLeft(); ok(!left.length, key + ': русский фолбэк «' + left.join('», «') + '»');
+        }
+      } finally { await toRu(); }
+      ok(q('h1').textContent === 'Обзор', 'не вернулся RU');
+    });
+    t(ML5, 'FR-170 KK: казахские подписи на экранах 02, 03, 05, 09, 12 и страницах учёта (входящие, заказы, журнал температур, справочники)', async () => {
+      await toKk();
+      try {
+        const SEEN = [['/s/dispatch', 'Бөлінбеген тапсырыстар'], ['/s/load', 'Салмақ, көлем және осьтік жүктемелер'], ['/s/thermo', 'Суық тізбек дабылдарының ережелері'],
+          ['/s/quality', 'Ауытқулар'], ['/s/staff', 'Әр жүргізуші қазір қайда'], ['/s/planning', 'Сценарийлер'], ['/inbox', 'Кіріс · сыртқы хабарлар'],
+          ['/orders', 'Тапсырыстар'], ['/s/thermo/journal', 'Көрсеткішті жазу'], ['/master-data', 'Анықтамалықтар']];
+        for (const [path, label] of SEEN) {
+          await goHash(path, 1000);
+          ok(D().body.textContent.includes(label), path + ': нет «' + label + '»');
+          const left = ruLeft(); ok(!left.length, path + ': русский фолбэк «' + left.join('», «') + '»');
+        }
+      } finally { await toRu(); }
     });
 
     return T;
@@ -3210,11 +3283,11 @@ class Component extends DCLogic {
     const req = async (m, p, b) => { try { return await W().__OLYMP_DEMO_REQ(m, p, b); } catch (e) { return { error: String(e && e.message || e), status: e && e.status }; } };
     const press = el => { ok(el, 'нет кнопки'); el.click(); };
     const M = 'Плановые значения · проверка перед запуском';
-    t(M, 'FR-174: «Справочники» показывают число непроверенных значений, список из 25 с источником, подтверждение аудируется', async () => {
+    t(M, 'FR-174: «Справочники» показывают число непроверенных значений, список из 26 с источником, подтверждение аудируется', async () => {
       await goHash('/master-data', 1200); const n = await waitFor(() => q('[data-unverified]')); ok(n, 'нет баннера непроверенных значений');
       const before = Number(n.getAttribute('data-unverified')); ok(before >= 20, 'непроверенных: ' + before);
       press(q('[data-goto-verify]')); await sleep(500);
-      const rows = all('[data-mtable="verify"] [data-mrow]'); ok(rows.length === 25, 'строк: ' + rows.length);
+      const rows = all('[data-mtable="verify"] [data-mrow]'); ok(rows.length === 26, 'строк: ' + rows.length);
       const esf = q('[data-mrow="esf_deadline"]'); ok(esf && /Tax Code RK art\. 412/.test(esf.textContent) && /ЭСФ/.test(esf.textContent), 'строка ЭСФ: ' + (esf && esf.textContent.slice(0, 120)));
       const r = await req('POST', '/api/master/verify/esf_deadline', { data: { verified: true, note: 'Подтверждено налоговым консультантом', ref: 'НК РК ст. 412 п. 1' } });
       ok(r && r.status === 'active' && r.changed.includes('verified'), 'подтверждение: ' + JSON.stringify(r).slice(0, 150));
@@ -3451,7 +3524,7 @@ class Component extends DCLogic {
   const baseBuild = Component.prototype.build;
   Component.prototype.build = function (fr) {
     const T = baseBuild.call(this, fr);
-    const h = this.helpers(fr), { D, W, all, ok } = h;
+    const h = this.helpers(fr), { D, W, all, ok, results } = h;
     const t = (mod, name, fn) => T.push({ mod, name, fn });
     const q = sel => D().querySelector(sel);
     const waitFor = async (fn, n = 40) => { for (let i = 0; i < n; i++) { try { const v = fn(); if (v) return v; } catch (e) { /* not yet */ } await sleep(150); } return null; };
@@ -3550,6 +3623,361 @@ class Component extends DCLogic {
       } finally { f2.remove(); }
     }));
     t(M, 'Сброс: снова администратор', async () => { await become('admin'); W().location.hash = '#/s/overview'; await sleep(600); ok(D().querySelectorAll('nav [data-nav]').length >= 17, 'нет меню администратора'); });
+
+    // ---- FR-163: one numbering scheme – scenario numbers marked, search maps variants of both schemes ----
+    const MN = 'FR-163 Номера';
+    const poll = async (fn, n = 40, doc) => { for (let i = 0; i < n; i++) { const r = fn(doc || D()); if (r) return r; await sleep(150); } return null; };
+    const typeQ = async (v, doc) => { const d = doc || D(), i = d.querySelector('input[data-search="1"]'); ok(i, 'нет поля поиска'); const W2 = d.defaultView;
+      Object.getOwnPropertyDescriptor(W2.HTMLInputElement.prototype, 'value').set.call(i, v); i.dispatchEvent(new W2.Event('input', { bubbles: true })); await sleep(450); };
+    const srvHit = (key, doc) => poll(d => d.querySelector('[data-search-server] [data-srv-hit="' + key + '"]'), 40, doc);
+    t(MN, 'Номера сценария помечены «сценарий» в обзоре и диспетчере, текст номера не меняется', async () => {
+      W().location.hash = '#/s/overview'; await sleep(700);
+      const ids = all('main .v5-ops-id'); ok(ids.length >= 3, 'нет рейсов в обзоре');
+      const scn = ids.filter(b => /^R-\d{3}$/.test(b.textContent.trim()));
+      ok(scn.length && scn.every(b => b.getAttribute('data-scn') === 'сценарий'), 'рейсы сценария не помечены');
+      ok(ids.filter(b => /^R-26-/.test(b.textContent.trim())).every(b => !b.hasAttribute('data-scn')), 'рейс БД помечен как сценарий');
+      ok(W().getComputedStyle(scn[0], '::after').content.includes('сценарий'), 'метка не видна: ' + W().getComputedStyle(scn[0], '::after').content);
+      W().location.hash = '#/s/dispatch'; await sleep(700);
+      const cards = all('[data-board] .v5-ops-card-top'); ok(cards.length, 'нет карточек');
+      const c = cards.find(x => /^R-\d{3}$/.test(x.querySelector('span').textContent.trim())); ok(c, 'нет рейса сценария на доске');
+      ok(c.querySelector('span').getAttribute('data-scn') === 'сценарий' && c.querySelector('span').textContent.trim().length === 5, 'карточка: ' + c.innerHTML.slice(0, 120));
+      const oo = all('[data-open-order] b'); ok(!oo.length || oo.filter(b => /^[ЗС]-\d{4}$/.test(b.textContent.trim())).every(b => b.getAttribute('data-scn') === 'сценарий'), 'заказы сценария не помечены');
+    });
+    t(MN, 'Поиск: r104 / Р-104 → R-104 (сценарий), Z-2290 / 3-2290 → З-2290, R-26-n → рейс БД без пометки', async () => {
+      W().location.hash = '#/s/overview'; await sleep(600);
+      for (const v of ['r104', 'Р-104']) {
+        await typeQ(v); const hh = await srvHit('trip:R-104'); ok(hh, v + ': R-104 не найден: ' + results());
+        ok(hh.querySelector('[data-scn="сценарий"]'), v + ': нет пометки «сценарий»');
+      }
+      for (const v of ['Z-2290', '3-2290', 'з2290']) { await typeQ(v); ok(await srvHit('order:З-2290'), v + ': З-2290 не найден: ' + results()); }
+      const hubs = await req('GET', '/api/hubs'); const ast = (hubs || []).find(x => x.code === 'AST') || hubs[0];
+      const tr = await req('POST', '/api/trips', { hub_id: ast.id, note: 'FR-163 UI' }); ok(/^R-26-\d{4}$/.test(tr.number), 'номер БД: ' + tr.number);
+      const short = 'r-26-' + parseInt(tr.number.slice(5), 10);
+      await typeQ(short); const hh = await srvHit('trip:' + tr.number); ok(hh, short + ': рейс БД не найден: ' + results());
+      ok(!hh.querySelector('[data-scn]'), 'рейс БД помечен как сценарий');
+      ok(!all('[data-search-server] [data-srv-hit]').some(x => x.getAttribute('data-srv-hit') === 'trip:R-104'), 'коллизия: R-26-n нашёл R-104');
+      await typeQ('');
+    });
+    ['DE', 'EN'].forEach(code => t(MN, code + ': метка и поиск номера сценария без русского текста', async () => {
+      const lc = code.toLowerCase(), f2 = document.createElement('iframe'); f2.style.cssText = 'position:fixed;left:-3000px;top:0;width:1400px;height:900px;border:0';
+      f2.src = fr.getAttribute('src').replace('.html', '-' + lc + '.html') + '#/s/dispatch?lang=' + lc; document.body.appendChild(f2);
+      try {
+        for (let k = 0; k < 60; k++) { try { if (f2.contentDocument.querySelectorAll('[data-board] .v5-ops-card').length) break; } catch (e) { /* loading */ } await sleep(200); } await sleep(500);
+        const d = f2.contentDocument, lab = code === 'DE' ? 'Szenario' : 'scenario';
+        const s = [...d.querySelectorAll('[data-board] .v5-ops-card-top span[data-scn]')]; ok(s.length && s.every(x => x.getAttribute('data-scn') === lab), code + ': метка ' + (s[0] && s[0].getAttribute('data-scn')));
+        await typeQ(code === 'DE' ? 'A-2290' : 'O-2290', d);
+        const hh = await srvHit('order:З-2290', d); ok(hh, code + ': заказ не найден');
+        ok(hh.textContent.includes(code === 'DE' ? 'A-2290' : 'O-2290') && !/[А-Яа-яЁё]/.test(hh.textContent), code + ': ' + hh.textContent);
+        ok(hh.querySelector('[data-scn="' + lab + '"]'), code + ': нет пометки в результатах');
+        await typeQ('', d);
+      } finally { f2.remove(); }
+    }));
+    return T;
+  };
+})();
+
+// Lane P (15.10.2026) – customer-portal requirements: FR-185 weight plausibility (warnings, never blocking), FR-186 payer
+// (agent / broker / forwarder, masked contact data, buyer of the offer), FR-187 booking messages (e-mail / SMS; demo preview),
+// FR-189 BIN / IIN (check digit, IIN = personal data), FR-190 badge «Bookings» + help article. Demo and real backend.
+(() => {
+  const baseBuild = Component.prototype.build;
+  Component.prototype.build = function (fr) {
+    const T = baseBuild.call(this, fr);
+    const h = this.helpers(fr), { D, W, ok } = h;
+    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const q = sel => D().querySelector(sel);
+    const waitFor = async (fn, n = 40) => { for (let i = 0; i < n; i++) { try { const v = fn(); if (v) return v; } catch (e) { /* not yet */ } await sleep(150); } return null; };
+    const setSel = async (sel, v, doc) => { const d = doc || D(), s = d.querySelector(sel); if (!s) throw new Error('Нет поля ' + sel); const set = Object.getOwnPropertyDescriptor(d.defaultView.HTMLSelectElement.prototype, 'value').set; set.call(s, v); s.dispatchEvent(new (d.defaultView.Event)('change', { bubbles: true })); await sleep(300); };
+    const setIn = async (sel, v, doc) => { const d = doc || D(), el = d.querySelector(sel); if (!el) throw new Error('Нет поля ' + sel); const set = Object.getOwnPropertyDescriptor(d.defaultView.HTMLInputElement.prototype, 'value').set; set.call(el, v); el.dispatchEvent(new (d.defaultView.Event)('input', { bubbles: true })); el.dispatchEvent(new (d.defaultView.Event)('change', { bubbles: true })); await sleep(160); };
+    const check = async (sel, on = true, doc) => { const el = (doc || D()).querySelector(sel); if (!el) throw new Error('Нет поля ' + sel); if (el.checked !== on) { el.click(); await sleep(200); } };
+    const become = async (u) => { if (h.BE()) { await h.asUser(u); } else { await setSel('.demo-role select', u); await sleep(600); } for (let i = 0; i < 60; i++) { try { if (D().querySelector('nav a') || D().querySelector('[data-page]')) break; } catch (e) { /* loading */ } await sleep(200); } };
+    const req = async (m, p, b) => { try { return await W().__OLYMP_DEMO_REQ(m, p, b); } catch (e) { return { error: String(e && e.message || e), status: e && e.status }; } };
+    const cyrIn = el => { const w = el.ownerDocument.createTreeWalker(el, NodeFilter.SHOW_TEXT); let x; while ((x = w.nextNode())) { const m = x.textContent.match(/[А-Яа-яЁё]{2,}/); if (m) return m[0]; } return ''; };
+    const fresh = async () => { W().location.hash = '#/my-bookings'; await sleep(400); W().location.hash = '#/book'; await sleep(800);
+      ok(await waitFor(() => D().querySelectorAll('select[data-f="pickup-city"] option').length > 10), 'форма бронирования не загрузилась'); };
+    const route = async () => {
+      await setSel('select[data-f="pickup-city"]', 'KZ-ALA'); await setIn('[data-f="pickup-street"]', 'улица Абая'); await setIn('[data-f="pickup-house"]', '5');
+      await setSel('select[data-f="dest-city"]', 'KZ-TAR'); await setIn('[data-f="dest-street"]', 'улица Абая'); await setIn('[data-f="dest-house"]', '10');
+      await check('[data-good="ivd"] input');
+    };
+    const searchPrice = async () => { const b = q('[data-search]'); ok(b && !b.disabled, 'расчёт недоступен'); b.click(); ok(await waitFor(() => q('[data-price]')), 'нет цены'); };
+    const OWNER = { destination: { city_id: 'KZ-TAR', street: 'улица Абая', house: '10' }, pickup: { city_id: 'KZ-ALA', street: 'улица Абая', house: '5' }, temp_class: 'cold', pallets: 1,
+      weight_kg: 905, goods: ['ivd'], lang: 'ru', lines: [206, 505, 300].map(w => ({ count: 1, length_cm: 120, width_cm: 80, height_cm: 150, weight_kg: w, stackable: false })) };
+    const M = 'Портал · вес, плательщик, сообщения, БИН (FR-185…190)';
+    const st = { n: null };
+    t(M, 'FR-185 API: пример владельца (206+505+300 = 1 011 кг при брутто 905 кг, 1 паллета, 3 места) → предупреждения сервера, бронирование не блокируется', async () => {
+      await become('kdl.portal');
+      const av = await req('POST', '/api/portal/availability', OWNER); ok(!av.error, 'расчёт: ' + av.error);
+      const codes = (av.price.warnings || []).map(w => w.code).join(',');
+      ok(codes === 'weight_sum_mismatch,places_exceed_pallets,kg_per_pallet_high', 'коды: ' + codes);
+      const w0 = av.price.warnings[0].params; ok(w0.sum === 1011 && w0.gross === 905 && w0.diff === 106, JSON.stringify(w0));
+      const s = av.slots.find(x => x.available); ok(s, 'нет свободного рейса');
+      const b = await req('POST', '/api/portal/bookings', { ...OWNER, schedule_id: s.schedule_id, departure_date: s.date });
+      ok(!b.error && /^BK-/.test(b.number), 'бронирование заблокировано: ' + b.error);
+      ok((b.warnings || []).length === 3, 'предупреждения бронирования: ' + JSON.stringify(b.warnings));
+    });
+    t(M, 'FR-185 форма (RU): предупреждение рядом с полями и на шаге цены — «проверьте вес каждой паллеты»; бронирование возможно', async () => {
+      await fresh(); await route(); await setIn('[data-f="weight"]', '905');
+      for (let i = 0; i < 3; i++) { q('[data-line-add]').click(); await sleep(200); }
+      const ws = ['206', '505', '300'];
+      for (let i = 0; i < 3; i++) await setIn('[data-line="' + i + '"] [data-lf="weight_kg"]', ws[i]);
+      const live = await waitFor(() => q('[data-load-warn="form"]')); ok(live, 'нет предупреждения в форме');
+      const sum = live.querySelector('[data-warn="weight_sum_mismatch"]'); ok(sum && /Сумма веса мест 1 011 кг/.test(sum.textContent) && /905 кг/.test(sum.textContent) && /Проверьте вес каждой паллеты/.test(sum.textContent), 'текст: ' + (sum && sum.textContent));
+      ok(live.querySelector('[data-warn="places_exceed_pallets"]') && /3 нештабелируемых мест требуют 3 паллето-мест/.test(live.textContent), live.textContent);
+      await searchPrice();
+      const pw = await waitFor(() => q('[data-load-warn="price"]')); ok(pw && pw.querySelectorAll('[data-warn]').length === 3, 'нет предупреждений на шаге цены');
+      const slot = [...D().querySelectorAll('button.slot')].find(b => !b.disabled); ok(slot, 'нет свободного рейса'); slot.click(); await sleep(400);
+      ok(q('[data-confirm-warn]'), 'нет пометки «проверить вес» перед подтверждением');
+      q('[data-book-confirm] button.btn.primary').click(); ok(await waitFor(() => q('[data-booked]')), 'бронирование не создано (предупреждение не должно блокировать)');
+      // consistent places: no warning
+      await fresh(); await route(); await setIn('[data-f="pallets"]', '3'); await setIn('[data-f="weight"]', '1000');
+      q('[data-line-add]').click(); await sleep(200); await setIn('[data-line="0"] [data-lf="count"]', '3'); await setIn('[data-line="0"] [data-lf="weight_kg"]', '335');
+      ok(!q('[data-load-warn="form"]'), 'ложное предупреждение: ' + (q('[data-load-warn="form"]') || {}).textContent);
+    });
+    ['de', 'en'].forEach(lc => t(M, lc.toUpperCase() + ': FR-185 warnings without Cyrillic; FR-190 help article «Bookings – confirm, reject or cancel»', async () => {
+      const f2 = document.createElement('iframe'); f2.style.cssText = 'position:fixed;left:-3000px;top:0;width:1400px;height:900px;border:0';
+      f2.src = fr.getAttribute('src').replace('.html', '-' + lc + '.html') + '#/?lang=' + lc; document.body.appendChild(f2);
+      try {
+        for (let k = 0; k < 60; k++) { try { if (f2.contentDocument.querySelector('.demo-role select')) break; } catch (e) { /* loading */ } await sleep(200); } await sleep(500);
+        await setSel('.demo-role select', 'kdl.portal', f2.contentDocument); await sleep(900);
+        f2.contentWindow.location.hash = '#/book'; await sleep(1200);
+        const d = f2.contentDocument;
+        ok(await waitFor(() => d.querySelector('[data-f="weight"]')), 'no form');
+        await setIn('[data-f="pallets"]', '4', d); await setIn('[data-f="weight"]', '30', d);
+        d.querySelector('[data-line-add]').click(); await sleep(250); await setIn('[data-line="0"] [data-lf="weight_kg"]', '500', d);
+        const box = await waitFor(() => d.querySelector('[data-load-warn="form"]')); ok(box, lc + ': no warning');
+        const low = box.querySelector('[data-warn="kg_per_pallet_low"]'), mis = box.querySelector('[data-warn="weight_sum_mismatch"]');
+        ok(low && (lc === 'de' ? /unplausibel wenig/.test(low.textContent) : /implausibly low/.test(low.textContent)), lc + ': ' + (low && low.textContent));
+        ok(mis && (lc === 'de' ? /Gewicht jeder Palette/.test(mis.textContent) : /validate the weight of each pallet/.test(mis.textContent)), lc + ': ' + (mis && mis.textContent));
+        const bad = cyrIn(box); ok(!bad, lc + ': «' + bad + '»');
+        ok(d.querySelector('[data-payer] summary') && !cyrIn(d.querySelector('[data-payer] summary')), lc + ': payer section');
+        await setSel('.demo-role select', 'admin', d); await sleep(900);
+        const D2 = () => f2.contentDocument; // the role switch may reload the frame – never keep the old document
+        await waitFor(() => D2().querySelectorAll('nav [data-nav]').length > 10, 60); await sleep(300);
+        f2.contentWindow.location.hash = '#/help'; await sleep(1200);
+        const art = await waitFor(() => D2().querySelector('[data-help-article="r-bookings-requests"]'), 60); ok(art, lc + ': no help article');
+        ok(lc === 'de' ? /Kundenanfrage bestätigen, ablehnen oder stornieren/.test(art.textContent) : /confirm, reject or cancel a customer request/.test(art.textContent), lc + ': ' + art.textContent.slice(0, 120));
+        const bad2 = cyrIn(art); ok(!bad2, lc + ' help: «' + bad2 + '»');
+      } finally { f2.remove(); }
+    }));
+    t(M, 'FR-186 / FR-189 / FR-187: плательщик (агент), БИН с контрольной цифрой, образец с плательщиком, подтверждение по e-mail и SMS', async () => {
+      await become('kdl.portal'); await fresh(); await route(); await setIn('[data-f="weight"]', '300');
+      await check('[data-f="payer-on"]');
+      await setIn('[data-f="payer-company"]', 'Агент Логистик ТОО');
+      await setIn('[data-f="payer-bin"]', '990140000553');
+      ok(q('[data-bin-state="bad"]') && /контрольная цифра/.test(q('[data-bin-state="bad"]').textContent), 'неверный БИН не отмечен');
+      ok(q('[data-search]').disabled && q('[data-payer-err]'), 'расчёт доступен с неверным БИН');
+      await setIn('[data-f="payer-bin"]', '990140000552'); ok(q('[data-bin-state="bin"]'), 'верный БИН не принят');
+      q('[data-bin-check="payer"]').click(); const res = await waitFor(() => q('[data-bin-result]'));
+      ok(res && /Не проверено онлайн|Проверено КГД|Запрос в КГД/.test(res.textContent), 'нет результата проверки: ' + (res && res.textContent));
+      await setIn('[data-f="payer-bin"]', '850102300131'); ok(q('[data-bin-state="iin"]') && /персональные данные/.test(q('[data-bin-state="iin"]').textContent), 'ИИН не отмечен как персональные данные');
+      await setIn('[data-f="payer-bin"]', '990140000552');
+      await setIn('[data-f="payer-contact"]', 'Асель Нурланова'); await setIn('[data-f="payer-email"]', 'asel@agent-logistic.kz'); await setIn('[data-f="payer-phone"]', '+7 701 555 12 34');
+      await setIn('[data-f="payer-ref"]', 'PO-7781');
+      await searchPrice();
+      q('[data-offer-open]').click(); const op = await waitFor(() => q('[data-offer-payer]'));
+      ok(op && /Агент Логистик ТОО/.test(op.textContent) && /БИН 990140000552/.test(op.textContent) && /PO-7781/.test(op.textContent), 'плательщик не в образце: ' + (op && op.textContent));
+      ok(!/Асель|asel@/.test(q('[data-offer]').textContent), 'контактные данные плательщика в образце');
+      q('[data-offer-close]').click(); await sleep(300);
+      const slot = [...D().querySelectorAll('button.slot')].find(b => !b.disabled); ok(slot, 'нет свободного рейса'); slot.click(); await sleep(400);
+      ok(q('[data-f="notify-email"]').checked, 'e-mail не включён по умолчанию'); ok(!q('[data-f="notify-sms"]').checked, 'SMS включено без согласия');
+      await setIn('[data-f="notify-email-to"]', 'buyer@client.kz');
+      await check('[data-f="notify-sms"]'); ok(q('[data-sms-need]') && q('[data-book-confirm] button.btn.primary').disabled, 'SMS без номера возможно');
+      await setIn('[data-f="notify-phone-to"]', '+7 701 222 33 44'); ok(!q('[data-book-confirm] button.btn.primary').disabled, 'подтверждение недоступно');
+      q('[data-book-confirm] button.btn.primary').click(); const done = await waitFor(() => q('[data-booked]')); ok(done, 'бронирование не создано');
+      st.n = done.querySelector('b').textContent;
+      const ni = q('[data-notify-info]'); ok(ni && /b•••@client\.kz/.test(ni.textContent) && /•••• 44/.test(ni.textContent), 'нет сведений о подтверждении: ' + (ni && ni.textContent));
+      ok(q('[data-booked-payer]') && /Агент Логистик ТОО/.test(q('[data-booked-payer]').textContent), 'нет плательщика в результате');
+      if (!h.BE()) { // demo: preview of the message the worker would send
+        const pv = q('[data-notify-preview]'); ok(pv && /Сообщение отправлено \(демо\)/.test(pv.textContent), 'нет демо-превью');
+        const em = pv.querySelector('[data-preview="email"]'); ok(em && em.textContent.includes(st.n) && /заявка получена/.test(em.textContent) && /Алматы → Тараз/.test(em.textContent) && /KZT/.test(em.textContent), 'e-mail: ' + (em && em.textContent));
+        ok(pv.querySelector('[data-preview="sms"]') && !/asel|Асель|990140000552/.test(pv.textContent), 'SMS / персональные данные в сообщении');
+      }
+      W().location.hash = '#/my-bookings'; await sleep(900);
+      const row = await waitFor(() => q('[data-row-payer="' + st.n + '"]')); ok(row && /Агент Логистик ТОО/.test(row.textContent) && /a•••@agent-logistic\.kz/.test(row.textContent) && /•••• 34/.test(row.textContent), 'строка плательщика: ' + (row && row.textContent));
+      ok(!/asel@|555 12 34|Нурланова/.test(q('[data-bookings]').textContent), 'контакт плательщика не маскирован');
+    });
+    t(M, 'FR-190: значок «Бронирования» = число заявок «Запрошено» (сервер), уменьшается после подтверждения; справка со страницы', async () => {
+      await become('admin'); W().location.hash = '#/s/overview'; await sleep(700); W().location.hash = '#/bookings'; await sleep(1000);
+      const cnt = (await req('GET', '/api/bookings/count?status=requested')).count; ok(cnt >= 1, 'нет заявок: ' + cnt);
+      const badge = await waitFor(() => q('[data-nav-badge="bookings"]')); ok(badge && Number(badge.textContent) === cnt, 'значок ' + (badge && badge.textContent) + ' ≠ ' + cnt);
+      ok(badge.classList.contains('v5-badge'), 'не стиль v5-badge');
+      ok(q('[data-help-link="r-bookings-requests"]'), 'кнопка «Справка» не ведёт на статью о заявках');
+      const row = await waitFor(() => q('[data-booking="' + st.n + '"]')); ok(row, 'нет заявки ' + st.n + ' в диспетчерской');
+      const pr = row.querySelector('[data-row-payer]'); ok(pr && /Агент Логистик ТОО/.test(pr.textContent) && /А•••/.test(pr.textContent) && !/Асель|asel@/.test(pr.textContent), 'плательщик: ' + (pr && pr.textContent));
+      row.querySelector('button.btn.primary').click(); await sleep(1200);
+      const after = (await req('GET', '/api/bookings/count?status=requested')).count; ok(after === cnt - 1, 'счётчик сервера ' + after);
+      const b2 = await waitFor(() => { const x = q('[data-nav-badge="bookings"]'); return after === 0 ? !x : x && Number(x.textContent) === after; }); ok(b2, 'значок не обновился: ' + (q('[data-nav-badge="bookings"]') || {}).textContent);
+      W().location.hash = '#/help'; await sleep(900);
+      const art = await waitFor(() => q('[data-help-article="r-bookings-requests"]')); ok(art && /Бронирования — подтвердить, отклонить или отменить заявку клиента/.test(art.textContent), 'нет статьи справки');
+      ok(/bookings:manage/.test(art.textContent) && /значок/.test(art.textContent) && /Запрошено/.test(art.textContent), 'статья неполная');
+    });
+    t(M, 'FR-189 CRM: ИИН клиента-ИП — только маскированно; неверная контрольная цифра → 422', async () => {
+      const name = 'ИП Сапарова ' + Math.random().toString(36).slice(2, 6);
+      const c = await req('POST', '/api/customers', { company: name, bin: '850102300131' }); ok(!c.error && c.bin === '8501••••••31' && c.tin_kind === 'iin', JSON.stringify(c).slice(0, 200));
+      const bad = await req('POST', '/api/customers', { company: 'Bad BIN', bin: '990140000553' }); ok(bad.status === 422, 'неверный БИН принят');
+      const list = await req('GET', '/api/customers'); ok(!JSON.stringify(list).includes('850102300131'), 'ИИН в списке клиентов');
+      W().location.hash = '#/customers'; await sleep(900);
+      await setIn('[data-f="customer-bin"]', '850102300131'); ok(q('[data-bin-state="iin"]'), 'нет отметки ИИН в форме клиента');
+      await setIn('[data-f="customer-bin"]', '');
+      W().location.hash = '#/s/overview'; await sleep(600);
+    });
+    return T;
+  };
+})();
+
+// FR-153 / FR-148 (lane C): insurance page (/insurance: policy card, claims from deviations, status steps with confirm),
+// customer price lists (CRM → Customers → "Price lists": create, deactivate) and the price-list / fuel-surcharge line on
+// the portal quote and the offer sample; RU / DE / EN texts, no Cyrillic on DE / EN.
+(() => {
+  const baseBuild = Component.prototype.build;
+  Component.prototype.build = function (fr) {
+    const T = baseBuild.call(this, fr);
+    const h = this.helpers(fr), { D, W, all, ok } = h;
+    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const q = sel => D().querySelector(sel);
+    const waitFor = async (fn, n = 40) => { for (let i = 0; i < n; i++) { try { const v = fn(); if (v) return v; } catch (e) { /* not yet */ } await sleep(150); } return null; };
+    const setVal = async (sel, v, doc) => { const d = doc || D(), e = d.querySelector(sel); if (!e) throw new Error('Нет поля ' + sel); const W2 = e.ownerDocument.defaultView;
+      const proto = e.tagName === 'SELECT' ? W2.HTMLSelectElement.prototype : W2.HTMLInputElement.prototype;
+      Object.getOwnPropertyDescriptor(proto, 'value').set.call(e, v); e.dispatchEvent(new W2.Event('input', { bubbles: true })); e.dispatchEvent(new W2.Event('change', { bubbles: true })); await sleep(160); };
+    const become = async (u, d) => { const wp = d && d.defaultView; // WindowProxy: stays valid across a reload of the frame
+      if (h.BE() && !d) { await h.asUser(u); } else if (h.BE()) { if (wp.__OLYMP_E2E && wp.__OLYMP_E2E.user() !== u) { wp.__OLYMP_E2E.setUser(u); wp.location.reload(); await sleep(1500); } } else { await setVal('.demo-role select', u, d); }
+      for (let i = 0; i < 60; i++) { try { const dd = wp ? wp.document : D(); if (dd.querySelector('nav a') || dd.querySelector('[data-page]')) break; } catch (e) { /* loading */ } await sleep(200); } await sleep(600); };
+    const req = async (m, p, b) => { try { return await W().__OLYMP_DEMO_REQ(m, p, b); } catch (e) { return { error: String(e && e.message || e), status: e && e.status, detail: e && e.detail }; } };
+    const cyrIn = el => { const w = el.ownerDocument.createTreeWalker(el, NodeFilter.SHOW_TEXT); let x; while ((x = w.nextNode())) { const m = x.textContent.match(/[А-Яа-яЁё]{2,}/); if (m) return m[0]; } return ''; };
+    const goHash = async (hh, ms = 900) => { W().location.hash = '#' + hh; await sleep(ms); };
+    const bookBody = { destination: { city_id: 'KZ-TAR', street: 'улица Абая', house: '10' }, pickup: { city_id: 'KZ-ALA', street: 'улица Абая', house: '5' }, temp_class: 'cold', pallets: 1, weight_kg: 100, goods: ['ivd'], lang: 'ru' };
+    const frameLang = async (lc, route) => {
+      const f2 = document.createElement('iframe'); f2.style.cssText = 'position:fixed;left:-3000px;top:0;width:1400px;height:900px;border:0';
+      f2.src = fr.getAttribute('src').replace('.html', '-' + lc + '.html') + '#' + route + '?lang=' + lc; document.body.appendChild(f2);
+      for (let k = 0; k < 60; k++) { try { if (f2.contentDocument.querySelector('.demo-role select') || f2.contentDocument.querySelector('nav a')) break; } catch (e) { /* loading */ } await sleep(200); } await sleep(500);
+      return f2;
+    };
+    const M = 'Страхование и прайс-листы · FR-153 / FR-148';
+    let claimNo = null, listId = null;
+    t(M, 'Страница «Страхование грузов» в группе 2: карточка полиса с пометкой «плановая запись», срок заявления 30 дней, таблица страховых случаев', async () => {
+      await become('admin');
+      ok(all('nav a').some(a => /\/insurance$/.test(a.getAttribute('href') || '')), 'нет пункта «Страхование грузов» в меню');
+      await goHash('/insurance', 1000); const card = await waitFor(() => q('[data-ins-policy]')); ok(card, 'нет карточки полиса');
+      ok(q('[data-ins-planning]') && /плановая запись/.test(q('[data-ins-planning]').textContent), 'нет пометки «плановая запись (вымышленная)»');
+      ok(q('[data-ins-claim-days]') && q('[data-ins-claim-days]').textContent.trim() === '30', 'срок заявления: ' + (q('[data-ins-claim-days]') || {}).textContent);
+      ok(/GP-2026-0001/.test(q('[data-ins-policy-no]').textContent) && /0,5 %/.test(q('[data-ins-deductible]').textContent), 'номер полиса / франшиза: ' + q('[data-ins-policy-no]').textContent);
+      ok(await waitFor(() => q('[data-ins-claims]')) && q('[data-claim-form]'), 'нет таблицы случаев или формы (quality:write)');
+      if (!h.BE()) {
+        ok(q('[data-claim="CL-00001"][data-claim-status="settled"]') && /урегулирован/.test(q('[data-claim="CL-00001"]').textContent), 'нет CL-00001 «урегулирован»');
+        ok(q('[data-claim="CL-00002"][data-claim-status="submitted"]') && /подан страховщику/.test(q('[data-claim="CL-00002"]').textContent), 'нет CL-00002 «подан страховщику»');
+        ok(q('[data-claim="CL-00002"] [data-claim-step="settled"]') && q('[data-claim="CL-00002"] [data-claim-step="rejected"]') && !q('[data-claim="CL-00001"] [data-claim-step]'), 'шаги статуса не по схеме');
+      }
+    });
+    t(M, 'Открыть страховой случай по отклонению: строка со статусом «открыт» и сроком; неизвестное отклонение → ошибка без строки; аудит без описания', async () => {
+      await goHash('/insurance', 800); await waitFor(() => q('[data-claim-form]'));
+      const before = all('[data-claim]').length;
+      await setVal('[data-claim-order]', 'ORD-26-000013'); await setVal('[data-claim-dev]', 'DEV-26-999999'); await setVal('[data-claim-amount]', '250000'); await setVal('[data-claim-note]', 'Excursion +9 C for 30 min, goods destroyed');
+      q('[data-claim-open]').click(); const err = await waitFor(() => q('[data-claim-form] .err')); ok(err, 'нет ошибки для неизвестного отклонения');
+      ok(all('[data-claim]').length === before && !q('[data-claim-opened]'), 'строка добавлена при ошибке');
+      if (h.BE()) return; // port: FR-136 backend – the seeded database has no deviation of an insured shipment
+      await setVal('[data-claim-dev]', 'DEV-26-0001'); q('[data-claim-open]').click();
+      const done = await waitFor(() => q('[data-claim-opened]')); ok(done && /Страховой случай открыт · CL-/.test(done.textContent), 'нет подтверждения: ' + (done && done.textContent));
+      claimNo = done.getAttribute('data-claim-opened');
+      const row = await waitFor(() => q('[data-claim="' + claimNo + '"][data-claim-status="open"]')); ok(row, 'строка ' + claimNo + ' не в статусе «открыт»');
+      ok(/открыт/.test(row.textContent) && /ORD-26-000013/.test(row.textContent) && /DEV-26-0001/.test(row.textContent) && /250 000 ₸/.test(row.textContent) && /01\.11\.2026/.test(row.textContent), 'строка: ' + row.textContent);
+      ok(row.querySelector('[data-claim-step="submitted"]') && !row.querySelector('[data-claim-step="settled"]'), 'у открытого случая не только «Подать страховщику»');
+      const dup = await req('POST', '/api/insurance/claims', { deviation: 'DEV-26-0001', order: 'ORD-26-000013', amount: 1000, note: 'duplicate claim attempt' }); ok(dup.status === 409, 'второй открытый случай принят: ' + JSON.stringify(dup).slice(0, 80));
+      const over = await req('POST', '/api/insurance/claims', { deviation: 'DEV-26-0002', order: 'ORD-26-000005', amount: 900000, note: 'amount above declared value' }); ok(over.status === 422, 'сумма выше объявленной стоимости принята');
+      const au = await req('GET', '/api/audit?limit=30'); const a = (au.items || au).find(x => x.action === 'insurance.claim_opened' && x.entity_id === claimNo);
+      ok(a && a.details.deviation === 'DEV-26-0001' && !/destroyed/.test(JSON.stringify(a)), 'аудит отсутствует или содержит описание: ' + JSON.stringify(a).slice(0, 120));
+    });
+    t(M, 'Шаги статуса с подтверждением: открыт → подан страховщику → урегулирован; отмена подтверждения ничего не меняет', async () => {
+      if (h.BE()) return; // port: FR-136 backend – no claim (see above)
+      await goHash('/insurance', 800); const row = await waitFor(() => q('[data-claim="' + claimNo + '"]')); ok(row, 'нет строки ' + claimNo);
+      W().confirm = () => false; row.querySelector('[data-claim-step="submitted"]').click(); await sleep(500);
+      ok(q('[data-claim="' + claimNo + '"][data-claim-status="open"]'), 'статус изменился без подтверждения');
+      W().confirm = () => true; W().prompt = (m, dflt) => dflt; q('[data-claim="' + claimNo + '"] [data-claim-step="submitted"]').click();
+      const r2 = await waitFor(() => q('[data-claim="' + claimNo + '"][data-claim-status="submitted"]')); ok(r2 && /подан страховщику/.test(r2.textContent) && /передано страховщику/.test(r2.textContent), 'не подан: ' + (r2 && r2.textContent));
+      q('[data-claim="' + claimNo + '"] [data-claim-step="settled"]').click();
+      const r3 = await waitFor(() => q('[data-claim="' + claimNo + '"][data-claim-status="settled"]')); ok(r3 && /урегулирован/.test(r3.textContent) && !r3.querySelector('[data-claim-step]'), 'не урегулирован');
+      const bad = await req('POST', '/api/insurance/claims/' + claimNo + '/status', { status: 'submitted', note: 'back to submitted' }); ok(bad.status === 409, 'обратный переход принят');
+      const au2 = await req('GET', '/api/audit?limit=40'); const acts = (au2.items || au2).filter(x => x.entity_id === claimNo).map(x => x.action);
+      ok(acts.includes('insurance.claim_submitted') && acts.includes('insurance.claim_settled'), 'аудит шагов: ' + acts.join(','));
+    });
+    t(M, 'CRM → Клиенты → «Прайс-листы»: действующий список, создать рамочный (−10 %, база 300) → строка и пометка «действует сейчас»; спот со скидкой → 422', async () => {
+      await goHash('/customers', 900);
+      const row = await waitFor(() => all('[data-customer]').find(r => /KDL Olymp/.test(r.textContent))); ok(row, 'нет клиента KDL Olymp');
+      row.querySelector('[data-pl-toggle]').click(); const box = await waitFor(() => q('[data-pl-customer]')); ok(box, 'раздел прайс-листов не открылся');
+      await waitFor(() => q('[data-pl-table]') && q('[data-pl-current]'));
+      if (!h.BE()) ok(q('[data-pl-current="1"]') && /−5 %/.test(q('[data-pl-current]').textContent) && /340 \/ 340/.test(q('[data-pl-current]').textContent), 'действующий список: ' + q('[data-pl-current]').textContent);
+      const cid = box.getAttribute('data-pl-customer');
+      const bad = await req('POST', '/api/customers/' + cid + '/price-lists', { kind: 'spot', discount_pct: 5, fuel_base_diesel: 300, valid_from: '2026-10-06' }); ok(bad.status === 422, 'спот со скидкой принят');
+      const back = await req('POST', '/api/customers/' + cid + '/price-lists', { kind: 'framework', discount_pct: 5, fuel_base_diesel: 300, valid_from: '2020-01-01' }); ok(back.status === 422, 'задним числом принято');
+      await setVal('[data-pl-kind]', 'framework'); await setVal('[data-pl-discount]', '10'); await setVal('[data-pl-base]', '300'); await setVal('[data-pl-from]', '2026-10-06');
+      q('[data-pl-create]').click();
+      const cur = await waitFor(() => { const c = q('[data-pl-current]'); return c && /−10 %/.test(c.textContent) ? c : null; }); ok(cur, 'новый список не действует: ' + (q('[data-pl-current]') || {}).textContent);
+      listId = cur.getAttribute('data-pl-current'); ok(/340 \/ 300/.test(cur.textContent), 'дизель / база: ' + cur.textContent);
+      const r2 = q('[data-pl-row="' + listId + '"]'); ok(r2 && r2.getAttribute('data-pl-active') === '1' && /−10 %/.test(r2.textContent) && /Действует сейчас/.test(r2.textContent) && r2.querySelector('[data-pl-off]'), 'строка списка: ' + (r2 && r2.textContent));
+      const au = await req('GET', '/api/audit?limit=20'); const a = (au.items || au).find(x => x.action === 'price_list.created' && String(x.details.list) === listId); ok(a && /^10(\.0)?$/.test(String(a.details.discount_pct)), 'аудит создания: ' + JSON.stringify(a).slice(0, 100));
+      const nope = await (async () => { try { return await W().__OLYMP_DEMO_REQ_AS('kdl.portal', 'GET', '/api/customers/' + cid + '/price-lists'); } catch (e) { return { status: e.status }; } })(); ok(nope.status === 403, 'клиент видит прайс-листы');
+    });
+    t(M, 'Портал: расчёт цены показывает «Прайс-лист клиента» (рамочный · −10 % · дизель 340 / база 300), скидку и топливную надбавку; образец предложения — ту же строку', async () => {
+      const av = await (async () => { try { return await W().__OLYMP_DEMO_REQ_AS('kdl.portal', 'POST', '/api/portal/availability', bookBody); } catch (e) { return { error: e.message, status: e.status }; } })();
+      ok(av.price && av.price.price_terms && String(av.price.price_terms.list_id) === listId && av.price.discount > 0 && av.price.fuel_surcharge > 0, 'расчёт без условий списка: ' + JSON.stringify(av.price || av).slice(0, 200));
+      ok(av.price.net === av.price.freight + av.price.fuel_surcharge + av.price.adr_surcharge + (av.price.handling || 0), 'нетто ≠ перевозка + надбавка');
+      await become('kdl.portal'); await goHash('/book', 900);
+      for (let i = 0; i < 40 && D().querySelectorAll('select[data-f="pickup-city"] option').length < 10; i++) await sleep(150);
+      await setVal('select[data-f="pickup-city"]', 'KZ-ALA'); await setVal('[data-f="pickup-street"]', 'улица Абая'); await setVal('[data-f="pickup-house"]', '5');
+      await setVal('select[data-f="dest-city"]', 'KZ-TAR'); await setVal('[data-f="dest-street"]', 'улица Абая'); await setVal('[data-f="dest-house"]', '10');
+      await setVal('[data-f="weight"]', '100'); if (!q('[data-good="ivd"] input').checked) { q('[data-good="ivd"] input').click(); await sleep(250); }
+      q('[data-search]').click(); const price = await waitFor(() => q('[data-price]')); ok(price, 'нет цены');
+      const pl = q('[data-p="price-list"]'); ok(pl && pl.getAttribute('data-price-list') === listId && /рамочный #/.test(pl.textContent) && /−10 %/.test(pl.textContent) && /дизель 340 \/ база 300/.test(pl.textContent), 'строка прайс-листа: ' + (pl && pl.textContent));
+      ok(q('[data-p="discount"]') && q('[data-p="fuel"]') && /Прайс-лист клиента/.test(price.textContent), 'нет строк скидки / надбавки');
+      const ob = await waitFor(() => q('[data-offer-open]')); ob.click(); const sheet = await waitFor(() => q('[data-offer]')); ok(sheet, 'образец не открылся');
+      const opl = sheet.querySelector('[data-offer-price-list]'); ok(opl && opl.getAttribute('data-offer-price-list') === listId && /−10 %/.test(opl.textContent), 'в образце нет строки прайс-листа: ' + (opl && opl.textContent));
+      ok(sheet.querySelector('[data-offer-fuel]') && /Топливная надбавка/.test(sheet.textContent) && /скидка/.test(sheet.textContent), 'в образце нет надбавки / скидки');
+      q('[data-offer-close]').click(); await sleep(300);
+    });
+    ['de', 'en'].forEach(lc => t(M, lc.toUpperCase() + ': страница страхования и прайс-листы без кириллицы; строка прайс-листа в расчёте', async () => {
+      const f2 = await frameLang(lc, '/s/overview');
+      try {
+        let d = f2.contentDocument;
+        await become('admin', d); d = f2.contentDocument; f2.contentWindow.location.hash = '#/insurance'; await sleep(1000); d = f2.contentDocument; // the demo role switch may reload the frame
+        const card = await waitFor(() => d.querySelector('[data-ins-policy]')); ok(card, lc + ': нет карточки полиса · ' + f2.contentWindow.location.hash + ' · ' + ((d.querySelector('main') || d.body).textContent || '').replace(/\s+/g, ' ').slice(0, 240));
+        await waitFor(() => d.querySelector('[data-ins-claims]'));
+        const txt = d.querySelector('[data-page="insurance"]').textContent;
+        ok(lc === 'de' ? /Transportversicherung/.test(txt) && /Planwert \(fiktiv\)/.test(txt) && /Schadenfälle/.test(txt) : /Cargo insurance/.test(txt) && /planning entry \(fictitious\)/.test(txt) && /Claims/.test(txt), lc + ': ' + txt.slice(0, 160));
+        if (!h.BE()) ok(lc === 'de' ? /eingereicht/.test(d.querySelector('[data-claim="CL-00002"]').textContent) : /submitted/.test(d.querySelector('[data-claim="CL-00002"]').textContent), lc + ': статус случая');
+        let bad = cyrIn(d.querySelector('[data-page="insurance"]')); ok(!bad, lc + ' insurance: «' + bad + '»');
+        f2.contentWindow.location.hash = '#/customers'; await sleep(900);
+        const row = await waitFor(() => [...d.querySelectorAll('[data-customer]')].find(r => /KDL Olymp/.test(r.textContent))); ok(row, lc + ': нет клиента');
+        row.querySelector('[data-pl-toggle]').click(); const box = await waitFor(() => d.querySelector('[data-pl-customer] [data-pl-row]')); ok(box, lc + ': нет прайс-листов');
+        const ptxt = d.querySelector('[data-pl-customer]').textContent;
+        ok(lc === 'de' ? /Preislisten/.test(ptxt) && /Gilt heute/.test(ptxt) && /Rahmenvertrag/.test(ptxt) : /Price lists/.test(ptxt) && /In force today/.test(ptxt) && /framework/.test(ptxt), lc + ': ' + ptxt.slice(0, 120));
+        bad = cyrIn(d.querySelector('[data-pl-customer]')); ok(!bad, lc + ' price lists: «' + bad + '»');
+        await become('kdl.portal', d); d = f2.contentDocument; f2.contentWindow.location.hash = '#/book'; await sleep(900); d = f2.contentDocument;
+        for (let i = 0; i < 40 && d.querySelectorAll('select[data-f="pickup-city"] option').length < 10; i++) await sleep(150);
+        await setVal('select[data-f="pickup-city"]', 'KZ-ALA', d); await setVal('[data-f="pickup-street"]', 'Abay St', d); await setVal('[data-f="pickup-house"]', '5', d);
+        await setVal('select[data-f="dest-city"]', 'KZ-SHY', d); await setVal('[data-f="dest-street"]', 'Abay St', d); await setVal('[data-f="dest-house"]', '9', d);
+        await setVal('[data-f="weight"]', '100', d); if (!d.querySelector('[data-good="ivd"] input').checked) { d.querySelector('[data-good="ivd"] input').click(); await sleep(250); }
+        d.querySelector('[data-search]').click(); const price = await waitFor(() => d.querySelector('[data-price]')); ok(price, lc + ': нет цены');
+        const pl = d.querySelector('[data-p="price-list"]'); ok(pl && (lc === 'de' ? /Rahmenvertrag #/.test(pl.textContent) && /Diesel 340 \/ Basis 300/.test(pl.textContent) : /framework #/.test(pl.textContent) && /diesel 340 \/ base 300/.test(pl.textContent)), lc + ': ' + (pl && pl.textContent));
+        bad = cyrIn(price); ok(!bad, lc + ' price: «' + bad + '»');
+        await become('admin', d);
+      } finally { f2.remove(); }
+    }));
+    t(M, 'Деактивировать прайс-лист → расчёт возвращается к предыдущему списку / тарифу линии; сброс: снова администратор', async () => {
+      await become('admin');
+      if (h.BE()) { // port: the language frames of the previous tests switched the shared account – reopen the main frame as admin
+        fr.src = fr.getAttribute('src'); await sleep(800); await waitFor(() => D().querySelector('nav [data-nav]'), 80); }
+      await goHash('/customers', 900);
+      let row = await waitFor(() => all('[data-customer]').find(r => /KDL Olymp/.test(r.textContent)));
+      if (!row) { await goHash('/s/overview', 400); await goHash('/customers', 1500); row = await waitFor(() => all('[data-customer]').find(r => /KDL Olymp/.test(r.textContent))); } // slow first load after the role switch (real backend)
+      ok(row, 'нет строки клиента KDL Olymp · ' + W().location.hash + ' · ' + (W().__OLYMP_E2E ? W().__OLYMP_E2E.user() : '') + ' · ' + ((q('main') || D().body).textContent || '').replace(/\s+/g, ' ').slice(0, 200)); row.querySelector('[data-pl-toggle]').click();
+      const btn = await waitFor(() => q('[data-pl-off="' + listId + '"]')); ok(btn, 'нет кнопки деактивации');
+      W().confirm = () => true; btn.click();
+      ok(await waitFor(() => q('[data-pl-row="' + listId + '"][data-pl-active="0"]')), 'список не деактивирован');
+      const cur = await waitFor(() => { const c = q('[data-pl-current]'); return c && c.getAttribute('data-pl-current') !== listId ? c : null; }); ok(cur, 'действующий список не сменился: ' + (q('[data-pl-current]') || {}).textContent);
+      const av = await (async () => { try { return await W().__OLYMP_DEMO_REQ_AS('kdl.portal', 'POST', '/api/portal/availability', bookBody); } catch (e) { return { error: e.message }; } })();
+      ok(av.price && !(av.price.price_terms && String(av.price.price_terms.list_id) === listId) && !av.price.fuel_surcharge, 'расчёт всё ещё по деактивированному списку: ' + JSON.stringify(av.price || av).slice(0, 160));
+      await goHash('/s/overview', 600); ok(D().querySelectorAll('nav [data-nav]').length >= 17, 'нет меню администратора');
+    });
     return T;
   };
 })();
