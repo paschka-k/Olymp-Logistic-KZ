@@ -228,10 +228,14 @@ function shardRange(T, search) {
   const k = Math.max(1, +m[1]), n = Math.max(1, +m[2]); if (n === 1) return [0, T.length];
   const fixed = /[?&]cuts=([\d,]+)/.exec(search || '');
   let cuts;
-  if (fixed) cuts = fixed[1].split(',').map(x => +x - 1);
+  // allowed cut points: a new block, or a new module inside a suite-ext block (those modules start from their own screen /
+  // reset group); never inside the ported suite (blk undefined), whose modules continue each other's state
+  const blockStarts = []; for (let i = 1; i < T.length; i++) if (T[i].blk !== T[i - 1].blk || (T[i].blk !== undefined && T[i].mod !== T[i - 1].mod)) blockStarts.push(i);
+  const snap = (x) => blockStarts.reduce((a, b) => Math.abs(b - x) < Math.abs(a - x) ? b : a, blockStarts[0] || T.length);
+  // fixed cuts (CI, balanced by measured durations) are snapped to the nearest block start – new tests never split a block
+  if (fixed) cuts = fixed[1].split(',').map(x => snap(+x - 1));
   else {
-    const starts = []; for (let i = 1; i < T.length; i++) if (T[i].mod !== T[i - 1].mod) starts.push(i);
-    cuts = []; for (let j = 1; j < n; j++) { const target = Math.round(j * T.length / n); cuts.push(starts.reduce((a, b) => Math.abs(b - target) < Math.abs(a - target) ? b : a, starts[0] || T.length)); }
+    cuts = []; for (let j = 1; j < n; j++) cuts.push(snap(Math.round(j * T.length / n)));
   }
   const b = [0, ...cuts, T.length].sort((x, y) => x - y);
   return [b[k - 1], b[Math.min(k, b.length - 1)]];
@@ -626,7 +630,9 @@ class Component extends DCLogic {
     }
     this.setState({ running: false, current: 'готово', findings: this.findings(), secs: Math.round((performance.now() - t0) / 1000) });
     const fin = this.state.res, fails = T.map((x, i) => fin[i] && fin[i].st === 'fail' ? (i + 1) + '. ' + x.mod + ' · ' + x.name + ' — ' + fin[i].err : null).filter(Boolean);
-    window.__TESTS = { done: true, total: hi - lo, passed: hi - lo - fails.length, failed: fails.length, failures: fails, range: [lo + 1, hi], all: T.length };
+    window.__TESTS = { done: true, total: hi - lo, passed: hi - lo - fails.length, failed: fails.length, failures: fails, range: [lo + 1, hi], all: T.length,
+      // port: FR-171 – duration per test and its block (shard balancing: scripts/ui_shard_cuts.py)
+      timing: T.slice(lo, hi).map((x, k) => [lo + k + 1, x.blk === undefined ? -1 : x.blk, (fin[lo + k] || {}).ms || 0, x.mod]) };
   }
 
   // port: FR-136 (4) – reset the state keys of a module group (POST /api/v5/reset {keys}; demo: mock API, backend: as admin) and
@@ -676,7 +682,7 @@ class Component extends DCLogic {
   Component.prototype.build = function (fr) {
     const T = baseBuild.call(this, fr);
     const h = this.helpers(fr), { O, D, all, click, nav, has, not, ok, txt } = h;
-    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const B0 = T.length, t = (mod, name, fn) => T.push({ mod, name, fn, blk: B0 }); // port: FR-171 – shard cuts only between blocks
     const M = 'Загрузка · типы ТС';
     const q = sel => D().querySelector(sel);
     const press = async sel => { const b = q(sel); if (!b) throw new Error('Нет элемента ' + sel); b.click(); await sleep(420); };
@@ -1704,7 +1710,7 @@ class Component extends DCLogic {
   Component.prototype.build = function (fr) {
     const T = baseBuild.call(this, fr);
     const h = this.helpers(fr), { D, O, all, nav, has, ok } = h;
-    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const B0 = T.length, t = (mod, name, fn) => T.push({ mod, name, fn, blk: B0 }); // port: FR-171 – shard cuts only between blocks
     const q = sel => D().querySelector(sel);
     const HMS = /^\d\d:\d\d:\d\d$/;
     const frame = async (url, ready) => {
@@ -2042,7 +2048,7 @@ class Component extends DCLogic {
   Component.prototype.build = function (fr) {
     const T = baseBuild.call(this, fr);
     const h = this.helpers(fr), { D, O, all, nav, has, ok } = h;
-    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const B0 = T.length, t = (mod, name, fn) => T.push({ mod, name, fn, blk: B0 }); // port: FR-171 – shard cuts only between blocks
     const q = sel => D().querySelector(sel);
     const req = (m, p, b) => fr.contentWindow.__OLYMP_DEMO_REQ(m, p, b);
     const rejects = async (p) => { try { await p; return null; } catch (e) { return e; } };
@@ -2162,7 +2168,7 @@ class Component extends DCLogic {
   Component.prototype.build = function (fr) {
     const T = baseBuild.call(this, fr);
     const h = this.helpers(fr), { D, all, nav, has, ok } = h;
-    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const B0 = T.length, t = (mod, name, fn) => T.push({ mod, name, fn, blk: B0 }); // port: FR-171 – shard cuts only between blocks
     const q = sel => D().querySelector(sel);
     const MI = 'Доставка · ePOD и связь (FR-107…113)';
     const W = () => fr.contentWindow;
@@ -2289,7 +2295,7 @@ class Component extends DCLogic {
   Component.prototype.build = function (fr) {
     const T = baseBuild.call(this, fr);
     const h = this.helpers(fr), { D, O, all, nav, ok } = h;
-    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const B0 = T.length, t = (mod, name, fn) => T.push({ mod, name, fn, blk: B0 }); // port: FR-171 – shard cuts only between blocks
     const q = sel => D().querySelector(sel);
     const req = (m, p, b) => fr.contentWindow.__OLYMP_DEMO_REQ(m, p, b);
     const rejects = async (p) => { try { await p; return null; } catch (e) { return e; } };
@@ -2412,7 +2418,7 @@ class Component extends DCLogic {
   Component.prototype.build = function (fr) {
     const T = baseBuild.call(this, fr);
     const h = this.helpers(fr), { D, O, all, nav, has, ok } = h;
-    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const B0 = T.length, t = (mod, name, fn) => T.push({ mod, name, fn, blk: B0 }); // port: FR-171 – shard cuts only between blocks
     const q = sel => D().querySelector(sel);
     const req = (m, p, b) => fr.contentWindow.__OLYMP_DEMO_REQ(m, p, b);
     const rejects = async (p) => { try { await p; return null; } catch (e) { return e; } };
@@ -2604,7 +2610,7 @@ class Component extends DCLogic {
   Component.prototype.build = function (fr) {
     const T = baseBuild.call(this, fr);
     const h = this.helpers(fr), { D, W, all, nav, ok } = h;
-    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const B0 = T.length, t = (mod, name, fn) => T.push({ mod, name, fn, blk: B0 }); // port: FR-171 – shard cuts only between blocks
     const q = sel => D().querySelector(sel);
     const goHash = async (hh, ms = 900) => { W().location.hash = '#' + hh; await sleep(ms); };
     const setVal = async (sel, v, doc) => { const e = (doc || D()).querySelector(sel); if (!e) throw new Error('Нет поля ' + sel); const W2 = e.ownerDocument.defaultView;
@@ -2814,7 +2820,7 @@ class Component extends DCLogic {
   Component.prototype.build = function (fr) {
     const T = baseBuild.call(this, fr);
     const h = this.helpers(fr), { O, D, all, nav, ok } = h;
-    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const B0 = T.length, t = (mod, name, fn) => T.push({ mod, name, fn, blk: B0 }); // port: FR-171 – shard cuts only between blocks
     const MP = 'FR-139…157 Подбор ТС и погрузка';
     const q = sel => D().querySelector(sel);
     const demoReq = () => fr.contentWindow.__OLYMP_DEMO_REQ;
@@ -2932,7 +2938,7 @@ class Component extends DCLogic {
   Component.prototype.build = function (fr) {
     const T = baseBuild.call(this, fr);
     const h = this.helpers(fr), { D, W, all, nav, ok } = h;
-    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const B0 = T.length, t = (mod, name, fn) => T.push({ mod, name, fn, blk: B0 }); // port: FR-171 – shard cuts only between blocks
     const q = sel => D().querySelector(sel);
     const goHash = async (hh, ms = 900) => { W().location.hash = '#' + hh; await sleep(ms); };
     const waitFor = async (fn, n = 40) => { for (let i = 0; i < n; i++) { try { const v = fn(); if (v) return v; } catch (e) { /* not yet */ } await sleep(150); } return null; };
@@ -3222,7 +3228,7 @@ class Component extends DCLogic {
   Component.prototype.build = function (fr) {
     const T = baseBuild.call(this, fr);
     const h = this.helpers(fr), { D, W, all, ok } = h;
-    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const B0 = T.length, t = (mod, name, fn) => T.push({ mod, name, fn, blk: B0 }); // port: FR-171 – shard cuts only between blocks
     const q = sel => D().querySelector(sel);
     const goHash = async (hh, ms = 900) => { W().location.hash = '#' + hh; await sleep(ms); };
     const waitFor = async (fn, n = 40) => { for (let i = 0; i < n; i++) { try { const v = fn(); if (v) return v; } catch (e) { /* not yet */ } await sleep(150); } return null; };
@@ -3276,7 +3282,7 @@ class Component extends DCLogic {
   Component.prototype.build = function (fr) {
     const T = baseBuild.call(this, fr);
     const h = this.helpers(fr), { D, W, all, ok } = h;
-    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const B0 = T.length, t = (mod, name, fn) => T.push({ mod, name, fn, blk: B0 }); // port: FR-171 – shard cuts only between blocks
     const q = sel => D().querySelector(sel);
     const goHash = async (hh, ms = 900) => { W().location.hash = '#' + hh; await sleep(ms); };
     const waitFor = async (fn, n = 40) => { for (let i = 0; i < n; i++) { try { const v = fn(); if (v) return v; } catch (e) { /* not yet */ } await sleep(150); } return null; };
@@ -3319,7 +3325,7 @@ class Component extends DCLogic {
   Component.prototype.build = function (fr) {
     const T = baseBuild.call(this, fr);
     const h = this.helpers(fr), { D, W, all, ok, nav } = h;
-    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const B0 = T.length, t = (mod, name, fn) => T.push({ mod, name, fn, blk: B0 }); // port: FR-171 – shard cuts only between blocks
     const q = sel => D().querySelector(sel);
     const sleepFor = async (fn, n = 40) => { for (let i = 0; i < n; i++) { try { const v = fn(); if (v) return v; } catch (e) { /* not yet */ } await sleep(150); } return null; };
     const setSel = async (sel, v) => { const s = q(sel); const set = Object.getOwnPropertyDescriptor(W().HTMLSelectElement.prototype, 'value').set; set.call(s, v); s.dispatchEvent(new (W().Event)('change', { bubbles: true })); await sleep(900); };
@@ -3369,7 +3375,7 @@ class Component extends DCLogic {
   Component.prototype.build = function (fr) {
     const T = baseBuild.call(this, fr);
     const h = this.helpers(fr), { D, W, all, ok } = h;
-    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const B0 = T.length, t = (mod, name, fn) => T.push({ mod, name, fn, blk: B0 }); // port: FR-171 – shard cuts only between blocks
     const q = sel => D().querySelector(sel);
     const goHash = async (hh, ms = 900) => { W().location.hash = '#' + hh; await sleep(ms); };
     const waitFor = async (fn, n = 40) => { for (let i = 0; i < n; i++) { try { const v = fn(); if (v) return v; } catch (e) { /* not yet */ } await sleep(150); } return null; };
@@ -3417,7 +3423,7 @@ class Component extends DCLogic {
   Component.prototype.build = function (fr) {
     const T = baseBuild.call(this, fr);
     const h = this.helpers(fr), { D, W, all, ok } = h;
-    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const B0 = T.length, t = (mod, name, fn) => T.push({ mod, name, fn, blk: B0 }); // port: FR-171 – shard cuts only between blocks
     const q = sel => D().querySelector(sel);
     const goHash = async (hh, ms = 900) => { W().location.hash = '#' + hh; await sleep(ms); };
     const waitFor = async (fn, n = 40) => { for (let i = 0; i < n; i++) { try { const v = fn(); if (v) return v; } catch (e) { /* not yet */ } await sleep(150); } return null; };
@@ -3458,7 +3464,7 @@ class Component extends DCLogic {
   Component.prototype.build = function (fr) {
     const T = baseBuild.call(this, fr);
     const h = this.helpers(fr), { D, W, all, ok } = h;
-    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const B0 = T.length, t = (mod, name, fn) => T.push({ mod, name, fn, blk: B0 }); // port: FR-171 – shard cuts only between blocks
     const q = sel => D().querySelector(sel);
     const M = 'Переключатель дизайна · Olymp ↔ Kökzhol';
     t(M, 'По умолчанию текущий дизайн; переключатель в подвале меню; Kökzhol: тёмное меню, знак и словесный знак, один цвет действия', async () => {
@@ -3492,7 +3498,7 @@ class Component extends DCLogic {
   Component.prototype.build = function (fr) {
     const T = baseBuild.call(this, fr);
     const h = this.helpers(fr), { D, W, all, ok } = h;
-    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const B0 = T.length, t = (mod, name, fn) => T.push({ mod, name, fn, blk: B0 }); // port: FR-171 – shard cuts only between blocks
     const q = sel => D().querySelector(sel);
     const M = 'Иконки навигации · Olymp duotone / Kökzhol tile';
     t(M, 'Olymp: у каждого пункта меню (17 + учёт + справка) есть иконка, число 01–17 сохранено, текст без лишних символов', async () => {
@@ -3525,7 +3531,7 @@ class Component extends DCLogic {
   Component.prototype.build = function (fr) {
     const T = baseBuild.call(this, fr);
     const h = this.helpers(fr), { D, W, all, ok, results } = h;
-    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const B0 = T.length, t = (mod, name, fn) => T.push({ mod, name, fn, blk: B0 }); // port: FR-171 – shard cuts only between blocks
     const q = sel => D().querySelector(sel);
     const waitFor = async (fn, n = 40) => { for (let i = 0; i < n; i++) { try { const v = fn(); if (v) return v; } catch (e) { /* not yet */ } await sleep(150); } return null; };
     const setSel = async (sel, v, doc) => { const d = doc || D(), s = d.querySelector(sel); if (!s) throw new Error('Нет поля ' + sel); const set = Object.getOwnPropertyDescriptor(d.defaultView.HTMLSelectElement.prototype, 'value').set; set.call(s, v); s.dispatchEvent(new (d.defaultView.Event)('change', { bubbles: true })); await sleep(900); };
@@ -3684,7 +3690,7 @@ class Component extends DCLogic {
   Component.prototype.build = function (fr) {
     const T = baseBuild.call(this, fr);
     const h = this.helpers(fr), { D, W, ok } = h;
-    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const B0 = T.length, t = (mod, name, fn) => T.push({ mod, name, fn, blk: B0 }); // port: FR-171 – shard cuts only between blocks
     const q = sel => D().querySelector(sel);
     const waitFor = async (fn, n = 40) => { for (let i = 0; i < n; i++) { try { const v = fn(); if (v) return v; } catch (e) { /* not yet */ } await sleep(150); } return null; };
     const setSel = async (sel, v, doc) => { const d = doc || D(), s = d.querySelector(sel); if (!s) throw new Error('Нет поля ' + sel); const set = Object.getOwnPropertyDescriptor(d.defaultView.HTMLSelectElement.prototype, 'value').set; set.call(s, v); s.dispatchEvent(new (d.defaultView.Event)('change', { bubbles: true })); await sleep(300); };
@@ -3834,7 +3840,7 @@ class Component extends DCLogic {
   Component.prototype.build = function (fr) {
     const T = baseBuild.call(this, fr);
     const h = this.helpers(fr), { D, W, all, ok } = h;
-    const t = (mod, name, fn) => T.push({ mod, name, fn });
+    const B0 = T.length, t = (mod, name, fn) => T.push({ mod, name, fn, blk: B0 }); // port: FR-171 – shard cuts only between blocks
     const q = sel => D().querySelector(sel);
     const waitFor = async (fn, n = 40) => { for (let i = 0; i < n; i++) { try { const v = fn(); if (v) return v; } catch (e) { /* not yet */ } await sleep(150); } return null; };
     const setVal = async (sel, v, doc) => { const d = doc || D(), e = d.querySelector(sel); if (!e) throw new Error('Нет поля ' + sel); const W2 = e.ownerDocument.defaultView;
