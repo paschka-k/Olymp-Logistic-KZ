@@ -1,0 +1,38 @@
+# platform-src — modular sources of Platform v5
+
+`platform-v5.3.html`, `platform-v5.3-de.html` and `platform-v5.3-en.html` are **generated** (v5.3; the older `platform-v5*.html` stay untouched). Version and file names live in `manifest.json` (`version`, `outputs`); segments use the tokens `@@VERSION@@`, `@@FILE_RU@@`, `@@FILE_DE@@`, `@@FILE_EN@@`. To cut the next version change them there. Edit the files here, then:
+
+```powershell
+node platform-src/build.mjs            # writes the three HTML files next to platform-src/
+node platform-src/build.mjs --lang ru  # one language only
+node platform-src/build.mjs --out dist # other output folder
+```
+Node 18+ is the only requirement (no npm packages).
+
+## Layout
+```
+platform-src/
+  manifest.json          ordered list of segments (= the build recipe) and output names
+  build.mjs              assembles the segments into the bundle
+  shared/screens/<id>/   language-neutral modules (texts via X(ru, de, en))  ← put NEW screens here
+  lang/<ru|de|en>/
+    bundle.html          bundle wrapper (assets), template is injected at /*@TEMPLATE@*/
+    shell/               head, CSS tokens, sidebar, top bar, overlays, script open/close
+    core/                i18n helpers, NAV, simulation clock, alerts, render (renderVals), units
+    screens/<id>/        view.html (markup) · data.js (constants) · logic.js (class methods)
+```
+Every screen = up to three segments: **view** (HTML in the `x-dc` template language), **data** (constants) and **logic** (`xxxVals()` methods of `Component`). The order in `manifest.json` matters (data before the class, class methods before `core/render.js`).
+
+## Add a new screen (checklist)
+1. `shared/screens/<id>/view.html` — one `<sc-if value="{{ is.<id> }}">…</sc-if>` block.
+2. `…/data.js` — constants (top level) and `…/logic.js` — a method `<id>Vals()` returning the bindings.
+3. `lang/*/core/nav.js` — add `['<id>','NN',label,subtitle]` (use `X(ru,de,en)` for labels).
+4. `lang/*/core/render.js` — add `...this.<id>Vals(),` to the returned object.
+5. `manifest.json` — insert the three segments (view before `screens/baseline/view.html`, data after the last data segment, logic before `core/render.js`).
+6. `node platform-src/build.mjs`. Set `"off": true` on a segment to switch it off without deleting it.
+
+The existing legacy screens are still per-language (they were translated by hand); new work should go to `shared/` so a change is made once for RU/DE/EN.
+
+## Screen 17 — Goods receipt (`shared/screens/inbound/`)
+Inbound list per hub (Astana / Almaty), status ordered → planned → at gate → unloaded, numbered sender and stop chips (green = unloaded), pre-carriage data, ramp windows, dwell clock turning red, delay question, Standgeld (free time, 6 000 ₸ per started 30 min, booked into screen 16), process timestamps, gate cold-chain check (temperature, logger, SSCC), side panel with progress and audit footer, feature chips (fixed slot, ADR, shortage, QA hold, customs, GDP, temperature class, ЭСФ / ЭСУТД), column filters, saved views, CSV export.
+Tune: `INB_RATE`, `INB_STEP`, `INB_TR` (temperature ranges), ramps `INB_RAMPS`, and the demo jobs `INBJ` in `data.js`.

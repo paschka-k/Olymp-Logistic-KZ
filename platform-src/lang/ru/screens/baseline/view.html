@@ -1,0 +1,149 @@
+      <sc-if value="{{ is.baseline }}">
+        <section data-screen-label="Исходные данные" style="display:flex;flex-direction:column;gap:22px">
+          <span style="font-size:13px;color:var(--color-neutral-800);max-width:980px;text-wrap:pretty">Fragenkatalog «Логистика Казахстан», 150 ответов коллег от 07.10.2026, сверен с моделью платформы. Источники ответов: накладные GarantA и KazExpress (фев–июл 2026), реестр температурных отправок 2026, КП на технику и лизинг. Номера в скобках — вопросы каталога.</span>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px">
+            <sc-for list="{{ blKpis }}" as="k" hint-placeholder-count="8">
+              <div class="blueprint" style="padding:14px;display:flex;flex-direction:column;gap:6px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700)">{{ k.k }}</span>
+                <span style="font-family:var(--font-heading);font-weight:600;font-size:26px;line-height:1.05">{{ k.v }}</span>
+                <span style="font-size:11px;color:var(--color-neutral-700)">{{ k.sub }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;border:1px solid var(--color-divider);align-self:flex-start"><sc-for list="{{ blTabs }}" as="b"><button data-bltab="1" sc-camel-on-click="{{ b.go }}" style="font-size:13px;padding:7px 12px;border:0;border-right:1px solid var(--color-divider);cursor:pointer;background:{{ b.bg }};color:{{ b.fg }}">{{ b.label }}</button></sc-for></div>
+
+          <sc-if value="{{ blIs.val }}">
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+                <h3 style="margin:0;font-size:20px">Сверка ответов с платформой v3</h3>
+                <div style="display:flex;flex-wrap:wrap;border:1px solid var(--color-divider);align-self:flex-start"><sc-for list="{{ blFOpts }}" as="b"><button data-blf="1" sc-camel-on-click="{{ b.go }}" style="font-size:13px;padding:7px 12px;border:0;border-right:1px solid var(--color-divider);cursor:pointer;background:{{ b.bg }};color:{{ b.fg }}">{{ b.label }}</button></sc-for></div>
+              </div>
+              <div style="overflow-x:auto"><div style="min-width:1040px;display:flex;flex-direction:column">
+                <div style="display:grid;grid-template-columns:64px 140px minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) 110px;gap:10px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>ID</span><span>Тема · вопрос</span><span>Fragenkatalog</span><span>Платформа v3</span><span>Решение в v4</span><span>Статус</span></div>
+                <sc-for list="{{ blFind }}" as="f" hint-placeholder-count="8">
+                  <div data-finding="{{ f.id }}" style="display:grid;grid-template-columns:64px 140px minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) 110px;gap:10px;font-size:13px;padding:8px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);align-items:start">
+                    <span style="font-family:var(--font-heading);font-weight:600">{{ f.id }}</span>
+                    <span style="display:flex;flex-direction:column"><span style="font-weight:500">{{ f.area }}</span><span style="font-size:11px;color:var(--color-accent-700)">{{ f.ref }}</span></span>
+                    <span style="text-wrap:pretty">{{ f.fk }}</span><span style="color:var(--color-neutral-800);text-wrap:pretty">{{ f.v3 }}</span><span style="color:var(--color-neutral-800);text-wrap:pretty">{{ f.act }}</span>
+                    <span class="tag" style="justify-content:center;background:{{ f.l.bg }};color:{{ f.l.fg }};border:1px solid {{ f.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ f.stL }}</span>
+                  </div>
+                </sc-for>
+              </div></div>
+              <h3 style="margin:10px 0 0;font-size:20px">Нет данных в ответах — запросить у KDL Olymp</h3>
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <sc-for list="{{ blGaps }}" as="g" hint-placeholder-count="6"><span style="display:flex;gap:6px;align-items:baseline;padding:5px 9px;border:1px solid var(--color-divider);font-size:13px"><span>{{ g.t }}</span><span style="font-size:11px;color:var(--color-accent-700)">{{ g.ref }}</span></span></sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ blIs.net }}">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <h3 style="margin:0;font-size:20px">Кольца и плечи (P83, P85, R111)</h3>
+              <div style="overflow-x:auto"><div style="min-width:1040px;display:flex;flex-direction:column">
+                <div style="display:grid;grid-template-columns:120px minmax(0,1.6fr) 120px 130px 150px 140px 110px;gap:10px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>Кольцо</span><span>Маршрут</span><span>км · проверка</span><span>Ритм · км/год</span><span>Загрузка рейса</span><span>ТС · экипаж</span><span>Старт</span></div>
+                <sc-for list="{{ blRings }}" as="r" hint-placeholder-count="5">
+                  <div data-ring="{{ r.id }}" style="display:grid;grid-template-columns:120px minmax(0,1.6fr) 120px 130px 150px 140px 110px;gap:10px;font-size:13px;padding:8px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);align-items:start">
+                    <span style="display:flex;flex-direction:column"><span style="font-family:var(--font-heading);font-weight:600;font-size:16px">{{ r.id }}</span><span>{{ r.name }}</span></span>
+                    <span style="display:flex;flex-direction:column;gap:2px"><span>{{ r.route }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ r.note }}</span></span>
+                    <span style="display:flex;flex-direction:column;gap:3px;align-items:flex-start"><span style="font-variant-numeric:tabular-nums">{{ r.km }}</span><span class="tag" style="justify-content:center;background:{{ r.chk.l.bg }};color:{{ r.chk.l.fg }};border:1px solid {{ r.chk.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ r.chk.t }}</span></span>
+                    <span style="display:flex;flex-direction:column"><span>{{ r.cad }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ r.yr }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ r.kmDay }}</span></span>
+                    <span style="display:flex;flex-direction:column"><span style="font-variant-numeric:tabular-nums">{{ r.load }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ r.fill }}</span></span>
+                    <span style="display:flex;flex-direction:column"><span>{{ r.veh }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ r.crew }}</span></span>
+                    <span>{{ r.start }}</span>
+                  </div>
+                </sc-for>
+              </div></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <h3 style="margin:0;font-size:20px">Объёмы по городам</h3>
+              <span style="font-size:12px;color:var(--color-neutral-700)">Лист «По городам»: плотность 164 кг/м³ (A4). Темп. — отправок в месяц +2..+8 / +15..+25 / −20 °C, округлено вверх. «В сети» — город есть в справочнике платформы.</span>
+              <div style="overflow-x:auto"><div style="min-width:960px;display:flex;flex-direction:column">
+                <div style="display:grid;grid-template-columns:150px 170px 80px 70px 60px minmax(80px,1fr) 90px 80px 60px;gap:10px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>Город</span><span>Кольцо</span><span>кг/мес</span><span>кг/нед</span><span>м³/нед</span><span></span><span>темп./мес</span><span>хаб</span><span>в сети</span></div>
+                <sc-for list="{{ blCities }}" as="c" hint-placeholder-count="10">
+                  <div data-blcity="{{ c.name }}" style="display:grid;grid-template-columns:150px 170px 80px 70px 60px minmax(80px,1fr) 90px 80px 60px;gap:10px;font-size:13px;padding:5px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);align-items:center;font-variant-numeric:tabular-nums">
+                    <span style="font-weight:500">{{ c.name }}</span><span style="font-size:12px">{{ c.ring }}</span><span>{{ c.kg }}</span><span>{{ c.kgw }}</span><span>{{ c.m3 }}</span>
+                    <span style="height:10px;background:var(--color-neutral-100);position:relative"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ c.w }};background:var(--color-accent)"></span></span>
+                    <span>{{ c.temp }}</span><span>{{ c.hub }}</span><span class="tag" style="justify-content:center;background:{{ c.l.bg }};color:{{ c.l.fg }};border:1px solid {{ c.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ c.net }}</span>
+                  </div>
+                </sc-for>
+                <div style="display:grid;grid-template-columns:150px 170px 80px 70px 60px minmax(80px,1fr) 90px 80px 60px;gap:10px;font-size:13px;padding:8px 0;font-weight:600;font-variant-numeric:tabular-nums"><span>Итого</span><span style="font-weight:400;font-size:12px">23 города + Макинск</span><span>{{ blCitySum.kg }}</span><span>{{ blCitySum.kgw }}</span><span>{{ blCitySum.m3 }}</span><span></span><span>{{ blCitySum.temp }}</span><span></span><span></span></div>
+              </div></div>
+              <span style="font-size:12px;color:var(--color-neutral-700)">Макинск: 1 темп. отправка в месяц, курьер из Кокшетау (P92). Жезказган — вне колец, SpezAvto из Караганды. Талдыкорган — отдельный рейс из Алматы.</span>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ blIs.fleet }}">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <h3 style="margin:0;font-size:20px">Целевой парк (H32, R111–R114)</h3>
+              <div style="overflow-x:auto"><div style="min-width:1040px;display:flex;flex-direction:column">
+                <div style="display:grid;grid-template-columns:110px 150px 150px 120px minmax(0,1fr) 170px 110px 100px;gap:10px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>Модель</span><span>Кузов</span><span>Груз · объём</span><span>Цена с НДС</span><span>Гарантия · до лимита</span><span>Расход · ТО</span><span>Кол-во · ТС</span><span>Статус</span></div>
+                <sc-for list="{{ blFleet }}" as="f" hint-placeholder-count="5">
+                  <div style="display:grid;grid-template-columns:110px 150px 150px 120px minmax(0,1fr) 170px 110px 100px;gap:10px;font-size:13px;padding:8px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);align-items:start">
+                    <span style="font-family:var(--font-heading);font-weight:600;font-size:16px">{{ f.model }}</span>
+                    <span style="display:flex;flex-direction:column;gap:2px"><span>{{ f.body }}</span><sc-if value="{{ f.hasNote }}"><span style="font-size:11px;color:var(--color-neutral-700)">{{ f.note }}</span></sc-if></span>
+                    <span style="font-variant-numeric:tabular-nums">{{ f.cap }}</span><span style="font-variant-numeric:tabular-nums">{{ f.price }}</span>
+                    <span style="display:flex;flex-direction:column;gap:3px;align-items:flex-start"><span>{{ f.warr }}</span><sc-if value="{{ f.hasWex }}"><span class="tag" style="justify-content:center;background:{{ f.wl.bg }};color:{{ f.wl.fg }};border:1px solid {{ f.wl.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ f.wex }}</span></sc-if></span>
+                    <span style="font-size:12px">{{ f.fuel }}</span><span>{{ f.qty }}</span><span class="tag" style="justify-content:center;background:{{ f.l.bg }};color:{{ f.l.fg }};border:1px solid {{ f.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ f.stL }}</span>
+                  </div>
+                </sc-for>
+              </div></div>
+              <span style="font-size:12px;color:var(--color-neutral-800);text-wrap:pretty">{{ blFleetSum }}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:24px;align-items:start">
+              <div class="blueprint" style="padding:18px;display:flex;flex-direction:column;gap:10px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <h3 style="margin:0;font-size:19px">Ставка за кг (G30)</h3>
+                <sc-for list="{{ blRates }}" as="r"><div style="display:grid;grid-template-columns:150px minmax(0,1fr) 90px;gap:10px;align-items:center;font-size:13px"><span>{{ r.k }}</span><span style="height:12px;background:var(--color-neutral-100);position:relative"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ r.w }};background:var(--color-accent)"></span></span><span style="text-align:right;font-variant-numeric:tabular-nums">{{ r.val }}</span></div></sc-for>
+                <h3 style="margin:8px 0 0;font-size:19px">Окупаемость при сценариях (N78)</h3>
+                <sc-for list="{{ blSens }}" as="r"><div style="display:grid;grid-template-columns:190px minmax(0,1fr) 80px;gap:10px;align-items:center;font-size:13px"><span>{{ r.k }}</span><span style="height:12px;background:var(--color-neutral-100);position:relative"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ r.w }};background:var(--color-accent-700)"></span></span><span style="text-align:right;font-variant-numeric:tabular-nums">{{ r.val }}</span></div></sc-for>
+              </div>
+              <div style="display:flex;flex-direction:column">
+                <h3 style="margin:0 0 6px;font-size:19px">Затраты и нормативы</h3>
+                <sc-for list="{{ blEcon }}" as="e"><div style="display:grid;grid-template-columns:170px minmax(0,1fr);gap:10px;padding:7px 0;border-top:1px solid var(--color-divider);font-size:13px"><span style="color:var(--color-neutral-700)">{{ e.k }}</span><span style="font-variant-numeric:tabular-nums">{{ e.v }}</span></div></sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ blIs.exp }}">
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <h3 style="margin:0;font-size:20px">Согласование экспресса (K55)</h3>
+              <span style="font-size:13px;color:var(--color-neutral-800);max-width:900px;text-wrap:pretty">Каждый экспресс уходит только после трёх подписей. Отказ переводит отправку в регулярный рейс или сборный тариф. Перевод экспресса в регулярный цикл даёт 78 % экономии программы (G29); контроль доли — через 6 и 12 месяцев после запуска (T148).</span>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:16px">
+                <sc-for list="{{ blEx }}" as="e" hint-placeholder-count="3">
+                  <div data-express="{{ e.id }}" class="blueprint" style="padding:16px;display:flex;flex-direction:column;gap:10px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                    <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">{{ e.id }} · {{ e.kg }}</span><span style="font-family:var(--font-heading);font-weight:600;font-size:20px">{{ e.route }}</span><span style="font-size:12px;color:var(--color-neutral-700)">{{ e.what }}</span></span><span class="tag" style="justify-content:center;background:{{ e.l.bg }};color:{{ e.l.fg }};border:1px solid {{ e.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ e.stL }}</span></div>
+                    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;font-size:12px">
+                      <span style="display:flex;flex-direction:column"><span style="color:var(--color-neutral-700)">Экспресс</span><span style="font-size:15px;font-weight:500">{{ e.cost }}</span></span>
+                      <span style="display:flex;flex-direction:column"><span style="color:var(--color-neutral-700)">Сборный</span><span style="font-size:15px;font-weight:500">{{ e.reg }}</span></span>
+                      <span style="display:flex;flex-direction:column"><span style="color:var(--color-neutral-700)">Экономия</span><span style="font-size:15px;font-weight:500">{{ e.save }}</span></span>
+                    </div>
+                    <sc-for list="{{ e.signers }}" as="g"><button sc-camel-on-click="{{ g.sign }}" style="display:grid;grid-template-columns:minmax(0,1fr) 24px;gap:8px;align-items:center;text-align:left;font-size:13px;padding:6px 8px;cursor:pointer;border:1px solid {{ g.bc }};background:{{ g.bg }};color:{{ g.fg }}"><span>{{ g.role }}</span><span style="text-align:center">{{ g.mark }}</span></button></sc-for>
+                    <sc-if value="{{ e.open }}"><button class="btn btn-secondary" sc-camel-on-click="{{ e.reject }}">Отклонить → регулярный рейс</button></sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ blIs.launch }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:24px;align-items:start">
+              <div style="display:flex;flex-direction:column">
+                <h3 style="margin:0 0 6px;font-size:20px">Критический путь до первого рейса (O79, S138)</h3>
+                <sc-for list="{{ blLaunch }}" as="t" hint-placeholder-count="8">
+                  <div style="display:grid;grid-template-columns:96px minmax(0,1fr) 90px;gap:12px;padding:9px 0 9px 10px;border-top:1px solid var(--color-divider);border-left:3px solid {{ t.l.bc }};font-size:13px;align-items:start">
+                    <span style="font-family:var(--font-heading);font-weight:600;font-size:15px">{{ t.d }}</span>
+                    <span style="display:flex;flex-direction:column;gap:2px"><span style="text-wrap:pretty">{{ t.t }}</span><span style="font-size:11px;color:var(--color-accent-700)">{{ t.ref }}</span></span>
+                    <span class="tag" style="justify-content:center;background:{{ t.l.bg }};color:{{ t.l.fg }};border:1px solid {{ t.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ t.l.label }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div class="blueprint" style="padding:18px;display:flex;flex-direction:column;gap:8px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Пилот R1 · Астана – Караганда – Алматы</span>
+                <h3 style="margin:0;font-size:20px">Критерии успеха (O80)</h3>
+                <sc-for list="{{ blPilot }}" as="p"><span style="font-size:13px;padding:6px 0;border-top:1px solid var(--color-divider)">{{ p }}</span></sc-for>
+                <span style="font-size:12px;color:var(--color-neutral-700);text-wrap:pretty">Руководит отдел закупок и логистики, менеджер транспортной компании выбран, отчётность ежеквартально (O81, S132). Решения — генеральный директор (S137).</span>
+              </div>
+            </div>
+          </sc-if>
+
+        </section>
+      </sc-if>

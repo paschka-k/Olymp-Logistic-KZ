@@ -1,0 +1,33 @@
+const TIPS = {
+  tiers: 'Gold — bevorzugter Partner: GDP, 2–8 °C, Übergabe ohne Freigabe. Silver — zulässig, Übergabe nach Freigabe durch den Disponenten. Bronze — nur Ware 15–25 °C ohne ADR, manuell. Blocked — Zusammenarbeit untersagt, Grund wird dokumentiert (CAPA / Abweichung).',
+  handover: 'Übergabe einer Sendung an einen Partner, ganz oder teilweise: das System berücksichtigt die Städte der Route, die Anforderungen der Packstücke (2–8 °C, ADR) und die Partnerstufe. Erstellt werden Übergabeprotokoll, Frachtbrief des Frachtführers und Temperaturblatt; SSCC-Scans laufen beim Partner weiter.',
+  track: 'Jedes Packstück (SSCC) wird am Hub bei der Kommissionierung, beim Verladen, beim Entladen und bei der Annahme in der Filiale gescannt. Fehlt ein Scan oder ist das Packstück in der falschen Tour, entsteht eine Abweichung.',
+  recon: 'Die Anzahl der Packstücke laut SSCC in der Packliste wird mit der Packstückzahl des Auftrags verglichen. Fehlt auch nur ein Scan, wird die Tour nicht freigegeben (Go/No-Go-Prüfung „Packstücke abgeglichen“).',
+  scan: 'Scannermodus: der Barcodescanner gibt GS1-128 (AI 00 + SSCC) und Enter ein — das Packstücketikett öffnet sich sofort. Pfeiltasten ↑ ↓ wählen ein Ergebnis, Esc schließt die Liste.',
+  fineLink: 'Der Fahrer wird automatisch ermittelt: die Zeit aus dem Bußgeldbescheid wird mit dem Fahrzeugnutzungsprotokoll abgeglichen (Fahraufträge, Fahrer-Login in der App). Wurde das Fahrzeug im Laufe des Tages übergeben, gilt der Fahrer als verantwortlich, der es zum Zeitpunkt des Verstoßes hatte.',
+  urgent: 'Kandidaten für eine Eiltour: Bereitschafts- und Reservefahrer des gewählten Hubs, danach Fahrer, die heute frei werden. Berücksichtigt werden Restlenkzeit, Führerscheinklasse und ADR-Bescheinigung. Krankheit, Urlaub, Schulung und Einarbeitung sind ausgeschlossen.',
+  sim: 'Übungsalarme für die Demo: jede Taste startet ein Szenario an einem bestimmten Fahrzeug. Temperatur, Status und Vorfälle ändern sich, auf der „Übersicht“ erscheint eine Schritt-für-Schritt-Anleitung. Erneutes Drücken setzt das Szenario zurück.',
+  gonogo: 'Eine Tour wird nur freigegeben, wenn alle Prüfungen grün sind: Fahrzeug verfügbar und für die Temperaturklasse geeignet, Fahrer zugelassen, KZ-Dokumente vollständig, Logger kalibriert, ADR erfüllt, Route wetterseitig freigegeben. Jede rote Prüfung blockiert die Freigabe.',
+  axle: 'Die Achslast hängt vom Ladeort ab: die 2–8 °C-Kammer an der Stirnwand belastet die Vorderachse (≈75 % der Masse), die 15–25 °C-Kammer an der Tür die Hinterachse. Leichte, voluminöse Ware stößt meist an die Palettenplätze, nicht an die Masse.',
+  twolevel: 'Zwei Nachweisebenen: Kammersensor (Aggregat / Telematik) zur Steuerung unterwegs und ein unabhängiger kalibrierter Logger je 2–8 °C-Sendung — er ist der Qualitätsnachweis für KDL Olymp.',
+  wxrisk: 'Stufen: „Achtung“ — Frost oder Wind ≥ 12 m/s; „Risiko“ — unter −10 °C, Wind ≥ 15 m/s oder Schnee; „Kritisch“ — Buran (Wind ≥ 20 m/s mit Schnee) oder unter −25 °C. Routenrisiko = schlechteste Stadt an den Tourtagen.',
+  scen: '„Was-wäre-wenn“-Szenarien: Ereignis einschalten — die Tabelle berechnet Fahrzeugbedarf, Verfügbarkeit und Defizit für 7 Tage neu und schlägt eine Lösung vor (Subunternehmer, Tourverschiebung, Routen bündeln).',
+  escal: 'Eskalation: Neu → Angenommen (Sicherheitsdienst) → Eskaliert (Leiter Sicherheit, ggf. 102 / 112) → Geschlossen. Jeder Schritt wird mit Zeit und Bearbeiter im Aktionsprotokoll erfasst.',
+  gate: 'Dokumente hängen von der Ware ab: eigene KDL-Ware — Umlagerungsbeleg; Fremdfracht — Vertrag, TTN mit Drittversender und ESF für die Leistung; Gefahrgut — ADR-Paket. Auf ein Dokument klicken, um es zu erzeugen.',
+  capa: 'Eine Abweichung durchläuft 7 Schritte. Über die Verwendbarkeit der Ware entscheidet nur der Qualitätsverantwortliche; CAPA — Korrektur- und Vorbeugemaßnahme, ohne sie wird die Abweichung nicht geschlossen.',
+  fees: 'Pflicht- und übliche Fahrzeugkosten in KZ: OGPO — Pflicht-Kfz-Haftpflicht des Halters; KASKO — freiwillige Vollkasko, für Neufahrzeuge und Leasing; technische Prüfung — Intervall nach Alter und Fahrzeugtyp; Kfz-Steuer — jährlich, nach Hubraum / Nutzlast; Mautstraßen — elektronische Zahlung per Kennzeichen (Republikstraßen); Bußgelder — Kameras „Sergek“ und StVO, 50 % Rabatt bei Zahlung innerhalb von 7 Tagen. Beträge und Fristen — Demo, mit aktuellen MRP-Sätzen prüfen.',
+  west: X('Допуск на западное кольцо (Актобе, Уральск, Атырау, Актау): только HOWO T5G 50 м³, ТО актуально, термоконтейнеры и логгеры откалиброваны, зимний пакет, Wialon онлайн.','Freigabe für den Westring (Aktobe, Oral, Atyrau, Aktau): nur HOWO T5G 50 m³, Wartung aktuell, Thermocontainer und Logger kalibriert, Winterpaket, Wialon online.','Approval for the West ring (Aktobe, Oral, Atyrau, Aktau): HOWO T5G 50 m³ only, service current, thermo containers and loggers calibrated, winter kit, Wialon online.'),
+  third: 'Fremdfracht (≈10 %): eigener Beförderungsvertrag, eigene Paletten und Kennzeichnung, eigene Haftung und Versicherung. Nicht mit KDL-Olymp-Ware auf einer Palette mischen.'
+};
+const FEES = {
+  V01: { ogpo:X('до ','bis ','until ') + '11.01.2027', kasko:X('до ','bis ','until ') + '11.01.2027', ti:X('до ','bis ','until ') + '01.2027', tax:X('2026 оплачен','2026 bezahlt','2026 paid'), toll:'40 800 ₸ / ' + X('мес','Monat','month'), fines:X('нет','keine','none'), lvl:0 },
+  V02: { ogpo:X('до ','bis ','until ') + '08.04.2027', kasko:X('до ','bis ','until ') + '08.04.2027', ti:X('до ','bis ','until ') + '04.2027', tax:X('2026 оплачен','2026 bezahlt','2026 paid'), toll:'64 300 ₸ / ' + X('мес','Monat','month'), fines:X('нет','keine','none'), lvl:0 },
+  V03: { ogpo:X('до ','bis ','until ') + '30.10.2026', kasko:X('до ','bis ','until ') + '30.10.2026', ti:X('до ','bis ','until ') + '11.2026', tax:X('2026 оплачен','2026 bezahlt','2026 paid'), toll:'22 900 ₸ / ' + X('мес','Monat','month'), fines:X('нет','keine','none'), lvl:2, note:"OGPO und KASKO laufen in 24 Tagen ab" },
+  V04: { ogpo:X('до ','bis ','until ') + '17.06.2027', kasko:X('до ','bis ','until ') + '17.06.2027', ti:X('до ','bis ','until ') + '06.2027', tax:X('2026 оплачен','2026 bezahlt','2026 paid'), toll:'31 200 ₸ / ' + X('мес','Monat','month'), fines:X('1 неоплачен · 29 500 ₸','1 offen · 29 500 ₸','1 unpaid · 29,500 ₸'), lvl:2, note:"05.10 16:42 · Geschwindigkeitsüberschreitung, „Sergek“, Astana · Fahrer E. Tulegenov (FA-0398) · 50 % Rabatt bis 12.10" }
+};
+function seedHist(b) {
+  const h = { cold: [], amb: [], out: [] };
+  for (let i = 0; i < 48; i++) { h.cold.push((b.cold ?? b.out) + Math.sin(i / 4) * 0.4); h.amb.push((b.amb ?? b.out) + Math.cos(i / 5) * 0.6); h.out.push(b.out + Math.sin(i / 9) * 1.2); }
+  return h;
+}
+

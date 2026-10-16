@@ -1,0 +1,62 @@
+      <sc-if value="{{ is.overview }}" hint-placeholder-val="{{ true }}">
+        <section data-screen-label="Übersicht" style="display:flex;flex-direction:column;gap:24px">
+          <sc-if value="{{ hasPlaybook }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:14px">
+              <sc-for list="{{ playbooks }}" as="p">
+                <div style="display:flex;flex-direction:column;gap:8px;padding:14px 16px;background:var(--color-accent-900);color:var(--color-bg)">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><span style="display:flex;flex-direction:column"><span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;opacity:0.8">Alarm · Vorgehen</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px">{{ p.title }}</span><span style="font-size:12px;opacity:0.85">{{ p.where }}</span></span><button sc-camel-on-click="{{ p.stop }}" style="font-size:12px;padding:4px 10px;border:1px solid var(--color-bg);background:transparent;color:var(--color-bg);cursor:pointer;white-space:nowrap">Zurücksetzen</button></div>
+                  <sc-if value="{{ p.hasContact }}"><button sc-camel-on-click="{{ p.openContact }}" style="align-self:flex-start;font-size:13px;font-weight:600;padding:8px 12px;border:1px solid var(--color-bg);background:var(--color-bg);color:var(--color-accent-900);cursor:pointer">{{ p.contactLabel }}</button></sc-if>
+                  <sc-for list="{{ p.steps }}" as="st"><div style="display:grid;grid-template-columns:22px 1fr;gap:8px;font-size:13px;line-height:1.4"><span style="font-family:var(--font-heading);font-weight:600">{{ st.n }}</span><span>{{ st.t }}</span></div></sc-for>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px">
+            <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="6">
+              <div class="blueprint" style="padding:14px;display:flex;flex-direction:column;gap:2px">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700)">{{ k.label }}</span>
+                <span style="font-family:var(--font-heading);font-weight:600;font-size:32px;line-height:1.1">{{ k.value }}</span>
+                <span style="font-size:12px;color:var(--color-neutral-700)">{{ k.sub }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:24px;align-items:start">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <h3 style="margin:0;font-size:20px">Touren in Echtzeit</h3>
+              <sc-for list="{{ tripsLive }}" as="r" hint-placeholder-count="5">
+                <button sc-camel-on-click="{{ r.open }}" style="display:grid;grid-template-columns:64px minmax(0,1fr) 110px;gap:12px;align-items:center;text-align:left;padding:10px 0;border:0;border-top:1px solid var(--color-divider);background:transparent;cursor:pointer;color:var(--color-text)">
+                  <span style="font-family:var(--font-heading);font-weight:600;font-size:15px">{{ r.id }}</span>
+                  <span style="display:flex;flex-direction:column;gap:6px;min-width:0">
+                    <span style="font-size:13px">{{ r.routeStr }}</span>
+                    <span style="height:6px;background:var(--color-neutral-200);display:block"><span style="display:block;height:6px;width:{{ r.pct }};background:var(--color-accent)"></span></span>
+                  </span>
+                  <span style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:12px"><span class="tag" style="background:{{ r.st.bg }};color:{{ r.st.fg }};padding:1px 7px">{{ r.statusLabel }}</span><span style="color:var(--color-neutral-700)">ETA {{ r.eta }}</span></span>
+                </button>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <h3 style="margin:0;font-size:20px">Alarme und Ereignisse</h3>
+              <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="5">
+                <button sc-camel-on-click="{{ a.go }}" style="display:grid;grid-template-columns:84px minmax(0,1fr);gap:12px;align-items:start;text-align:left;padding:9px 0;border:0;border-top:1px solid var(--color-divider);background:transparent;cursor:pointer;color:var(--color-text)">
+                  <span class="tag" style="justify-content:center;background:{{ a.l.bg }};color:{{ a.l.fg }};border:1px solid {{ a.l.bc }};padding:2px 6px">{{ a.l.label }}</span>
+                  <span style="display:flex;flex-direction:column;gap:1px"><span style="font-size:13px;text-wrap:pretty">{{ a.text }}</span><span style="font-size:11px;color:var(--color-accent-700)">{{ a.src }} →</span></span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <h3 style="margin:0;font-size:20px">Wetter an den Hubs · 3 Tage</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px">
+              <sc-for list="{{ hubWx }}" as="w" hint-placeholder-count="6">
+                <div style="padding:10px;border:1px solid {{ w.l.bc }};background:{{ w.l.bg }};color:{{ w.l.fg }};display:flex;flex-direction:column;gap:2px">
+                  <span style="font-size:11px;letter-spacing:0.06em;text-transform:uppercase">{{ w.city }} · {{ w.day }}</span>
+                  <span style="font-family:var(--font-heading);font-weight:600;font-size:22px">{{ w.temp }}</span>
+                  <span style="font-size:12px">{{ w.cond }} · {{ w.wind }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </section>
+      </sc-if>
+

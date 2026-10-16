@@ -1,0 +1,131 @@
+      <sc-if value="{{ is.costs }}">
+        <section data-screen-label="Затраты" style="display:flex;flex-direction:column;gap:22px">
+          <span style="font-size:13px;color:var(--color-neutral-800);max-width:980px;text-wrap:pretty">Текущие затраты собственного парка: 4 ТС (V01 — HOWO T5G с активным холодом на R1, V02–V04 — изотермы без агрегата), 7 водителей, кольца R1 / Запад / Юг / Север + Восток. Ставки — из Fragenkatalog; позиции с пометкой «допущение» нужно подтвердить.</span>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+            <sc-for list="{{ cKpis }}" as="k" hint-placeholder-count="6">
+              <div class="blueprint" style="padding:14px;display:flex;flex-direction:column;gap:6px;border-left:3px solid {{ k.l.bc }}"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700)">{{ k.k }}</span>
+                <span style="font-family:var(--font-heading);font-weight:600;font-size:26px;line-height:1.05">{{ k.v }}</span>
+                <span style="font-size:11px;color:var(--color-neutral-700)">{{ k.sub }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;border:1px solid var(--color-divider);align-self:flex-start"><sc-for list="{{ cTabs }}" as="b"><button data-ctab="1" sc-camel-on-click="{{ b.go }}" style="font-size:13px;padding:7px 12px;border:0;border-right:1px solid var(--color-divider);cursor:pointer;background:{{ b.bg }};color:{{ b.fg }}">{{ b.label }}</button></sc-for></div>
+          <sc-if value="{{ cIs.sum }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,640px),1fr));gap:24px;align-items:start">
+              <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+                <h3 style="margin:0;font-size:20px">Текущие затраты по позициям</h3>
+                <div style="overflow-x:auto"><div style="min-width:940px;display:flex;flex-direction:column">
+                  <div style="display:grid;grid-template-columns:96px minmax(0,1.3fr) 70px minmax(0,1.2fr) 110px 100px 70px minmax(60px,0.6fr) 100px;gap:10px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>Группа</span><span>Позиция</span><span>Основа</span><span>Расчёт</span><span>₸ / мес</span><span>₸ / год</span><span>Доля</span><span></span><span>Источник</span></div>
+                  <sc-for list="{{ cRows }}" as="r" hint-placeholder-count="12">
+                    <div data-cost="{{ r.k }}" style="display:grid;grid-template-columns:96px minmax(0,1.3fr) 70px minmax(0,1.2fr) 110px 100px 70px minmax(60px,0.6fr) 100px;gap:10px;font-size:13px;padding:8px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);align-items:center;font-variant-numeric:tabular-nums">
+                      <span style="font-size:12px;color:var(--color-neutral-700)">{{ r.grp }}</span><span style="font-weight:500">{{ r.k }}</span><span style="font-size:11px;color:var(--color-accent-700)">{{ r.ref }}</span><span style="font-size:12px;color:var(--color-neutral-800)">{{ r.basis }}</span>
+                      <span>{{ r.mo }}</span><span>{{ r.yr }}</span><span>{{ r.share }}</span>
+                      <span style="height:10px;background:var(--color-neutral-100);position:relative"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ r.w }};background:var(--color-accent)"></span></span>
+                      <span class="tag" style="justify-content:center;background:{{ r.l.bg }};color:{{ r.l.fg }};border:1px solid {{ r.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ r.tagL }}</span>
+                    </div>
+                  </sc-for>
+                  <div data-cost-total="1" style="display:grid;grid-template-columns:96px minmax(0,1.3fr) 70px minmax(0,1.2fr) 110px 100px 70px minmax(60px,0.6fr) 100px;gap:10px;font-size:14px;padding:10px 0;font-weight:600;font-variant-numeric:tabular-nums"><span></span><span>Итого текущие затраты</span><span></span><span style="font-weight:400;font-size:12px">{{ cTotal.perKm }} · {{ cTotal.perKg }}</span><span>{{ cTotal.mo }}</span><span>{{ cTotal.yr }}</span><span>100 %</span><span></span><span></span></div>
+                </div></div>
+                <span style="font-size:12px;color:var(--color-neutral-800);text-wrap:pretty">{{ cTotal.n77 }}</span>
+                <span style="font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);margin-top:6px">Не включено</span>
+                <sc-for list="{{ cExcl }}" as="e"><span style="font-size:12px;color:var(--color-neutral-800)">— {{ e }}</span></sc-for>
+              </div>
+              <div class="blueprint" style="padding:18px;display:flex;flex-direction:column;gap:6px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Для дашборда руководства</span>
+                <h3 style="margin:0 0 4px;font-size:20px">Верхний уровень · 6 показателей</h3>
+                <sc-for list="{{ cDash }}" as="d"><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:7px 0;border-top:1px solid var(--color-divider);font-size:13px"><span style="color:var(--color-neutral-700)">{{ d.k }}</span><span style="font-weight:500;font-variant-numeric:tabular-nums">{{ d.v }}</span></div></sc-for>
+                <span style="font-size:11px;color:var(--color-neutral-700);text-wrap:pretty">Обновление: ежедневно из Wialon (топливо, пробег), 1С (затраты), ежемесячно — страховки и налоги.</span>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ cIs.fuel }}">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h3 style="margin:0;font-size:20px;margin-right:auto">Статистика расхода дизеля</h3><div style="display:flex;flex-wrap:wrap;border:1px solid var(--color-divider);align-self:flex-start"><sc-for list="{{ cDieselOpts }}" as="b"><button data-cdiesel="1" sc-camel-on-click="{{ b.go }}" style="font-size:13px;padding:7px 12px;border:0;border-right:1px solid var(--color-divider);cursor:pointer;background:{{ b.bg }};color:{{ b.fg }}">{{ b.label }}</button></sc-for></div><button data-cwinter="1" sc-camel-on-click="{{ cWinterOpt.go }}" style="font-size:13px;padding:7px 12px;border:1px solid var(--color-divider);cursor:pointer;background:{{ cWinterOpt.bg }};color:{{ cWinterOpt.fg }}">{{ cWinterOpt.label }}</button></div>
+              <div style="overflow-x:auto"><div style="min-width:980px;display:flex;flex-direction:column">
+                <div style="display:grid;grid-template-columns:60px 170px 70px 70px 80px minmax(140px,1fr) 110px 110px 90px;gap:10px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>ID</span><span>Модель</span><span>План л/100</span><span>Факт л/100</span><span>Откл.</span><span>8 недель</span><span>Литры · CO₂</span><span>₸ / мес · ₸/км</span><span>Статус</span></div>
+                <sc-for list="{{ cFuel }}" as="f" hint-placeholder-count="4">
+                  <div data-fuel="{{ f.id }}" style="display:grid;grid-template-columns:60px 170px 70px 70px 80px minmax(140px,1fr) 110px 110px 90px;gap:10px;font-size:13px;padding:8px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);align-items:center;font-variant-numeric:tabular-nums">
+                    <span style="font-family:var(--font-heading);font-weight:600;font-size:16px">{{ f.id }}</span>
+                    <span style="display:flex;flex-direction:column"><span>{{ f.model }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ f.note }}</span></span>
+                    <span>{{ f.plan }}</span><span style="font-weight:500">{{ f.act }}</span><span>{{ f.dev }}</span>
+                    <span style="display:flex;align-items:flex-end;gap:3px;height:32px"><sc-for list="{{ f.wk }}" as="b"><span style="flex:1;height:{{ b.h }};background:{{ b.c }}"></span></sc-for></span>
+                    <span style="display:flex;flex-direction:column"><span>{{ f.liters }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ f.co2 }}</span></span>
+                    <span style="display:flex;flex-direction:column"><span>{{ f.cost }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ f.perKm }}</span></span>
+                    <span class="tag" style="justify-content:center;background:{{ f.l.bg }};color:{{ f.l.fg }};border:1px solid {{ f.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ f.l.label }}</span>
+                  </div>
+                </sc-for>
+              </div></div>
+              <span style="font-size:13px">Итого: {{ fuelTot.liters }} · {{ fuelTot.cost }} в месяц. Зимний риск: {{ fuelTot.winter }}.</span>
+              <span style="font-size:12px;color:var(--color-neutral-700);text-wrap:pretty">План: HOWO 26 л/100 км, JAC 17 л/100 км (I38), V01 + 2,5 л/100 км на агрегат Carrier. Факт — датчики уровня топлива Wialon (R125); данные до запуска смоделированы. Отклонение &gt; 8 % — жёлтый, &gt; 15 % — красный.</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ cIs.svc }}">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <h3 style="margin:0;font-size:20px">Мастерская, ТО и простои</h3>
+              <div style="overflow-x:auto"><div style="min-width:1100px;display:flex;flex-direction:column">
+                <div style="display:grid;grid-template-columns:60px 170px 100px 100px 90px 90px 80px 70px 110px 120px 100px;gap:10px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>ID</span><span>Модель</span><span>Пробег / мес</span><span>Сервис / мес</span><span>До ТО-1</span><span>До ТО-2</span><span>Простой ТО</span><span>КТГ</span><span>День простоя</span><span>Замена рейса</span><span>Статус</span></div>
+                <sc-for list="{{ cSvc }}" as="v" hint-placeholder-count="4">
+                  <div data-svc="{{ v.id }}" style="display:grid;grid-template-columns:60px 170px 100px 100px 90px 90px 80px 70px 110px 120px 100px;gap:10px;font-size:13px;padding:8px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);align-items:center;font-variant-numeric:tabular-nums">
+                    <span style="font-family:var(--font-heading);font-weight:600;font-size:16px">{{ v.id }}</span><span>{{ v.model }}</span><span>{{ v.km }}</span><span>{{ v.svc }}</span><span>{{ v.to1 }}</span><span>{{ v.to2 }}</span><span>{{ v.down }}</span><span class="tag" style="justify-content:center;background:{{ v.kl.bg }};color:{{ v.kl.fg }};border:1px solid {{ v.kl.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ v.ktg }}</span><span>{{ v.perDay }}</span><span>{{ v.lost }}</span><span class="tag" style="justify-content:center;background:{{ v.sl.bg }};color:{{ v.sl.fg }};border:1px solid {{ v.sl.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ v.st }}</span>
+                  </div>
+                </sc-for>
+              </div></div>
+              <span style="font-size:12px;color:var(--color-neutral-700);text-wrap:pretty">ТО-1 каждые 15 000 км (0,75 дня), ТО-2 каждые 45 000 км (1,5 дня), воскресенье — день ТО (I45/J51). «День простоя» — лизинг, страховка, налог и оклады экипажа; «Замена рейса» — груз кольца по сборному тарифу 228 ₸/кг.</span>
+              <div data-outage="1" class="blueprint" style="padding:18px;display:flex;flex-direction:column;gap:6px;max-width:640px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Стоимость внепланового простоя</span>
+                <h3 style="margin:0;font-size:19px">{{ cOut.title }}</h3>
+                <sc-for list="{{ cOut.items }}" as="i"><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:5px 0;border-top:1px solid var(--color-divider);font-size:13px;font-variant-numeric:tabular-nums"><span>{{ i.k }}</span><span>{{ i.v }}</span></div></sc-for>
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:6px 0;border-top:1px solid var(--color-text);font-size:14px;font-weight:600"><span>Итого за событие</span><span>{{ cOut.total }}</span></div>
+                <span style="font-size:12px;color:var(--color-neutral-700)">Резервные договоры GarantA / KazExpress сохранять — магистраль единая точка отказа (L66).</span>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ cIs.ins }}">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><h3 style="margin:0;font-size:20px;margin-right:auto">Страховки, налоги и регистрация ТС</h3><div style="display:flex;flex-wrap:wrap;border:1px solid var(--color-divider);align-self:flex-start"><sc-for list="{{ cIdleOpts }}" as="b"><button data-cidle="1" sc-camel-on-click="{{ b.go }}" style="font-size:13px;padding:7px 12px;border:0;border-right:1px solid var(--color-divider);cursor:pointer;background:{{ b.bg }};color:{{ b.fg }}">{{ b.label }}</button></sc-for></div></div>
+              <div style="overflow-x:auto"><div style="min-width:1140px;display:flex;flex-direction:column">
+                <div style="display:grid;grid-template-columns:60px 160px 90px 80px 80px 70px 100px minmax(0,1fr) 70px minmax(0,1.6fr);gap:10px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>ID</span><span>Модель</span><span>КАСКО</span><span>ОГПО</span><span>Налог</span><span>Техосмотр</span><span>Итого / год</span><span>Сроки</span><span>Простой</span><span>Рекомендация по учёту</span></div>
+                <sc-for list="{{ cIns }}" as="v" hint-placeholder-count="4">
+                  <div data-ins="{{ v.id }}" style="display:grid;grid-template-columns:60px 160px 90px 80px 80px 70px 100px minmax(0,1fr) 70px minmax(0,1.6fr);gap:10px;font-size:13px;padding:8px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);align-items:center;font-variant-numeric:tabular-nums;align-items:start">
+                    <span style="font-family:var(--font-heading);font-weight:600;font-size:16px">{{ v.id }}</span><span>{{ v.model }}</span><span>{{ v.kasko }}</span><span>{{ v.ogpo }}</span><span>{{ v.tax }}</span><span>{{ v.ti }}</span><span style="font-weight:500">{{ v.total }}</span>
+                    <span style="display:flex;flex-direction:column;gap:3px;align-items:flex-start"><span style="font-size:12px">{{ v.due }}</span><span class="tag" style="justify-content:center;background:{{ v.fl.bg }};color:{{ v.fl.fg }};border:1px solid {{ v.fl.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ v.fnote }}</span></span>
+                    <span>{{ v.idle }}</span><span style="display:flex;gap:6px;align-items:flex-start"><span style="width:8px;height:8px;margin-top:5px;flex:none;background:{{ v.rl.bc }}"></span><span style="font-size:12px;text-wrap:pretty">{{ v.rec }}</span></span>
+                  </div>
+                </sc-for>
+              </div></div>
+              <span style="font-size:12px;color:var(--color-neutral-800);max-width:980px;text-wrap:pretty">{{ cRule }}</span>
+              <span style="font-size:12px;color:var(--color-neutral-700);max-width:980px;text-wrap:pretty">КАСКО 1,5 % стоимости (I41), ОГПО 1,9 МРП × 3,98 без территориального коэффициента, транспортный налог 9 МРП (M67), техосмотр 1 МРП — допущение. Суммы проверить по ставкам 2026.</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ cIs.own }}">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <h3 style="margin:0;font-size:20px">Свой рейс или внешний перевозчик</h3>
+              <span style="font-size:13px;color:var(--color-neutral-800);max-width:980px;text-wrap:pretty">Свой рейс: топливо, сервис, сдельная часть и суточные плюс постоянные затраты ТС за дни рейса. Если разница больше 50 %, решение утверждают два сотрудника: руководитель логистики и финансовый контролёр.</span>
+              <div style="overflow-x:auto"><div style="min-width:1080px;display:flex;flex-direction:column">
+                <div style="display:grid;grid-template-columns:minmax(0,1.4fr) 80px 110px minmax(0,1.1fr) 100px 70px minmax(0,1.6fr);gap:10px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>Перевозка</span><span>Груз</span><span>Свой рейс</span><span>Внешний</span><span>Выгоднее</span><span>Разница</span><span>Решение</span></div>
+                <sc-for list="{{ cOwn }}" as="o" hint-placeholder-count="7">
+                  <div data-own="{{ o.id }}" style="display:grid;grid-template-columns:minmax(0,1.4fr) 80px 110px minmax(0,1.1fr) 100px 70px minmax(0,1.6fr);gap:10px;font-size:13px;padding:8px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);align-items:center;font-variant-numeric:tabular-nums;align-items:start">
+                    <span style="font-weight:500">{{ o.name }}</span><span>{{ o.kg }}</span><span>{{ o.own }}</span><span style="display:flex;flex-direction:column"><span>{{ o.ext }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ o.extL }}</span></span>
+                    <span style="font-weight:500">{{ o.best }}</span><span>{{ o.save }}</span>
+                    <span style="display:flex;flex-direction:column;gap:5px;align-items:flex-start"><span class="tag" style="justify-content:center;background:{{ o.l.bg }};color:{{ o.l.fg }};border:1px solid {{ o.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ o.st }}</span><sc-if value="{{ o.need }}"><span style="display:flex;flex-wrap:wrap;gap:5px"><sc-for list="{{ o.signers }}" as="g"><button sc-camel-on-click="{{ g.sign }}" style="display:flex;gap:6px;align-items:center;font-size:12px;padding:4px 8px;cursor:pointer;border:1px solid {{ g.bc }};background:{{ g.bg }};color:{{ g.fg }}"><span>{{ g.role }}</span><span>{{ g.mark }}</span></button></sc-for></span></sc-if></span>
+                  </div>
+                </sc-for>
+              </div></div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ cIs.drv }}">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <h3 style="margin:0;font-size:20px">Потребность в водителях (E20, J51, FR-46)</h3>
+              <div style="overflow-x:auto"><div style="min-width:720px;display:flex;flex-direction:column">
+                <div style="display:grid;grid-template-columns:60px 90px 120px 100px 80px 70px 110px;gap:10px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>ID</span><span>Кольца</span><span>Пробег / год</span><span>Часы / год</span><span>Ставки</span><span>Экипаж</span><span>В рейсе</span></div>
+                <sc-for list="{{ cDrv }}" as="d" hint-placeholder-count="4">
+                  <div data-cdrv="{{ d.id }}" style="display:grid;grid-template-columns:60px 90px 120px 100px 80px 70px 110px;gap:10px;font-size:13px;padding:8px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);align-items:center;font-variant-numeric:tabular-nums"><span style="font-family:var(--font-heading);font-weight:600;font-size:16px">{{ d.id }}</span><span>{{ d.rings }}</span><span>{{ d.kmY }}</span><span>{{ d.h }}</span><span>{{ d.fte }}</span><span class="tag" style="justify-content:center;background:{{ d.l.bg }};color:{{ d.l.fg }};border:1px solid {{ d.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ d.crew }}</span><span>{{ d.days }}</span></div>
+                </sc-for>
+              </div></div>
+              <span style="font-size:13px">Итого: {{ drvSum.crew }} водителей · {{ drvSum.fte }} ставки · оклады {{ drvSum.base }} · налоги работодателя {{ drvSum.tax }}</span>
+              <span style="font-size:12px;color:var(--color-neutral-700);max-width:980px;text-wrap:pretty">Часы = км / 70 км/ч + 15 % на погрузку и приёмку; лимит 1 814 ч в год на водителя; 6-дневная неделя, воскресенье — выходной и ТО. Ставки больше экипажа — красный.</span>
+            </div>
+          </sc-if>
+        </section>
+      </sc-if>

@@ -1,0 +1,6 @@
+const NAV = [
+  ['overview','01','Übersicht','Live-Monitoring'], ['dispatch','02','Disponent','Touren, Zuweisungen, Fahraufträge'], ['load','03','Beladung und Gewicht','Paletten, Volumen, Achsen'], ['ship','04','Sendungen und Kennzeichnung','PO, PL, SSCC, Artikel, Chargen'],
+  ['thermo','04','Thermostatus','Laderaumkammern und Außentemperatur'], ['weather','05','Wetter 3–7 Tage','Prognose und Routenrisiken'], ['security','06','Sicherheit','Vorfälle, Geozonen, ADR'],
+  ['docs','07','KZ-Dokumente','Dokumentensatz und Tourfreigabe'], ['quality','08','Qualität','Abweichungen, CAPA, Kalibrierung'], ['fleet','09','Fuhrpark','Zustand, Wartung, Zulassungen'], ['partners','10','Partner','Service- und Logistikpartner, Übergabe von Sendungen'], ['staff','10','Personal','Wo die Fahrer sind, Verfügbarkeit, Abwesenheiten'], ['driver','11','Fahrer-App','Fahrerbildschirm auf Tour'],
+  ['planning','12','Planung','Kapazität, Szenarien, Ressourcen'], ['reports','13','Berichte','Berichte und KPI'], ['costs','15','Kosten','Diesel, Werkstatt, Ausfall, Versicherung, Steuern'], ['inbound','17',X('Приёмка на хабе','Wareneingang Hub','Hub goods receipt'),X('Входящие машины, рампы, стоянка, Standgeld','Eingangsliste, Rampen, Standzeit, Standgeld','Inbound vehicles, ramps, dwell time, demurrage')], ['baseline','16','Ausgangsdaten','Fragenkatalog · 150 Antworten · Validierung']
+];

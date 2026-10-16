@@ -1,0 +1,47 @@
+name: Build platform-v5.3
+
+# Rebuilds platform-v5.3.html / -de / -en from platform-src/ whenever the sources change.
+# The commit made here only touches the generated HTML (outside platform-src/), so it does not retrigger this job.
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'platform-src/**'
+      - '.github/workflows/build-platform.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-platform-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build the three language bundles
+        run: node platform-src/build.mjs
+      - name: Sanity check
+        run: |
+          for f in platform-v5.3.html platform-v5.3-de.html platform-v5.3-en.html; do
+            test -s "$f" || { echo "missing $f"; exit 1; }
+            grep -q 'inbound' "$f" || { echo "$f has no inbound screen"; exit 1; }
+          done
+      - name: Commit regenerated HTML
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add platform-v5.3.html platform-v5.3-de.html platform-v5.3-en.html
+          if git diff --cached --quiet; then
+            echo "HTML already up to date"
+          else
+            git commit -m "build: regenerate platform-v5.3 from platform-src [skip ci]"
+            git push
+          fi

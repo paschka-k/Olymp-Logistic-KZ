@@ -1,0 +1,73 @@
+      <sc-if value="{{ is.dispatch }}">
+        <section data-screen-label="Диспетчер" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,600px),1fr));gap:24px;align-items:start">
+          <div style="display:flex;flex-direction:column;gap:24px;min-width:0">
+            <div style="display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:14px;overflow-x:auto">
+              <sc-for list="{{ board }}" as="col" hint-placeholder-count="4">
+                <div style="display:flex;flex-direction:column;gap:10px;padding:10px;border:1px solid var(--color-divider);min-height:260px">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--font-heading);font-weight:600;font-size:17px">{{ col.label }}</span><span style="font-size:12px;color:var(--color-neutral-700)">{{ col.count }}</span></div>
+                  <sc-for list="{{ col.trips }}" as="r">
+                    <button sc-camel-on-click="{{ r.select }}" style="display:flex;flex-direction:column;gap:5px;text-align:left;padding:10px;cursor:pointer;color:var(--color-text);border:1px solid {{ r.bc }};background:{{ r.bg }}">
+                      <span style="display:flex;justify-content:space-between;width:100%;font-family:var(--font-heading);font-weight:600;font-size:15px"><span>{{ r.id }}</span><span style="font-size:12px;color:var(--color-accent-700)">{{ r.veh }}</span></span>
+                      <span style="font-size:13px;line-height:1.3">{{ r.routeStr }}</span>
+                      <span style="font-size:11px;color:var(--color-neutral-700)">{{ r.dep }} → {{ r.eta }}</span>
+                      <sc-if value="{{ r.hasIssue }}"><span class="tag" style="background:{{ r.issue.bg }};color:{{ r.issue.fg }};padding:1px 6px;font-size:10px">{{ r.issueText }}</span></sc-if>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><h3 style="margin:0;font-size:20px">Нераспределённые заказы</h3><span style="font-size:12px;color:var(--color-neutral-700)">из ERP KDL Olymp · хаб Астана</span></div>
+              <sc-for list="{{ openOrders }}" as="o" hint-placeholder-count="2">
+                <div style="display:grid;grid-template-columns:70px minmax(0,1fr) 64px 56px auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--color-divider);font-size:13px">
+                  <span style="font-family:var(--font-heading);font-weight:600">{{ o.id }}</span><span>{{ o.to }} · {{ o.desc }}</span><span>{{ o.clsLabel }}</span><span>{{ o.palLabel }}</span>
+                  <button class="btn btn-secondary" sc-camel-on-click="{{ o.add }}" style="font-size:12px;padding:4px 10px">В рейс R-106</button>
+                </div>
+              </sc-for>
+              <sc-if value="{{ noOpenOrders }}"><span style="font-size:13px;color:var(--color-neutral-700);padding:8px 0;border-top:1px solid var(--color-divider)">Все заказы распределены.</span></sc-if>
+            </div>
+          </div>
+
+          <aside class="blueprint" style="position:sticky;top:20px;max-width:640px;padding:18px;display:flex;flex-direction:column;gap:14px">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Рейс {{ trip.id }} · {{ trip.note }}</span>
+              <h3 style="margin:0;font-size:24px">{{ trip.routeStr }}</h3>
+              <span style="font-size:13px;color:var(--color-neutral-700)">{{ trip.km }} км · выезд {{ trip.dep }} · ETA {{ trip.eta }}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:80px 1fr;gap:4px 10px;font-size:13px">
+              <span style="color:var(--color-neutral-700)">Машина</span><span>{{ trip.vehStr }}</span>
+              <span style="color:var(--color-neutral-700)">Водитель</span><span>{{ trip.drvStr }}</span>
+              <span style="color:var(--color-neutral-700)">Камеры</span><span>{{ trip.chambers }}</span>
+            </div>
+            <div style="display:flex;flex-direction:column">
+              <sc-for list="{{ trip.stops }}" as="s">
+                <div style="display:grid;grid-template-columns:16px 1fr auto;gap:10px;align-items:center;font-size:13px;padding:5px 0">
+                  <span style="width:9px;height:9px;border:1.5px solid var(--color-accent);background:{{ s.fill }}"></span><span>{{ s.name }}</span><span style="font-size:12px;color:var(--color-neutral-700)">{{ s.info }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <span style="display:flex;align-items:center;gap:6px;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700)">Проверки перед выпуском (Go / No-Go) <span style="position:relative;display:inline-flex;vertical-align:middle"><span sc-camel-on-mouse-enter="{{ tips.gonogo.on }}" sc-camel-on-mouse-leave="{{ tipOff }}" style="width:17px;height:17px;border:1px solid var(--color-accent);color:var(--color-accent-700);font-size:11px;font-family:var(--font-body);display:inline-flex;align-items:center;justify-content:center;cursor:help">?</span><sc-if value="{{ tips.gonogo.show }}"><span style="position:absolute;top:24px;left:-8px;z-index:30;width:300px;padding:10px 12px;background:var(--color-bg);border:1px solid var(--color-accent);box-shadow:var(--shadow-md);font-size:12px;line-height:1.45;color:var(--color-text);text-transform:none;letter-spacing:0;font-weight:400;font-family:var(--font-body);white-space:normal">{{ tips.gonogo.text }}</span></sc-if></span></span>
+              <sc-for list="{{ trip.checks }}" as="c">
+                <div style="display:grid;grid-template-columns:76px 1fr;gap:10px;font-size:13px;align-items:start">
+                  <span class="tag" style="justify-content:center;background:{{ c.l.bg }};color:{{ c.l.fg }};border:1px solid {{ c.l.bc }};padding:1px 4px;font-size:10px">{{ c.l.label }}</span>
+                  <span><b style="font-weight:500">{{ c.label }}</b> — {{ c.text }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <sc-if value="{{ hasTripWs }}"><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--color-divider)"><span style="display:flex;flex-direction:column"><span style="font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700)">Сервис на маршруте</span><span style="font-size:13px;font-weight:500">{{ tripWs.name }} · {{ tripWs.city }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ tripWs.tierL }} · отклик {{ tripWs.resp }}</span></span><button class="btn btn-secondary" sc-camel-on-click="{{ tripWs.open }}" style="font-size:12px;padding:4px 10px">Контакты</button></div></sc-if>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <button class="btn btn-primary" sc-camel-on-click="{{ trip.send }}" style="opacity:{{ trip.sendOp }}">{{ trip.sendLabel }}</button>
+              <sc-if value="{{ trip.canReplan }}"><button class="btn btn-secondary" sc-camel-on-click="{{ trip.replan }}">Перенести на 10.10 (окно без бурана)</button></sc-if>
+              <sc-if value="{{ trip.hasLoad }}"><button class="btn btn-ghost" sc-camel-on-click="{{ goLoad }}">Загрузка →</button></sc-if>
+              <button class="btn btn-ghost" sc-camel-on-click="{{ goThermo }}">Термостатус →</button>
+            </div>
+          </aside>
+          <div data-disp-drv="1" style="grid-column:1 / -1;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><h3 style="margin:0;font-size:20px;margin-right:auto">Лента приложения водителя · R-103 · V01</h3><button class="btn btn-ghost" sc-camel-on-click="{{ goDriver }}">Приложение водителя →</button></div>
+            <sc-for list="{{ drvEv5 }}" as="e"><div style="display:grid;grid-template-columns:52px 110px minmax(0,1fr) 100px;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--color-divider);font-size:13px"><span style="color:var(--color-neutral-700);font-variant-numeric:tabular-nums">{{ e.t }}</span><span style="font-weight:500">{{ e.modL }}</span><span>{{ e.text }}</span><span class="tag" style="justify-content:center;background:{{ e.l.bg }};color:{{ e.l.fg }};border:1px solid {{ e.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ e.stL }}</span></div></sc-for>
+          </div>
+        </section>
+      </sc-if>
+

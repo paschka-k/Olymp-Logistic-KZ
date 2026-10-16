@@ -1,0 +1,52 @@
+      <sc-if value="{{ is.security }}">
+        <section data-screen-label="Sicherheit" style="display:flex;flex-direction:column;gap:22px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px">
+            <sc-for list="{{ secKpis }}" as="k">
+              <div class="blueprint" style="padding:12px;display:flex;flex-direction:column;gap:2px">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700)">{{ k.label }}</span>
+                <span style="font-family:var(--font-heading);font-weight:600;font-size:28px;line-height:1.1">{{ k.value }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:24px;align-items:start">
+            <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3 style="margin:0;font-size:20px;display:flex;align-items:center;gap:8px">Vorfälle <span style="position:relative;display:inline-flex;vertical-align:middle"><span sc-camel-on-mouse-enter="{{ tips.escal.on }}" sc-camel-on-mouse-leave="{{ tipOff }}" style="width:17px;height:17px;border:1px solid var(--color-accent);color:var(--color-accent-700);font-size:11px;font-family:var(--font-body);display:inline-flex;align-items:center;justify-content:center;cursor:help">?</span><sc-if value="{{ tips.escal.show }}"><span style="position:absolute;top:24px;left:-8px;z-index:30;width:300px;padding:10px 12px;background:var(--color-bg);border:1px solid var(--color-accent);box-shadow:var(--shadow-md);font-size:12px;line-height:1.45;color:var(--color-text);text-transform:none;letter-spacing:0;font-weight:400;font-family:var(--font-body);white-space:normal">{{ tips.escal.text }}</span></sc-if></span></h3><button class="btn btn-secondary" sc-camel-on-click="{{ panicTest }}" style="white-space:nowrap">Test Notfalltaste V01</button></div>
+              <sc-for list="{{ incidents }}" as="i" hint-placeholder-count="5">
+                <div style="display:grid;grid-template-columns:76px minmax(0,1fr);gap:6px 12px;align-items:start;padding:10px 0;border-top:1px solid var(--color-divider)">
+                  <span class="tag" style="justify-content:center;background:{{ i.l.bg }};color:{{ i.l.fg }};border:1px solid {{ i.l.bc }};padding:1px 4px;font-size:10px">{{ i.l.label }}</span>
+                  <span style="display:flex;flex-direction:column;gap:1px;min-width:0"><span style="font-size:14px;font-weight:500">{{ i.type }}</span><span style="font-size:13px;color:var(--color-neutral-800)">{{ i.text }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ i.id }} · {{ i.time }} · {{ i.statusLabel }}</span></span>
+                  <span style="grid-column:2;display:flex;gap:6px;flex-wrap:wrap">
+                    <sc-if value="{{ i.canAck }}"><button class="btn btn-secondary" sc-camel-on-click="{{ i.ack }}" style="font-size:12px;padding:4px 9px">Annehmen</button></sc-if>
+                    <sc-if value="{{ i.canEsc }}"><button class="btn btn-secondary" sc-camel-on-click="{{ i.esc }}" style="font-size:12px;padding:4px 9px">Eskalieren</button></sc-if>
+                    <sc-if value="{{ i.canClose }}"><button class="btn btn-ghost" sc-camel-on-click="{{ i.close }}" style="font-size:12px;padding:4px 9px">Schließen</button></sc-if>
+                  </span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700)">Aktionsprotokoll (Audit Trail)</span>
+                <sc-for list="{{ audit }}" as="a"><div style="display:grid;grid-template-columns:50px 1fr;gap:8px;font-size:12px;padding:4px 0;border-top:1px solid var(--color-divider)"><span style="color:var(--color-neutral-700)">{{ a.t }}</span><span>{{ a.text }}</span></div></sc-for>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700)">Geozonen · Ereignisse</span>
+                <sc-for list="{{ geo }}" as="g"><div style="display:grid;grid-template-columns:50px 1fr;gap:8px;font-size:12px;padding:4px 0;border-top:1px solid var(--color-divider)"><span style="color:var(--color-neutral-700)">{{ g.t }}</span><span>{{ g.text }}</span></div></sc-for>
+              </div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:24px;align-items:start">
+            <div style="display:flex;flex-direction:column;min-width:0">
+              <h3 style="margin:0 0 8px;font-size:20px">Fahrer · Lenkzeiten und ADR</h3>
+              <div style="display:grid;grid-template-columns:minmax(0,1.4fr) 50px 90px 110px;gap:8px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>Fahrer</span><span>Fzg.</span><span>Lenkzeit</span><span>ADR bis</span></div>
+              <sc-for list="{{ drivers }}" as="d"><div style="display:grid;grid-template-columns:minmax(0,1.4fr) 50px 90px 110px;gap:8px;font-size:13px;padding:7px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);align-items:center"><span>{{ d.name }}</span><span>{{ d.veh }}</span><span>{{ d.drive }}</span><span style="color:{{ d.adrFg }}">{{ d.adr }}</span></div></sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;min-width:0">
+              <h3 style="margin:0 0 8px;font-size:20px">Türen, Plomben, Route</h3>
+              <div style="display:grid;grid-template-columns:50px 1fr 1fr 1fr;gap:8px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>Fzg.</span><span>Türen</span><span>Plombe</span><span>Route</span></div>
+              <sc-for list="{{ seals }}" as="s"><div style="display:grid;grid-template-columns:50px 1fr 1fr 1fr;gap:8px;font-size:13px;padding:7px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent)"><span style="font-family:var(--font-heading);font-weight:600">{{ s.id }}</span><span>{{ s.door }}</span><span>{{ s.seal }}</span><span>{{ s.route }}</span></div></sc-for>
+            </div>
+          </div>
+        </section>
+      </sc-if>
+

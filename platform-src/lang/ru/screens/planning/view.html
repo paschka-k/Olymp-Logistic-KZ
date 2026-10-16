@@ -1,0 +1,41 @@
+      <sc-if value="{{ is.planning }}">
+        <section data-screen-label="Планирование" style="display:flex;flex-direction:column;gap:22px">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <h3 style="margin:0;font-size:20px;display:flex;align-items:center;gap:8px">Сценарии <span style="position:relative;display:inline-flex;vertical-align:middle"><span sc-camel-on-mouse-enter="{{ tips.scen.on }}" sc-camel-on-mouse-leave="{{ tipOff }}" style="width:17px;height:17px;border:1px solid var(--color-accent);color:var(--color-accent-700);font-size:11px;font-family:var(--font-body);display:inline-flex;align-items:center;justify-content:center;cursor:help">?</span><sc-if value="{{ tips.scen.show }}"><span style="position:absolute;top:24px;left:-8px;z-index:30;width:300px;padding:10px 12px;background:var(--color-bg);border:1px solid var(--color-accent);box-shadow:var(--shadow-md);font-size:12px;line-height:1.45;color:var(--color-text);text-transform:none;letter-spacing:0;font-weight:400;font-family:var(--font-body);white-space:normal">{{ tips.scen.text }}</span></sc-if></span></h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px">
+              <sc-for list="{{ scenarios }}" as="s">
+                <button sc-camel-on-click="{{ s.toggle }}" style="display:grid;grid-template-columns:20px 1fr;gap:10px;text-align:left;padding:12px;cursor:pointer;color:var(--color-text);border:1px solid {{ s.bc }};background:{{ s.bg }}">
+                  <span style="width:16px;height:16px;border:1.5px solid var(--color-accent);background:{{ s.box }};display:block;margin-top:2px"></span>
+                  <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:500">{{ s.label }}</span><span style="font-size:12px;color:var(--color-neutral-700)">{{ s.sub }}</span></span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;overflow-x:auto">
+            <h3 style="margin:0;font-size:20px">Мощность парка · 7 дней</h3>
+            <div style="min-width:760px;display:flex;flex-direction:column">
+              <div style="display:grid;grid-template-columns:200px repeat(7,minmax(0,1fr));gap:4px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0">
+                <span></span><sc-for list="{{ planHead }}" as="d"><span>{{ d }}</span></sc-for>
+              </div>
+              <sc-for list="{{ planRows }}" as="r">
+                <div style="display:grid;grid-template-columns:200px repeat(7,minmax(0,1fr));gap:4px;padding:2px 0">
+                  <span style="font-size:13px;padding:6px 0">{{ r.label }}</span>
+                  <sc-for list="{{ r.cells }}" as="c"><div style="padding:6px 8px;font-size:14px;font-variant-numeric:tabular-nums;border:1px solid {{ c.l.bc }};background:{{ c.l.bg }};color:{{ c.l.fg }}">{{ c.v }}</div></sc-for>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;align-items:start">
+            <div class="blueprint" style="padding:16px;display:flex;flex-direction:column;gap:8px">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Рекомендации системы</span>
+              <sc-for list="{{ planRecs }}" as="r"><div style="font-size:14px;padding:6px 0;border-top:1px solid var(--color-divider);text-wrap:pretty">{{ r }}</div></sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700)">Факторы планирования</span>
+              <sc-for list="{{ planFactors }}" as="f"><div style="display:grid;grid-template-columns:170px 1fr;gap:10px;font-size:13px;padding:5px 0;border-top:1px solid var(--color-divider)"><span style="font-weight:500">{{ f.k }}</span><span style="color:var(--color-neutral-800)">{{ f.v }}</span></div></sc-for>
+            </div>
+          </div>
+        </section>
+      </sc-if>
+

@@ -1,0 +1,66 @@
+      <sc-if value="{{ is.weather }}">
+        <section data-screen-label="Погода" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,560px),1fr));gap:24px;align-items:start">
+          <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+            <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+              <span style="font-size:13px;color:var(--color-neutral-700);display:flex;align-items:center;gap:8px">Прогноз по городам сети · цвет ячейки = уровень риска для рейса <span style="position:relative;display:inline-flex;vertical-align:middle"><span sc-camel-on-mouse-enter="{{ tips.wxrisk.on }}" sc-camel-on-mouse-leave="{{ tipOff }}" style="width:17px;height:17px;border:1px solid var(--color-accent);color:var(--color-accent-700);font-size:11px;font-family:var(--font-body);display:inline-flex;align-items:center;justify-content:center;cursor:help">?</span><sc-if value="{{ tips.wxrisk.show }}"><span style="position:absolute;top:24px;left:-8px;z-index:30;width:300px;padding:10px 12px;background:var(--color-bg);border:1px solid var(--color-accent);box-shadow:var(--shadow-md);font-size:12px;line-height:1.45;color:var(--color-text);text-transform:none;letter-spacing:0;font-weight:400;font-family:var(--font-body);white-space:normal">{{ tips.wxrisk.text }}</span></sc-if></span></span>
+              <div style="display:flex;border:1px solid var(--color-divider)">
+                <sc-for list="{{ wxOpts }}" as="o"><button sc-camel-on-click="{{ o.go }}" style="font-size:13px;padding:6px 12px;border:0;border-right:1px solid var(--color-divider);white-space:nowrap;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for>
+              </div>
+            </div>
+            <div style="overflow-x:auto">
+              <div style="min-width:{{ wxMinW }};display:flex;flex-direction:column">
+                <div style="display:grid;grid-template-columns:{{ wxCols }};gap:4px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding-bottom:6px">
+                  <span>Город</span>
+                  <sc-for list="{{ wxHead }}" as="d"><span>{{ d }}</span></sc-for>
+                </div>
+                <sc-for list="{{ wxRows }}" as="r" hint-placeholder-count="10">
+                  <div style="display:grid;grid-template-columns:{{ wxCols }};gap:4px;padding:2px 0">
+                    <button sc-camel-on-click="{{ r.select }}" style="display:flex;flex-direction:column;justify-content:center;text-align:left;border:0;padding:4px 6px;cursor:pointer;background:{{ r.bg }};color:var(--color-text)"><span style="font-size:13px;font-weight:500">{{ r.city }}</span><span style="font-size:10px;color:var(--color-neutral-700)">{{ r.hubLabel }}</span></button>
+                    <sc-for list="{{ r.cells }}" as="c">
+                      <div style="display:flex;flex-direction:column;padding:4px 6px;border:1px solid {{ c.l.bc }};background:{{ c.l.bg }};color:{{ c.l.fg }};font-variant-numeric:tabular-nums">
+                        <span style="font-size:13px;font-weight:500">{{ c.temp }}</span>
+                        <span style="font-size:10px">{{ c.cond }} · {{ c.wind }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <span style="font-size:12px;color:var(--color-neutral-700)">Гибридная модель (концепт): Казгидромет / meteo.kz + глобальная модель прогноза + слой дорожных закрытий. Демо-прогноз.</span>
+          </div>
+
+          <aside style="display:flex;flex-direction:column;gap:18px">
+            <div class="blueprint" style="padding:14px;display:flex;flex-direction:column;gap:6px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <span style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Источники · обновлено {{ wxUpd }}</span><button class="btn btn-ghost" sc-camel-on-click="{{ wxRefresh }}" style="font-size:12px;padding:2px 6px">Обновить</button></span>
+              <sc-for list="{{ wxSrc }}" as="w"><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;font-size:12px;padding:4px 0;border-top:1px solid var(--color-divider)"><span>{{ w.name }}</span><span style="color:var(--color-neutral-700)">{{ w.st }}</span></div></sc-for>
+              <span style="font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);margin-top:4px">Закрытия трасс · КазАвтоЖол</span>
+              <sc-for list="{{ closures }}" as="c"><div style="display:flex;flex-direction:column;font-size:12px;padding:4px 0;border-top:1px solid var(--color-divider)"><span style="font-weight:500">{{ c.road }}</span><span style="color:var(--color-neutral-700)">{{ c.when }} · {{ c.why }}</span><span style="color:var(--color-accent-800)">{{ c.trip }}</span></div></sc-for>
+            </div>
+            <div class="blueprint" style="padding:16px;display:flex;flex-direction:column;gap:8px">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">{{ wxCity.hubLabel }}</span>
+              <h3 style="margin:0;font-size:24px">{{ wxCity.city }}</h3>
+              <sc-for list="{{ wxCity.days }}" as="d">
+                <div style="display:grid;grid-template-columns:62px 1fr auto;gap:8px;font-size:13px;align-items:center;padding:4px 0;border-top:1px solid var(--color-divider)">
+                  <span>{{ d.day }}</span><span>{{ d.temp }} · {{ d.cond }} · {{ d.wind }}</span>
+                  <span class="tag" style="background:{{ d.l.bg }};color:{{ d.l.fg }};border:1px solid {{ d.l.bc }};padding:0 5px;font-size:10px">{{ d.l.label }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700)">Погодный риск по рейсам</span>
+              <sc-for list="{{ routeWx }}" as="r">
+                <button sc-camel-on-click="{{ r.open }}" style="display:grid;grid-template-columns:56px minmax(0,1fr) 76px;gap:8px;align-items:center;text-align:left;font-size:13px;padding:6px 0;border:0;border-top:1px solid var(--color-divider);background:transparent;cursor:pointer;color:var(--color-text)">
+                  <span style="font-family:var(--font-heading);font-weight:600">{{ r.id }}</span><span>{{ r.text }}</span>
+                  <span class="tag" style="justify-content:center;background:{{ r.l.bg }};color:{{ r.l.fg }};border:1px solid {{ r.l.bc }};padding:0 4px;font-size:10px">{{ r.l.label }}</span>
+                </button>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700)">Пороги погодных тревог</span>
+              <sc-for list="{{ wxRules }}" as="r"><div style="display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:4px 0;border-top:1px solid var(--color-divider)"><span>{{ r.name }}</span><span style="color:var(--color-neutral-700);text-align:right">{{ r.rule }}</span></div></sc-for>
+            </div>
+          </aside>
+        </section>
+      </sc-if>
+

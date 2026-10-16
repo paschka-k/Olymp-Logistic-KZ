@@ -1,0 +1,131 @@
+      <sc-if value="{{ is.costs }}">
+        <section data-screen-label="Kosten" style="display:flex;flex-direction:column;gap:22px">
+          <span style="font-size:13px;color:var(--color-neutral-800);max-width:980px;text-wrap:pretty">Laufende Kosten der eigenen Flotte: 4 Fahrzeuge (V01 — HOWO T5G mit aktiver Kühlung auf R1, V02–V04 — Isotherm ohne Aggregat), 7 Fahrer, Ringe R1 / West / Süd / Nord + Ost. Sätze aus dem Fragenkatalog; Positionen mit „Annahme“ sind zu bestätigen.</span>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+            <sc-for list="{{ cKpis }}" as="k" hint-placeholder-count="6">
+              <div class="blueprint" style="padding:14px;display:flex;flex-direction:column;gap:6px;border-left:3px solid {{ k.l.bc }}"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700)">{{ k.k }}</span>
+                <span style="font-family:var(--font-heading);font-weight:600;font-size:26px;line-height:1.05">{{ k.v }}</span>
+                <span style="font-size:11px;color:var(--color-neutral-700)">{{ k.sub }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;border:1px solid var(--color-divider);align-self:flex-start"><sc-for list="{{ cTabs }}" as="b"><button data-ctab="1" sc-camel-on-click="{{ b.go }}" style="font-size:13px;padding:7px 12px;border:0;border-right:1px solid var(--color-divider);cursor:pointer;background:{{ b.bg }};color:{{ b.fg }}">{{ b.label }}</button></sc-for></div>
+          <sc-if value="{{ cIs.sum }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,640px),1fr));gap:24px;align-items:start">
+              <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+                <h3 style="margin:0;font-size:20px">Laufende Kosten je Position</h3>
+                <div style="overflow-x:auto"><div style="min-width:940px;display:flex;flex-direction:column">
+                  <div style="display:grid;grid-template-columns:96px minmax(0,1.3fr) 70px minmax(0,1.2fr) 110px 100px 70px minmax(60px,0.6fr) 100px;gap:10px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>Gruppe</span><span>Position</span><span>Basis</span><span>Berechnung</span><span>₸ / Monat</span><span>₸ / Jahr</span><span>Anteil</span><span></span><span>Quelle</span></div>
+                  <sc-for list="{{ cRows }}" as="r" hint-placeholder-count="12">
+                    <div data-cost="{{ r.k }}" style="display:grid;grid-template-columns:96px minmax(0,1.3fr) 70px minmax(0,1.2fr) 110px 100px 70px minmax(60px,0.6fr) 100px;gap:10px;font-size:13px;padding:8px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);align-items:center;font-variant-numeric:tabular-nums">
+                      <span style="font-size:12px;color:var(--color-neutral-700)">{{ r.grp }}</span><span style="font-weight:500">{{ r.k }}</span><span style="font-size:11px;color:var(--color-accent-700)">{{ r.ref }}</span><span style="font-size:12px;color:var(--color-neutral-800)">{{ r.basis }}</span>
+                      <span>{{ r.mo }}</span><span>{{ r.yr }}</span><span>{{ r.share }}</span>
+                      <span style="height:10px;background:var(--color-neutral-100);position:relative"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ r.w }};background:var(--color-accent)"></span></span>
+                      <span class="tag" style="justify-content:center;background:{{ r.l.bg }};color:{{ r.l.fg }};border:1px solid {{ r.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ r.tagL }}</span>
+                    </div>
+                  </sc-for>
+                  <div data-cost-total="1" style="display:grid;grid-template-columns:96px minmax(0,1.3fr) 70px minmax(0,1.2fr) 110px 100px 70px minmax(60px,0.6fr) 100px;gap:10px;font-size:14px;padding:10px 0;font-weight:600;font-variant-numeric:tabular-nums"><span></span><span>Summe laufende Kosten</span><span></span><span style="font-weight:400;font-size:12px">{{ cTotal.perKm }} · {{ cTotal.perKg }}</span><span>{{ cTotal.mo }}</span><span>{{ cTotal.yr }}</span><span>100 %</span><span></span><span></span></div>
+                </div></div>
+                <span style="font-size:12px;color:var(--color-neutral-800);text-wrap:pretty">{{ cTotal.n77 }}</span>
+                <span style="font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);margin-top:6px">Nicht enthalten</span>
+                <sc-for list="{{ cExcl }}" as="e"><span style="font-size:12px;color:var(--color-neutral-800)">— {{ e }}</span></sc-for>
+              </div>
+              <div class="blueprint" style="padding:18px;display:flex;flex-direction:column;gap:6px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Für das Management-Dashboard</span>
+                <h3 style="margin:0 0 4px;font-size:20px">Top-Ebene · 6 Kennzahlen</h3>
+                <sc-for list="{{ cDash }}" as="d"><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:7px 0;border-top:1px solid var(--color-divider);font-size:13px"><span style="color:var(--color-neutral-700)">{{ d.k }}</span><span style="font-weight:500;font-variant-numeric:tabular-nums">{{ d.v }}</span></div></sc-for>
+                <span style="font-size:11px;color:var(--color-neutral-700);text-wrap:pretty">Aktualisierung: täglich aus Wialon (Kraftstoff, km), 1C (Kosten), monatlich — Versicherung und Steuern.</span>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ cIs.fuel }}">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h3 style="margin:0;font-size:20px;margin-right:auto">Dieselverbrauchsstatistik</h3><div style="display:flex;flex-wrap:wrap;border:1px solid var(--color-divider);align-self:flex-start"><sc-for list="{{ cDieselOpts }}" as="b"><button data-cdiesel="1" sc-camel-on-click="{{ b.go }}" style="font-size:13px;padding:7px 12px;border:0;border-right:1px solid var(--color-divider);cursor:pointer;background:{{ b.bg }};color:{{ b.fg }}">{{ b.label }}</button></sc-for></div><button data-cwinter="1" sc-camel-on-click="{{ cWinterOpt.go }}" style="font-size:13px;padding:7px 12px;border:1px solid var(--color-divider);cursor:pointer;background:{{ cWinterOpt.bg }};color:{{ cWinterOpt.fg }}">{{ cWinterOpt.label }}</button></div>
+              <div style="overflow-x:auto"><div style="min-width:980px;display:flex;flex-direction:column">
+                <div style="display:grid;grid-template-columns:60px 170px 70px 70px 80px minmax(140px,1fr) 110px 110px 90px;gap:10px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>ID</span><span>Modell</span><span>Plan l/100</span><span>Ist l/100</span><span>Abw.</span><span>8 Wochen</span><span>Liter · CO₂</span><span>₸ / Monat · ₸/km</span><span>Status</span></div>
+                <sc-for list="{{ cFuel }}" as="f" hint-placeholder-count="4">
+                  <div data-fuel="{{ f.id }}" style="display:grid;grid-template-columns:60px 170px 70px 70px 80px minmax(140px,1fr) 110px 110px 90px;gap:10px;font-size:13px;padding:8px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);align-items:center;font-variant-numeric:tabular-nums">
+                    <span style="font-family:var(--font-heading);font-weight:600;font-size:16px">{{ f.id }}</span>
+                    <span style="display:flex;flex-direction:column"><span>{{ f.model }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ f.note }}</span></span>
+                    <span>{{ f.plan }}</span><span style="font-weight:500">{{ f.act }}</span><span>{{ f.dev }}</span>
+                    <span style="display:flex;align-items:flex-end;gap:3px;height:32px"><sc-for list="{{ f.wk }}" as="b"><span style="flex:1;height:{{ b.h }};background:{{ b.c }}"></span></sc-for></span>
+                    <span style="display:flex;flex-direction:column"><span>{{ f.liters }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ f.co2 }}</span></span>
+                    <span style="display:flex;flex-direction:column"><span>{{ f.cost }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ f.perKm }}</span></span>
+                    <span class="tag" style="justify-content:center;background:{{ f.l.bg }};color:{{ f.l.fg }};border:1px solid {{ f.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ f.l.label }}</span>
+                  </div>
+                </sc-for>
+              </div></div>
+              <span style="font-size:13px">Summe: {{ fuelTot.liters }} · {{ fuelTot.cost }} pro Monat. Winterrisiko: {{ fuelTot.winter }}.</span>
+              <span style="font-size:12px;color:var(--color-neutral-700);text-wrap:pretty">Plan: HOWO 26 l/100 km, JAC 17 l/100 km (I38), V01 + 2,5 l/100 km für das Carrier-Aggregat. Ist — Wialon-Füllstandssensoren (R125); Daten vor dem Start simuliert. Abweichung &gt; 8 % gelb, &gt; 15 % rot.</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ cIs.svc }}">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <h3 style="margin:0;font-size:20px">Werkstatt, Wartung und Ausfall</h3>
+              <div style="overflow-x:auto"><div style="min-width:1100px;display:flex;flex-direction:column">
+                <div style="display:grid;grid-template-columns:60px 170px 100px 100px 90px 90px 80px 70px 110px 120px 100px;gap:10px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>ID</span><span>Modell</span><span>km / Monat</span><span>Werkstatt / Monat</span><span>Bis TO-1</span><span>Bis TO-2</span><span>Ausfall TO</span><span>Bereitsch.</span><span>Ausfalltag</span><span>Ersatz Fahrt</span><span>Status</span></div>
+                <sc-for list="{{ cSvc }}" as="v" hint-placeholder-count="4">
+                  <div data-svc="{{ v.id }}" style="display:grid;grid-template-columns:60px 170px 100px 100px 90px 90px 80px 70px 110px 120px 100px;gap:10px;font-size:13px;padding:8px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);align-items:center;font-variant-numeric:tabular-nums">
+                    <span style="font-family:var(--font-heading);font-weight:600;font-size:16px">{{ v.id }}</span><span>{{ v.model }}</span><span>{{ v.km }}</span><span>{{ v.svc }}</span><span>{{ v.to1 }}</span><span>{{ v.to2 }}</span><span>{{ v.down }}</span><span class="tag" style="justify-content:center;background:{{ v.kl.bg }};color:{{ v.kl.fg }};border:1px solid {{ v.kl.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ v.ktg }}</span><span>{{ v.perDay }}</span><span>{{ v.lost }}</span><span class="tag" style="justify-content:center;background:{{ v.sl.bg }};color:{{ v.sl.fg }};border:1px solid {{ v.sl.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ v.st }}</span>
+                  </div>
+                </sc-for>
+              </div></div>
+              <span style="font-size:12px;color:var(--color-neutral-700);text-wrap:pretty">TO-1 alle 15 000 km (0,75 Tag), TO-2 alle 45 000 km (1,5 Tage), Sonntag ist Wartungstag (I45/J51). „Ausfalltag“ — Leasing, Versicherung, Steuer und Grundgehalt der Besatzung; „Ersatz Fahrt“ — Ringladung zum Stückguttarif 228 ₸/kg.</span>
+              <div data-outage="1" class="blueprint" style="padding:18px;display:flex;flex-direction:column;gap:6px;max-width:640px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Kosten eines ungeplanten Ausfalls</span>
+                <h3 style="margin:0;font-size:19px">{{ cOut.title }}</h3>
+                <sc-for list="{{ cOut.items }}" as="i"><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:5px 0;border-top:1px solid var(--color-divider);font-size:13px;font-variant-numeric:tabular-nums"><span>{{ i.k }}</span><span>{{ i.v }}</span></div></sc-for>
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:6px 0;border-top:1px solid var(--color-text);font-size:14px;font-weight:600"><span>Summe je Ereignis</span><span>{{ cOut.total }}</span></div>
+                <span style="font-size:12px;color:var(--color-neutral-700)">Reserveverträge GarantA / KazExpress behalten — Hauptstrecke ist Single Point of Failure (L66).</span>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ cIs.ins }}">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><h3 style="margin:0;font-size:20px;margin-right:auto">Versicherung, Steuern und Zulassung</h3><div style="display:flex;flex-wrap:wrap;border:1px solid var(--color-divider);align-self:flex-start"><sc-for list="{{ cIdleOpts }}" as="b"><button data-cidle="1" sc-camel-on-click="{{ b.go }}" style="font-size:13px;padding:7px 12px;border:0;border-right:1px solid var(--color-divider);cursor:pointer;background:{{ b.bg }};color:{{ b.fg }}">{{ b.label }}</button></sc-for></div></div>
+              <div style="overflow-x:auto"><div style="min-width:1140px;display:flex;flex-direction:column">
+                <div style="display:grid;grid-template-columns:60px 160px 90px 80px 80px 70px 100px minmax(0,1fr) 70px minmax(0,1.6fr);gap:10px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>ID</span><span>Modell</span><span>Kasko</span><span>OGPO</span><span>Steuer</span><span>Prüfung</span><span>Summe / Jahr</span><span>Fristen</span><span>Stillstand</span><span>Empfehlung Zulassung</span></div>
+                <sc-for list="{{ cIns }}" as="v" hint-placeholder-count="4">
+                  <div data-ins="{{ v.id }}" style="display:grid;grid-template-columns:60px 160px 90px 80px 80px 70px 100px minmax(0,1fr) 70px minmax(0,1.6fr);gap:10px;font-size:13px;padding:8px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);align-items:center;font-variant-numeric:tabular-nums;align-items:start">
+                    <span style="font-family:var(--font-heading);font-weight:600;font-size:16px">{{ v.id }}</span><span>{{ v.model }}</span><span>{{ v.kasko }}</span><span>{{ v.ogpo }}</span><span>{{ v.tax }}</span><span>{{ v.ti }}</span><span style="font-weight:500">{{ v.total }}</span>
+                    <span style="display:flex;flex-direction:column;gap:3px;align-items:flex-start"><span style="font-size:12px">{{ v.due }}</span><span class="tag" style="justify-content:center;background:{{ v.fl.bg }};color:{{ v.fl.fg }};border:1px solid {{ v.fl.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ v.fnote }}</span></span>
+                    <span>{{ v.idle }}</span><span style="display:flex;gap:6px;align-items:flex-start"><span style="width:8px;height:8px;margin-top:5px;flex:none;background:{{ v.rl.bc }}"></span><span style="font-size:12px;text-wrap:pretty">{{ v.rec }}</span></span>
+                  </div>
+                </sc-for>
+              </div></div>
+              <span style="font-size:12px;color:var(--color-neutral-800);max-width:980px;text-wrap:pretty">{{ cRule }}</span>
+              <span style="font-size:12px;color:var(--color-neutral-700);max-width:980px;text-wrap:pretty">Kasko 1,5 % des Werts (I41), OGPO 1,9 MRP × 3,98 ohne Gebietskoeffizient, Kfz-Steuer 9 MRP (M67), Prüfung 1 MRP — Annahme. Beträge mit Sätzen 2026 prüfen.</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ cIs.own }}">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <h3 style="margin:0;font-size:20px">Eigenes Fahrzeug oder externer Frachtführer</h3>
+              <span style="font-size:13px;color:var(--color-neutral-800);max-width:980px;text-wrap:pretty">Eigenes Fahrzeug: Kraftstoff, Werkstatt, Kilometergeld und Spesen plus Fixkosten des Fahrzeugs für die Tourtage. Bei mehr als 50 % Unterschied bestätigen zwei Mitarbeiter: Leitung Logistik und Finanzcontroller.</span>
+              <div style="overflow-x:auto"><div style="min-width:1080px;display:flex;flex-direction:column">
+                <div style="display:grid;grid-template-columns:minmax(0,1.4fr) 80px 110px minmax(0,1.1fr) 100px 70px minmax(0,1.6fr);gap:10px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>Transport</span><span>Ladung</span><span>Eigenes Fzg.</span><span>Extern</span><span>Günstiger</span><span>Differenz</span><span>Entscheidung</span></div>
+                <sc-for list="{{ cOwn }}" as="o" hint-placeholder-count="7">
+                  <div data-own="{{ o.id }}" style="display:grid;grid-template-columns:minmax(0,1.4fr) 80px 110px minmax(0,1.1fr) 100px 70px minmax(0,1.6fr);gap:10px;font-size:13px;padding:8px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);align-items:center;font-variant-numeric:tabular-nums;align-items:start">
+                    <span style="font-weight:500">{{ o.name }}</span><span>{{ o.kg }}</span><span>{{ o.own }}</span><span style="display:flex;flex-direction:column"><span>{{ o.ext }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ o.extL }}</span></span>
+                    <span style="font-weight:500">{{ o.best }}</span><span>{{ o.save }}</span>
+                    <span style="display:flex;flex-direction:column;gap:5px;align-items:flex-start"><span class="tag" style="justify-content:center;background:{{ o.l.bg }};color:{{ o.l.fg }};border:1px solid {{ o.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ o.st }}</span><sc-if value="{{ o.need }}"><span style="display:flex;flex-wrap:wrap;gap:5px"><sc-for list="{{ o.signers }}" as="g"><button sc-camel-on-click="{{ g.sign }}" style="display:flex;gap:6px;align-items:center;font-size:12px;padding:4px 8px;cursor:pointer;border:1px solid {{ g.bc }};background:{{ g.bg }};color:{{ g.fg }}"><span>{{ g.role }}</span><span>{{ g.mark }}</span></button></sc-for></span></sc-if></span>
+                  </div>
+                </sc-for>
+              </div></div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ cIs.drv }}">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <h3 style="margin:0;font-size:20px">Fahrerbedarf (E20, J51, FR-46)</h3>
+              <div style="overflow-x:auto"><div style="min-width:720px;display:flex;flex-direction:column">
+                <div style="display:grid;grid-template-columns:60px 90px 120px 100px 80px 70px 110px;gap:10px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>ID</span><span>Ringe</span><span>km / Jahr</span><span>Stunden / Jahr</span><span>Stellen</span><span>Besatzung</span><span>Auf Tour</span></div>
+                <sc-for list="{{ cDrv }}" as="d" hint-placeholder-count="4">
+                  <div data-cdrv="{{ d.id }}" style="display:grid;grid-template-columns:60px 90px 120px 100px 80px 70px 110px;gap:10px;font-size:13px;padding:8px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);align-items:center;font-variant-numeric:tabular-nums"><span style="font-family:var(--font-heading);font-weight:600;font-size:16px">{{ d.id }}</span><span>{{ d.rings }}</span><span>{{ d.kmY }}</span><span>{{ d.h }}</span><span>{{ d.fte }}</span><span class="tag" style="justify-content:center;background:{{ d.l.bg }};color:{{ d.l.fg }};border:1px solid {{ d.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ d.crew }}</span><span>{{ d.days }}</span></div>
+                </sc-for>
+              </div></div>
+              <span style="font-size:13px">Summe: {{ drvSum.crew }} Fahrer · {{ drvSum.fte }} Stellen · Grundgehälter {{ drvSum.base }} · Arbeitgeberabgaben {{ drvSum.tax }}</span>
+              <span style="font-size:12px;color:var(--color-neutral-700);max-width:980px;text-wrap:pretty">Stunden = km / 70 km/h + 15 % für Be- und Entladung; Limit 1 814 h pro Jahr je Fahrer; 6-Tage-Woche, Sonntag frei und Wartung. Mehr Stellen als Besatzung — rot.</span>
+            </div>
+          </sc-if>
+        </section>
+      </sc-if>

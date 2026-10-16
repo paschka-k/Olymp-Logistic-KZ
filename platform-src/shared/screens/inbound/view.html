@@ -1,0 +1,161 @@
+      <sc-if value="{{ is.inbound }}">
+        <section data-screen-label="Goods receipt" style="display:flex;flex-direction:column;gap:18px">
+          <span style="font-size:13px;color:var(--color-neutral-800);max-width:980px;text-wrap:pretty">{{ inbL.intro }}</span>
+          <div style="display:flex;flex-wrap:wrap;border:1px solid var(--color-divider);align-self:flex-start">
+            <sc-for list="{{ inbHubs }}" as="h"><button data-inb-hub="1" sc-camel-on-click="{{ h.go }}" style="font-size:14px;padding:9px 16px;border:0;border-right:1px solid var(--color-divider);cursor:pointer;background:{{ h.bg }};color:{{ h.fg }}">{{ h.label }} · {{ h.n }}</button></sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px">
+            <sc-for list="{{ inbKpis }}" as="k">
+              <div class="blueprint" data-inb-kpi="1" style="padding:12px;display:flex;flex-direction:column;gap:4px;border-left:3px solid {{ k.l.bc }}"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700)">{{ k.k }}</span>
+                <span style="font-family:var(--font-heading);font-weight:600;font-size:24px;line-height:1.05">{{ k.v }}</span>
+                <span style="font-size:11px;color:var(--color-neutral-700)">{{ k.sub }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+              <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700)">{{ inbL.views }}</span>
+              <div style="display:flex;flex-wrap:wrap;border:1px solid var(--color-divider)"><sc-for list="{{ inbViews }}" as="v"><button data-inb-view="1" sc-camel-on-click="{{ v.go }}" style="font-size:12px;padding:6px 11px;border:0;border-right:1px solid var(--color-divider);cursor:pointer;background:{{ v.bg }};color:{{ v.fg }}">{{ v.label }}</button></sc-for></div>
+              <input data-inb-name="1" value="{{ inbName }}" sc-camel-on-change="{{ onInbName }}" placeholder="{{ inbL.namePh }}" style="box-sizing:border-box;height:30px;width:150px;padding:4px 8px;font-family:var(--font-body);font-size:12px;border:1px solid var(--color-divider);background:transparent;color:var(--color-text)" />
+              <button class="btn btn-secondary" data-inb-save="1" sc-camel-on-click="{{ inbSave }}" style="font-size:12px;padding:5px 10px">{{ inbL.save }}</button>
+              <button class="btn btn-secondary" data-inb-export="1" sc-camel-on-click="{{ inbExport }}" style="font-size:12px;padding:5px 10px;margin-left:auto">{{ inbL.exp }}</button>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center">
+              <sc-for list="{{ inbFilters }}" as="g">
+                <div style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700)">{{ g.label }}</span>
+                  <div style="display:flex;flex-wrap:wrap;border:1px solid var(--color-divider)"><sc-for list="{{ g.opts }}" as="o"><button data-inb-f="1" sc-camel-on-click="{{ o.go }}" style="font-size:11px;padding:4px 8px;border:0;border-right:1px solid var(--color-divider);cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for></div>
+                </div>
+              </sc-for>
+              <input data-inb-q="1" value="{{ inbQ }}" sc-camel-on-change="{{ onInbQ }}" placeholder="{{ inbL.search }}" style="box-sizing:border-box;height:30px;width:250px;padding:4px 8px;font-family:var(--font-body);font-size:12px;border:1px solid var(--color-divider);background:transparent;color:var(--color-text)" />
+              <span style="font-size:12px;color:var(--color-neutral-700)">{{ inbCount }}</span>
+            </div>
+            <span style="font-size:11px;color:var(--color-neutral-700)">{{ inbL.legend }}</span>
+          </div>
+
+          <div style="overflow-x:auto"><div data-inb-list="1" style="min-width:1100px;display:flex;flex-direction:column">
+            <div style="display:grid;grid-template-columns:34px 112px 52px 112px 150px 170px 200px minmax(0,1fr);gap:10px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 8px;border-bottom:1px solid var(--color-divider)">
+              <sc-for list="{{ inbL.cols }}" as="c"><span>{{ c }}</span></sc-for>
+            </div>
+            <sc-for list="{{ inbRows }}" as="r">
+              <button data-inb-row="{{ r.id }}" sc-camel-on-click="{{ r.open }}" style="display:flex;flex-direction:column;gap:5px;text-align:left;cursor:pointer;padding:8px;border:0;border-bottom:1px solid var(--color-divider);background:{{ r.bg }};color:var(--color-text);font-family:var(--font-body)">
+                <span style="display:grid;grid-template-columns:34px 112px 52px 112px 150px 170px 200px minmax(0,1fr);gap:10px;align-items:center;width:100%">
+                  <span title="{{ r.arrowTitle }}" style="font-size:20px;line-height:1;text-align:center">{{ r.arrow }}</span>
+                  <span style="display:flex;flex-direction:column"><span style="font-weight:600;font-size:13px">{{ r.id }}</span><span style="font-size:10px;color:var(--color-neutral-700)">{{ r.src }}</span></span>
+                  <span class="tag" style="justify-content:center;background:{{ r.pc.bg }};color:{{ r.pc.fg }};border:1px solid {{ r.pc.bc }};padding:1px 6px;font-size:11px;font-weight:600">{{ r.prio }}</span>
+                  <span data-inb-status="1" class="tag" style="justify-content:center;background:{{ r.stc.bg }};color:{{ r.stc.fg }};border:1px solid {{ r.stc.bc }};padding:2px 6px;font-size:11px">{{ r.st }}</span>
+                  <span style="display:flex;flex-wrap:wrap;gap:4px"><sc-for list="{{ r.snd }}" as="z"><span title="{{ z.title }}" class="tag" style="padding:1px 6px;font-size:11px;border:1px solid var(--color-accent-500);color:var(--color-accent-900);cursor:help">{{ z.t }}</span></sc-for></span>
+                  <span style="display:flex;flex-wrap:wrap;gap:4px"><sc-for list="{{ r.stops }}" as="z"><span data-inb-stop="1" title="{{ z.title }}" class="tag" style="padding:1px 6px;font-size:11px;background:{{ z.bg }};color:{{ z.fg }};border:1px solid {{ z.bc }};cursor:help">{{ z.t }}</span></sc-for></span>
+                  <span style="display:flex;align-items:center;gap:8px"><span data-inb-clock="1" data-late="{{ r.late }}" title="{{ r.clockTitle }}" style="display:inline-flex;align-items:center;gap:4px;padding:2px 6px;border:1px solid {{ r.clockBc }};background:{{ r.clockBg }};color:{{ r.clockC }};cursor:help;font-size:12px;font-variant-numeric:tabular-nums">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="{{ r.clockC }}" stroke-width="1.6" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.5V8l2.4 1.6"/></svg>{{ r.dwellTxt }}</span>
+                    <span style="font-size:12px;color:var(--color-neutral-800)">{{ r.win }}</span></span>
+                  <span style="display:flex;flex-wrap:wrap;gap:4px;align-items:center"><sc-for list="{{ r.flags }}" as="f"><span title="{{ f.title }}" class="tag" style="padding:1px 5px;font-size:10px;background:{{ f.bg }};color:{{ f.fg }};border:1px solid {{ f.bc }};cursor:help">{{ f.t }}</span></sc-for>
+                    <sc-if value="{{ r.hasFee }}"><span class="tag" title="Standgeld" style="padding:1px 5px;font-size:10px;background:oklch(0.88 0.14 27);color:oklch(0.35 0.14 27);border:1px solid oklch(0.55 0.19 27)">₸ {{ r.fee }}</span></sc-if></span>
+                </span>
+                <span style="font-size:11px;color:var(--color-neutral-700)">{{ r.sub }}</span>
+              </button>
+            </sc-for>
+            <sc-if value="{{ inbNone }}"><span style="padding:18px 8px;font-size:13px;color:var(--color-neutral-700)">{{ inbL.empty }}</span></sc-if>
+          </div></div>
+        </section>
+
+        <sc-if value="{{ inbOpen }}">
+          <div data-inb-drawer="1" role="dialog" aria-modal="true" style="position:fixed;inset:0;z-index:55;display:flex;justify-content:flex-end;background:color-mix(in srgb, var(--color-text) 28%, transparent)">
+            <div style="flex:1" sc-camel-on-click="{{ dr.close }}"></div>
+            <aside style="width:min(560px,100%);height:100%;overflow-y:auto;background:var(--color-bg);border-left:1px solid var(--color-divider);box-shadow:var(--shadow-lg);padding:20px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box">
+              <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:26px;line-height:1">{{ dr.arrow }}</span>
+                <span style="display:flex;flex-direction:column;gap:3px;margin-right:auto"><span style="font-family:var(--font-heading);font-weight:600;font-size:22px">{{ dr.id }}</span><span style="font-size:12px;color:var(--color-neutral-700)">{{ dr.hubName }} · {{ dr.src }}</span></span>
+                <span class="tag" style="background:{{ dr.pc.bg }};color:{{ dr.pc.fg }};border:1px solid {{ dr.pc.bc }};padding:2px 7px;font-weight:600">{{ dr.prio }}</span>
+                <span class="tag" style="background:{{ dr.stc.bg }};color:{{ dr.stc.fg }};border:1px solid {{ dr.stc.bc }};padding:2px 7px">{{ dr.st }}</span>
+                <button class="btn btn-secondary" sc-camel-on-click="{{ dr.close }}" style="font-size:12px;padding:5px 9px">{{ inbL.close }}</button>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-700)">{{ inbL.progH }} · {{ dr.pct }}</span>
+                <div style="height:8px;background:var(--color-neutral-200);position:relative"><span data-inb-progress="1" style="position:absolute;left:0;top:0;bottom:0;width:{{ dr.pctW }};background:var(--color-accent)"></span></div>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px"><sc-for list="{{ dr.steps }}" as="z"><span style="font-size:11px;padding:3px 0;border-top:3px solid {{ z.bg }};color:{{ z.fg }}">{{ z.label }}</span></sc-for></div>
+              </div>
+
+              <div style="display:flex;flex-wrap:wrap;gap:4px"><sc-for list="{{ dr.flags }}" as="f"><span title="{{ f.title }}" class="tag" style="padding:1px 6px;font-size:11px;background:{{ f.bg }};color:{{ f.fg }};border:1px solid {{ f.bc }};cursor:help">{{ f.t }}</span></sc-for></div>
+              <sc-if value="{{ dr.hasBlock }}"><span style="font-size:12px;padding:8px;background:oklch(0.95 0.04 27);border-left:3px solid oklch(0.55 0.19 27)">{{ dr.blockTxt }}</span></sc-if>
+              <sc-if value="{{ dr.hasDocMiss }}"><span style="font-size:12px;padding:8px;background:oklch(0.97 0.05 90);border-left:3px solid oklch(0.80 0.13 88)">{{ dr.docTxt }}</span></sc-if>
+
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-700)">{{ inbL.pickup }}</span>
+                <sc-for list="{{ dr.pick }}" as="p"><div style="display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;font-size:13px;padding:5px 0;border-top:1px solid var(--color-divider)"><span style="color:var(--color-neutral-700)">{{ p.k }}</span><span>{{ p.v }}</span></div></sc-for>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-700)">{{ inbL.stopsH }}</span>
+                <sc-for list="{{ dr.stopsT }}" as="z">
+                  <div data-inb-dstop="1" style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:7px 8px;border:1px solid {{ z.l.bc }};background:{{ z.l.bg }}">
+                    <span style="display:flex;flex-direction:column;gap:2px;font-size:12px"><span style="font-weight:600;color:{{ z.l.fg }}">{{ z.n }} · {{ z.ramp }}</span><span>{{ z.win }}</span><span style="color:var(--color-neutral-800)">{{ z.kg }} · {{ z.m3 }} · {{ z.pcs }}</span></span>
+                    <sc-if value="{{ z.done }}"><span class="tag" style="color:{{ z.l.fg }};border:1px solid {{ z.l.bc }}">{{ z.mark }}</span></sc-if>
+                    <sc-if value="{{ z.can }}"><button class="btn btn-primary" sc-camel-on-click="{{ z.go }}" style="font-size:12px;padding:5px 9px">{{ z.btn }}</button></sc-if>
+                  </div>
+                </sc-for>
+                <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;padding:6px 0;border-top:2px solid var(--color-text)"><span>{{ inbL.sumL }}</span><span>{{ dr.sum }}</span></div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-700)">{{ inbL.procH }}</span>
+                <sc-for list="{{ dr.proc }}" as="p">
+                  <div data-inb-step="{{ p.k }}" style="display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--color-divider)">
+                    <span style="width:22px;height:22px;display:flex;align-items:center;justify-content:center;border:1px solid {{ p.bc }};background:{{ p.bg }};font-size:12px">{{ p.mark }}</span>
+                    <span style="display:flex;flex-direction:column;font-size:12px"><span>{{ p.label }}</span><span style="color:var(--color-neutral-700);font-variant-numeric:tabular-nums">{{ p.time }}</span></span>
+                    <sc-if value="{{ p.can }}"><button class="btn btn-primary" sc-camel-on-click="{{ p.go }}" style="font-size:12px;padding:5px 9px">{{ p.btn }}</button></sc-if>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ dr.cold.hint }}"><span style="font-size:12px;color:oklch(0.40 0.09 75)">{{ dr.cold.hint }}</span></sc-if>
+              </div>
+
+              <div data-inb-cold="1" style="display:flex;flex-direction:column;gap:8px;opacity:{{ dr.cold.op }}">
+                <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-700)">{{ inbL.coldH }} · {{ inbL.classL }} {{ dr.cold.cls }}</span>
+                <div style="display:grid;grid-template-columns:150px minmax(0,1fr);gap:8px;align-items:center;font-size:13px">
+                  <span style="color:var(--color-neutral-700)">{{ inbL.tempL }}</span>
+                  <span style="display:flex;gap:8px;align-items:center"><input data-inb-temp="1" value="{{ dr.cold.temp }}" sc-camel-on-change="{{ dr.cold.onTemp }}" placeholder="°C" style="box-sizing:border-box;height:28px;width:80px;padding:3px 8px;font-size:13px;border:1px solid var(--color-divider);background:transparent;color:var(--color-text)" /><span class="tag" style="background:{{ dr.cold.tl.bg }};color:{{ dr.cold.tl.fg }};border:1px solid {{ dr.cold.tl.bc }}">{{ dr.cold.tempShow }}</span><span style="font-size:12px">{{ dr.cold.tempMsg }}</span></span>
+                  <span style="color:var(--color-neutral-700)">{{ inbL.lgL }}</span>
+                  <span style="display:flex;gap:8px;align-items:center"><span>{{ dr.cold.lg }}</span><button class="btn btn-secondary" sc-camel-on-click="{{ dr.cold.takeLg }}" style="font-size:12px;padding:4px 9px">{{ inbL.lgBtn }}</button></span>
+                  <span style="color:var(--color-neutral-700)">{{ inbL.ssL }}</span>
+                  <span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="tag" style="background:{{ dr.cold.sl.bg }};color:{{ dr.cold.sl.fg }};border:1px solid {{ dr.cold.sl.bc }}">{{ dr.cold.ssTxt }}</span><button class="btn btn-secondary" sc-camel-on-click="{{ dr.cold.runSs }}" style="font-size:12px;padding:4px 9px">{{ inbL.ssBtn }}</button>
+                    <sc-if value="{{ dr.cold.ssBad }}"><button class="btn btn-secondary" sc-camel-on-click="{{ dr.toQuality }}" style="font-size:12px;padding:4px 9px">{{ inbL.toQuality }}</button></sc-if></span>
+                </div>
+              </div>
+
+              <div data-inb-dwell="1" style="display:flex;flex-direction:column;gap:8px">
+                <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-700)">{{ inbL.dwellH }}</span>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:12px">
+                  <span style="display:flex;flex-direction:column"><span style="color:var(--color-neutral-700)">{{ inbL.winL }}</span><b>{{ dr.dwell.window }}</b></span>
+                  <span style="display:flex;flex-direction:column"><span style="color:var(--color-neutral-700)">{{ inbL.freeL }}</span><b>{{ dr.dwell.free }}</b></span>
+                  <span style="display:flex;flex-direction:column"><span style="color:var(--color-neutral-700)">{{ inbL.dwellL }}</span><b>{{ dr.dwell.dwell }}</b></span>
+                </div>
+                <span class="tag" style="align-self:flex-start;background:{{ dr.dwell.l.bg }};color:{{ dr.dwell.l.fg }};border:1px solid {{ dr.dwell.l.bc }}">{{ dr.dwell.lateTxt }}</span>
+                <sc-if value="{{ dr.dwell.showQ }}">
+                  <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><span style="font-size:12px;font-weight:600">{{ inbL.delayQ }}</span>
+                    <div style="display:flex;border:1px solid var(--color-divider)"><button data-inb-delay="yes" sc-camel-on-click="{{ dr.dwell.yes.go }}" style="font-size:12px;padding:5px 10px;border:0;border-right:1px solid var(--color-divider);cursor:pointer;background:{{ dr.dwell.yes.bg }};color:{{ dr.dwell.yes.fg }}">{{ dr.dwell.yes.label }}</button><button data-inb-delay="no" sc-camel-on-click="{{ dr.dwell.no.go }}" style="font-size:12px;padding:5px 10px;border:0;cursor:pointer;background:{{ dr.dwell.no.bg }};color:{{ dr.dwell.no.fg }}">{{ dr.dwell.no.label }}</button></div></div>
+                  <div style="display:flex;flex-wrap:wrap;gap:4px"><sc-for list="{{ dr.dwell.reasons }}" as="z"><button sc-camel-on-click="{{ z.go }}" style="font-size:11px;padding:3px 8px;border:1px solid var(--color-divider);cursor:pointer;background:{{ z.bg }};color:{{ z.fg }}">{{ z.label }}</button></sc-for></div>
+                </sc-if>
+                <sc-if value="{{ dr.dwell.fee }}">
+                  <div data-inb-fee="1" style="display:flex;flex-direction:column;gap:6px;padding:10px;border:1px solid oklch(0.55 0.19 27);background:oklch(0.95 0.04 27)">
+                    <span style="display:flex;justify-content:space-between;font-size:14px"><b>{{ inbL.feeL }}</b><b>{{ dr.dwell.feeTxt }}</b></span>
+                    <span style="font-size:11px;color:var(--color-neutral-800)">{{ dr.dwell.feeCalc }}</span>
+                    <span style="font-size:12px">{{ dr.dwell.feeMsg }}</span>
+                    <span style="display:flex;gap:8px"><button data-inb-book="1" class="btn btn-primary" sc-camel-on-click="{{ dr.dwell.book }}" style="font-size:12px;padding:5px 10px;opacity:{{ dr.dwell.bookOp }}">{{ inbL.bookBtn }}</button>
+                      <sc-if value="{{ dr.dwell.booked }}"><button class="btn btn-secondary" sc-camel-on-click="{{ dr.toCosts }}" style="font-size:12px;padding:5px 10px">{{ inbL.toCosts }}</button></sc-if></span>
+                  </div>
+                </sc-if>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-700)">{{ inbL.logH }}</span>
+                <sc-for list="{{ dr.log }}" as="l"><div style="display:grid;grid-template-columns:44px minmax(0,1fr);gap:8px;font-size:12px;padding:4px 0;border-top:1px solid var(--color-divider)"><span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ l.t }}</span><span>{{ l.text }} <span style="color:var(--color-neutral-700)">· {{ l.by }}</span></span></div></sc-for>
+              </div>
+              <div data-inb-foot="1" style="display:flex;flex-direction:column;gap:2px;font-size:11px;color:var(--color-neutral-700);border-top:1px solid var(--color-text);padding-top:8px">
+                <span>{{ inbL.created }}: {{ dr.created }}</span><span>{{ inbL.changed }}: {{ dr.changed }}</span>
+              </div>
+            </aside>
+          </div>
+        </sc-if>
+      </sc-if>

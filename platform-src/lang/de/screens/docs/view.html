@@ -1,0 +1,36 @@
+      <sc-if value="{{ is.docs }}">
+        <section data-screen-label="KZ-Dokumente" style="display:flex;flex-direction:column;gap:20px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px">
+            <sc-for list="{{ docTripChips }}" as="c"><button sc-camel-on-click="{{ c.select }}" style="display:flex;flex-direction:column;gap:2px;text-align:left;padding:10px;cursor:pointer;color:var(--color-text);border:1px solid {{ c.bc }};background:{{ c.bg }}"><span style="font-family:var(--font-heading);font-weight:600;font-size:16px">{{ c.id }}</span><span style="font-size:12px;color:var(--color-neutral-700)">{{ c.sub }}</span></button></sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:24px;align-items:start">
+            <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+                <h3 style="margin:0;font-size:20px;display:flex;align-items:center;gap:8px">Dokumentensatz · {{ docTrip.id }} <span style="position:relative;display:inline-flex;vertical-align:middle"><span sc-camel-on-mouse-enter="{{ tips.gate.on }}" sc-camel-on-mouse-leave="{{ tipOff }}" style="width:17px;height:17px;border:1px solid var(--color-accent);color:var(--color-accent-700);font-size:11px;font-family:var(--font-body);display:inline-flex;align-items:center;justify-content:center;cursor:help">?</span><sc-if value="{{ tips.gate.show }}"><span style="position:absolute;top:24px;left:-8px;z-index:30;width:300px;padding:10px 12px;background:var(--color-bg);border:1px solid var(--color-accent);box-shadow:var(--shadow-md);font-size:12px;line-height:1.45;color:var(--color-text);text-transform:none;letter-spacing:0;font-weight:400;font-family:var(--font-body);white-space:normal">{{ tips.gate.text }}</span></sc-if></span></h3>
+                <button class="btn btn-secondary" sc-camel-on-click="{{ genAll }}" style="font-size:12px;white-space:nowrap">Alle erstellen</button>
+              </div>
+              <span style="font-size:12px;color:var(--color-neutral-700)">{{ docTrip.route }} · {{ docTrip.veh }} · {{ docTrip.drv }}</span>
+              <sc-for list="{{ docs }}" as="d" hint-placeholder-count="8">
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) 110px auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--color-divider)">
+                  <span style="display:flex;flex-direction:column"><span style="font-size:14px">{{ d.name }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ d.sub }}</span></span>
+                  <span class="tag" style="justify-content:center;background:{{ d.l.bg }};color:{{ d.l.fg }};border:1px solid {{ d.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ d.st }}</span>
+                  <span style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end"><sc-if value="{{ d.can }}"><button class="btn btn-ghost" sc-camel-on-click="{{ d.gen }}" style="font-size:12px;padding:2px 6px;white-space:nowrap">Erstellen</button></sc-if><sc-if value="{{ d.ready }}"><button class="btn btn-ghost" sc-camel-on-click="{{ d.pdf }}" aria-label="PDF öffnen" style="font-size:12px;padding:2px 6px">PDF</button></sc-if><sc-if value="{{ d.canSign }}"><button class="btn btn-ghost" sc-camel-on-click="{{ d.sign }}" style="font-size:12px;padding:2px 6px;white-space:nowrap">Mit EDS signieren</button></sc-if><sc-if value="{{ d.canSend }}"><button class="btn btn-ghost" sc-camel-on-click="{{ d.send }}" style="font-size:12px;padding:2px 6px;white-space:nowrap">An IS ESF</button></sc-if></span>
+                </div>
+              </sc-for>
+              <span style="font-size:11px;color:var(--color-neutral-700);padding-top:6px">Formularliste — Arbeitsstand; Formulare und Pflicht mit Anwalt und Steuerberater in KZ prüfen.</span>
+            </div>
+            <div class="blueprint" style="padding:18px;display:flex;flex-direction:column;gap:10px">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <span style="display:flex;align-items:center;gap:6px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Tourfreigabe · Go / No-Go <span style="position:relative;display:inline-flex;vertical-align:middle"><span sc-camel-on-mouse-enter="{{ tips.gonogo.on }}" sc-camel-on-mouse-leave="{{ tipOff }}" style="width:17px;height:17px;border:1px solid var(--color-accent);color:var(--color-accent-700);font-size:11px;font-family:var(--font-body);display:inline-flex;align-items:center;justify-content:center;cursor:help">?</span><sc-if value="{{ tips.gonogo.show }}"><span style="position:absolute;top:24px;left:-8px;z-index:30;width:300px;padding:10px 12px;background:var(--color-bg);border:1px solid var(--color-accent);box-shadow:var(--shadow-md);font-size:12px;line-height:1.45;color:var(--color-text);text-transform:none;letter-spacing:0;font-weight:400;font-family:var(--font-body);white-space:normal">{{ tips.gonogo.text }}</span></sc-if></span></span>
+              <sc-for list="{{ gate }}" as="g">
+                <div style="display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;align-items:start;padding:6px 0;border-top:1px solid var(--color-divider)">
+                  <span class="tag" style="justify-content:center;background:{{ g.l.bg }};color:{{ g.l.fg }};border:1px solid {{ g.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ g.mark }}</span>
+                  <span style="display:flex;flex-direction:column"><span style="font-size:14px">{{ g.label }}</span><span style="font-size:12px;color:var(--color-neutral-700)">{{ g.text }}</span></span>
+                </div>
+              </sc-for>
+              <button class="btn btn-primary" sc-camel-on-click="{{ release }}" style="opacity:{{ releaseOp }};margin-top:6px">{{ releaseLabel }}</button>
+            </div>
+          </div>
+        </section>
+      </sc-if>
+

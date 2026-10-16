@@ -1,0 +1,255 @@
+{
+ "//": "Segments are concatenated in this order. scope 'lang' -> lang/<xx>/<path>; scope 'shared' -> shared/<path> (language-neutral, uses X(ru,de,en)).",
+ "outputs": {
+  "ru": "platform-v5.3.html",
+  "de": "platform-v5.3-de.html",
+  "en": "platform-v5.3-en.html"
+ },
+ "segments": [
+  {
+   "path": "shell/head.html",
+   "scope": "lang"
+  },
+  {
+   "path": "shell/tokens-and-css.html",
+   "scope": "lang"
+  },
+  {
+   "path": "shell/helmet-tail.html",
+   "scope": "lang"
+  },
+  {
+   "path": "shell/layout-open.html",
+   "scope": "lang"
+  },
+  {
+   "path": "shell/sidebar-nav.html",
+   "scope": "lang"
+  },
+  {
+   "path": "shell/topbar.html",
+   "scope": "lang"
+  },
+  {
+   "path": "shell/main-open.html",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/overview/view.html",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/dispatch/view.html",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/load/view.html",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/ship/view.html",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/thermo/view.html",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/weather/view.html",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/security/view.html",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/docs/view.html",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/quality/view.html",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/fleet/view.html",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/partners/view.html",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/staff/view.html",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/driver/view.html",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/planning/view.html",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/reports/view.html",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/costs/view.html",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/inbound/view.html",
+   "scope": "shared"
+  },
+  {
+   "path": "screens/baseline/view.html",
+   "scope": "lang"
+  },
+  {
+   "path": "shell/main-close-and-overlays.html",
+   "scope": "lang"
+  },
+  {
+   "path": "shell/script-open.html",
+   "scope": "lang"
+  },
+  {
+   "path": "core/i18n-helpers.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/weather/data.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/dispatch/data.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/security/data.js",
+   "scope": "lang"
+  },
+  {
+   "path": "core/nav.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/thermo/data.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/ship/data.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/ship/data-dates.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/driver/data-docs.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/partners/data.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/staff/data.js",
+   "scope": "lang"
+  },
+  {
+   "path": "core/tips-fees.js",
+   "scope": "lang"
+  },
+  {
+   "path": "core/format-units.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/baseline/data.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/costs/data.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/driver/data.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/fleet/data-manufacturers.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/inbound/data.js",
+   "scope": "shared"
+  },
+  {
+   "path": "core/component-core.js",
+   "scope": "lang"
+  },
+  {
+   "path": "core/simulation.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/weather/logic.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/load/logic.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/thermo/logic.js",
+   "scope": "lang"
+  },
+  {
+   "path": "core/alerts-and-extras.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/partners/logic.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/driver/logic-lang.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/ship/logic.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/staff/logic.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/baseline/logic.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/costs/logic.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/driver/logic.js",
+   "scope": "lang"
+  },
+  {
+   "path": "screens/inbound/logic.js",
+   "scope": "shared"
+  },
+  {
+   "path": "core/render.js",
+   "scope": "lang"
+  },
+  {
+   "path": "shell/script-close.html",
+   "scope": "lang"
+  }
+ ],
+ "version": "5.3"
+}

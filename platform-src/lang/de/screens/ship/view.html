@@ -1,0 +1,62 @@
+      <sc-if value="{{ is.ship }}">
+        <section data-screen-label="Sendungen und Kennzeichnung" style="display:flex;flex-direction:column;gap:20px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">
+            <sc-for list="{{ shipTrips }}" as="c"><button sc-camel-on-click="{{ c.select }}" style="display:flex;flex-direction:column;gap:2px;text-align:left;padding:10px;cursor:pointer;color:var(--color-text);border:1px solid {{ c.bc }};background:{{ c.bg }}"><span style="display:flex;justify-content:space-between"><span style="font-family:var(--font-heading);font-weight:600;font-size:16px">{{ c.id }}</span><span style="font-size:11px;color:var(--color-accent-700)">{{ c.n }} Pos.</span></span><span style="font-size:12px;color:var(--color-neutral-700)">{{ c.sub }}</span></button></sc-for>
+          </div>
+          <div data-mfr-dir="1" style="display:flex;flex-direction:column;gap:8px">
+            <h3 style="margin:0;font-size:20px">Hersteller · {{ mfrN }}</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px">
+              <sc-for list="{{ mfrList }}" as="m" hint-placeholder-count="8"><div data-mfr="{{ m.key }}" style="display:flex;gap:10px;align-items:center;padding:8px;border:1px solid {{ m.bc }}"><span data-mlogo="{{ m.mAb }}" title="{{ m.mName }}" style="width:34px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;border:1px solid var(--color-accent);background:var(--color-accent-100);color:var(--color-accent-900);font-family:var(--font-heading);font-weight:600;font-size:15px;line-height:1">{{ m.mAb }}</span><span style="display:flex;flex-direction:column;gap:1px;min-width:0"><span style="font-size:13px;font-weight:500">{{ m.mName }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ m.mCo }} · {{ m.mUrl }}</span><span style="font-size:11px;color:var(--color-accent-700)">{{ m.grp }} · {{ m.n }}</span></span></div></sc-for>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:24px;align-items:start">
+            <div style="display:flex;flex-direction:column;min-width:0;overflow-x:auto">
+              <h3 style="margin:0 0 8px;font-size:20px">Packstücke · {{ shipTripId }}</h3>
+              <div style="min-width:860px;display:flex;flex-direction:column">
+                <div style="display:grid;grid-template-columns:130px 70px 120px 110px minmax(0,1.6fr) 110px 70px 64px;gap:8px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 8px;border-bottom:1px solid var(--color-divider)"><span>SSCC</span><span>Auftrag</span><span>PO</span><span>PL</span><span>Artikel · Ware</span><span>LOT · verwendbar bis</span><span>Menge</span><span>Klasse</span></div>
+                <sc-for list="{{ shipLines }}" as="l" hint-placeholder-count="6">
+                  <button sc-camel-on-click="{{ l.select }}" style="display:grid;grid-template-columns:130px 70px 120px 110px minmax(0,1.6fr) 110px 70px 64px;gap:8px;align-items:center;text-align:left;font-size:12px;padding:7px 8px;border:1px solid {{ l.bc }};border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);background:{{ l.bg }};cursor:pointer;color:var(--color-text)">
+                    <span style="font-family:monospace;font-size:11px;overflow-wrap:anywhere">{{ l.sscc }}</span><span>{{ l.ord }}</span><span style="overflow-wrap:anywhere">{{ l.po }}</span><span style="overflow-wrap:anywhere">{{ l.pl }}</span>
+                    <span style="display:flex;gap:8px;align-items:center;min-width:0"><span data-mlogo="{{ l.mAb }}" title="{{ l.mName }}" style="width:28px;height:28px;flex:none;display:flex;align-items:center;justify-content:center;border:1px solid var(--color-accent);background:var(--color-accent-100);color:var(--color-accent-900);font-family:var(--font-heading);font-weight:600;font-size:11px;line-height:1">{{ l.mAb }}</span><span style="display:flex;flex-direction:column;min-width:0"><span style="font-weight:500">{{ l.art }}</span><span style="color:var(--color-neutral-700)">{{ l.name }} · {{ l.mName }}</span></span></span>
+                    <span style="display:flex;flex-direction:column"><sc-if value="{{ l.short }}"><span style="font-size:10px;font-weight:600;color:var(--color-accent-900)">kurze Restlaufzeit</span></sc-if><span>{{ l.lot }}</span><span style="color:var(--color-neutral-700)">{{ l.exp }}</span></span><span>{{ l.qty }}</span><span>{{ l.clsL }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+            <sc-if value="{{ hasLabel }}">
+              <div class="blueprint" style="padding:18px;display:flex;flex-direction:column;gap:12px;max-width:520px">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Transportkennzeichnung · Packstücketikett</span>
+                <div data-lab-mfr="1" style="display:flex;gap:10px;align-items:center"><span data-mlogo="{{ lab.mAb }}" title="{{ lab.mName }}" style="width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;border:1px solid var(--color-accent);background:var(--color-accent-100);color:var(--color-accent-900);font-family:var(--font-heading);font-weight:600;font-size:15px;line-height:1">{{ lab.mAb }}</span><span style="display:flex;flex-direction:column;gap:1px"><span style="font-family:var(--font-heading);font-weight:600;font-size:18px">{{ lab.mName }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ lab.mCo }} · {{ lab.mUrl }}</span></span></div>
+                <div style="border:2px solid var(--color-text);display:flex;flex-direction:column">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--color-text)">
+                    <div style="padding:8px;border-right:1px solid var(--color-text);display:flex;flex-direction:column;gap:2px"><span style="font-size:10px;text-transform:uppercase">Absender</span><span style="font-size:13px;font-weight:500">{{ lab.from }}</span></div>
+                    <div style="padding:8px;display:flex;flex-direction:column;gap:2px"><span style="font-size:10px;text-transform:uppercase">Empfänger</span><span style="font-size:13px;font-weight:500">{{ lab.toFull }}</span></div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 130px;border-bottom:1px solid var(--color-text)">
+                    <div style="padding:8px;display:grid;grid-template-columns:90px 1fr;gap:3px 8px;font-size:12px;border-right:1px solid var(--color-text)">
+                      <span>PO</span><b style="font-weight:600">{{ lab.po }}</b><span>PL</span><b style="font-weight:600">{{ lab.pl }}</b><span>Auftrag · Tour</span><span>{{ lab.ord }} · {{ lab.trip }}</span>
+                      <span>Artikel</span><b style="font-weight:600">{{ lab.art }}</b><span>Ware</span><span>{{ lab.name }}</span><span>LOT</span><span>{{ lab.lot }}</span><span>Verwendbar bis</span><span>{{ lab.exp }}</span><span>Menge</span><span>{{ lab.qty }}</span><span>Hersteller</span><span style="display:flex;gap:6px;align-items:center"><span data-mlogo="{{ lab.mAb }}" title="{{ lab.mName }}" style="width:22px;height:22px;flex:none;display:flex;align-items:center;justify-content:center;border:1px solid var(--color-accent);background:var(--color-accent-100);color:var(--color-accent-900);font-family:var(--font-heading);font-weight:600;font-size:11px;line-height:1">{{ lab.mAb }}</span><span>{{ lab.mName }}</span></span>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px;background:{{ lab.tBg }};color:{{ lab.tFg }}"><span style="font-family:var(--font-heading);font-weight:600;font-size:26px;line-height:1">{{ lab.clsL }}</span><span style="font-size:10px;text-align:center;font-weight:600">{{ lab.tNote }}</span></div>
+                  </div>
+                  <div style="padding:8px;display:flex;flex-direction:column;gap:4px;border-bottom:1px solid var(--color-text)">
+                    <div style="height:54px;background:repeating-linear-gradient(90deg, var(--color-text) 0 2px, transparent 2px 4px, var(--color-text) 4px 5px, transparent 5px 8px, var(--color-text) 8px 11px, transparent 11px 12px)"></div>
+                    <span style="font-family:monospace;font-size:12px;text-align:center">(00) {{ lab.sscc }}</span>
+                  </div>
+                  <div style="padding:6px 8px;display:flex;flex-wrap:wrap;gap:8px;font-size:11px;font-weight:600">
+                    <sc-for list="{{ lab.marks }}" as="m"><span style="padding:2px 6px;border:1px solid var(--color-text)">{{ m }}</span></sc-for>
+                  </div>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px"><button class="btn btn-secondary" sc-camel-on-click="{{ printLabel }}">Etikett drucken (Demo)</button><button class="btn btn-secondary" sc-camel-on-click="{{ toggleZpl }}" aria-pressed="{{ zplOpen }}">{{ zplLabel }}</button></div>
+                <sc-if value="{{ zplOpen }}"><pre data-zpl="1" style="margin:0;padding:10px;font-size:11px;line-height:1.4;background:var(--color-neutral-100);border:1px solid var(--color-divider);white-space:pre-wrap;overflow-wrap:anywhere">{{ lab.zpl }}</pre></sc-if>
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <span style="display:flex;align-items:center;gap:6px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700)">Scanverlauf des Packstücks (Track &amp; Trace) <span style="position:relative;display:inline-flex;vertical-align:middle"><span sc-camel-on-mouse-enter="{{ tips.track.on }}" sc-camel-on-mouse-leave="{{ tipOff }}" style="width:17px;height:17px;border:1px solid var(--color-accent);color:var(--color-accent-700);font-size:11px;font-family:var(--font-body);display:inline-flex;align-items:center;justify-content:center;cursor:help">?</span><sc-if value="{{ tips.track.show }}"><span style="position:absolute;top:24px;left:-8px;z-index:30;width:320px;padding:10px 12px;background:var(--color-bg);border:1px solid var(--color-accent);box-shadow:var(--shadow-md);font-size:12px;line-height:1.45;color:var(--color-text);text-transform:none;letter-spacing:0;font-weight:400;font-family:var(--font-body);white-space:normal">{{ tips.track.text }}</span></sc-if></span></span>
+                  <sc-for list="{{ lab.track }}" as="e"><div style="display:grid;grid-template-columns:96px 14px minmax(0,1fr);gap:8px;align-items:start;font-size:12px;padding:4px 0;border-top:1px solid var(--color-divider)"><span style="color:var(--color-neutral-700)">{{ e.t }}</span><span style="width:9px;height:9px;margin-top:3px;border:1.5px solid var(--color-accent);background:{{ e.fill }}"></span><span style="color:{{ e.fg }};font-weight:{{ e.fw }}">{{ e.text }}</span></div></sc-for>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </section>
+      </sc-if>
+

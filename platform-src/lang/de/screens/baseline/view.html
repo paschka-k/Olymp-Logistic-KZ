@@ -1,0 +1,149 @@
+      <sc-if value="{{ is.baseline }}">
+        <section data-screen-label="Ausgangsdaten" style="display:flex;flex-direction:column;gap:22px">
+          <span style="font-size:13px;color:var(--color-neutral-800);max-width:980px;text-wrap:pretty">Fragenkatalog „Logistik Kasachstan“, 150 Antworten der Kollegen vom 07.10.2026, mit dem Plattformmodell abgeglichen. Quellen: Frachtbriefe GarantA und KazExpress (Feb–Jul 2026), Register Temperatursendungen 2026, Angebote Fahrzeuge und Leasing. Kürzel in Klammern — Fragen des Katalogs.</span>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px">
+            <sc-for list="{{ blKpis }}" as="k" hint-placeholder-count="8">
+              <div class="blueprint" style="padding:14px;display:flex;flex-direction:column;gap:6px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <span style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700)">{{ k.k }}</span>
+                <span style="font-family:var(--font-heading);font-weight:600;font-size:26px;line-height:1.05">{{ k.v }}</span>
+                <span style="font-size:11px;color:var(--color-neutral-700)">{{ k.sub }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;border:1px solid var(--color-divider);align-self:flex-start"><sc-for list="{{ blTabs }}" as="b"><button data-bltab="1" sc-camel-on-click="{{ b.go }}" style="font-size:13px;padding:7px 12px;border:0;border-right:1px solid var(--color-divider);cursor:pointer;background:{{ b.bg }};color:{{ b.fg }}">{{ b.label }}</button></sc-for></div>
+
+          <sc-if value="{{ blIs.val }}">
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+                <h3 style="margin:0;font-size:20px">Abgleich der Antworten mit Plattform v3</h3>
+                <div style="display:flex;flex-wrap:wrap;border:1px solid var(--color-divider);align-self:flex-start"><sc-for list="{{ blFOpts }}" as="b"><button data-blf="1" sc-camel-on-click="{{ b.go }}" style="font-size:13px;padding:7px 12px;border:0;border-right:1px solid var(--color-divider);cursor:pointer;background:{{ b.bg }};color:{{ b.fg }}">{{ b.label }}</button></sc-for></div>
+              </div>
+              <div style="overflow-x:auto"><div style="min-width:1040px;display:flex;flex-direction:column">
+                <div style="display:grid;grid-template-columns:64px 140px minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) 110px;gap:10px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>ID</span><span>Thema · Frage</span><span>Fragenkatalog</span><span>Plattform v3</span><span>Entscheidung v4</span><span>Status</span></div>
+                <sc-for list="{{ blFind }}" as="f" hint-placeholder-count="8">
+                  <div data-finding="{{ f.id }}" style="display:grid;grid-template-columns:64px 140px minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) 110px;gap:10px;font-size:13px;padding:8px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);align-items:start">
+                    <span style="font-family:var(--font-heading);font-weight:600">{{ f.id }}</span>
+                    <span style="display:flex;flex-direction:column"><span style="font-weight:500">{{ f.area }}</span><span style="font-size:11px;color:var(--color-accent-700)">{{ f.ref }}</span></span>
+                    <span style="text-wrap:pretty">{{ f.fk }}</span><span style="color:var(--color-neutral-800);text-wrap:pretty">{{ f.v3 }}</span><span style="color:var(--color-neutral-800);text-wrap:pretty">{{ f.act }}</span>
+                    <span class="tag" style="justify-content:center;background:{{ f.l.bg }};color:{{ f.l.fg }};border:1px solid {{ f.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ f.stL }}</span>
+                  </div>
+                </sc-for>
+              </div></div>
+              <h3 style="margin:10px 0 0;font-size:20px">Keine Daten in den Antworten — bei KDL Olymp anfragen</h3>
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <sc-for list="{{ blGaps }}" as="g" hint-placeholder-count="6"><span style="display:flex;gap:6px;align-items:baseline;padding:5px 9px;border:1px solid var(--color-divider);font-size:13px"><span>{{ g.t }}</span><span style="font-size:11px;color:var(--color-accent-700)">{{ g.ref }}</span></span></sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ blIs.net }}">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <h3 style="margin:0;font-size:20px">Ringe und Legs (P83, P85, R111)</h3>
+              <div style="overflow-x:auto"><div style="min-width:1040px;display:flex;flex-direction:column">
+                <div style="display:grid;grid-template-columns:120px minmax(0,1.6fr) 120px 130px 150px 140px 110px;gap:10px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>Ring</span><span>Route</span><span>km · Prüfung</span><span>Takt · km/Jahr</span><span>Ladung je Fahrt</span><span>Fahrzeug · Besatzung</span><span>Start</span></div>
+                <sc-for list="{{ blRings }}" as="r" hint-placeholder-count="5">
+                  <div data-ring="{{ r.id }}" style="display:grid;grid-template-columns:120px minmax(0,1.6fr) 120px 130px 150px 140px 110px;gap:10px;font-size:13px;padding:8px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);align-items:start">
+                    <span style="display:flex;flex-direction:column"><span style="font-family:var(--font-heading);font-weight:600;font-size:16px">{{ r.id }}</span><span>{{ r.name }}</span></span>
+                    <span style="display:flex;flex-direction:column;gap:2px"><span>{{ r.route }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ r.note }}</span></span>
+                    <span style="display:flex;flex-direction:column;gap:3px;align-items:flex-start"><span style="font-variant-numeric:tabular-nums">{{ r.km }}</span><span class="tag" style="justify-content:center;background:{{ r.chk.l.bg }};color:{{ r.chk.l.fg }};border:1px solid {{ r.chk.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ r.chk.t }}</span></span>
+                    <span style="display:flex;flex-direction:column"><span>{{ r.cad }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ r.yr }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ r.kmDay }}</span></span>
+                    <span style="display:flex;flex-direction:column"><span style="font-variant-numeric:tabular-nums">{{ r.load }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ r.fill }}</span></span>
+                    <span style="display:flex;flex-direction:column"><span>{{ r.veh }}</span><span style="font-size:11px;color:var(--color-neutral-700)">{{ r.crew }}</span></span>
+                    <span>{{ r.start }}</span>
+                  </div>
+                </sc-for>
+              </div></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <h3 style="margin:0;font-size:20px">Mengen je Stadt</h3>
+              <span style="font-size:12px;color:var(--color-neutral-700)">Blatt nach Städten: Dichte 164 kg/m³ (A4). Temp. — Sendungen pro Monat +2..+8 / +15..+25 / −20 °C, aufgerundet. „Im Netz“ — Stadt im Plattformverzeichnis.</span>
+              <div style="overflow-x:auto"><div style="min-width:960px;display:flex;flex-direction:column">
+                <div style="display:grid;grid-template-columns:150px 170px 80px 70px 60px minmax(80px,1fr) 90px 80px 60px;gap:10px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>Stadt</span><span>Ring</span><span>kg/Monat</span><span>kg/Woche</span><span>m³/Woche</span><span></span><span>Temp./Monat</span><span>Hub</span><span>im Netz</span></div>
+                <sc-for list="{{ blCities }}" as="c" hint-placeholder-count="10">
+                  <div data-blcity="{{ c.name }}" style="display:grid;grid-template-columns:150px 170px 80px 70px 60px minmax(80px,1fr) 90px 80px 60px;gap:10px;font-size:13px;padding:5px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);align-items:center;font-variant-numeric:tabular-nums">
+                    <span style="font-weight:500">{{ c.name }}</span><span style="font-size:12px">{{ c.ring }}</span><span>{{ c.kg }}</span><span>{{ c.kgw }}</span><span>{{ c.m3 }}</span>
+                    <span style="height:10px;background:var(--color-neutral-100);position:relative"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ c.w }};background:var(--color-accent)"></span></span>
+                    <span>{{ c.temp }}</span><span>{{ c.hub }}</span><span class="tag" style="justify-content:center;background:{{ c.l.bg }};color:{{ c.l.fg }};border:1px solid {{ c.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ c.net }}</span>
+                  </div>
+                </sc-for>
+                <div style="display:grid;grid-template-columns:150px 170px 80px 70px 60px minmax(80px,1fr) 90px 80px 60px;gap:10px;font-size:13px;padding:8px 0;font-weight:600;font-variant-numeric:tabular-nums"><span>Summe</span><span style="font-weight:400;font-size:12px">23 Städte + Makinsk</span><span>{{ blCitySum.kg }}</span><span>{{ blCitySum.kgw }}</span><span>{{ blCitySum.m3 }}</span><span></span><span>{{ blCitySum.temp }}</span><span></span><span></span></div>
+              </div></div>
+              <span style="font-size:12px;color:var(--color-neutral-700)">Makinsk: 1 Temperatursendung pro Monat, Kurier ab Kokshetau (P92). Zhezkazgan — außerhalb der Ringe, SpezAvto ab Karaganda. Taldykorgan — eigene Fahrt ab Almaty.</span>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ blIs.fleet }}">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <h3 style="margin:0;font-size:20px">Zielflotte (H32, R111–R114)</h3>
+              <div style="overflow-x:auto"><div style="min-width:1040px;display:flex;flex-direction:column">
+                <div style="display:grid;grid-template-columns:110px 150px 150px 120px minmax(0,1fr) 170px 110px 100px;gap:10px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-neutral-700);padding:6px 0;border-bottom:1px solid var(--color-divider)"><span>Modell</span><span>Aufbau</span><span>Nutzlast · Volumen</span><span>Preis inkl. MwSt.</span><span>Garantie · bis Limit</span><span>Verbrauch · Wartung</span><span>Anzahl · Einheit</span><span>Status</span></div>
+                <sc-for list="{{ blFleet }}" as="f" hint-placeholder-count="5">
+                  <div style="display:grid;grid-template-columns:110px 150px 150px 120px minmax(0,1fr) 170px 110px 100px;gap:10px;font-size:13px;padding:8px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);align-items:start">
+                    <span style="font-family:var(--font-heading);font-weight:600;font-size:16px">{{ f.model }}</span>
+                    <span style="display:flex;flex-direction:column;gap:2px"><span>{{ f.body }}</span><sc-if value="{{ f.hasNote }}"><span style="font-size:11px;color:var(--color-neutral-700)">{{ f.note }}</span></sc-if></span>
+                    <span style="font-variant-numeric:tabular-nums">{{ f.cap }}</span><span style="font-variant-numeric:tabular-nums">{{ f.price }}</span>
+                    <span style="display:flex;flex-direction:column;gap:3px;align-items:flex-start"><span>{{ f.warr }}</span><sc-if value="{{ f.hasWex }}"><span class="tag" style="justify-content:center;background:{{ f.wl.bg }};color:{{ f.wl.fg }};border:1px solid {{ f.wl.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ f.wex }}</span></sc-if></span>
+                    <span style="font-size:12px">{{ f.fuel }}</span><span>{{ f.qty }}</span><span class="tag" style="justify-content:center;background:{{ f.l.bg }};color:{{ f.l.fg }};border:1px solid {{ f.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ f.stL }}</span>
+                  </div>
+                </sc-for>
+              </div></div>
+              <span style="font-size:12px;color:var(--color-neutral-800);text-wrap:pretty">{{ blFleetSum }}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:24px;align-items:start">
+              <div class="blueprint" style="padding:18px;display:flex;flex-direction:column;gap:10px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <h3 style="margin:0;font-size:19px">Satz je kg (G30)</h3>
+                <sc-for list="{{ blRates }}" as="r"><div style="display:grid;grid-template-columns:150px minmax(0,1fr) 90px;gap:10px;align-items:center;font-size:13px"><span>{{ r.k }}</span><span style="height:12px;background:var(--color-neutral-100);position:relative"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ r.w }};background:var(--color-accent)"></span></span><span style="text-align:right;font-variant-numeric:tabular-nums">{{ r.val }}</span></div></sc-for>
+                <h3 style="margin:8px 0 0;font-size:19px">Amortisation je Szenario (N78)</h3>
+                <sc-for list="{{ blSens }}" as="r"><div style="display:grid;grid-template-columns:190px minmax(0,1fr) 80px;gap:10px;align-items:center;font-size:13px"><span>{{ r.k }}</span><span style="height:12px;background:var(--color-neutral-100);position:relative"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ r.w }};background:var(--color-accent-700)"></span></span><span style="text-align:right;font-variant-numeric:tabular-nums">{{ r.val }}</span></div></sc-for>
+              </div>
+              <div style="display:flex;flex-direction:column">
+                <h3 style="margin:0 0 6px;font-size:19px">Kosten und Kennwerte</h3>
+                <sc-for list="{{ blEcon }}" as="e"><div style="display:grid;grid-template-columns:170px minmax(0,1fr);gap:10px;padding:7px 0;border-top:1px solid var(--color-divider);font-size:13px"><span style="color:var(--color-neutral-700)">{{ e.k }}</span><span style="font-variant-numeric:tabular-nums">{{ e.v }}</span></div></sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ blIs.exp }}">
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <h3 style="margin:0;font-size:20px">Express-Freigabe (K55)</h3>
+              <span style="font-size:13px;color:var(--color-neutral-800);max-width:900px;text-wrap:pretty">Jeder Express geht erst nach drei Unterschriften raus. Eine Ablehnung verschiebt die Sendung in die Regelfahrt oder den Stückguttarif. Die Verlagerung des Express in den Regelzyklus bringt 78 % der Einsparung (G29); Anteil wird 6 und 12 Monate nach Start geprüft (T148).</span>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:16px">
+                <sc-for list="{{ blEx }}" as="e" hint-placeholder-count="3">
+                  <div data-express="{{ e.id }}" class="blueprint" style="padding:16px;display:flex;flex-direction:column;gap:10px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                    <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">{{ e.id }} · {{ e.kg }}</span><span style="font-family:var(--font-heading);font-weight:600;font-size:20px">{{ e.route }}</span><span style="font-size:12px;color:var(--color-neutral-700)">{{ e.what }}</span></span><span class="tag" style="justify-content:center;background:{{ e.l.bg }};color:{{ e.l.fg }};border:1px solid {{ e.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ e.stL }}</span></div>
+                    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;font-size:12px">
+                      <span style="display:flex;flex-direction:column"><span style="color:var(--color-neutral-700)">Express</span><span style="font-size:15px;font-weight:500">{{ e.cost }}</span></span>
+                      <span style="display:flex;flex-direction:column"><span style="color:var(--color-neutral-700)">Stückgut</span><span style="font-size:15px;font-weight:500">{{ e.reg }}</span></span>
+                      <span style="display:flex;flex-direction:column"><span style="color:var(--color-neutral-700)">Einsparung</span><span style="font-size:15px;font-weight:500">{{ e.save }}</span></span>
+                    </div>
+                    <sc-for list="{{ e.signers }}" as="g"><button sc-camel-on-click="{{ g.sign }}" style="display:grid;grid-template-columns:minmax(0,1fr) 24px;gap:8px;align-items:center;text-align:left;font-size:13px;padding:6px 8px;cursor:pointer;border:1px solid {{ g.bc }};background:{{ g.bg }};color:{{ g.fg }}"><span>{{ g.role }}</span><span style="text-align:center">{{ g.mark }}</span></button></sc-for>
+                    <sc-if value="{{ e.open }}"><button class="btn btn-secondary" sc-camel-on-click="{{ e.reject }}">Ablehnen → Regelfahrt</button></sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ blIs.launch }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:24px;align-items:start">
+              <div style="display:flex;flex-direction:column">
+                <h3 style="margin:0 0 6px;font-size:20px">Kritischer Pfad bis zur ersten Fahrt (O79, S138)</h3>
+                <sc-for list="{{ blLaunch }}" as="t" hint-placeholder-count="8">
+                  <div style="display:grid;grid-template-columns:96px minmax(0,1fr) 90px;gap:12px;padding:9px 0 9px 10px;border-top:1px solid var(--color-divider);border-left:3px solid {{ t.l.bc }};font-size:13px;align-items:start">
+                    <span style="font-family:var(--font-heading);font-weight:600;font-size:15px">{{ t.d }}</span>
+                    <span style="display:flex;flex-direction:column;gap:2px"><span style="text-wrap:pretty">{{ t.t }}</span><span style="font-size:11px;color:var(--color-accent-700)">{{ t.ref }}</span></span>
+                    <span class="tag" style="justify-content:center;background:{{ t.l.bg }};color:{{ t.l.fg }};border:1px solid {{ t.l.bc }};padding:1px 5px;font-size:10px;white-space:nowrap">{{ t.l.label }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div class="blueprint" style="padding:18px;display:flex;flex-direction:column;gap:8px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Pilot R1 · Astana – Karaganda – Almaty</span>
+                <h3 style="margin:0;font-size:20px">Erfolgskriterien (O80)</h3>
+                <sc-for list="{{ blPilot }}" as="p"><span style="font-size:13px;padding:6px 0;border-top:1px solid var(--color-divider)">{{ p }}</span></sc-for>
+                <span style="font-size:12px;color:var(--color-neutral-700);text-wrap:pretty">Leitung durch Einkauf &amp; Logistik, Manager der Transportgesellschaft ausgewählt, Berichte quartalsweise (O81, S132). Entscheidungen — Generaldirektor (S137).</span>
+              </div>
+            </div>
+          </sc-if>
+
+        </section>
+      </sc-if>

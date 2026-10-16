@@ -1,0 +1,6 @@
+const NAV = [
+  ['overview','01','Overview','Live monitoring'], ['dispatch','02','Dispatcher','Trips, assignments, trip sheets'], ['load','03','Load and weight','Pallets, volume, axles'], ['ship','04','Shipments and marking','PO, PL, SSCC, articles, lots'],
+  ['thermo','04','Thermo status','Cargo chambers and outside temperature'], ['weather','05','Weather 3–7 days','Forecast and route risks'], ['security','06','Security','Incidents, geofences, ADR'],
+  ['docs','07','KZ documents','Document set and trip release'], ['quality','08','Quality','Deviations, CAPA, calibration'], ['fleet','09','Fleet','Status, service, approvals'], ['partners','10','Partners','Service and logistics partners, shipment handover'], ['staff','10','Staff','Where drivers are, availability, absences'], ['driver','11','Driver app','Driver screen on trip'],
+  ['planning','12','Planning','Capacity, scenarios, resources'], ['reports','13','Reports','Reports and KPIs'], ['costs','15','Costs','Diesel, workshop, downtime, insurance, taxes'], ['inbound','17',X('Приёмка на хабе','Wareneingang Hub','Hub goods receipt'),X('Входящие машины, рампы, стоянка, Standgeld','Eingangsliste, Rampen, Standzeit, Standgeld','Inbound vehicles, ramps, dwell time, demurrage')], ['baseline','16','Baseline data','Question catalogue · 150 answers · validation']
+];

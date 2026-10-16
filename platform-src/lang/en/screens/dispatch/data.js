@@ -1,0 +1,29 @@
+const CAL_RX = X(/истекла/, /abgelaufen/, /expired/);
+const VEH = [
+  { id:'V01', plate:'358 TRS 02', hub:'ast', cls:'10 т'.replace('т', X('т','t','t')), model:X('HOWO T5G · рефкузов 50 м³','HOWO T5G · Kühlkoffer 50 m³','HOWO T5G · reefer body 50 m³'), pal:18, unit:'Carrier Citimax 500', active:true, adr:true, thermo:true, where:X('Трасса Караганда','Strecke Karaganda','Karaganda road'), st:'line', maint:X('ТО-1 через 3 400 км','TO-1 in 3 400 km','TO-1 in 3,400 km'), calib:X('истекла 09.2026','abgelaufen 09.2026','expired 09.2026'), base:{cold:5.0, amb:19.6, out:4} },
+  { id:'V02', plate:'112 OLP 02', hub:'ast', cls:'10 т'.replace('т', X('т','t','t')), model:X('HOWO T5G · изотерм 50 м³','HOWO T5G · Isotherm 50 m³','HOWO T5G · isothermal 50 m³'), pal:18, unit:X('нет агрегата · изотерм + термоконтейнеры','kein Aggregat · Isotherm + Thermocontainer','no unit · isothermal + thermo containers'), active:false, adr:true, thermo:true, where:X('Хаб Астана · рампа 1 · комплектация Запада','Hub Astana · Rampe 1 · Kommissionierung West','Astana hub · dock 1 · picking West'), st:'hub', maint:X('Проверка перед западным кольцом ✓','Prüfung vor dem Westring ✓','Check before the West ring ✓'), calib:'04.2027', base:{cold:5.2, amb:18.6, out:5} },
+  { id:'V03', plate:'517 ALM 02', hub:'alm', cls:'6 т'.replace('т', X('т','t','t')), model:X('JAC N120 · изотерм 33,7 м³','JAC N120 · Isotherm 33,7 m³','JAC N120 · isothermal 33.7 m³'), pal:14, unit:X('нет агрегата · изотерм + термоконтейнеры','kein Aggregat · Isotherm + Thermocontainer','no unit · isothermal + thermo containers'), active:false, adr:true, thermo:true, where:X('Хаб Алматы · рампа 2','Hub Almaty · Rampe 2','Almaty hub · dock 2'), st:'hub', maint:X('ТО-1 09.10 запланировано','TO-1 am 09.10 geplant','TO-1 planned 09.10'), calib:'11.2026', base:{cold:5.0, amb:21.0, out:14} },
+  { id:'V04', plate:'746 KMD 02', hub:'ast', cls:'6 т'.replace('т', X('т','t','t')), model:X('JAC N120 · изотерм 33,7 м³','JAC N120 · Isotherm 33,7 m³','JAC N120 · isothermal 33.7 m³'), pal:14, unit:X('нет агрегата · изотерм + термоконтейнеры','kein Aggregat · Isotherm + Thermocontainer','no unit · isothermal + thermo containers'), active:false, adr:true, thermo:true, where:X('Трасса Кокшетау','Strecke Kokshetau','Kokshetau road'), st:'line', maint:X('ТО-1 через 10 900 км','TO-1 in 10 900 km','TO-1 in 10,900 km'), calib:'05.2027', base:{cold:4.8, amb:19.5, out:-3} }
+];
+const VM = Object.fromEntries(VEH.map(v => [v.id, v]));
+const DRV = { D1:{name:'Erzhan Tulegenov',veh:'V04',drive:3.3,adr:'03.2028'}, D2:{name:'Askhat Nurlanov',veh:'V01',drive:2.8,adr:null}, D3:{name:'Dmitry Kim',veh:'V01',drive:6.1,adr:'14.11.2026'}, D4:{name:'Bauyrzhan Seitov',veh:'V03',drive:0.4,adr:'09.2027'}, D5:{name:'Marat Zhumabaev',veh:'V03',drive:3.6,adr:null}, D6:{name:'Oleg Petrenko',veh:'V02',drive:0,adr:'05.2027'} };
+const TRIPS = [
+  { id:'R-102', hub:'ast', veh:'V04', drv:'D1', route:[CN('Астана','Astana'),CN('Кокшетау','Kokshetau'),CN('Петропавловск','Petropavl'),CN('Костанай','Kostanay')], km:1580, status:'transit', prog:0.24, dep:'09:00', eta:'08.10 · 18:00', day:0, note:X('Кольцо A · Север · изотерм','Ring A · Nord · Isotherm','Ring A · North · isothermal'), pal:'9 / 14' },
+  { id:'R-103', hub:'ast', veh:'V01', drv:'D3', route:[CN('Астана','Astana'),CN('Караганда','Karaganda'),CN('Алматы','Almaty')], km:1215, status:'transit', prog:0.18, dep:'08:00', eta:'07.10 · 08:30', day:0, note:X('R1 · магистраль · активный холод · 2 водителя','R1 · Hauptstrecke · aktive Kühlung · 2 Fahrer','R1 · trunk line · active cooling · 2 drivers'), pal:'16 / 18' },
+  { id:'R-104', hub:'alm', veh:'V03', drv:'D4', route:[CN('Алматы','Almaty'),CN('Каскелен','Kaskelen'),CN('Тараз','Taraz'),CN('Шымкент','Shymkent'),CN('Туркестан','Turkistan'),CN('Кызылорда','Kyzylorda')], km:1245, status:'loading', prog:0, dep:'15:30', eta:'07.10 · 02:10', day:0, note:X('Юг · изотерм','Süd · Isotherm','South · isothermal'), pal:'8 / 14' },
+  { id:'R-105', hub:'alm', veh:'V03', drv:'D5', route:[CN('Алматы','Almaty'),CN('Талдыкорган','Taldykorgan')], km:260, status:'done', prog:1, dep:'06:30', eta:'10:05', day:0, note:X('Доставлено · ePOD получен','Zugestellt · ePOD erhalten','Delivered · ePOD received'), pal:'4 / 14' },
+  { id:'R-106', hub:'ast', veh:'V02', drv:'D6', route:[CN('Астана','Astana'),CN('Костанай','Kostanay'),CN('Актобе','Aktobe'),CN('Хромтау','Khromtau'),CN('Уральск','Oral'),CN('Атырау','Atyrau'),CN('Актау','Aktau')], km:3632, status:'plan', prog:0, dep:'08.10 · 06:00', eta:'09.10 · 14:00', day:2, note:X('Запад · кольцо 6 482 км · изотерм','West · Ring 6 482 km · Isotherm','West · 6,482 km ring · isothermal'), pal:null }
+];
+const STATUS = { plan:'Planning', loading:'Loading', transit:'In transit', done:'Delivered' };
+const ORD = [
+  { id:'O-2281', to:'Kostanay', cls:'amb', pal:2, m3:5.8, kg:310, desc:'Pipette tips, tubes' },
+  { id:'O-2282', to:'Kostanay', cls:'cold', pal:1, m3:1.6, kg:240, desc:'Roche reagents' },
+  { id:'O-2290', to:'Aktobe', cls:'amb', pal:3, m3:8.9, kg:420, desc:'Gloves, needles' },
+  { id:'O-2291', to:'Aktobe', cls:'cold', pal:1, m3:1.5, kg:260, desc:'Calibrators, controls' },
+  { id:'O-2292', to:'Aktobe', cls:'cold', pal:1, m3:1.4, kg:380, adr:true, desc:'Wash solutions · ADR (LQ)' },
+  { id:'O-2295', to:'Aktobe', cls:'frz', pal:0, m3:0.2, kg:25, adr:true, desc:'Thermo box −20 °C, dry ice UN 1845' },
+  { id:'O-2297', to:'Aktobe', cls:'amb', pal:2, m3:6.1, kg:280, desc:'Sysmex consumables' },
+  { id:'O-2299', to:'Kostanay', cls:'amb', pal:1, m3:3.0, kg:150, desc:'Plastics, racks' },
+  { id:'T-0107', to:'Aktobe', cls:'amb', pal:3, m3:7.4, kg:610, third:true, desc:'Third-party cargo · MedSnab Aktobe LLP' },
+  { id:'T-0109', to:'Kostanay', cls:'cold', pal:1, m3:1.2, kg:190, third:true, desc:'Third-party cargo · pharmacy chain, 2–8 °C' }
+];

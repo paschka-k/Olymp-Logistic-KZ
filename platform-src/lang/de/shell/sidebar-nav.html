@@ -1,0 +1,23 @@
+  <nav style="border-right:1px solid var(--color-divider);padding:20px 12px;display:flex;flex-direction:column;gap:3px;position:sticky;top:0;height:100vh;box-sizing:border-box;overflow-y:auto">
+    <div style="display:flex;flex-direction:column;gap:2px;padding:0 8px 18px">
+      <span style="font-family:var(--font-heading);font-weight:600;font-size:21px;line-height:1.1">Olymp Logistic</span>
+      <span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Dispositionsplattform · v@@VERSION@@</span>
+    </div>
+    <div style="display:flex;gap:4px;padding:0 8px 14px"><a href="@@FILE_RU@@" style="flex:1;text-align:center;padding:5px 0;font-size:12px;font-weight:500;text-decoration:none;border:1px solid var(--color-accent);background:transparent;color:var(--color-accent-800)">RU</a><a href="@@FILE_DE@@" style="flex:1;text-align:center;padding:5px 0;font-size:12px;font-weight:500;text-decoration:none;border:1px solid var(--color-accent);background:var(--color-accent);color:var(--color-bg)">DE</a><a href="@@FILE_EN@@" style="flex:1;text-align:center;padding:5px 0;font-size:12px;font-weight:500;text-decoration:none;border:1px solid var(--color-accent);background:transparent;color:var(--color-accent-800)">EN</a></div>
+    <sc-for list="{{ nav }}" as="n" hint-placeholder-count="8">
+      <button sc-camel-on-click="{{ n.go }}" style="display:flex;align-items:center;gap:10px;padding:9px 10px;border:0;text-align:left;cursor:pointer;font-size:14px;background:{{ n.bg }};color:{{ n.fg }}">
+        <span style="font-family:var(--font-heading);font-weight:600;font-size:12px;opacity:0.7;min-width:18px">{{ n.code }}</span>
+        <span style="flex:1">{{ n.label }}</span>
+        <sc-if value="{{ n.hasBadge }}"><span style="font-size:11px;min-width:18px;text-align:center;padding:1px 5px;background:{{ n.badgeBg }};color:{{ n.badgeFg }}">{{ n.badge }}</span></sc-if>
+      </button>
+    </sc-for>
+    <div style="margin-top:auto;display:flex;flex-direction:column;gap:6px;padding:12px 8px;border-top:1px solid var(--color-divider)">
+      <span style="display:flex;align-items:center;gap:6px;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-700)">Alarmsimulation <span style="position:relative;display:inline-flex;vertical-align:middle"><span sc-camel-on-mouse-enter="{{ tips.sim.on }}" sc-camel-on-mouse-leave="{{ tipOff }}" style="width:17px;height:17px;border:1px solid var(--color-accent);color:var(--color-accent-700);font-size:11px;font-family:var(--font-body);display:inline-flex;align-items:center;justify-content:center;cursor:help">?</span><sc-if value="{{ tips.sim.show }}"><span style="position:absolute;top:24px;left:-8px;z-index:30;width:300px;padding:10px 12px;background:var(--color-bg);border:1px solid var(--color-accent);box-shadow:var(--shadow-md);font-size:12px;line-height:1.45;color:var(--color-text);text-transform:none;letter-spacing:0;font-weight:400;font-family:var(--font-body);white-space:normal">{{ tips.sim.text }}</span></sc-if></span></span>
+      <sc-for list="{{ simBtns }}" as="b"><button sc-camel-on-click="{{ b.toggle }}" style="font-size:12px;padding:6px 8px;text-align:left;border:1px solid var(--color-accent);cursor:pointer;background:{{ b.bg }};color:{{ b.fg }}">{{ b.label }}</button></sc-for>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;padding:12px 8px 0;border-top:1px solid var(--color-divider);font-size:12px;color:var(--color-neutral-700)">
+      <span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;background:{{ liveDot }}"></span>{{ liveLabel }}</span>
+      <span>Demodaten · UI-Konzept für KDL Olymp. Alle Werte sind simuliert.</span>
+    </div>
+  </nav>
+
