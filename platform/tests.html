@@ -3987,6 +3987,49 @@ class Component extends DCLogic {
     return T;
   };
 })();
+
+// BUG-37 (16.10.2026): online demo with two tabs – the customer books in one tab, the dispatcher's open Bookings list in the
+// other tab shows the request (and its badge) without a reload, and the desk's next save does not overwrite it
+(() => {
+  const baseBuild = Component.prototype.build;
+  Component.prototype.build = function (fr) {
+    const T = baseBuild.call(this, fr);
+    const h = this.helpers(fr), { D, W, all, ok } = h;
+    const B0 = T.length, t = (mod, name, fn) => T.push({ mod, name, fn, blk: B0 }); // port: FR-171 – shard cuts only between blocks
+    const goHash = async (hh, ms = 900) => { W().location.hash = '#' + hh; await sleep(ms); };
+    const waitFor = async (fn, n = 40) => { for (let i = 0; i < n; i++) { try { const v = fn(); if (v) return v; } catch (e) { /* not yet */ } await sleep(150); } return null; };
+    const M = 'BUG-37 · Демо в двух вкладках';
+    t(M, 'Бронь из второй вкладки (портал) появляется в списке «Бронирования» и в счётчике первой вкладки без перезагрузки', async () => {
+      if (h.BE()) { ok(true); return; } // real backend: one server, nothing to synchronise
+      await goHash('/bookings', 900);
+      const before = all('main tbody tr').length, badge0 = Number((D().querySelector('[data-nav-badge="bookings"]') || {}).textContent || 0);
+      const f2 = document.createElement('iframe'); f2.style.cssText = 'position:fixed;left:-3000px;top:0;width:1200px;height:800px;border:0';
+      f2.src = fr.getAttribute('src').split('#')[0] + '#/s/overview'; document.body.appendChild(f2);
+      try {
+        await waitFor(() => f2.contentWindow.__OLYMP_DEMO_REQ_AS && f2.contentDocument.querySelector('nav [data-nav]'), 80);
+        const body = { destination: { city_id: 'KZ-SHY', street: 'Промышленная зона', house: '50' }, pickup: { city_id: 'KZ-KOS', street: 'улица Абая', house: '12' },
+          temp_class: 'cold', pallets: 1, weight_kg: 300, goods: ['ivd'], lang: 'ru' };
+        // the second tab becomes the customer with the demo role selector (like a person would) and books through the API
+        const role = async u => { const sel = await waitFor(() => f2.contentDocument.querySelector('.demo-role select'), 80); ok(sel, 'нет переключателя ролей');
+          Object.getOwnPropertyDescriptor(f2.contentWindow.HTMLSelectElement.prototype, 'value').set.call(sel, u); sel.dispatchEvent(new f2.contentWindow.Event('change', { bubbles: true }));
+          await sleep(1200); await waitFor(() => f2.contentDocument.querySelector('.demo-role select'), 60); };
+        await role('kdl.portal');
+        const av = await f2.contentWindow.__OLYMP_DEMO_REQ('POST', '/api/portal/availability', body);
+        const s = av.slots.find(x => x.available); ok(s, 'нет свободного слота');
+        const bk = await f2.contentWindow.__OLYMP_DEMO_REQ('POST', '/api/portal/bookings', { ...body, schedule_id: s.schedule_id, departure_date: s.date });
+        await role('admin'); // the stored account is the admin again (a later reload of the main frame)
+        ok(bk && /^BK-/.test(bk.number), 'бронь не создана');
+        const row = await waitFor(() => all('main tbody tr').find(r => r.textContent.includes(bk.number)), 60);
+        ok(row, 'бронь ' + bk.number + ' не появилась в списке (было строк ' + before + ')');
+        const badge = await waitFor(() => Number((D().querySelector('[data-nav-badge="bookings"]') || {}).textContent || 0) === badge0 + 1, 60); ok(badge, 'счётчик не вырос');
+        await goHash('/s/overview', 500); await goHash('/bookings', 900); // the desk saves its state – the portal's booking stays
+        ok(all('main tbody tr').some(r => r.textContent.includes(bk.number)), 'бронь пропала после действий первой вкладки');
+        await W().__OLYMP_DEMO_REQ('POST', '/api/bookings/' + bk.number + '/reject', { reason: 'Тест BUG-37' }).catch(() => null); // leave the list as found
+      } finally { f2.remove(); }
+    });
+    return T;
+  };
+})();
 </script>
 </body>
 </html>
