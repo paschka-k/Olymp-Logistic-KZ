@@ -168,6 +168,7 @@ const NAV = [
   ['settings', 'cog', T('Настройки', 'Einstellungen', 'Settings', 'Баптаулар'), 6],
 ];
 const SCREENS = {};   // id -> { title, sub, actions(), body() | tabs[{key,label,body,badge,perm}] }
+const NAV_BADGE = {};   // screen id -> () => number shown on the menu item (e.g. new bookings, FR-190); areas add entries
 /* ---------- tabs: every screen is a list of tabs; other files add tabs with addTab() (docs/INTEGRATION-PLAN.md) ---------- */
 function addTab(id, key, label, body, o) { const sc = SCREENS[id]; (sc.tabs = sc.tabs || []).push(Object.assign({ key, label, body }, o)); }
 const tabsOf = id => ((SCREENS[id] && SCREENS[id].tabs) || []).filter(t => !t.perm || canDo(t.perm));
@@ -185,7 +186,7 @@ const alertsCount = () => S.loads.filter(l => tempState(l) === 'breach' && isAct
 
 function shell() {
   const sc = SCREENS[S.route];
-  const nav = navItems().map(n => `<div class="nav-item${n[0] === S.route ? ' active' : ''}" data-act="go" data-v="${n[0]}">${ic(n[1])}<span>${esc(n[2])}</span></div>`).join('');
+  const nav = navItems().map(n => `<div class="nav-item${n[0] === S.route ? ' active' : ''}" data-act="go" data-v="${n[0]}">${ic(n[1])}<span>${esc(n[2])}</span>${NAV_BADGE[n[0]] && NAV_BADGE[n[0]]() ? `<span class="badge-count nav-n">${NAV_BADGE[n[0]]()}</span>` : ''}</div>`).join('');
   const ver = `<div class="ver"><a data-act="go" data-v="changes">v${VERSION}</a> · ${esc(BUILD)}</div>`;
   const lang = ['ru', 'de', 'en', 'kk'].map(l => `<a href="${fileFor(l)}"${l === LANG ? ' class="on"' : ''}>${l.toUpperCase()}</a>`).join('');
   const body = sc ? screenBody(S.route) : placeholder(S.route);

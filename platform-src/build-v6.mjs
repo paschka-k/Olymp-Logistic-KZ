@@ -19,9 +19,12 @@ const js = [rd('v6', 'core.js'), rd('v6', 'roles.js'), rd('v6', 'data.js'), ...l
 let build = new Date().toISOString().slice(0, 16).replace('T', ' ');
 try { build = execSync('git log -1 --format=%cI', { cwd: here }).toString().trim().slice(0, 16).replace('T', ' '); } catch (_) { /* no git: build time = now */ }
 const rolePerms = rd('v6', 'role-perms.json').trim();
+// Changes page (W3): docs/source-platform/register.json -> compact per-language JSON (@@REGISTER@@); KK falls back to RU
+const reg = JSON.parse(readFileSync(join(here, '..', 'docs', 'source-platform', 'register.json'), 'utf8'));
+const regFor = lang => { const L = lang === 'kk' ? 'ru' : lang; return JSON.stringify({ as_of: reg.as_of, n: reg.entries.length, entries: reg.entries.map(e => ({ id: e.id, type: e.type, date: e.date || e.date_approx || '', status: e.status, group: (e.group || {})[L] || (e.group || {}).en || '', module: e.module || '', title: (e[L] || e.en || {}).title || '', change: (e[L] || e.en || {}).change || '', finding: (e[L] || e.en || {}).finding || '' })) }); };
 mkdirSync(outDir, { recursive: true });
 for (const lang of langs) {
-  const code = js.replaceAll('@@LANG@@', lang).replaceAll('@@BUILD@@', build).replaceAll('@@ROLEPERMS@@', rolePerms).replace(/<\/script/gi, '<\\/script');
+  const code = js.replaceAll('@@LANG@@', lang).replaceAll('@@BUILD@@', build).replaceAll('@@ROLEPERMS@@', rolePerms).replaceAll('@@REGISTER@@', () => regFor(lang)).replace(/<\/script/gi, '<\\/script');
   const html = `<!doctype html><html lang="${lang}" data-design="olymp"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Olymp Logistic KZ · Platform v6 (${lang})</title><style>\n${css}\n</style></head><body><a class="skip" href="#main-content">Skip to content</a><div id="root"></div><script>\n${code}\n</script></body></html>\n`;
   const file = join(outDir, lang === 'ru' ? 'index.html' : `${lang}.html`);
   writeFileSync(file, html);
