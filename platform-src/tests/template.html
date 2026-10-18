@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Olymp Logistic KZ · platform tests</title>
+<style>body{font:14px/1.5 system-ui,sans-serif;margin:24px;max-width:960px}h1{font-size:20px}.ok{color:#166534}.bad{color:#be123c;font-weight:600}#sum{padding:10px 14px;border-radius:8px;background:#f3f4f6;margin:12px 0}li{margin:2px 0}iframe{display:none}</style></head>
+<body><h1>Platform tests</h1><div id="sum">running…</div><ul id="out"></ul><div id="frames"></div>
+<script>
+/* Same contract as tests.html (window.__TESTS) so tools/run-ui-tests.cjs runs it unchanged.
+   Every group loads a fresh copy of platform-v6*.html in a hidden iframe, so tests never share state. */
+window.__TESTS = { total: 0, passed: 0, failed: 0, failures: [], done: false };
+const LANGS = ['ru', 'de', 'en', 'kk'], file = l => (l === 'ru' ? 'index.html' : l + '.html');
+const out = document.getElementById('out');
+const log = (name, err) => { const R = window.__TESTS; R.total++; if (err) { R.failed++; R.failures.push(name + ' — ' + err); } else R.passed++; const li = document.createElement('li'); li.className = err ? 'bad' : 'ok'; li.textContent = (err ? '✗ ' : '✓ ') + name + (err ? ' — ' + err : ''); out.appendChild(li); };
+const assert = (c, msg) => { if (!c) throw new Error(msg || 'assertion failed'); };
+const eq = (a, b, msg) => assert(a === b, (msg || 'expected equal') + ': ' + JSON.stringify(a) + ' !== ' + JSON.stringify(b));
+async function fresh(lang) {
+  const f = document.createElement('iframe'); f.style.cssText = 'width:1316px;height:760px'; f.src = file(lang); document.getElementById('frames').appendChild(f);
+  await new Promise((ok, no) => { f.onload = ok; f.onerror = no; setTimeout(() => no(new Error('iframe timeout')), 20000); });
+  const w = f.contentWindow; w.__errs = []; w.addEventListener('error', e => w.__errs.push(e.message));
+  return { w, ev: c => w.eval(c), done: () => f.remove() };
+}
+async function group(name, lang, fn) { let g; try { g = await fresh(lang || 'ru'); } catch (e) { return log(name, 'cannot load: ' + e.message); } try { await fn(g, g.ev, g.w); log(name); } catch (e) { log(name, e.message); } finally { g.done(); } }
+const clean = (w, where) => { const t = w.document.querySelector('#root').innerText; const m = t.match(/.{0,20}(undefined|NaN|\[object|\bnull\b).{0,20}/); assert(!m, where + ' contains "' + (m && m[0]) + '"'); assert(!w.__errs.length, where + ' threw: ' + w.__errs[0]); };
+
+(async () => {
+/*@@SUITES@@*/
+
+  const R = window.__TESTS; document.getElementById('sum').textContent = R.passed + '/' + R.total + ' passed, ' + R.failed + ' failed'; R.done = true;
+})().catch(e => { log('harness', e.message); window.__TESTS.done = true; });
+</script></body></html>

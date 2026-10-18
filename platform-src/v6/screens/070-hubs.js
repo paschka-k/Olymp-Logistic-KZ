@@ -40,7 +40,7 @@ ${S.hubView === 'map' ? mapView() : `<div class="hub-grid">${ls.map(card).join('
     title: () => navLabel('hubs'),
     sub: () => T('Загрузка по температурным зонам, рампы, очередь рефрижераторов и приёмка', 'Auslastung je Temperaturzone, Rampen, Kühl-Warteschlange und Wareneingang', 'Utilization by temperature zone, ramps, reefer queue and goods receipt', 'Температура аймақтары бойынша жүктеме, рампалар, рефрижератор кезегі және қабылдау'),
     actions: () => `<button class="btn grey" data-act="hset">${esc(T('Настройки', 'Einstellungen', 'Settings', 'Баптаулар'))}</button><button class="btn primary" data-act="hadd">${ic('plus')} ${esc(T('Добавить хаб', 'Hub hinzufügen', 'Add New Warehouse', 'Хаб қосу'))}</button>`,
-    body: () => `<div class="pill-tabs"><span class="pill-tab${S.hubTab === 'hubs' ? ' active' : ''}" data-act="htab" data-v="hubs">${esc(T('Хабы', 'Hubs', 'Warehouses', 'Хабтар'))}</span><span class="pill-tab${S.hubTab === 'recv' ? ' active' : ''}" data-act="htab" data-v="recv">${esc(T('Приёмка', 'Wareneingang', 'Receiving', 'Қабылдау'))} <span class="n">${S.jobs.filter(j => j.ev.ci != null && j.ev.en == null).length}</span></span></div>${S.hubTab === 'hubs' ? hubsBody() : recvBody()}`,
+    tabs: [{ key: 'hubs', label: T('Хабы', 'Hubs', 'Warehouses', 'Хабтар'), body: () => hubsBody() }, { key: 'recv', label: T('Приёмка', 'Wareneingang', 'Receiving', 'Қабылдау'), badge: () => S.jobs.filter(j => j.ev.ci != null && j.ev.en == null).length, body: () => recvBody() }],
   };
   const kv = (k, v) => `<div><small>${esc(k)}</small><b>${v}</b></div>`;
   const ZN = { frozen: T('Заморозка', 'Tiefkühl', 'Frozen', 'Мұздатылған'), chilled: T('Охлаждённые', 'Gekühlt', 'Chilled', 'Салқындатылған'), pharma: T('Фарма 2–8 °C', 'Pharma 2–8 °C', 'Pharma 2–8 °C', 'Фарма 2–8 °C'), ambient: T('Сухая зона', 'Trocken', 'Ambient', 'Құрғақ аймақ') };
@@ -72,11 +72,11 @@ ${S.hubView === 'map' ? mapView() : `<div class="hub-grid">${ls.map(card).join('
   Object.assign(ACT, {
     openH: d => openDrawer({ type: 'hub', id: d.id, tab: 'overview' }),
     htabd: d => { S.drawer.tab = d.v; render(); },
-    htab: d => { S.hubTab = d.v; render(); }, hview: d => { S.hubView = d.v; render(); },
+    hview: d => { S.hubView = d.v; render(); },
     clrH: () => { Object.keys(F).forEach(k => F[k] = ''); render(); },
     hset: () => toast(T('Настройки хабов: фаза 6 (Settings)', 'Hub-Einstellungen: Phase 6', 'Hub settings: phase 6 (Settings)', 'Хаб баптаулары: 6-кезең')),
     hadd: () => toast(T('Добавление хаба: фаза 6 (Settings)', 'Hub hinzufügen: Phase 6', 'Add hub: phase 6 (Settings)', 'Хаб қосу: 6-кезең')),
-    hrecv: d => { S.rf.hub = d.id; S.hubTab = 'recv'; S.drawer = null; render(); },
+    hrecv: d => { S.rf.hub = d.id; setTab('hubs', 'recv'); },
     hmaint: d => { const H = S.hubs[d.id]; H.maint = !H.maint; toast(H.maint ? T('Хаб переведён в обслуживание', 'Hub in Wartung', 'Hub set to maintenance', 'Хаб қызмет көрсетуге ауысты') : T('Хаб снова активен', 'Hub wieder aktiv', 'Hub active again', 'Хаб қайта белсенді')); },
     blk: d => { const H = S.hubs[d.id], n = +d.v; H.blocked = H.blocked.includes(n) ? H.blocked.filter(x => x !== n) : H.blocked.concat(n); render(); },
   });

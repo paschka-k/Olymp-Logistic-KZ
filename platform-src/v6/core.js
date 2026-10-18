@@ -3,7 +3,7 @@ const LANG = '@@LANG@@';
 const LI = { ru: 0, de: 1, en: 2, kk: 3 }[LANG];
 const HOOKS = { status: [] };   // screens subscribe here (e.g. hubs create inbound jobs when a load departs)
 const hmm = m => { const x = Math.floor(m + 1e-9); return p2(Math.floor(x / 60) % 24) + ':' + p2(x % 60); };
-const fileFor = l => (l === 'ru' ? 'platform-v6.html' : 'platform-v6-' + l + '.html');
+const fileFor = l => (l === 'ru' ? 'index.html' : l + '.html');
 const T = (...a) => (a[LI] != null ? a[LI] : a[0]);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const $ = (s, r = document) => r.querySelector(s);
@@ -63,10 +63,10 @@ const avatar = (ini, n) => `<span class="avatar sm" style="background:var(--av-$
 /* ---------- store ---------- */
 const S = {
   loads: [], drivers: [], trucks: [],
-  route: 'dashboard', drawer: null, toast: null,
+  route: 'dashboard', drawer: null, toast: null, tab: {}, role: 'admin', design: 'olymp',
   f: { q: '', status: '', cust: '', zone: '', pri: '', hub: '', drv: '', page: 1 },
-  dispTab: 'board', nextId: 1856,
-  hubTab: 'hubs', hubView: 'cards', clock: 14 * 60 + 32, costs: [], views: [], rf: { st: '', hub: '', q: '', flag: '' },
+  nextId: 1856,
+  hubView: 'cards', clock: 14 * 60 + 32, costs: [], views: [], rf: { st: '', hub: '', q: '', flag: '' },
 };
 const loadOfTruck = id => S.loads.find(l => l.truck === id && isActive(l));
 const loadOfDriver = id => S.loads.find(l => l.driver === id && isActive(l));
@@ -167,25 +167,33 @@ const NAV = [
   ['ai', 'spark', T('AI-ассистент', 'KI-Assistent', 'AI Ops Assistant', 'AI-көмекші'), 6],
   ['settings', 'cog', T('Настройки', 'Einstellungen', 'Settings', 'Баптаулар'), 6],
 ];
-const SCREENS = {};   // id -> { title, sub, actions(), body(), search }
-const navLabel = id => (NAV.find(n => n[0] === id) || [])[2] || id;
+const SCREENS = {};   // id -> { title, sub, actions(), body() | tabs[{key,label,body,badge,perm}] }
+/* ---------- tabs: every screen is a list of tabs; other files add tabs with addTab() (docs/INTEGRATION-PLAN.md) ---------- */
+function addTab(id, key, label, body, o) { const sc = SCREENS[id]; (sc.tabs = sc.tabs || []).push(Object.assign({ key, label, body }, o)); }
+const tabsOf = id => ((SCREENS[id] && SCREENS[id].tabs) || []).filter(t => !t.perm || canDo(t.perm));
+const curTab = id => { const ts = tabsOf(id), k = S.tab[id]; return ts.find(t => t.key === k) || ts[0]; };
+function setTab(id, k) { S.tab[id] = k; S.drawer = null; render(); }
+const tabBar = id => { const ts = tabsOf(id), cur = curTab(id); return ts.length < 2 ? '' : `<div class="pill-tabs" role="tablist">${ts.map(t => `<span class="pill-tab${t === cur ? ' active' : ''}" role="tab" tabindex="0" aria-selected="${t === cur}" data-act="stab" data-s="${id}" data-v="${t.key}">${esc(t.label)}${t.badge && t.badge() ? ` <span class="n">${t.badge()}</span>` : ''}</span>`).join('')}</div>`; };
+const screenBody = id => { const sc = SCREENS[id]; if (!sc.tabs) return sc.body(); const t = curTab(id); return tabBar(id) + (t ? t.body() : ''); };
+const navLabel = id => (NAV.find(n => n[0] === id) || [])[2] || ((SCREENS[id] && SCREENS[id].title) ? SCREENS[id].title() : id);
 
 function toast(msg, kind) { S.toast = { msg, kind: kind || 'ok' }; render(); clearTimeout(toast.t); toast.t = setTimeout(() => { S.toast = null; render(); }, 3200); }
-function go(r) { S.route = r; S.drawer = null; S.f.page = 1; render(); const m = $('main'); if (m) m.scrollTop = 0; }
+function go(r) { if (!canSee(r)) return toast(T('Нет доступа для роли ', 'Kein Zugriff für Rolle ', 'No access for role ', 'Рөлге қолжетімсіз: ') + ROLE_NAME[S.role], 'err'); S.route = r; S.drawer = null; S.f.page = 1; render(); const m = $('main'); if (m) m.scrollTop = 0; }
 function openDrawer(d) { S.drawer = d; render(); }
 const closeDrawer = () => { S.drawer = null; render(); };
 const alertsCount = () => S.loads.filter(l => tempState(l) === 'breach' && isActive(l)).length + S.drivers.filter(d => d.rto < 4 && d.status === 'available').length;
 
 function shell() {
   const sc = SCREENS[S.route];
-  const nav = NAV.map(n => `<div class="nav-item${n[0] === S.route ? ' active' : ''}" data-act="go" data-v="${n[0]}">${ic(n[1])}<span>${esc(n[2])}</span></div>`).join('');
+  const nav = navItems().map(n => `<div class="nav-item${n[0] === S.route ? ' active' : ''}" data-act="go" data-v="${n[0]}">${ic(n[1])}<span>${esc(n[2])}</span></div>`).join('');
+  const ver = `<div class="ver"><a data-act="go" data-v="changes">v${VERSION}</a> · ${esc(BUILD)}</div>`;
   const lang = ['ru', 'de', 'en', 'kk'].map(l => `<a href="${fileFor(l)}"${l === LANG ? ' class="on"' : ''}>${l.toUpperCase()}</a>`).join('');
-  const body = sc ? sc.body() : placeholder(S.route);
+  const body = sc ? screenBody(S.route) : placeholder(S.route);
   const title = sc ? sc.title() : navLabel(S.route);
-  return `<div class="app"><aside class="sidebar"><div class="logo">Olymp&nbsp;Logistic</div>${nav}<div class="langs">${lang}</div></aside>
-<main><header class="topbar"><span class="crumb">${esc(navLabel('dashboard'))} › <b>${esc(navLabel(S.route))}</b></span>
+  return `<div class="app"><aside class="sidebar"><div class="logo">Olymp&nbsp;Logistic</div>${nav}<div class="langs">${lang}</div>${ver}</aside>
+<main id="main-content"><header class="topbar"><span class="crumb">${esc(navLabel('dashboard'))} › <b>${esc(navLabel(S.route))}</b></span>
 <div class="who"><label class="searchbox">${ic('search', 14)}<input id="gsearch" placeholder="${esc(T('Поиск рейсов, ТС, водителей…', 'Fahrten, Fahrzeuge, Fahrer suchen…', 'Search loads, trucks, drivers…', 'Рейс, КҚ, жүргізуші іздеу…'))}" value="${esc(S.f.q)}"></label>
-<span class="bell">${ic('bell', 18)}${alertsCount() ? `<span class="badge-count">${alertsCount()}</span>` : ''}</span>
+<select id="roleSel" class="select" aria-label="Role" style="height:32px">${ROLES.map(r => `<option value="${r}"${r === S.role ? ' selected' : ''}>${esc(ROLE_NAME[r])}</option>`).join('')}</select><button class="btn grey sm" data-act="setDesign" title="Olymp / Kökzhol">${S.design === 'olymp' ? '◐' : '◑'}</button><button class="btn grey sm" data-act="helpHere" aria-label="Help">?</button><span class="bell">${ic('bell', 18)}${alertsCount() ? `<span class="badge-count">${alertsCount()}</span>` : ''}</span>
 <div class="usr"><b>Sarah Johnson</b><small>${esc(T('Руководитель операций', 'Betriebsleiterin', 'Operations Manager', 'Операциялар басшысы'))}</small></div><span class="avatar" style="background:var(--primary)">SJ</span></div></header>
 <div class="page-head"><div><h1 class="page-title">${esc(title)}</h1>${sc && sc.sub ? `<p class="page-sub">${esc(sc.sub())}</p>` : ''}</div><div class="actions">${sc && sc.actions ? sc.actions() : ''}</div></div>
 <div class="content">${body}</div></main>${drawerHtml()}${S.toast ? `<div class="toast ${S.toast.kind}">${esc(S.toast.msg)}</div>` : ''}</div>`;
@@ -222,7 +230,8 @@ document.addEventListener('input', e => {
   else if (e.target.dataset && e.target.dataset.f) { S.f[e.target.dataset.f] = e.target.value; S.f.page = 1; render(); }
 });
 Object.assign(ACT, {
-  go: d => go(d.v), close: closeDrawer,
+  go: d => go(d.v), close: closeDrawer, stab: d => setTab(d.s, d.v),
+  dtab: d => setTab('dispatch', d.v), rtab: d => setTab('routes', d.v), podTab: d => setTab('pod', d.v), bTab: d => setTab('billing', d.v), htab: d => setTab('hubs', d.v),
   open: d => openDrawer({ type: 'load', id: d.id, tab: 'overview' }),
   tab: d => { S.drawer.tab = d.v; render(); },
   clear: () => { S.f = { q: '', status: '', cust: '', zone: '', pri: '', hub: '', drv: '', page: 1 }; render(); },

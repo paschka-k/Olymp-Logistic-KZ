@@ -2,7 +2,7 @@ name: UI tests
 
 # FR-18: runs all platform tests in headless Chromium on every push; fails the run if any test fails.
 #  - tests.html    : legacy v5.3 suite (RU scenarios, data validation, DE/EN navigation + i18n)
-#  - tests-v6.html : v6 suite (12-item menu, 4 languages, dispatch rules, POD -> invoice -> ESF, reports, AI, settings, tabs)
+#  - platform/tests.html : v6 platform suite, assembled by platform-src/build-v6.mjs from platform-src/tests/*.js
 on:
   push:
     branches: [main]
@@ -37,4 +37,4 @@ jobs:
       - name: Run v6 tests
         env:
           NODE_PATH: ${{ runner.temp }}/pw/node_modules
-        run: node tools/run-ui-tests.cjs http://localhost:8080/tests-v6.html
+        run: node tools/run-ui-tests.cjs http://localhost:8080/platform/tests.html

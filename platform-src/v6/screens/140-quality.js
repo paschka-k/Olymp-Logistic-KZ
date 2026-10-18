@@ -29,12 +29,8 @@
 <div class="grid2 eq"><div class="card card-body"><h3 style="margin:0 0 12px;font-size:15px">${esc(T('Отклонения', 'Abweichungen', 'Deviations', 'Ауытқулар'))}</h3>${listH()}</div><div class="card card-body">${detail()}</div></div>
 <div class="card card-body"><h3 style="margin:0 0 12px;font-size:15px">${esc(T('Реестр калибровки логгеров и датчиков', 'Kalibrierregister Logger und Sensoren', 'Logger & sensor calibration registry', 'Логгерлер мен датчиктер калибрлеу тізілімі'))}</h3><p class="note">${esc(T('Просроченная поверка блокирует назначение ТС на фарма-рейсы (GDP).', 'Abgelaufene Kalibrierung sperrt Fahrzeuge für Pharma-Fahrten (GDP).', 'Expired calibration blocks the truck for pharma loads (GDP).', 'Мерзімі өткен поверка КҚ-ны фарма-рейстерден бұғаттайды (GDP).'))}</p>${calib()}</div>`; };
   const tk2 = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
-  /* POD gets a second tab */
-  const podBody = SCREENS.pod.body;
-  S.podTab = 'queue';
-  SCREENS.pod.body = () => `<div class="pill-tabs"><span class="pill-tab${S.podTab === 'queue' ? ' active' : ''}" data-act="podTab" data-v="queue">${esc(T('Очередь POD', 'POD-Warteschlange', 'POD queue', 'POD кезегі'))}</span><span class="pill-tab${S.podTab === 'quality' ? ' active' : ''}" data-act="podTab" data-v="quality">${esc(T('Отклонения и качество', 'Abweichungen & Qualität', 'Deviations & quality', 'Ауытқулар және сапа'))} <span class="n">${S.devs.filter(d => !done(d)).length}</span></span></div>${S.podTab === 'queue' ? podBody() : qualityBody()}`;
+  addTab('pod', 'quality', T('Отклонения и качество', 'Abweichungen & Qualität', 'Deviations & quality', 'Ауытқулар және сапа'), () => qualityBody(), { badge: () => S.devs.filter(d => !done(d)).length });
   Object.assign(ACT, {
-    podTab: d => { S.podTab = d.v; S.drawer = null; render(); },
     qDev: d => { F.dev = d.id; render(); },
     qNext: d => { const x = S.devs.find(v => v.id === d.id); x.step++; audit('QA', x.id, STEPS[x.step - 1], ''); render(); },
     qDec: d => { const x = S.devs.find(v => v.id === d.id); x.decision = d.v; x.step = 4; const l = x.load && load(x.load); if (l) l.qa = d.v === 'quarantine' ? 'quarantine' : 'released'; audit('QA', x.id, d.v === 'release' ? 'Release' : 'Quarantine', ''); toast(d.v === 'release' ? T('Товар допущен', 'Ware freigegeben', 'Goods released', 'Тауарға рұқсат') : T('Товар в карантине', 'Ware in Quarantäne', 'Goods quarantined', 'Тауар карантинде')); },

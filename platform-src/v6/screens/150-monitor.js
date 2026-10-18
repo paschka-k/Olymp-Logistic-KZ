@@ -1,9 +1,6 @@
 /* Routes & Tracking tabs (legacy screens 04 Thermostatus, 05 Weather, 06 Security -> spec 2.2): Map | Temperature | Weather | Security.
    Temperature alarms open a QA deviation (quality.js); security incidents and weather risks are computed from live loads, drivers and documents. */
 (function () {
-  S.rtab = 'map';
-  const mapBody = SCREENS.routes.body;
-  const TABS = [['map', T('Карта', 'Karte', 'Map', 'Карта')], ['temp', T('Температура', 'Temperatur', 'Temperature', 'Температура')], ['wx', T('Погода и риски', 'Wetter & Risiken', 'Weather & risks', 'Ауа райы және тәуекел')], ['sec', T('Безопасность', 'Sicherheit', 'Security', 'Қауіпсіздік')]];
   const tk = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
   const dec = s => String(s).replace('.', ',');
   const live = () => S.loads.filter(l => ['loading', 'in_transit', 'problem'].includes(l.status));
@@ -62,9 +59,10 @@
 <div class="grid2 eq"><div class="card tcard"><div class="card-head" style="padding:14px 20px"><h3 style="margin:0;font-size:15px">${esc(T('Водители · режим труда и допуски', 'Fahrer · Lenkzeit und Zulassungen', 'Drivers · working time and permits', 'Жүргізушілер · еңбек режимі және рұқсаттар'))}</h3></div><table class="table"><thead><tr><th>${esc(T('Водитель', 'Fahrer', 'Driver', 'Жүргізуші'))}</th><th>${esc(T('Вождение', 'Fahrzeit', 'Driving', 'Жүргізу'))}</th><th>${esc(T('Неделя', 'Woche', 'Week', 'Апта'))}</th><th>GDP</th></tr></thead><tbody>${S.drivers.map(d => { const g = (d.docs || []).find(x => x.type === 'gdp'), s = g ? docState(g.to) : 'valid'; return `<tr style="cursor:default"><td>${esc(d.name)}</td><td>${dec(d.onDuty)} / ${CFG.live.shift} ${esc(T('ч', 'Std.', 'h', 'сағ'))}</td><td>${d.week} ${esc(T('ч', 'Std.', 'h', 'сағ'))}</td><td>${chip(DOCST[s].c, g ? fd(g.to) : '—')}</td></tr>`; }).join('')}</tbody></table></div>
 <div class="card tcard"><div class="card-head" style="padding:14px 20px"><h3 style="margin:0;font-size:15px">${esc(T('Двери, пломбы, маршрут', 'Türen, Plomben, Route', 'Doors, seals, route', 'Есіктер, пломбалар, маршрут'))}</h3></div><table class="table"><thead><tr><th>${esc(T('ТС', 'Fzg.', 'Truck', 'КҚ'))}</th><th>${esc(T('Дверь', 'Tür', 'Door', 'Есік'))}</th><th>${esc(T('Пломба', 'Plombe', 'Seal', 'Пломба'))}</th><th>${esc(T('Маршрут', 'Route', 'Route', 'Маршрут'))}</th></tr></thead><tbody>${act.map(l => { const br = tempState(l) === 'breach'; return `<tr style="cursor:default"><td>${esc((trk(l.truck) || { plate: '—' }).plate)}</td><td>${chip(br ? 'red' : 'green', br ? T('открыта', 'offen', 'open', 'ашық') : T('закрыта', 'zu', 'closed', 'жабық'))}</td><td>№ ${seal(l.id)}</td><td>${chip(l.status === 'problem' ? 'red' : 'green', l.status === 'problem' ? T('отклонение', 'Abweichung', 'deviation', 'ауытқу') : T('по плану', 'planmäßig', 'on plan', 'жоспар бойынша'))}</td></tr>`; }).join('') || `<tr><td colspan="4" class="empty">—</td></tr>`}</tbody></table></div></div>`;
   }
-  SCREENS.routes.body = () => `<div class="pill-tabs">${TABS.map(t => `<span class="pill-tab${S.rtab === t[0] ? ' active' : ''}" data-act="rtab" data-v="${t[0]}">${esc(t[1])}</span>`).join('')}</div>${S.rtab === 'map' ? mapBody() : S.rtab === 'temp' ? temp() : S.rtab === 'wx' ? wx() : sec()}`;
+  addTab('routes', 'temp', T('Температура', 'Temperatur', 'Temperature', 'Температура'), temp);
+  addTab('routes', 'wx', T('Погода и риски', 'Wetter & Risiken', 'Weather & risks', 'Ауа райы және тәуекел'), wx);
+  addTab('routes', 'sec', T('Безопасность', 'Sicherheit', 'Security', 'Қауіпсіздік'), sec);
   Object.assign(ACT, {
-    rtab: d => { S.rtab = d.v; S.drawer = null; render(); },
     sim: d => { const sel = $('#sim_l'); if (!sel) return; const l = load(sel.value), z = ZONES[l.zone];
       if (d.v === 'reset') { l.temp = z.mid; if (l.status === 'problem') setStatus(l.id, 'in_transit'); audit('Temperature', l.id, 'Reset', ''); return render(); }
       if (l.status !== 'problem') setStatus(l.id, 'problem');

@@ -1,23 +1,33 @@
 #!/usr/bin/env node
-// Assemble the v6 prototype (standalone vanilla JS, no template engine): platform-v6{,-de,-en,-kk}.html
+// Assemble the v6 platform (standalone vanilla JS, no template engine) into platform/: index.html (RU), de.html, en.html, kk.html + tests.html
 //   node platform-src/build-v6.mjs [--out <dir>] [--lang ru,de,en,kk]
-// Order matters: core (T, helpers, store) -> data -> screens -> app. '@@LANG@@' is replaced per language.
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+// Bundle order: core -> roles -> data -> v6/screens/*.js (file-name order, NN-name.js) -> v6/help/*.js -> app.
+// Areas add their own files (screens/NNN-area.js, help/area.js, tests/NN-area.js); no manifest to edit. Placeholders: @@LANG@@ @@BUILD@@ @@ROLEPERMS@@.
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync } from 'node:fs';
+import { execSync } from 'node:child_process';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
-const outDir = resolve(arg('out', join(here, '..')));
+const outDir = resolve(arg('out', join(here, '..', 'platform')));
 const langs = arg('lang', 'ru,de,en,kk').split(',');
 const rd = (...p) => readFileSync(join(here, ...p), 'utf8');
-const css = ['tokens.css', 'shell.css', 'components.css', 'components-kz.css'].map(f => rd('shared', 'design', f)).join('\n') + '\n' + rd('v6', 'app.css');
-const js = ['core.js', 'data.js', 'screens/dashboard.js', 'screens/orders.js', 'screens/dispatch.js', 'screens/fleet.js', 'screens/drivers.js', 'screens/routes.js', 'screens/hubs.js', 'screens/receiving.js', 'screens/pod.js', 'screens/billing.js', 'screens/reports.js', 'screens/settings.js', 'screens/ai.js', 'screens/quality.js', 'screens/monitor.js', 'screens/partners.js', 'app.js'].map(f => rd('v6', f)).join('\n');
+const list = (dir, ext) => (existsSync(join(here, dir)) ? readdirSync(join(here, dir)).filter(f => f.endsWith(ext)).sort() : []);
+const css = ['tokens.css', 'shell.css', 'components.css', 'components-kz.css', 'theme-kokzhol.css'].map(f => rd('shared', 'design', f)).join('\n') + '\n' + rd('v6', 'app.css');
+const js = [rd('v6', 'core.js'), rd('v6', 'roles.js'), rd('v6', 'data.js'), ...list('v6/screens', '.js').map(f => rd('v6', 'screens', f)), ...list('v6/help', '.js').map(f => rd('v6', 'help', f)), rd('v6', 'app.js')].join('\n');
+let build = new Date().toISOString().slice(0, 16).replace('T', ' ');
+try { build = execSync('git log -1 --format=%cI', { cwd: here }).toString().trim().slice(0, 16).replace('T', ' '); } catch (_) { /* no git: build time = now */ }
+const rolePerms = rd('v6', 'role-perms.json').trim();
 mkdirSync(outDir, { recursive: true });
 for (const lang of langs) {
-  const code = js.replaceAll('@@LANG@@', lang).replace(/<\/script/gi, '<\\/script');
-  const html = `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Olymp Logistic KZ · Platform v6 (${lang})</title><style>\n${css}\n</style></head><body><div id="root"></div><script>\n${code}\n</script></body></html>\n`;
-  const file = join(outDir, lang === 'ru' ? 'platform-v6.html' : `platform-v6-${lang}.html`);
+  const code = js.replaceAll('@@LANG@@', lang).replaceAll('@@BUILD@@', build).replaceAll('@@ROLEPERMS@@', rolePerms).replace(/<\/script/gi, '<\\/script');
+  const html = `<!doctype html><html lang="${lang}" data-design="olymp"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Olymp Logistic KZ · Platform v6 (${lang})</title><style>\n${css}\n</style></head><body><a class="skip" href="#main-content">Skip to content</a><div id="root"></div><script>\n${code}\n</script></body></html>\n`;
+  const file = join(outDir, lang === 'ru' ? 'index.html' : `${lang}.html`);
   writeFileSync(file, html);
   console.log(`${lang}: ${file} (${(html.length / 1024).toFixed(0)} KB)`);
 }
+// tests.html = harness + every suite in tests/NN-*.js
+const suites = list('tests', '.js').map(f => rd('tests', f)).join('\n');
+writeFileSync(join(outDir, 'tests.html'), rd('tests', 'template.html').replace('/*@@SUITES@@*/', () => suites));
+console.log(`tests: ${list('tests', '.js').length} suites -> ${join(outDir, 'tests.html')}`);

@@ -1,0 +1,6 @@
+/* Kökzhol design (FR-178): html[data-design="kokzhol"] re-maps the tokens: one action colour (brand teal), ink sidebar, flatter cards, system fonts only. */
+html[data-design="kokzhol"]{--bg-page:#f5f8f9;--bg-selected:#dceef1;--border:#c9d6dc;--border-input:#9fb3bc;--text-strong:#0b2230;--text-muted:#4a6070;--link:#0e6e7e;
+--primary:#0e6e7e;--primary-hover:#0b5865;--primary-tint:#dceef1;--primary-ring:#7fd3de;--blue:#0e6e7e;--yellow:#c8963e;--red:#b4442b;--green:#1f6f5c;--r-card:6px;--r-btn:6px;--r-input:6px;--r-nav:2px;--r-icon:6px;--r-chip:4px}
+html[data-design="kokzhol"] .sidebar{background:#0b2230;color:#e3ecef;border-right-color:#0b2230} html[data-design="kokzhol"] .nav-item:hover{background:#123446} html[data-design="kokzhol"] .sidebar .logo{color:#fff}
+html[data-design="kokzhol"] .card{box-shadow:none} html[data-design="kokzhol"] .page-title{letter-spacing:-.01em}
+.ver{margin-top:12px;padding:0 8px;font-size:11px;color:var(--text-faint)} .ver a{color:inherit;cursor:pointer;text-decoration:underline}

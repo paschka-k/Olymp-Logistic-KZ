@@ -34,7 +34,7 @@
   Object.assign(ACT, {
     toDispatch: () => go('dispatch'),
     esfAll: () => { const t = S.loads.filter(l => l.status === 'delivered' && l.pod === 'approved' && l.esf === 'none'); t.forEach(l => l.esf = 'issued'); toast(t.length ? T('Выписано ЭСФ: ', 'ESF ausgestellt: ', 'ESF issued: ', 'ЭШФ жазылды: ') + t.length : T('Нет рейсов для ЭСФ', 'Keine Fahrten für ESF', 'No loads need an ESF', 'ЭШФ үшін рейс жоқ')); },
-    planRoute: () => { S.dispTab = 'planning'; go('dispatch'); },
+    planRoute: () => { S.tab.dispatch = 'planning'; go('dispatch'); },
   });
   SCREENS.dashboard = {
     title: () => navLabel('dashboard'),

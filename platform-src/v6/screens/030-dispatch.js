@@ -31,14 +31,13 @@ ${l.status === 'problem' ? `<div class="prob">${ic('alert', 14)} ${esc(T('Тем
   }
   Object.assign(ACT, {
     auto: () => { const r = autoAssign(); toast(r.ok ? T('Назначено автоматически: ', 'Automatisch zugewiesen: ', 'Auto-assigned: ', 'Автоматты тағайындалды: ') + r.ok + (r.fail ? T('; не удалось: ', '; nicht möglich: ', '; could not assign: ', '; болмады: ') + r.fail : '') : T('Нет подходящих ТС/водителей для свободных рейсов', 'Keine passenden Fahrzeuge/Fahrer', 'No matching trucks/drivers for unassigned loads', 'Сәйкес КҚ/жүргізуші жоқ'), r.ok ? 'ok' : 'err'); },
-    dtab: d => { S.dispTab = d.v; render(); },
+    
   });
   SCREENS.dispatch = {
     title: () => navLabel('dispatch'),
     sub: () => T('Перетащите карточку в следующий столбец или откройте её для назначения', 'Karte in die nächste Spalte ziehen oder öffnen, um zuzuweisen', 'Drag a card to the next column or open it to assign', 'Картаны келесі бағанға сүйреңіз немесе тағайындау үшін ашыңыз'),
     actions: () => `<button class="btn green" data-act="auto">${ic('spark')} ${esc(T('Авто-назначение', 'Auto-Zuweisung', 'Auto-Assign', 'Авто-тағайындау'))}</button><button class="btn primary" data-act="create">${ic('plus')} ${esc(T('Создать рейс', 'Fahrt anlegen', 'Create New Load', 'Рейс құру'))}</button>`,
-    body: () => `<div class="pill-tabs"><span class="pill-tab${S.dispTab === 'board' ? ' active' : ''}" data-act="dtab" data-v="board">${esc(T('Доска', 'Tafel', 'Board', 'Тақта'))}</span><span class="pill-tab${S.dispTab === 'planning' ? ' active' : ''}" data-act="dtab" data-v="planning">${esc(T('Планирование', 'Planung', 'Planning', 'Жоспарлау'))}</span><span class="pill-tab${S.dispTab === 'partners' ? ' active' : ''}" data-act="dtab" data-v="partners">${esc(T('Партнёры', 'Partner', 'Partners', 'Серіктестер'))}</span></div>
-${S.dispTab === 'board' ? `<div class="filters">${sel('pri', T('Приоритет', 'Priorität', 'Priority', 'Басымдық'), [['', ALL], ...Object.keys(PRI).map(p => [p, PRI[p].l])])}${sel('drv', T('Статус водителя', 'Fahrerstatus', 'Driver status', 'Жүргізуші күйі'), [['', ALL], ...Object.keys(DRV).map(k => [k, DRV[k]])])}${sel('hub', T('Хаб', 'Hub', 'Hub', 'Хаб'), [['', ALL], ...Object.keys(HUBS).map(k => [k, HUBS[k].city])])}<button class="clear-all" data-act="clear">× ${esc(T('Сбросить', 'Zurücksetzen', 'Clear All', 'Тазалау'))}</button></div>${board()}` : S.dispTab === 'planning' ? planning() : partnersBody()}`,
+    tabs: [{ key: 'board', label: T('Доска', 'Tafel', 'Board', 'Тақта'), body: () => `<div class="filters">${sel('pri', T('Приоритет', 'Priorität', 'Priority', 'Басымдық'), [['', ALL], ...Object.keys(PRI).map(p => [p, PRI[p].l])])}${sel('drv', T('Статус водителя', 'Fahrerstatus', 'Driver status', 'Жүргізуші күйі'), [['', ALL], ...Object.keys(DRV).map(k => [k, DRV[k]])])}${sel('hub', T('Хаб', 'Hub', 'Hub', 'Хаб'), [['', ALL], ...Object.keys(HUBS).map(k => [k, HUBS[k].city])])}<button class="clear-all" data-act="clear">× ${esc(T('Сбросить', 'Zurücksetzen', 'Clear All', 'Тазалау'))}</button></div>${board()}` }, { key: 'planning', label: T('Планирование', 'Planung', 'Planning', 'Жоспарлау'), body: () => planning() }],
   };
   /* drag & drop (HTML5) */
   let dragId = null;

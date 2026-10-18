@@ -1,6 +1,6 @@
 name: Build platform (v5.3 + v6)
 
-# Rebuilds platform-v5.3.html / -de / -en and platform-v6.html / -de / -en / -kk from platform-src/ whenever the sources change.
+# Rebuilds platform-v5.3.html / -de / -en and platform/index.html / de / en / kk + platform/tests.html from platform-src/ whenever the sources change.
 # The commit made here only touches the generated HTML (outside platform-src/), so it does not retrigger this job.
 on:
   push:
@@ -36,7 +36,7 @@ jobs:
             test -s "$f" || { echo "missing $f"; exit 1; }
             grep -q 'inbound' "$f" || { echo "$f has no inbound screen"; exit 1; }
           done
-          for f in platform-v6.html platform-v6-de.html platform-v6-en.html platform-v6-kk.html; do
+          for f in platform/index.html platform/de.html platform/en.html platform/kk.html platform/tests.html; do
             test -s "$f" || { echo "missing $f"; exit 1; }
             grep -q 'SCREENS.settings' "$f" || { echo "$f has no settings screen"; exit 1; }
           done
@@ -44,7 +44,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add platform-v5.3.html platform-v5.3-de.html platform-v5.3-en.html platform-v6.html platform-v6-de.html platform-v6-en.html platform-v6-kk.html
+          git add platform-v5.3.html platform-v5.3-de.html platform-v5.3-en.html platform/index.html platform/de.html platform/en.html platform/kk.html platform/tests.html
           if git diff --cached --quiet; then
             echo "HTML already up to date"
           else

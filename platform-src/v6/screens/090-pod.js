@@ -33,6 +33,7 @@
 <div class="pill-tabs">${tab('all', T('Все рейсы', 'Alle Fahrten', 'All loads', 'Барлық рейстер'), all.length)}${tab('pending', T('Ожидают', 'Ausstehend', 'Pending', 'Күтуде'), n('pending'))}${tab('submitted', T('Отправлены', 'Eingereicht', 'Submitted', 'Жіберілген'), n('submitted'))}${tab('approved', T('Подтверждены', 'Freigegeben', 'Approved', 'Расталған'), n('approved'))}${tab('rejected', T('Отклонены', 'Abgelehnt', 'Rejected', 'Қабылданбаған'), n('rejected'))}</div>
 <div class="filters"><label class="searchbox" style="width:260px;height:34px">${ic('search', 14)}<input id="pq" data-pf="q" placeholder="${esc(T('Рейс или клиент…', 'Fahrt oder Kunde…', 'Load ID or customer…', 'Рейс немесе клиент…'))}" value="${esc(F.q)}"></label><label>${esc(T('Водитель', 'Fahrer', 'Driver', 'Жүргізуші'))}:</label><select class="select" data-pf="drv"><option value="">${esc(T('Все', 'Alle', 'All', 'Барлығы'))}</option>${drvs.map(id => `<option value="${id}"${F.drv === id ? ' selected' : ''}>${esc(drv(id).name)}</option>`).join('')}</select><button class="clear-all" data-act="pClr">× ${esc(T('Сбросить', 'Zurücksetzen', 'Clear Filters', 'Тазалау'))}</button></div>${table()}`; },
   };
+  SCREENS.pod.tabs = [{ key: 'queue', label: T('Очередь POD', 'POD-Warteschlange', 'POD queue', 'POD кезегі'), body: SCREENS.pod.body }]; delete SCREENS.pod.body;
   const kv = (k, v) => `<div><small>${esc(k)}</small><b>${v}</b></div>`;
   DRAWERS.pod = d => {
     const l = load(d.id), c = cust(l.cust), ex = excOf(l), docs = have(l), inv = invOfLoad(l.id), files = l.podFiles || {};
