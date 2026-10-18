@@ -201,7 +201,10 @@ const DRAWERS = {};
 function render() {
   const keep = { y: ($('main') || {}).scrollTop || 0, f: document.activeElement && document.activeElement.id };
   const pos = document.activeElement && document.activeElement.selectionStart;
+  const keepIn = {};   // keep what the user typed in drawer fields across re-renders (e.g. a toast)
+  $$('.drawer input[id], .drawer select[id], .drawer textarea[id]').forEach(e => { keepIn[e.id] = e.type === 'checkbox' ? e.checked : e.value; });
   $('#root').innerHTML = shell();
+  Object.keys(keepIn).forEach(id => { const e = document.getElementById(id); if (e && e.closest('.drawer')) { if (e.type === 'checkbox') e.checked = keepIn[id]; else e.value = keepIn[id]; } });
   const m = $('main'); if (m) m.scrollTop = keep.y;
   if (keep.f) { const e = document.getElementById(keep.f); if (e) { e.focus(); try { e.setSelectionRange(pos, pos); } catch (_) {} } }
 }

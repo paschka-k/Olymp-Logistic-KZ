@@ -69,12 +69,12 @@ const mkLoads = () => [
   mkLoad('001853', 'c2', 'SHY', 'ALA', 'chilled', 26, 9800, 'medium', 'unassigned', '2026-10-19T12:00:00+05:00'),
   mkLoad('001854', 'c4', 'ALA', 'KAR', 'frozen', 22, 11800, 'low', 'unassigned', '2026-10-21T08:00:00+05:00'),
   mkLoad('001855', 'c3', 'AST', 'KAR', 'pharma', 8, 1900, 'high', 'unassigned', '2026-10-18T22:00:00+05:00'),
-  mkLoad('001840', 'c5', 'KAR', 'ALA', 'chilled', 28, 10400, 'medium', 'delivered', '2026-10-17T15:00:00+05:00', { pod: 'pending', progress: 1 }),
-  mkLoad('001841', 'c1', 'AST', 'ALA', 'pharma', 16, 4300, 'high', 'delivered', '2026-10-17T10:30:00+05:00', { pod: 'approved', esf: 'issued', progress: 1, temp: 5.2 }),
-  mkLoad('001842', 'c2', 'SHY', 'AST', 'chilled', 24, 8800, 'low', 'delivered', '2026-10-16T19:00:00+05:00', { pod: 'approved', esf: 'none', progress: 1 }),
-  mkLoad('001843', 'c4', 'ALA', 'SHY', 'frozen', 18, 9100, 'medium', 'delivered', '2026-10-16T11:00:00+05:00', { pod: 'approved', esf: 'confirmed', progress: 1 }),
-  mkLoad('001844', 'c3', 'KAR', 'SHY', 'pharma', 10, 2500, 'medium', 'delivered', '2026-10-15T14:00:00+05:00', { pod: 'approved', esf: 'confirmed', progress: 1 }),
-  mkLoad('001845', 'c5', 'AST', 'KAR', 'ambient', 20, 7000, 'low', 'delivered', '2026-10-15T09:00:00+05:00', { pod: 'approved', esf: 'confirmed', progress: 1 }),
+  mkLoad('001840', 'c5', 'KAR', 'ALA', 'chilled', 28, 10400, 'medium', 'delivered', '2026-10-17T15:00:00+05:00', { driver: 'd1', truck: 't3', pod: 'pending', progress: 1 }),
+  mkLoad('001841', 'c1', 'AST', 'ALA', 'pharma', 16, 4300, 'high', 'delivered', '2026-10-17T10:30:00+05:00', { driver: 'd4', truck: 't5', pod: 'approved', esf: 'issued', progress: 1, temp: 5.2, podDocs: ['ttn', 'act', 'photo', 'logger'], sig: true }),
+  mkLoad('001842', 'c2', 'SHY', 'AST', 'chilled', 24, 8800, 'low', 'delivered', '2026-10-16T19:00:00+05:00', { driver: 'd2', truck: 't1', pod: 'approved', esf: 'none', progress: 1, podDocs: ['ttn', 'act', 'photo', 'logger'], sig: true }),
+  mkLoad('001843', 'c4', 'ALA', 'SHY', 'frozen', 18, 9100, 'medium', 'delivered', '2026-10-16T11:00:00+05:00', { driver: 'd7', truck: 't6', pod: 'approved', esf: 'confirmed', progress: 1, podDocs: ['ttn', 'act', 'photo', 'logger'], sig: true }),
+  mkLoad('001844', 'c3', 'KAR', 'SHY', 'pharma', 10, 2500, 'medium', 'delivered', '2026-10-15T14:00:00+05:00', { driver: 'd5', truck: 't2', pod: 'submitted', esf: 'none', progress: 1, podDocs: ['ttn', 'act', 'photo', 'logger'], exc: 30 }),
+  mkLoad('001845', 'c5', 'AST', 'KAR', 'ambient', 20, 7000, 'low', 'delivered', '2026-10-15T09:00:00+05:00', { driver: 'd3', truck: 't4', pod: 'rejected', esf: 'none', progress: 1, podDocs: ['ttn'], rejectWhy: 'Нет акта приёма-передачи и фото груза' }),
 ];
 
 S.loads = mkLoads(); S.drivers = mkDrivers(); S.trucks = mkTrucks();
@@ -103,6 +103,9 @@ const mkJobs = () => [
 ];
 S.hubs = mkHubs(); S.jobs = mkJobs();
 S.costs = [
-  { id: 'C-1', date: '2026-10-12', hub: 'AST', text: T('Дизельное топливо', 'Diesel', 'Diesel fuel', 'Дизель отыны'), amount: 1850000, ref: '' },
-  { id: 'C-2', date: '2026-10-14', hub: 'ALA', text: T('Сервис ТС 135 STU 02', 'Service Fzg. 135 STU 02', 'Service truck 135 STU 02', 'КҚ сервисі 135 STU 02'), amount: 420000, ref: '' },
+  { id: 'C-1', date: '2026-10-12', hub: 'AST', text: T('Дизельное топливо', 'Diesel', 'Diesel fuel', 'Дизель отыны'), amount: 1850000, ref: '', cat: 'fuel' },
+  { id: 'C-2', date: '2026-10-14', hub: 'ALA', text: T('Сервис ТС 135 STU 02', 'Service Fzg. 135 STU 02', 'Service truck 135 STU 02', 'КҚ сервисі 135 STU 02'), amount: 420000, ref: '', cat: 'service' },
+  { id: 'C-3', date: '2026-10-01', hub: 'AST', text: T('Страхование груза (КАСКО/CMR)', 'Frachtversicherung', 'Cargo insurance', 'Жүкті сақтандыру'), amount: 310000, ref: '', cat: 'insurance' },
+  { id: 'C-4', date: '2026-10-10', hub: 'ALA', text: T('Налог на транспорт', 'Fahrzeugsteuer', 'Vehicle tax', 'Көлік салығы'), amount: 96000, ref: '', cat: 'tax' },
+  { id: 'C-5', date: '2026-10-15', hub: 'KAR', text: T('Дизельное топливо', 'Diesel', 'Diesel fuel', 'Дизель отыны'), amount: 780000, ref: '', cat: 'fuel' },
 ];
