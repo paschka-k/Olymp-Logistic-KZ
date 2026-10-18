@@ -76,3 +76,7 @@ Simulated hub time: `S.clock` (+15 min button in the tab).
 Chain (spec section 3, decision Q3): load delivered -> POD pending -> upload/submit -> approve -> invoice is created automatically (`makeInvoice`, total = rate, net + VAT 12 %) and the POD row shows "Ready for ESF" -> issue ESF (none -> issued -> confirmed or rejected, shared with the load) -> payment. An open dispute (e.g. temperature claim) blocks sending, ESF issuing and payment until it is resolved. Standgeld booked in the receiving tab appears in Costs.
 `render()` now keeps what is typed in drawer fields (by element id) across re-renders.
 
+
+
+## Phase 6 (v6): Reports, AI Ops, Settings
+`v6/screens/reports.js`, `ai.js`, `settings.js` (build order in `build-v6.mjs`). Settings (`CFG`) drive Standgeld (`RECV`), RTO shift (`needRto`) and AI confidence thresholds; every AI decision and settings save goes to `S.audit`.

@@ -81,7 +81,7 @@ const trk = id => S.trucks.find(t => t.id === id);
 const load = id => S.loads.find(l => l.id === id);
 const hrs = l => Math.round(dist(l.from, l.to) / 65 * 10) / 10;
 /* driving time the driver must still have: one shift (max 9 h); longer routes get planned rest stops (norms to be verified, spec Q5) */
-const needRto = l => Math.min(hrs(l), 9);
+const needRto = l => Math.min(hrs(l), typeof CFG !== 'undefined' ? CFG.live.shift : 9);
 const tempState = l => { const z = ZONES[l.zone]; if (l.temp < z.lo || l.temp > z.hi) return 'breach'; return (l.temp - z.lo < 0.8 || z.hi - l.temp < 0.8) ? 'warn' : 'ok'; };
 const tempChip = l => `<span class="chip temp-${tempState(l)}">${l.temp > 0 ? '+' : ''}${String(l.temp).replace('.', ',')} °C</span>`;
 const revenue = l => dist(l.from, l.to) * ZONES[l.zone].rate;
@@ -193,7 +193,7 @@ function placeholder(id) {
 function drawerHtml() {
   const d = S.drawer; if (!d) return '';
   const r = DRAWERS[d.type](d);
-  return `<aside class="drawer open"><div class="drawer-head"><span>${esc(r.title)}</span><span class="x" data-act="close">${ic('x', 18)}</span></div>${r.html}</aside>`;
+  return `<aside class="drawer open${r.xl ? ' xl' : ''}"><div class="drawer-head"><span>${esc(r.title)}</span><span class="x" data-act="close">${ic('x', 18)}</span></div>${r.html}</aside>`;
 }
 const DRAWERS = {};
 

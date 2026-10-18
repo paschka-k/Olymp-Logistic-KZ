@@ -416,6 +416,48 @@ main{overflow:auto;height:100vh;position:relative}
 .tinted-row{gap:8px;flex-wrap:wrap} .tinted-row .btn.sm{margin-left:6px}
 label.drop-zone{display:block;cursor:pointer} .dzrow td{padding:6px 14px!important} .dzrow{height:auto!important;cursor:default}
 
+/* phase 6: reports, AI Ops, settings */
+.drawer.xl{width:min(var(--drawer-w-xl),100%)}
+.rep-filters{position:sticky;top:calc(var(--topbar-h) + 72px);z-index:8;background:var(--bg-page,#f8f8fc);padding:8px 0}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;margin:8px 0 -4px} .sec-head h3{margin:0;font-size:16px} .sec-head span{font-size:12px;color:var(--text-faint)}
+.rep-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.report-card{transition:transform .15s,box-shadow .15s} .report-card:hover{transform:translateY(-3px);box-shadow:var(--sh-hover)}
+.report-card .rh{display:flex;justify-content:space-between;align-items:center;gap:8px} .report-card .rh h4{margin:0;font-size:14px}
+.report-card .chart{background:none;height:auto;margin:8px 0} .chart svg{width:100%;height:auto;display:block}
+.report-card .kpi3 b{font-size:17px;line-height:1.2} .report-card .kpi3 small{display:block;margin-top:2px}
+.report-card .ra{display:flex;justify-content:space-between;align-items:center;margin-top:12px} .ra .ex{display:flex;gap:6px}
+.xchip{border:0;border-radius:6px;height:28px;min-width:36px;color:#fff;font-weight:600;font-size:11px;cursor:pointer} .xchip.pdf{background:#dc3048}.xchip.csv{background:#30d860}.xchip.xls{background:#30d860}
+.aisum{margin-top:8px;padding:10px 12px;background:var(--tint-blue-50);border-radius:var(--r-btn);font-size:12px;color:var(--text-muted)}
+.center-link{text-align:center;margin-top:6px;font-size:12px}
+.pt .tip{display:none} .pt:hover .tip{display:block} .pt circle{cursor:pointer}
+.tone-g{color:#2a9d52}.tone-b{color:var(--primary)}.tone-k{color:#111827}.tone-r{color:var(--label-red)}.tone-a{color:#b7791f}
+.kpi4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px} .kpi4>div{background:var(--tint-blue-50);border-radius:var(--r-btn);padding:12px;text-align:center} .kpi4 b{display:block;font-size:20px} .kpi4 small{color:var(--text-muted);font-size:11px}
+.ai-banner{position:sticky;top:calc(var(--topbar-h) + 72px);z-index:9;margin:-8px 0 0;padding:8px 16px;font-size:12px;border-radius:var(--r-btn)}
+.ai-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
+.ai-card .card-head{display:flex;align-items:center;gap:10px;padding:16px 20px;flex-wrap:wrap} .ai-card .card-head h3{margin:0;font-size:15px} .ai-card .card-head .chip{margin-left:auto}
+.itile{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:none}
+.itile.blue{background:#d8e8f8;color:var(--primary)}.itile.red{background:#f8dce0;color:#be123c}.itile.yellow{background:#f8f8c8;color:#854d0e}.itile.green{background:#dcfce4;color:#166534}.itile.purple{background:#f0e4fc;color:#6b21a8}.itile.gray{background:#eceef2;color:#4b5563}.itile.orange{background:#f8ecd8;color:#b45309}
+.ai-body{padding:0 20px 20px}
+.rec{border:1px solid var(--border);border-radius:var(--r-btn);padding:14px;margin-bottom:12px} .rec .t{display:flex;justify-content:space-between;gap:8px;align-items:flex-start} .rec .t b{font-size:14px} .rec .why{font-size:12px;color:var(--text-muted);margin:6px 0 0} .rec .amt{font-weight:700;white-space:nowrap}
+.rec .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px} .rec.done{opacity:.55} .rec.risk-card{margin-bottom:12px}
+.rec.risk-card .t{align-items:center}
+.btn.amber{background:#dcb814;color:#fff}.btn.dismiss{background:#6c707c;color:#fff}
+.audit{margin-top:4px} .audit table{width:100%}
+.set-card .card-head{display:flex;align-items:center;gap:12px;padding:18px 24px} .set-card .card-head h3{margin:0;font-size:15px} .set-card .card-head small{color:var(--text-muted)}
+.set-body{padding:0 24px 24px;display:grid;grid-template-columns:1fr 1fr;gap:24px} .set-body.c3{grid-template-columns:1fr}
+.set-col h5{margin:0 0 10px;font-size:13px;color:var(--text-strong)}
+.trow{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--r-btn);margin-bottom:10px} .trow .tx{flex:1;min-width:0} .trow .tx b{display:block;font-size:13px} .trow .tx small{color:var(--text-muted);font-size:12px}
+.switch{cursor:pointer;display:inline-block} .switch.lock{opacity:.55;cursor:not-allowed}
+.integration-tile .it{display:flex;align-items:center;gap:10px;margin-bottom:10px} .integration-tile .it b{display:block} .integration-tile .it small{color:var(--text-muted)}
+.slider{display:flex;align-items:center;gap:12px;margin:8px 0} .slider label{width:140px;font-size:13px} .slider input[type=range]{flex:1;accent-color:var(--primary)} .slider output{width:44px;text-align:right;font-weight:600}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:6px 0;font-size:13px;cursor:pointer} .opt small{display:block;color:var(--text-muted);font-size:12px}
+.inp{border:1px solid var(--border-input);border-radius:10px;height:36px;padding:0 10px;font:inherit;width:100%} .inp.bad{border-color:var(--label-red)}
+.prm{display:grid;grid-template-columns:1fr 120px 28px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px} .prm small{display:block;color:var(--text-faint);font-size:11px}
+.dirty{display:none;align-items:center;gap:6px;font-size:12px;color:#b7791f} .dirty.on{display:inline-flex}
+@media (max-width:1100px){.rep-grid,.ai-grid,.set-body{grid-template-columns:1fr}.kpi4{grid-template-columns:1fr 1fr}}
+
+.col.drop-ok{outline:2px dashed var(--primary);background:var(--tint-blue-50)} .col.drop-no{outline:2px dashed var(--label-red);background:var(--tint-red-50)} .kcard[draggable=true]:active{cursor:grabbing}
+
 </style></head><body><div id="root"></div><script>
 /* v6 core: i18n, helpers, icons, store + dispatch rules, shell, drawer, router. */
 const LANG = 'ru';
@@ -500,7 +542,7 @@ const trk = id => S.trucks.find(t => t.id === id);
 const load = id => S.loads.find(l => l.id === id);
 const hrs = l => Math.round(dist(l.from, l.to) / 65 * 10) / 10;
 /* driving time the driver must still have: one shift (max 9 h); longer routes get planned rest stops (norms to be verified, spec Q5) */
-const needRto = l => Math.min(hrs(l), 9);
+const needRto = l => Math.min(hrs(l), typeof CFG !== 'undefined' ? CFG.live.shift : 9);
 const tempState = l => { const z = ZONES[l.zone]; if (l.temp < z.lo || l.temp > z.hi) return 'breach'; return (l.temp - z.lo < 0.8 || z.hi - l.temp < 0.8) ? 'warn' : 'ok'; };
 const tempChip = l => `<span class="chip temp-${tempState(l)}">${l.temp > 0 ? '+' : ''}${String(l.temp).replace('.', ',')} °C</span>`;
 const revenue = l => dist(l.from, l.to) * ZONES[l.zone].rate;
@@ -612,7 +654,7 @@ function placeholder(id) {
 function drawerHtml() {
   const d = S.drawer; if (!d) return '';
   const r = DRAWERS[d.type](d);
-  return `<aside class="drawer open"><div class="drawer-head"><span>${esc(r.title)}</span><span class="x" data-act="close">${ic('x', 18)}</span></div>${r.html}</aside>`;
+  return `<aside class="drawer open${r.xl ? ' xl' : ''}"><div class="drawer-head"><span>${esc(r.title)}</span><span class="x" data-act="close">${ic('x', 18)}</span></div>${r.html}</aside>`;
 }
 const DRAWERS = {};
 
@@ -958,11 +1000,19 @@ ${S.dispTab === 'board' ? `<div class="filters">${sel('pri', T('Приорите
   /* drag & drop (HTML5) */
   let dragId = null;
   document.addEventListener('dragstart', e => { const c = e.target.closest && e.target.closest('.kcard'); if (c) { dragId = c.dataset.id; e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', dragId); } catch (_) {} } });
-  document.addEventListener('dragover', e => { if (dragId && e.target.closest && e.target.closest('.col')) e.preventDefault(); });
+  const colOf = e => e.target.closest && e.target.closest('.col');
+  const clearHi = () => $$('.col.drop-ok,.col.drop-no').forEach(c => c.classList.remove('drop-ok', 'drop-no'));
+  document.addEventListener('dragover', e => { const col = colOf(e); if (!dragId || !col) return; e.preventDefault(); const l = load(dragId), ok = l.status === col.dataset.col || !canMove(l, col.dataset.col) || (l.status === 'unassigned' && col.dataset.col === 'assigned'); if (!col.classList.contains(ok ? 'drop-ok' : 'drop-no')) { clearHi(); col.classList.add(ok ? 'drop-ok' : 'drop-no'); } });
+  document.addEventListener('dragend', () => { dragId = null; clearHi(); });
   document.addEventListener('drop', e => {
-    const col = e.target.closest && e.target.closest('.col'); if (!col || !dragId) return; e.preventDefault();
+    const col = colOf(e); clearHi(); if (!col || !dragId) return; e.preventDefault();
     const l = load(dragId), to = col.dataset.col; dragId = null; if (l.status === to) return;
-    const err = canMove(l, to); if (err) { if (l.status === 'unassigned') openDrawer({ type: 'load', id: l.id, tab: 'overview' }); return toast(err, 'err'); }
+    if (l.status === 'unassigned' && to === 'assigned') {   // dropping an open load on "Assigned" picks the best eligible driver + truck
+      const ts = S.trucks.filter(t => t.zones.includes(l.zone)).sort((a, b) => a.cap - b.cap), ds = S.drivers.slice().sort((a, b) => a.rto - b.rto);
+      for (const t of ts) for (const d of ds) if (!compat(l, d, t).length && !assign(l.id, d.id, t.id)) { return toast(T('Назначено: ', 'Zugewiesen: ', 'Assigned: ', 'Тағайындалды: ') + d.name + ' / ' + t.plate); }
+      openDrawer({ type: 'load', id: l.id, tab: 'overview' }); return toast(T('Нет подходящей пары водитель + ТС — назначьте вручную', 'Kein passendes Paar Fahrer + Fahrzeug — manuell zuweisen', 'No eligible driver + truck pair — assign manually', 'Жарамды жұп жоқ — қолмен тағайындаңыз'), 'err');
+    }
+    const err = canMove(l, to); if (err) return toast(err, 'err');
     setStatus(l.id, to); render();
   });
 })();
@@ -1465,6 +1515,431 @@ ${l.pod === 'submitted' && ex > 0 ? `<div class="drawer-section"><div class="tin
     cSave: () => { const a = +$('#ca').value, t = $('#ct').value.trim(); if (!t || !(a > 0)) { $('#ce').textContent = T('Укажите описание и сумму', 'Beschreibung und Betrag angeben', 'Enter a description and an amount', 'Сипаттама мен соманы көрсетіңіз'); return; } S.costs.push({ id: 'C-' + (S.costs.length + 1), date: $('#cd').value, hub: $('#ch').value, text: t, amount: a, ref: '', cat: $('#cc').value }); S.drawer = null; toast(T('Затрата добавлена', 'Kosten erfasst', 'Cost added', 'Шығыс қосылды')); },
   });
   document.addEventListener('input', e => { const k = e.target.dataset && e.target.dataset.bf; if (k) { F[k] = e.target.value; render(); } });
+})();
+
+/* Reports (spec 5.10): six identical report-cards (chart + exactly 3 KPIs + PDF/CSV + View Details + AI summary),
+   sticky filters, 840 px detail drawer (chart with tooltip, 4 KPIs, table, raw export). Numbers come from S.loads / S.invoices / S.costs;
+   trend history before the current period is derived demo data. */
+(function () {
+  const R = { from: '2026-09-01', to: '2026-10-31', hub: '', zone: '', sum: {} };
+  const dec = s => (LANG === 'en' ? s : s.replace('.', ','));
+  const pc = v => dec(v.toFixed(1)) + ' %';
+  const sg = v => (v < 0 ? '−' : '+') + dec(Math.abs(v).toFixed(1)) + ' %';
+  const nf = n => Math.round(n).toLocaleString('ru-RU');
+  const mio = n => n >= 1e6 ? dec((n / 1e6).toFixed(1)) + ' ' + T('млн', 'Mio.', 'M', 'млн') + ' ₸' : n >= 1e3 ? dec((n / 1e3).toFixed(1)) + ' ' + T('тыс', 'Tsd.', 'K', 'мың') + ' ₸' : nf(n) + ' ₸';
+  const dd = iso => { const d = new Date(iso); return p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '.' + d.getFullYear(); };
+  const lane = l => HUBS[l.from].city + ' → ' + HUBS[l.to].city;
+  const day = iso => String(iso).slice(0, 10);
+  const loadsF = () => S.loads.filter(l => day(l.eta) >= R.from && day(l.eta) <= R.to && (!R.hub || l.from === R.hub || l.to === R.hub) && (!R.zone || l.zone === R.zone));
+  const invF = () => S.invoices.filter(i => i.created >= R.from && i.created <= R.to && (!R.zone || i.zone === R.zone) && (!R.hub || (i.load && load(i.load) && (load(i.load).from === R.hub || load(i.load).to === R.hub))));
+  const sumLines = (iv, t) => iv.reduce((s, i) => s + i.lines.filter(x => x.type === t).reduce((a, x) => a + x.amount, 0), 0);
+  const hist = k => [...k].reduce((s, c) => s + c.charCodeAt(0), 0) % 4 + 1;   // deterministic 30-day history per lane (demo)
+  const excMin = l => (l.exc || 0) + (tempState(l) === 'breach' && isActive(l) ? 12 : 0);
+
+  /* ---------- SVG charts ---------- */
+  const CO = {};
+  function chart(o) {
+    if (!o.w) CO[o.id] = o;   // {type: area|bars|line|stack, labels, series:[[..]], colors:[..], min, max, step, w, h, tips, dots}
+    const W = o.w || 300, H = o.h || 160, L = 28, B = 18, Tp = 6, iw = W - L - 6, ih = H - B - Tp, n = o.labels.length, ymin = o.min, ymax = o.max;
+    const Y = v => Tp + ih - (v - ymin) / (ymax - ymin) * ih, X = i => L + (o.type === 'area' || o.type === 'line' ? (n === 1 ? iw / 2 : i / (n - 1) * iw) : (i + 0.5) * iw / n);
+    let g = '';
+    for (let v = ymin; v <= ymax + 1e-9; v += o.step) g += `<line x1="${L}" x2="${W - 6}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--chart-grid)" stroke-width="1"/><text x="${L - 4}" y="${Y(v) + 3}" font-size="8" fill="#9ca3af" text-anchor="end">${+v.toFixed(1)}</text>`;
+    g += o.labels.map((t, i) => `<text x="${X(i)}" y="${H - 5}" font-size="8" fill="#9ca3af" text-anchor="middle">${esc(t)}</text>`).join('');
+    const smooth = pts => pts.map((p, i) => i ? `C${(pts[i - 1][0] + p[0]) / 2},${pts[i - 1][1]} ${(pts[i - 1][0] + p[0]) / 2},${p[1]} ${p[0]},${p[1]}` : `M${p[0]},${p[1]}`).join(' ');
+    const s0 = o.series[0], tipFor = (i, v) => (o.tips ? o.tips[i] : o.labels[i] + ': ' + dec(String(+v.toFixed(1))));
+    if (o.type === 'area' || o.type === 'line') {
+      const pts = s0.map((v, i) => [X(i), Y(v)]), path = smooth(pts);
+      if (o.type === 'area') g += `<defs><linearGradient id="ga${o.id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--chart-area)"/><stop offset="1" stop-color="#fff" stop-opacity=".2"/></linearGradient></defs><path d="${path} L${pts[n - 1][0]},${Y(ymin)} L${pts[0][0]},${Y(ymin)}Z" fill="url(#ga${o.id})"/>`;
+      g += `<path d="${path}" fill="none" stroke="${o.colors[0]}" stroke-width="2"/>`;
+      if (o.dots) g += pts.map((p, i) => { const tx = Math.min(Math.max(p[0] - 40, 2), W - 84); return `<g class="pt"><circle cx="${p[0]}" cy="${p[1]}" r="4" fill="${o.dots}" stroke="#fff" stroke-width="1.5"/><g class="tip"><rect x="${tx}" y="${Math.max(p[1] - 36, 0)}" width="82" height="26" rx="6" fill="#fff" stroke="#e5e7eb"/><text x="${tx + 8}" y="${Math.max(p[1] - 20, 12)}" font-size="9" fill="#111827">${esc(tipFor(i, s0[i]))}</text></g></g>`; }).join('');
+    } else {
+      const bw = Math.min(34, iw / n * 0.55);
+      o.series.forEach((s, k) => s.forEach((v, i) => { const below = o.type === 'stack' ? o.series.slice(0, k).reduce((a, q) => a + q[i], 0) : 0; const y1 = Y(below + v), y0 = Y(below);
+        g += `<g class="pt"><rect x="${X(i) - bw / 2}" y="${y1}" width="${bw}" height="${Math.max(y0 - y1, 0)}" rx="3" fill="${o.colors[o.type === 'stack' ? k : i % o.colors.length]}"/><g class="tip"><rect x="${Math.min(Math.max(X(i) - 41, 2), W - 84)}" y="${Math.max(y1 - 30, 0)}" width="82" height="22" rx="6" fill="#fff" stroke="#e5e7eb"/><text x="${Math.min(Math.max(X(i) - 41, 2), W - 84) + 8}" y="${Math.max(y1 - 15, 12)}" font-size="9" fill="#111827">${esc(tipFor(i, v))}</text></g></g>`; }));
+    }
+    return `<svg viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
+  }
+  const hi = (a, st) => { const m = Math.max(...a, 1), s = st || (m <= 10 ? 2 : m <= 50 ? 10 : 20); return Math.ceil(m / s) * s; };
+
+  /* ---------- the six cards ---------- */
+  function cards() {
+    const L = loadsF(), I = invF(), dv = L.filter(l => l.status === 'delivered'), net = I.reduce((s, i) => s + i.net, 0), cst = S.costs.filter(c => c.date >= R.from && c.date <= R.to && (!R.hub || c.hub === R.hub)).reduce((s, c) => s + c.amount, 0);
+    const good = dv.filter(l => !l.exc && l.pod !== 'rejected').length, otif = dv.length ? good / dv.length * 100 : 0;
+    const ev = L.filter(l => excMin(l) > 0), mins = ev.length ? ev.reduce((s, l) => s + excMin(l), 0) / ev.length : 0;
+    const lanes = {}; L.forEach(l => { const k = lane(l); lanes[k] = lanes[k] || { n: 0 }; }); Object.keys(lanes).forEach(k => { lanes[k].n = hist(k) + ev.filter(l => lane(l) === k).length; });
+    const lk = Object.keys(lanes).sort((a, b) => lanes[b].n - lanes[a].n).slice(0, 5), exTotal = lk.reduce((s, k) => s + lanes[k].n, 0);
+    const act = S.drivers.filter(d => d.status !== 'rest').length, rate = S.drivers.length ? S.drivers.reduce((s, d) => s + d.rating, 0) / S.drivers.length : 0, fin = L.filter(l => ['delivered', 'problem'].includes(l.status)), comp = fin.length ? fin.filter(l => l.status === 'delivered').length / fin.length * 100 : 0;
+    const mg = net ? (net - cst) / net * 100 : 0, nm = mg - 5.5;
+    const reefer = sumLines(I, 'reefer'), fuel = sumLines(I, 'fuel'), det = S.costs.filter(c => c.cat === 'detention' && c.date >= R.from && c.date <= R.to).reduce((s, c) => s + c.amount, 0), acc = reefer + fuel + det;
+    const cnt = I.reduce((s, i) => s + i.lines.filter(x => x.type !== 'freight').length, 0) + S.costs.filter(c => c.cat === 'detention').length;
+    const wk = [T('Нед. 1', 'Wo 1', 'Wk 1', '1-апта'), T('Нед. 2', 'Wo 2', 'Wk 2', '2-апта'), T('Нед. 3', 'Wo 3', 'Wk 3', '3-апта'), T('Нед. 4', 'Wo 4', 'Wk 4', '4-апта'), T('Нед. 5', 'Wo 5', 'Wk 5', '5-апта')];
+    const mo = [T('Май', 'Mai', 'May', 'Мамыр'), T('Июн', 'Jun', 'Jun', 'Мау'), T('Июл', 'Jul', 'Jul', 'Шіл'), T('Авг', 'Aug', 'Aug', 'Там'), T('Сен', 'Sep', 'Sep', 'Қыр'), T('Окт', 'Okt', 'Oct', 'Қаз')];
+    const f3 = [0.62, 0.7, 0.78, 0.85, 0.93, 1].map(k => net * k);
+    const r = (id, g, title, period, ch, k, extra, rows, cols) => ({ id, g, title, period, ch, k, extra, rows, cols });
+    const tone = (v, l, t) => ({ v, l, t });
+    const lr = ls => ls.map(l => [dd(l.eta), lane(l), drv(l.driver) ? drv(l.driver).name : '—', trk(l.truck) ? trk(l.truck).plate : '—', (l.temp - 0.6).toFixed(1) + ' / ' + (l.temp + 0.9).toFixed(1) + ' °C', (excMin(l) ? 'exc' : l.status === 'delivered' ? 'ok' : l.status), l.id]);
+    const lcols = [T('Дата', 'Datum', 'Date', 'Күні'), T('Маршрут', 'Route', 'Route', 'Маршрут'), T('Водитель', 'Fahrer', 'Driver', 'Жүргізуші'), T('ТС (ГРЗ)', 'Fzg. (Kennz.)', 'Vehicle (plate)', 'КҚ (ГРЗ)'), T('t мин / макс', 't min / max', 't min / max', 't мин / макс'), T('Статус', 'Status', 'Status', 'Күйі'), 'ID'];
+    const ir = iv => iv.map(i => [dd(i.created), i.id, cust(i.cust).name, i.route, nf(i.net), nf(i.total), i.paidAt ? 'paid' : 'open']);
+    const icols = [T('Дата', 'Datum', 'Date', 'Күні'), T('Счёт', 'Rechnung', 'Invoice', 'Шот'), T('Клиент', 'Kunde', 'Customer', 'Клиент'), T('Маршрут', 'Route', 'Route', 'Маршрут'), T('Без НДС, ₸', 'Netto, ₸', 'Net, ₸', 'ҚҚС-сіз, ₸'), T('С НДС, ₸', 'Brutto, ₸', 'Gross, ₸', 'ҚҚС-пен, ₸'), T('Оплата', 'Zahlung', 'Payment', 'Төлем')];
+    const otifS = [91.8, 92.6, 93.1, 93.9, otif || 94];
+    return [
+      r('otif', 'op', T('OTIF по хабам', 'OTIF je Hub', 'OTIF by hub', 'Хабтар бойынша OTIF'), T('30 дней', '30 Tage', 'Last 30 days', '30 күн'), chart({ id: 1, type: 'area', labels: wk, series: [otifS], colors: ['var(--chart-line)'], min: Math.floor(Math.min(...otifS) / 10) * 10, max: 100, step: 10, dots: 'var(--chart-line)', tips: otifS.map((v, i) => wk[i] + ': ' + dec(v.toFixed(1)) + ' %') }),
+        [tone(pc(otif), T('Текущий уровень', 'Aktuell', 'Current rate', 'Ағымдағы деңгей'), 'g'), tone(sg(otif - otifS[3]), T('к прошлой неделе', 'ggü. Vorwoche', 'vs last week', 'өткен аптаға'), 'b'), tone(String(dv.length), T('Доставок', 'Lieferungen', 'Total deliveries', 'Жеткізулер'), 'k')],
+        tone(String(L.length), T('Всего рейсов', 'Fahrten gesamt', 'Total loads', 'Барлық рейс'), 'k'), lr(dv.length ? dv : L), lcols),
+      r('exc', 'op', T('Температурные отклонения по линиям', 'Temperaturabweichungen je Linie', 'Temperature excursions by lane', 'Желілер бойынша температура ауытқулары'), T('30 дней', '30 Tage', 'Last 30 days', '30 күн'), chart({ id: 2, type: 'bars', labels: lk.map(k => k.replace(' → ', '→')), series: [lk.map(k => lanes[k].n)], colors: ['var(--chart-amber)', 'var(--chart-amber)', '#f8d080', 'var(--chart-amber)'], min: 0, max: hi(lk.map(k => lanes[k].n)), step: hi(lk.map(k => lanes[k].n)) / 5 >= 1 ? Math.ceil(hi(lk.map(k => lanes[k].n)) / 5) : 1, tips: lk.map(k => k + ': ' + lanes[k].n) }),
+        [tone(String(exTotal), T('Отклонений', 'Abweichungen', 'Excursions', 'Ауытқулар'), 'r'), tone(dec(mins.toFixed(0)) + ' ' + T('мин', 'Min.', 'min', 'мин'), T('Средняя длит.', 'Ø Dauer', 'Avg duration', 'Орташа ұзақтық'), 'a'), tone(lk[0] || '—', T('Больше всего', 'Am meisten', 'Most affected', 'Көбірек'), 'k')],
+        tone(String(ev.length), T('Рейсов с отклонением сейчас', 'Fahrten mit Abweichung', 'Loads with excursion', 'Ауытқуы бар рейстер'), 'r'), lr(ev.length ? ev : L), lcols),
+      r('drv', 'op', T('Эффективность водителей и ТС', 'Fahrer- und Fahrzeugeffizienz', 'Driver & vehicle performance', 'Жүргізушілер мен КҚ тиімділігі'), T('30 дней', '30 Tage', 'Last 30 days', '30 күн'), chart({ id: 3, type: 'line', labels: wk.slice(0, 4), series: [[4.6, 4.7, 4.8, +rate.toFixed(2)]], colors: ['#7bc9b0'], min: 0, max: 5, step: 1, dots: '#4e5ba6' }),
+        [tone(dec(rate.toFixed(1)), T('Ср. рейтинг', 'Ø Bewertung', 'Avg rating', 'Орт. рейтинг'), 'g'), tone(pc(comp), T('Завершено', 'Abgeschlossen', 'Completion rate', 'Аяқталды'), 'b'), tone(String(act), T('Активных водителей', 'Aktive Fahrer', 'Active drivers', 'Белсенді жүргізушілер'), 'k')],
+        tone(String(S.trucks.filter(t => t.status === 'busy').length), T('ТС в рейсе', 'Fzg. im Einsatz', 'Trucks in use', 'Рейстегі КҚ'), 'k'), lr(L.filter(l => l.driver)), lcols),
+      r('rev', 'fin', T('Выручка', 'Umsatz', 'Revenue', 'Түсім'), T('6 месяцев', '6 Monate', 'Last 6 months', '6 ай'), chart({ id: 4, type: 'area', labels: mo, series: [f3], colors: ['var(--chart-line)'], min: 0, max: hi(f3, Math.max(1e6, Math.ceil(Math.max(...f3) / 5 / 1e6) * 1e6)), step: Math.max(1e6, Math.ceil(Math.max(...f3) / 5 / 1e6) * 1e6), tips: f3.map((v, i) => mo[i] + ': ' + mio(v)) }),
+        [tone(mio(net), T('Выручка (без НДС)', 'Umsatz (netto)', 'Total revenue', 'Түсім (ҚҚС-сіз)'), 'g'), tone(sg(net / (f3[4] || 1) * 100 - 100), T('Рост к мес.', 'Wachstum', 'Growth rate', 'Өсім'), 'b'), tone(String(I.length), T('Счетов', 'Rechnungen', 'Invoices', 'Шоттар'), 'k')],
+        tone(mio(I.reduce((s, i) => s + i.vat, 0)), T('НДС 12 %', 'MwSt 12 %', 'VAT 12 %', 'ҚҚС 12 %'), 'k'), ir(I), icols),
+      r('mrg', 'fin', T('Маржа по маршрутам', 'Marge je Route', 'Margin analysis', 'Маржа талдауы'), T('3 месяца', '3 Monate', 'Last 3 months', '3 ай'), chart({ id: 5, type: 'stack', labels: mo.slice(3), series: [[nm - 1.1, nm - 0.6, nm], [6.6, 6.1, 5.5]], colors: ['var(--chart-mint)', 'var(--chart-sky)'], min: 0, max: Math.max(10, Math.ceil((mg + 4) / 10) * 10), step: Math.max(10, Math.ceil((mg + 4) / 10) * 10) / 5 }),
+        [tone(pc(mg), T('Валовая маржа', 'Bruttomarge', 'Gross margin', 'Жалпы маржа'), 'g'), tone(pc(nm), T('Чистая маржа', 'Nettomarge', 'Net margin', 'Таза маржа'), 'b'), tone('+' + dec('1.3') + ' %', T('к прошлому кв.', 'ggü. Vorquartal', 'vs last quarter', 'өткен тоқсанға'), 'k')],
+        tone(mio(cst), T('Затраты', 'Kosten', 'Costs', 'Шығыстар'), 'k'), ir(I), icols),
+      r('acc', 'fin', T('Дополнительные услуги', 'Zusatzleistungen', 'Accessorials', 'Қосымша қызметтер'), T('30 дней', '30 Tage', 'Last 30 days', '30 күн'), chart({ id: 6, type: 'bars', labels: [T('Реф', 'Kühl', 'Reefer', 'Реф'), T('Топливо', 'Treibst.', 'Fuel', 'Отын'), 'Standgeld'], series: [[reefer / 1e3, fuel / 1e3, det / 1e3]], colors: ['var(--chart-amber)', 'var(--chart-amber)', '#f8d080'], min: 0, max: hi([reefer / 1e3, fuel / 1e3, det / 1e3], Math.max(100, Math.ceil(Math.max(reefer, fuel, det) / 1e3 / 5 / 100) * 100)), step: Math.max(100, Math.ceil(Math.max(reefer, fuel, det) / 1e3 / 5 / 100) * 100), tips: [mio(reefer), mio(fuel), mio(det)] }),
+        [tone(mio(acc), T('Выручка доп. услуг', 'Zusatzumsatz', 'Total revenue', 'Қосымша түсім'), 'g'), tone(pc(net ? acc / net * 100 : 0), T('от выручки', 'vom Umsatz', 'of total revenue', 'түсімнен'), 'b'), tone(String(cnt), T('Начислений', 'Positionen', 'Total charges', 'Есептеулер'), 'k')],
+        tone(mio(det), T('Standgeld', 'Standgeld', 'Standgeld', 'Standgeld'), 'a'), ir(I), icols)];
+  }
+  const sumTxt = c => {
+    const k = c.k.map(x => x.l + ' ' + x.v).join(', ');
+    return { otif: T('Доставлено в срок и без отклонений: ', 'Pünktlich und ohne Abweichung: ', 'On time and without excursion: ', 'Мерзімінде және ауытқусыз: '), exc: T('Рейсы с выходом за 2–8 °C сгруппированы по линиям; ', 'Fahrten außerhalb 2–8 °C je Linie; ', 'Loads outside 2–8 °C grouped by lane; ', '2–8 °C-тан шыққан рейстер желі бойынша; '), drv: T('Нагрузка и рейтинг парка: ', 'Auslastung und Bewertung: ', 'Fleet load and rating: ', 'Парк жүктемесі мен рейтингі: '), rev: T('Выручка без НДС по выставленным счетам: ', 'Umsatz netto aus Rechnungen: ', 'Net revenue from issued invoices: ', 'Шоттар бойынша ҚҚС-сіз түсім: '), mrg: T('Маржа = (выручка − затраты) / выручка: ', 'Marge = (Umsatz − Kosten) / Umsatz: ', 'Margin = (revenue − costs) / revenue: ', 'Маржа = (түсім − шығыс) / түсім: '), acc: T('Реф-доплата, топливная надбавка и Standgeld: ', 'Kühlzuschlag, Treibstoffzuschlag und Standgeld: ', 'Reefer surcharge, fuel surcharge and Standgeld: ', 'Реф-үстеме, отын үстемесі және Standgeld: ') }[c.id] + k + '.';
+  };
+  const col = { g: 'tone-g', b: 'tone-b', k: 'tone-k', r: 'tone-r', a: 'tone-a' };
+  const kp = x => `<div><b class="${col[x.t]}"${x.v.length > 9 ? ' style="font-size:13px"' : ''}>${esc(x.v)}</b><small>${esc(x.l)}</small></div>`;
+  const csvOf = c => [c.cols].concat(c.rows.map(r => r.map(v => ({ ok: 'on time', exc: 'excursion' }[v] || v))));
+  const csvText = rows => '﻿' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';')).join('\n');
+  const dl = (name, text, mime) => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: mime })); a.download = name; a.click(); };
+  const pdfDemo = () => toast(T('PDF формируется на сервере — в прототипе доступны CSV и JSON', 'PDF entsteht serverseitig — im Prototyp sind CSV und JSON verfügbar', 'PDF is rendered server-side — CSV and JSON are available in the prototype', 'PDF серверде жасалады — прототипте CSV және JSON қолжетімді'));
+  const card = c => `<div class="card report-card" data-id="${c.id}"><div class="rh"><h4>${esc(c.title)}</h4>${chip('gray', c.period)}</div><div class="chart">${c.ch}</div><div class="kpi3">${c.k.map(kp).join('')}</div>
+<div class="ra"><div class="ex"><button class="xchip pdf" data-act="rPdf">PDF</button><button class="xchip csv" data-act="rCsv" data-id="${c.id}">CSV</button></div><a class="lnk" data-act="rOpen" data-id="${c.id}">View Details</a></div><div class="center-link"><a class="lnk" data-act="rSum" data-id="${c.id}">Toggle AI Summary</a></div>${R.sum[c.id] ? `<div class="aisum">${esc(sumTxt(c))}</div>` : ''}</div>`;
+  const sel = (k, lab, opts) => `<label>${esc(lab)}</label><select class="select" data-rf="${k}">${opts.map(o => `<option value="${esc(o[0])}"${R[k] === o[0] ? ' selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
+  SCREENS.reports = {
+    title: () => navLabel('reports'),
+    sub: () => T('Эффективность, холодовая цепь и финансы', 'Leistung, Kühlkette und Finanzen', 'Performance, cold chain and finance', 'Тиімділік, суық тізбек және қаржы'),
+    actions: () => `<button class="btn grey" data-act="rBulk">${esc(T('Массовый экспорт', 'Sammelexport', 'Bulk Export', 'Жаппай экспорт'))}</button><button class="btn primary" data-act="rCustom">${ic('plus')} ${esc(T('Свой отчёт', 'Eigener Bericht', 'Custom Report', 'Жеке есеп'))}</button>`,
+    body: () => { const cs = cards(), g = k => cs.filter(c => c.g === k).map(card).join('');
+      return `<div class="filters rep-filters"><input type="date" class="select" data-rf="from" value="${R.from}"><label>${esc(T('по', 'bis', 'to', 'дейін'))}</label><input type="date" class="select" data-rf="to" value="${R.to}">${sel('hub', T('Хаб', 'Hub', 'Hub', 'Хаб'), [['', T('Все хабы', 'Alle Hubs', 'All Hubs', 'Барлық хаб')], ...Object.keys(HUBS).map(k => [k, HUBS[k].city])])}${sel('zone', T('Тип груза', 'Ladungstyp', 'Types', 'Жүк түрі'), [['', T('Все типы', 'Alle Typen', 'All Types', 'Барлық түр')], ...Object.keys(ZONES).map(k => [k, ZONES[k].label])])}<button class="clear-all" data-act="rClr">× ${esc(T('Сбросить', 'Zurücksetzen', 'Clear Filters', 'Тазалау'))}</button></div>
+<div class="sec-head"><h3>${esc(T('Операционные отчёты', 'Operative Berichte', 'Operational Reports', 'Операциялық есептер'))}</h3><span>${esc(T('Показатели работы и холодовой цепи', 'Leistungs- und Kühlkettenkennzahlen', 'Performance metrics and operational insights', 'Жұмыс және суық тізбек көрсеткіштері'))}</span></div><div class="rep-grid">${g('op')}</div>
+<div class="sec-head"><h3>${esc(T('Финансовые отчёты', 'Finanzberichte', 'Financial Reports', 'Қаржылық есептер'))}</h3><span>${esc(T('Выручка, маржа, доп. услуги', 'Umsatz, Marge, Zusatzleistungen', 'Revenue analysis and financial metrics', 'Түсім, маржа, қосымша қызметтер'))}</span></div><div class="rep-grid">${g('fin')}</div>`; },
+  };
+  const stChip = s => ({ ok: chip('green', T('В срок', 'Pünktlich', 'On time', 'Мерзімінде')), exc: chip('yellow', T('Отклонение', 'Abweichung', 'Excursion', 'Ауытқу')), paid: chip('green', T('Оплачен', 'Bezahlt', 'Paid', 'Төленді')), open: chip('yellow', T('Открыт', 'Offen', 'Open', 'Ашық')) }[s] || (ST[s] ? chip(ST[s].c, ST[s].l) : esc(s)));
+  DRAWERS.rep = d => {
+    const c = cards().find(x => x.id === d.id), co = CO[['otif', 'exc', 'drv', 'rev', 'mrg', 'acc'].indexOf(c.id) + 1];
+    const wide = chart(Object.assign({}, co, { w: 720, h: 220, dots: co.dots || 'var(--chart-line)' }));
+    const ex = c.k.concat([c.extra]), stCol = 5;
+    return { title: c.title + ' – ' + T('подробно', 'Details', 'Detailed View', 'толық'), xl: true, html: `<div class="drawer-section"><div style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:8px"><button class="btn sm red" data-act="rPdf">PDF</button><button class="btn sm green" data-act="rCsv" data-id="${c.id}">Excel</button></div><div class="chart">${wide}</div></div>
+<div class="drawer-section"><div class="kpi4">${ex.map(kp).join('')}</div></div>
+<div class="drawer-section"><h4>${esc(T('Детальные данные', 'Detaildaten', 'Detailed Data', 'Толық деректер'))}</h4><div class="tcard"><table class="table"><thead><tr>${c.cols.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${c.rows.slice(0, 8).map(r => `<tr style="cursor:default">${r.map((v, i) => `<td>${(i === stCol && c.g === 'op') || (i === 6 && c.g === 'fin') ? stChip(v) : esc(v)}</td>`).join('')}</tr>`).join('') || `<tr><td colspan="${c.cols.length}" class="empty">${esc(T('Нет данных', 'Keine Daten', 'No data', 'Дерек жоқ'))}</td></tr>`}</tbody></table></div></div>
+<div class="drawer-section"><h4>Raw Data Export</h4><div style="display:flex;flex-direction:column;gap:8px"><button class="btn red block" data-act="rPdf">Export PDF</button><button class="btn green block" data-act="rCsv" data-id="${c.id}">Export Excel</button><button class="btn primary block" data-act="rJson" data-id="${c.id}">Export JSON</button>${c.g === 'op' ? `<button class="btn grey block" data-act="rGdp" data-id="${c.id}">${esc(T('Лог температуры GDP (CSV)', 'GDP-Temperaturlog (CSV)', 'GDP temperature log (CSV)', 'GDP температура журналы (CSV)'))}</button>` : ''}</div></div>` };
+  };
+  DRAWERS.repCustom = () => ({ title: T('Свой отчёт', 'Eigener Bericht', 'Custom Report', 'Жеке есеп'), html: `<div class="drawer-section"><p class="note">${esc(T('Выберите карточки для объединённого экспорта.', 'Karten für den kombinierten Export wählen.', 'Select the cards for a combined export.', 'Біріктірілген экспортқа карточкаларды таңдаңыз.'))}</p>${cards().map(c => `<label class="opt"><input type="checkbox" id="cr_${c.id}" checked><span><b>${esc(c.title)}</b></span></label>`).join('')}<div class="actbar" style="margin-top:12px"><button class="btn primary" data-act="rCustomGo" data-v="csv">CSV</button><button class="btn grey" data-act="rCustomGo" data-v="json">JSON</button></div></div>` });
+  const jsonOf = c => ({ id: c.id, title: c.title, period: c.period, kpis: c.k.map(x => ({ label: x.l, value: x.v })), columns: c.cols, rows: c.rows });
+  Object.assign(ACT, {
+    rOpen: d => openDrawer({ type: 'rep', id: d.id }), rPdf: pdfDemo, rSum: d => { R.sum[d.id] = !R.sum[d.id]; render(); },
+    rClr: () => { Object.assign(R, { from: '2026-09-01', to: '2026-10-31', hub: '', zone: '' }); render(); },
+    rCsv: d => { const c = cards().find(x => x.id === d.id); dl('report-' + c.id + '.csv', csvText(csvOf(c)), 'text/csv'); },
+    rJson: d => { const c = cards().find(x => x.id === d.id); dl('report-' + c.id + '.json', JSON.stringify(jsonOf(c), null, 2), 'application/json'); },
+    rGdp: d => { const c = cards().find(x => x.id === d.id), rows = [[T('Рейс', 'Fahrt', 'Load', 'Рейс'), T('Зона', 'Zone', 'Zone', 'Аймақ'), 't min', 't max', T('Статус', 'Status', 'Status', 'Күйі')]].concat(loadsF().map(l => [l.id, ZONES[l.zone].label, (l.temp - 0.6).toFixed(1), (l.temp + 0.9).toFixed(1), tempState(l)])); dl('gdp-temperature-log.csv', csvText(rows), 'text/csv'); },
+    rBulk: () => { dl('reports-all.json', JSON.stringify({ filters: { from: R.from, to: R.to, hub: R.hub, zone: R.zone }, reports: cards().map(jsonOf) }, null, 2), 'application/json'); },
+    rCustom: () => openDrawer({ type: 'repCustom' }),
+    rCustomGo: d => { const sel_ = cards().filter(c => ($('#cr_' + c.id) || {}).checked); if (!sel_.length) return toast(T('Выберите хотя бы одну карточку', 'Mindestens eine Karte wählen', 'Select at least one card', 'Кемінде бір карточка таңдаңыз'), 'err'); if (d.v === 'json') dl('custom-report.json', JSON.stringify(sel_.map(jsonOf), null, 2), 'application/json'); else dl('custom-report.csv', csvText([['report', 'kpi', 'value']].concat(...sel_.map(c => c.k.map(x => [c.title, x.l, x.v])))), 'text/csv'); },
+  });
+  document.addEventListener('input', e => { const k = e.target.dataset && e.target.dataset.rf; if (k) { R[k] = e.target.value; render(); } });
+})();
+
+/* Settings (spec 5.12): one long page of cards, one global "Save All Changes" with a dirty state, JSON export, audit log.
+   Values that drive the prototype (Standgeld, RTO shift, AI confidence thresholds) are applied on save. */
+(function () {
+  const dup = o => JSON.parse(JSON.stringify(o));
+  const ago = m => m === 0 ? T('только что', 'gerade eben', 'just now', 'жаңа ғана') : agoTxt(m);
+  const base = {
+    company: { legal: 'ТОО «Олимп Логистик KZ»', bin: '190340012345', sites: [
+      { n: T('Хаб Астана-Север', 'Hub Astana-Nord', 'Astana North Hub', 'Астана-Солтүстік хабы'), lic: 'GDP-KZ-2026-017', st: 'active', hq: 1 },
+      { n: T('Хаб Алматы-Жетысу', 'Hub Almaty-Zhetysu', 'Almaty Zhetysu Hub', 'Алматы-Жетісу хабы'), lic: 'GDP-KZ-2026-021', st: 'active' },
+      { n: T('Хаб Караганда', 'Hub Karaganda', 'Karaganda Hub', 'Қарағанды хабы'), lic: 'GDP-KZ-2026-033', st: 'active' },
+      { n: T('Хаб Шымкент', 'Hub Schymkent', 'Shymkent Hub', 'Шымкент хабы'), lic: T('заявка подана', 'beantragt', 'application filed', 'өтінім берілді'), st: 'pending' }] },
+    integ: [
+      { k: 'gps', ic: 'route', tint: 'blue', t: T('GPS-трекинг', 'GPS-Tracking', 'GPS tracking', 'GPS-трекинг'), p: 'Wialon (Gurtam)', on: true, m: 2 },
+      { k: 'reefer', ic: 'therm', tint: 'green', t: T('Реф-телематика', 'Kühl-Telematik', 'Reefer telematics', 'Реф-телематика'), p: 'Thermo King TracKing / Carrier Lynx', on: true, m: 5 },
+      { k: 'acc', ic: 'receipt', tint: 'yellow', t: T('Бухгалтерия', 'Buchhaltung', 'Accounting', 'Бухгалтерия'), p: '1С:Предприятие', on: false, m: 0 },
+      { k: 'esf', ic: 'file', tint: 'red', t: T('Счета-фактуры', 'Rechnungen', 'Invoicing', 'Шот-фактуралар'), p: 'ИС ЭСФ (esf.gov.kz)', on: true, m: 60 },
+      { k: 'wx', ic: 'alert', tint: 'purple', t: T('Погода', 'Wetter', 'Weather', 'Ауа райы'), p: 'Open-Meteo / Казгидромет', on: true, m: 15 },
+      { k: 'fuel', ic: 'truck', tint: 'orange', t: T('Топливные карты', 'Tankkarten', 'Fuel cards', 'Отын карталары'), p: 'Helios / Sinooil', on: false, m: 0 }],
+    notify: { rules: {
+      temp: { on: true, v: 15 }, door: { on: true, v: 5 }, sensor: { on: true }, setp: { on: true }, delay: { on: true, v: 30 },
+      route: { on: true, v: 5 }, calib: { on: true, v: 30 }, gdp: { on: true }, esf: { on: false } }, sens: 'medium', ch: { app: true, mail: true, sms: true, tg: false } },
+    ai: { mod: { match: true, exc: true, leak: true, anom: true }, thr: { high: 85, medium: 65, low: 45 }, expl: true, ovr: true },
+    sec: { esign: true, twofa: true, sess: 30 },
+    params: { shift: 9, free: 45, step: 30, rate: 6000 },
+  };
+  const ROLES = [
+    ['admin', 'red', 'Admin', T('Полный доступ к системе', 'Voller Systemzugriff', 'Full system access', 'Жүйеге толық қолжетімділік'), 4],
+    ['dispatcher', 'blue', T('Диспетчер', 'Disponent', 'Dispatcher', 'Диспетчер'), T('Рейсы и маршруты', 'Fahrten und Routen', 'Load & route management', 'Рейстер мен маршруттар'), 12],
+    ['finance', 'green', T('Финансы', 'Finanzen', 'Finance', 'Қаржы'), T('Счета, ЭСФ, затраты', 'Rechnungen, ESF, Kosten', 'Billing, ESF, costs', 'Шоттар, ЭШФ, шығыстар'), 6],
+    ['qa', 'purple', T('QA / ответственное лицо (GDP)', 'QA / Verantwortliche Person (GDP)', 'QA / Responsible Person (GDP)', 'QA / жауапты тұлға (GDP)'), T('Выпуск партий, отклонения', 'Chargenfreigabe, Abweichungen', 'Batch release, deviations', 'Партия шығару, ауытқулар'), 3],
+    ['driver', 'orange', T('Водитель', 'Fahrer', 'Driver', 'Жүргізуші'), T('Мобильное приложение', 'Mobile App', 'Mobile app', 'Мобильді қосымша'), 38],
+    ['viewer', 'gray', T('Просмотр', 'Lesen', 'Viewer', 'Көру'), T('Только чтение', 'Nur lesen', 'Read-only', 'Тек оқу'), 9]];
+  const RULES = [
+    ['temp', 'therm', 'red', T('Температура вне диапазона', 'Temperatur außerhalb Bereich', 'Temperature out of range', 'Температура диапазоннан тыс'), T('дольше (мин)', 'länger als (Min)', 'longer than (min)', 'ұзағырақ (мин)')],
+    ['door', 'warehouse', 'orange', T('Дверь рефрижератора открыта', 'Kühltür offen', 'Reefer door open', 'Рефрижератор есігі ашық'), T('дольше (мин)', 'länger als (Min)', 'longer than (min)', 'ұзағырақ (мин)')],
+    ['sensor', 'alert', 'yellow', T('Датчик offline', 'Sensor offline', 'Sensor offline', 'Датчик offline'), ''],
+    ['setp', 'cog', 'blue', T('Set-point ≠ заказу', 'Set-Point ≠ Auftrag', 'Set-point ≠ order', 'Set-point ≠ тапсырыс'), ''],
+    ['delay', 'route', 'yellow', T('Задержка рейса', 'Verspätung', 'Delivery delay', 'Рейстің кешігуі'), T('более (мин)', 'mehr als (Min)', 'more than (min)', 'артық (мин)')],
+    ['route', 'route', 'blue', T('Отклонение от маршрута', 'Routenabweichung', 'Route deviation', 'Маршруттан ауытқу'), T('более (км)', 'mehr als (km)', 'more than (km)', 'артық (км)')],
+    ['calib', 'therm', 'purple', T('Истечение поверки датчиков', 'Kalibrierung läuft ab', 'Calibration expiring', 'Поверка мерзімі аяқталуда'), T('за (дн.)', 'in (Tagen)', 'within (days)', '(күн) бұрын')],
+    ['gdp', 'file', 'green', T('Создано отклонение GDP', 'GDP-Abweichung erstellt', 'GDP deviation created', 'GDP ауытқуы құрылды'), ''],
+    ['esf', 'receipt', 'red', T('ЭСФ отклонена', 'ESF abgelehnt', 'ESF rejected', 'ЭШФ қабылданбады'), '']];
+  const AIM = [
+    ['match', 'user', 'blue', T('Подбор водитель–реф-юнит', 'Fahrer-Kühlfahrzeug-Zuordnung', 'Driver–reefer matching', 'Жүргізуші–реф-юнит таңдау'), T('Предлагает пары по правилам допуска', 'Schlägt Paare nach Zulassungsregeln vor', 'Proposes pairs by eligibility rules', 'Рұқсат ережелері бойынша жұп ұсынады')],
+    ['exc', 'therm', 'red', T('Прогноз температурных отклонений', 'Prognose Temperaturabweichungen', 'Excursion risk prediction', 'Температура ауытқуын болжау'), T('Заблаговременные предупреждения', 'Frühwarnungen', 'Proactive warnings', 'Алдын ала ескертулер')],
+    ['leak', 'chart', 'yellow', T('Поиск утечек затрат', 'Kostenlecks erkennen', 'Cost-leak detection', 'Шығын ағып кетуін іздеу'), T('Простои, порожние пробеги, топливо', 'Standzeiten, Leerfahrten, Treibstoff', 'Detention, empty legs, fuel', 'Тұрып қалу, бос жүріс, отын')],
+    ['anom', 'receipt', 'green', T('Аномалии ЭСФ и счетов', 'ESF-/Rechnungsanomalien', 'ESF / invoice anomalies', 'ЭШФ және шот ауытқулары'), T('Дубли, расхождения, пропущенные позиции', 'Dubletten, Abweichungen, fehlende Positionen', 'Duplicates, mismatches, missing lines', 'Қайталанулар, айырмашылықтар')]];
+  globalThis.CFG = { cur: dup(base), saved: JSON.stringify(base), live: { shift: 9 }, tab: false, auditOpen: false };
+  S.audit = [];
+  globalThis.audit = (module, subject, decision, reason) => { const d = new Date(); S.audit.unshift({ t: p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds()), user: 'Sarah Johnson', module, subject, decision, reason: reason || '' }); };
+  const getp = (p) => p.split('.').reduce((o, k) => o[k], CFG.cur);
+  const setp = (p, v) => { const a = p.split('.'), k = a.pop(); a.reduce((o, x) => o[x], CFG.cur)[k] = v; };
+  const dirty = () => JSON.stringify(CFG.cur) !== CFG.saved;
+  const num = (v, lo, hi) => typeof v === 'number' && isFinite(v) && v >= lo && v <= hi;
+  function errors() {
+    const c = CFG.cur, e = {}, P = c.params, t = c.ai.thr;
+    if (!/^\d{12}$/.test(c.company.bin)) e['company.bin'] = T('БИН: ровно 12 цифр', 'BIN: genau 12 Ziffern', 'BIN: exactly 12 digits', 'БСН: нақты 12 цифр');
+    if (!c.company.legal.trim()) e['company.legal'] = T('Укажите название', 'Name angeben', 'Enter a name', 'Атауын көрсетіңіз');
+    if (!num(P.shift, 4, 9)) e['params.shift'] = T('4–9 ч', '4–9 Std.', '4–9 h', '4–9 сағ');
+    if (!num(P.free, 0, 240)) e['params.free'] = T('0–240 мин', '0–240 Min.', '0–240 min', '0–240 мин');
+    if (!num(P.step, 5, 120)) e['params.step'] = T('5–120 мин', '5–120 Min.', '5–120 min', '5–120 мин');
+    if (!num(P.rate, 0, 100000)) e['params.rate'] = T('0–100 000 ₸', '0–100 000 ₸', '0–100,000 ₸', '0–100 000 ₸');
+    if (!(t.high > t.medium && t.medium > t.low && t.low >= 1 && t.high <= 99)) e['ai.thr'] = T('Нужно: High > Medium > Low, 1–99 %', 'Erforderlich: High > Medium > Low, 1–99 %', 'Required: High > Medium > Low, 1–99 %', 'Қажет: High > Medium > Low, 1–99 %');
+    if (!num(c.sec.sess, 5, 240)) e['sec.sess'] = T('5–240 мин', '5–240 Min.', '5–240 min', '5–240 мин');
+    RULES.forEach(r => { const x = c.notify.rules[r[0]]; if (r[4] && !num(x.v, 1, 999)) e['notify.rules.' + r[0] + '.v'] = '1–999'; });
+    return e;
+  }
+  function apply() {   // saved values drive the prototype
+    const P = JSON.parse(CFG.saved).params, T_ = JSON.parse(CFG.saved).ai.thr;
+    RECV.free = P.free; RECV.step = P.step; RECV.rate = P.rate; CFG.live.shift = P.shift; CFG.live.thr = T_;
+  }
+  globalThis.aiThr = () => JSON.parse(CFG.saved).ai.thr;
+  globalThis.aiOn = k => JSON.parse(CFG.saved).ai.mod[k];
+  const idOf = p => 'cf_' + p.replace(/\./g, '_');
+  const ERR = () => errors();
+  const sw = (p, lock) => `<span class="switch${getp(p) ? ' on' : ''}${lock ? ' lock' : ''}"${lock ? '' : ` data-act="cfgT" data-p="${p}"`} role="switch" aria-checked="${!!getp(p)}"></span>`;
+  const tile = (n, t, s, tint) => `<span class="itile ${tint}">${ic(n, 18)}</span>`;
+  const field = (lab, p, type, extra) => { const er = ERR()[p]; return `<label class="fl">${esc(lab)}<input class="inp${er ? ' bad' : ''}" id="${idOf(p)}" data-cf="${p}"${type === 'number' ? ' data-num="1" type="number"' : ' type="text"'} value="${esc(getp(p))}" ${extra || ''}>${er ? `<span class="note" style="color:var(--label-red)">${esc(er)}</span>` : ''}</label>`; };
+  const prm = (p, lab, hint, unit) => { const er = ERR()[p]; return `<div class="prm"><span>${esc(lab)}<small>${esc(hint)}</small></span><input class="inp${er ? ' bad' : ''}" id="${idOf(p)}" data-cf="${p}" data-num="1" type="number" value="${esc(getp(p))}">${er ? `<span title="${esc(er)}" style="color:var(--label-red)">!</span>` : `<small>${esc(unit)}</small>`}</div>`; };
+
+  const cCompany = () => {
+    const C = CFG.cur.company, users = ROLES.reduce((s, r) => s + r[4], 0);
+    return `<div class="card set-card" id="sc-company"><div class="card-head">${tile('warehouse', '', '', 'blue')}<div><h3>Company Setup</h3><small>${esc(T('Юрлицо, площадки и лицензии GDP, роли', 'Rechtsträger, Standorte und GDP-Lizenzen, Rollen', 'Legal entity, sites & GDP licences, roles', 'Заңды тұлға, алаңдар және GDP лицензиялары, рөлдер'))}</small></div></div>
+<div class="set-body"><div class="set-col"><h5>${esc(T('Юрлицо и площадки', 'Rechtsträger und Standorte', 'Legal entity & sites', 'Заңды тұлға және алаңдар'))}</h5>
+<div class="two">${field(T('Наименование', 'Name', 'Name', 'Атауы'), 'company.legal', 'text')}${field(T('БИН', 'BIN', 'BIN', 'БСН'), 'company.bin', 'text', 'inputmode="numeric" maxlength="12"')}</div>
+${C.sites.map(s => `<div class="trow">${tile('warehouse', '', '', s.st === 'active' ? 'green' : 'yellow')}<span class="tx"><b>${esc(s.n)}${s.hq ? ' · HQ' : ''}</b><small>${esc(T('Лицензия: ', 'Lizenz: ', 'Licence: ', 'Лицензия: '))}${esc(s.lic)}</small></span>${chip(s.st === 'active' ? 'green' : 'yellow', s.st === 'active' ? T('Активен', 'Aktiv', 'Active', 'Белсенді') : T('Ожидает', 'Ausstehend', 'Pending', 'Күтуде'))}</div>`).join('')}
+<div style="display:flex;gap:8px"><input class="inp" id="newsite" placeholder="${esc(T('Новая площадка / склад', 'Neuer Standort / Lager', 'New site / warehouse', 'Жаңа алаң / қойма'))}"><button class="btn grey" data-act="siteAdd">${ic('plus')} ${esc(T('Добавить', 'Hinzufügen', 'Add', 'Қосу'))}</button></div></div>
+<div class="set-col"><h5>${esc(T('Роли и права', 'Rollen und Rechte', 'User roles & permissions', 'Рөлдер мен құқықтар'))} · ${users} ${esc(T('польз.', 'Nutzer', 'users', 'пайд.'))}</h5>
+${ROLES.map(r => `<div class="trow">${tile('user', '', '', r[1])}<span class="tx"><b>${esc(r[2])}</b><small>${esc(r[3])}</small></span><b>${r[4]}</b></div>`).join('')}</div></div></div>`;
+  };
+  const cInteg = () => `<div class="card set-card" id="sc-integ"><div class="card-head">${tile('route', '', '', 'purple')}<div><h3>System Integrations</h3><small>${esc(T('Внешние системы и обмен данными', 'Externe Systeme und Datenaustausch', 'External systems and data exchange', 'Сыртқы жүйелер мен деректер алмасу'))}</small></div></div>
+<div style="padding:0 24px 24px"><div class="integration-grid">${CFG.cur.integ.map((x, i) => `<div class="integration-tile"><div class="it">${tile(x.ic, '', '', x.tint)}<span><b>${esc(x.t)}</b><small>${esc(x.p)}</small></span></div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">${chip(x.on ? 'green' : 'red', x.on ? T('Подключено', 'Verbunden', 'Connected', 'Қосылған') : T('Не подключено', 'Nicht verbunden', 'Not connected', 'Қосылмаған'))}<small class="faint">${x.on ? esc(ago(x.m)) : esc(T('нужна настройка', 'Einrichtung nötig', 'Setup required', 'баптау қажет'))}</small></div>${x.on ? `<button class="btn grey block" data-act="intCfg" data-i="${i}">Configure</button>` : `<button class="btn primary block" data-act="intConn" data-i="${i}">Connect</button>`}</div>`).join('')}</div></div></div>`;
+  const cNotify = () => { const N = CFG.cur.notify, er = ERR();
+    return `<div class="card set-card" id="sc-notify"><div class="card-head">${tile('bell', '', '', 'orange')}<div><h3>Notifications &amp; Alerts</h3><small>${esc(T('Правила событий, чувствительность, каналы', 'Ereignisregeln, Empfindlichkeit, Kanäle', 'Event rules, sensitivity, channels', 'Оқиға ережелері, сезімталдық, арналар'))}</small></div></div>
+<div class="set-body"><div class="set-col"><h5>${esc(T('Правила событий', 'Ereignisregeln', 'Event-based rules', 'Оқиға ережелері'))}</h5>${RULES.map(r => { const x = N.rules[r[0]]; return `<div class="trow">${tile(r[1], '', '', r[2])}<span class="tx"><b>${esc(r[3])}</b>${r[4] ? `<small>${esc(r[4])}</small>` : ''}</span>${r[4] ? `<input class="inp${er['notify.rules.' + r[0] + '.v'] ? ' bad' : ''}" style="width:68px" id="${idOf('notify.rules.' + r[0] + '.v')}" data-cf="notify.rules.${r[0]}.v" data-num="1" type="number" value="${x.v}">` : ''}${sw('notify.rules.' + r[0] + '.on')}</div>`; }).join('')}</div>
+<div class="set-col"><h5>${esc(T('Чувствительность', 'Empfindlichkeit', 'Alert sensitivity', 'Сезімталдық'))}</h5>
+${[['low', T('Низкая', 'Niedrig', 'Low', 'Төмен'), T('Только критичное', 'Nur Kritisches', 'Critical issues only', 'Тек сыни жағдайлар')], ['medium', T('Средняя', 'Mittel', 'Medium', 'Орташа'), T('Важные операционные оповещения', 'Wichtige operative Meldungen', 'Important operational alerts', 'Маңызды операциялық хабарлар')], ['high', T('Высокая', 'Hoch', 'High', 'Жоғары'), T('Все системные уведомления', 'Alle Systemmeldungen', 'All system notifications', 'Барлық жүйе хабарлары')]].map(o => `<label class="opt"><input type="radio" name="sens" data-act="cfgS" data-p="notify.sens" data-v="${o[0]}"${N.sens === o[0] ? ' checked' : ''}><span><b>${esc(o[1])}</b><small>${esc(o[2])}</small></span></label>`).join('')}
+<h5 style="margin-top:20px">${esc(T('Каналы', 'Kanäle', 'Communication channels', 'Байланыс арналары'))}</h5>
+${[['app', 'In-App', T('Оповещения на панели', 'Dashboard-Meldungen', 'Real-time dashboard alerts', 'Панельдегі хабарлар')], ['mail', 'Email', T('На зарегистрированный адрес', 'An registrierte Adresse', 'Send to registered email', 'Тіркелген мекенжайға')], ['sms', 'SMS', T('Критично для холодовой цепи', 'Kritisch für die Kühlkette', 'Critical for the cold chain', 'Суық тізбек үшін маңызды')], ['tg', 'Telegram / WhatsApp', T('Сообщения водителям и клиентам', 'Nachrichten an Fahrer und Kunden', 'Messages to drivers and customers', 'Жүргізушілер мен клиенттерге хабар')]].map(o => `<label class="opt"><input type="checkbox" data-act="cfgT" data-p="notify.ch.${o[0]}"${N.ch[o[0]] ? ' checked' : ''}><span><b>${esc(o[1])}</b><small>${esc(o[2])}</small></span></label>`).join('')}</div></div></div>`; };
+  const cAI = () => { const A = CFG.cur.ai, er = ERR()['ai.thr'];
+    return `<div class="card set-card" id="sc-ai"><div class="card-head">${tile('spark', '', '', 'blue')}<div><h3>AI &amp; Automation Controls</h3><small>${esc(T('AI предлагает, решает человек; пороги и журнал решений', 'KI schlägt vor, Mensch entscheidet; Schwellen und Entscheidungsprotokoll', 'AI proposes, humans decide; thresholds and decision log', 'AI ұсынады, адам шешеді; шектер мен шешім журналы'))}</small></div></div>
+<div class="set-body"><div class="set-col"><h5>${esc(T('Модули AI', 'KI-Module', 'AI module controls', 'AI модульдері'))}</h5>${AIM.map(m => `<div class="trow">${tile(m[1], '', '', m[2])}<span class="tx"><b>${esc(m[3])}</b><small>${esc(m[4])}</small></span>${sw('ai.mod.' + m[0])}</div>`).join('')}</div>
+<div class="set-col"><h5>${esc(T('Пороги уверенности', 'Konfidenz-Schwellen', 'Confidence thresholds', 'Сенімділік шектері'))}</h5>
+${[['high', 'High'], ['medium', 'Medium'], ['low', 'Low']].map(x => `<div class="slider"><label>${x[1]}</label><input type="range" min="1" max="99" id="${idOf('ai.thr.' + x[0])}" data-cf="ai.thr.${x[0]}" data-num="1" data-live="o_${x[0]}" value="${A.thr[x[0]]}"><output id="o_${x[0]}">${A.thr[x[0]]}%</output></div>`).join('')}
+${er ? `<p class="note" style="color:var(--label-red)">${esc(er)}</p>` : `<p class="note">${esc(T('Эскалация только для уведомлений — никогда для выпуска товара.', 'Eskalation nur für Benachrichtigungen — nie für Warenfreigabe.', 'Escalation applies to notifications only — never to goods release.', 'Эскалация тек хабарламаларға қатысты — тауарды шығаруға ешқашан.'))}</p>`}
+<div class="trow"><span class="tx"><b>AI Explainability</b><small>${esc(T('Показывать обоснование рекомендаций', 'Begründung der Empfehlungen zeigen', 'Show reasoning behind recommendations', 'Ұсыныстардың негіздемесін көрсету'))}</small></span>${sw('ai.expl')}</div>
+<div class="trow"><span class="tx"><b>Override Tracking</b><small>${esc(T('Обязателен: журнал GDP (кто/когда/почему)', 'Pflicht: GDP-Protokoll (wer/wann/warum)', 'Mandatory: GDP audit trail (who/when/why)', 'Міндетті: GDP журналы (кім/қашан/неге)'))}</small></span>${sw('ai.ovr', true)}</div></div></div></div>`; };
+  const cSec = () => { const Sx = CFG.cur.sec, er = ERR()['sec.sess'];
+    return `<div class="card set-card" id="sc-sec"><div class="card-head">${tile('alert', '', '', 'red')}<div><h3>Security &amp; Compliance</h3><small>${esc(T('Контроль доступа и журнал аудита', 'Zugriffskontrolle und Audit-Protokoll', 'Access control and audit trail management', 'Қолжетімділікті бақылау және аудит журналы'))}</small></div></div>
+<div class="set-body"><div class="set-col"><div class="trow"><span class="tx"><b>${esc(T('Подпись ЭЦП (NCALayer)', 'E-Signatur (NCALayer)', 'E-signature (NCALayer)', 'ЭЦҚ (NCALayer)'))}</b><small>${esc(T('Для актов, ЭСФ и решений QA', 'Für Akte, ESF und QA-Entscheidungen', 'For acts, ESF and QA decisions', 'Актілер, ЭШФ және QA шешімдері үшін'))}</small></span>${sw('sec.esign')}</div>
+<div class="trow"><span class="tx"><b>${esc(T('Двухфакторный вход', 'Zwei-Faktor-Anmeldung', 'Two-factor sign-in', 'Екі факторлы кіру'))}</b></span>${sw('sec.twofa')}</div>
+${field(T('Тайм-аут сессии, мин', 'Sitzungs-Timeout, Min.', 'Session timeout, min', 'Сессия тайм-ауты, мин'), 'sec.sess', 'number')}</div>
+<div class="set-col"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h5 style="margin:0">${esc(T('Журнал аудита', 'Audit-Protokoll', 'Audit log', 'Аудит журналы'))} · ${S.audit.length}</h5><span><button class="btn sm grey" data-act="auditToggle">${esc(CFG.auditOpen ? T('Скрыть', 'Ausblenden', 'Hide', 'Жасыру') : T('Показать журнал', 'Protokoll zeigen', 'Show audit log', 'Журналды көрсету'))}</button> <button class="btn sm grey" data-act="auditCsv">CSV</button></span></div>${CFG.auditOpen ? auditTable() : `<p class="note">${esc(T('Каждое решение AI и каждое сохранение настроек фиксируется.', 'Jede KI-Entscheidung und jedes Speichern wird protokolliert.', 'Every AI decision and every settings save is recorded.', 'Әрбір AI шешімі мен сақтау тіркеледі.'))}</p>`}</div></div></div>`; };
+  globalThis.auditTable = () => S.audit.length ? `<div class="audit"><table class="table"><thead><tr><th>${esc(T('Время', 'Zeit', 'Time', 'Уақыт'))}</th><th>${esc(T('Пользователь', 'Nutzer', 'User', 'Пайдаланушы'))}</th><th>${esc(T('Модуль', 'Modul', 'Module', 'Модуль'))}</th><th>${esc(T('Решение', 'Entscheidung', 'Decision', 'Шешім'))}</th></tr></thead><tbody>${S.audit.slice(0, 12).map(a => `<tr style="cursor:default"><td>${a.t}</td><td>${esc(a.user)}</td><td>${esc(a.module)}</td><td><b>${esc(a.decision)}</b> · ${esc(a.subject)}${a.reason ? `<div class="sub">${esc(a.reason)}</div>` : ''}</td></tr>`).join('')}</tbody></table></div>` : `<p class="note">${esc(T('Записей пока нет.', 'Noch keine Einträge.', 'No entries yet.', 'Жазбалар жоқ.'))}</p>`;
+  const cSrc = () => { const er = ERR(), bad = Object.keys(er).filter(k => k.startsWith('params.') || k === 'ai.thr').length;
+    return `<div class="card set-card" id="sc-src"><div class="card-head">${tile('file', '', '', 'gray')}<div><h3>${esc(T('Исходные данные и валидация', 'Basisdaten und Validierung', 'Source data & validation', 'Бастапқы деректер және валидация'))}</h3><small>${esc(T('Параметры, которые управляют расчётами; применяются после «Save All Changes»', 'Parameter der Berechnungen; wirken nach „Save All Changes“', 'Parameters that drive the calculations; applied after “Save All Changes”', 'Есептеулерді басқаратын параметрлер; «Save All Changes» кейін қолданылады'))}</small></div><span style="margin-left:auto">${chip(bad ? 'red' : 'green', bad ? T('Ошибок: ', 'Fehler: ', 'Errors: ', 'Қателер: ') + bad : T('Проверка пройдена', 'Validierung ok', 'Validation passed', 'Тексеру өтті'))}</span></div>
+<div class="set-body"><div class="set-col"><h5>${esc(T('Приёмка и Standgeld', 'Wareneingang und Standgeld', 'Receiving & Standgeld', 'Қабылдау және Standgeld'))}</h5>
+${prm('params.free', T('Бесплатное время разгрузки', 'Freie Entladezeit', 'Free unloading time', 'Тегін түсіру уақыты'), T('Далее начисляется Standgeld', 'Danach fällt Standgeld an', 'Standgeld accrues afterwards', 'Одан кейін Standgeld есептеледі'), T('мин', 'Min.', 'min', 'мин'))}
+${prm('params.step', T('Шаг начисления', 'Abrechnungsschritt', 'Billing step', 'Есептеу қадамы'), T('За каждые начатые N минут', 'Je angefangene N Minuten', 'Per started N minutes', 'Басталған әр N минутқа'), T('мин', 'Min.', 'min', 'мин'))}
+${prm('params.rate', T('Ставка за шаг', 'Satz je Schritt', 'Rate per step', 'Қадам үшін тариф'), T('Стоимость одного шага', 'Preis eines Schrittes', 'Price of one step', 'Бір қадам құны'), '₸')}</div>
+<div class="set-col"><h5>${esc(T('Время вождения (РТО) и налоги', 'Lenkzeit (RTO) und Steuern', 'Driving time (RTO) & tax', 'Жүргізу уақыты (РТО) және салық'))}</h5>
+${prm('params.shift', T('Максимум смены', 'Maximale Schicht', 'Maximum shift', 'Ауысымның максимумы'), T('Ориентировочно, сверить с нормами РК (Q5)', 'Richtwert, mit KZ-Normen abgleichen (Q5)', 'Indicative, verify against KZ norms (Q5)', 'Болжамды, ҚР нормаларымен салыстыру (Q5)'), T('ч', 'Std.', 'h', 'сағ'))}
+<div class="prm"><span>${esc(T('Ставка НДС', 'MwSt-Satz', 'VAT rate', 'ҚҚС мөлшерлемесі'))}<small>${esc(T('Налоговый кодекс РК — не редактируется', 'Steuergesetz KZ — nicht editierbar', 'KZ tax code — not editable', 'ҚР Салық кодексі — өзгертілмейді'))}</small></span><input class="inp" value="12" disabled><small>%</small></div>
+<p class="note" style="margin-top:12px">${esc(T('Пороги уверенности AI и правила допуска (права, медосмотр, поверка) настраиваются выше и в профилях водителей/ТС.', 'KI-Schwellen und Zulassungsregeln (Führerschein, Untersuchung, Kalibrierung) siehe oben und in Fahrer-/Fahrzeugprofilen.', 'AI thresholds and eligibility rules (licence, medical, calibration) are set above and in driver/truck profiles.', 'AI шектері мен рұқсат ережелері жоғарыда және профильдерде баптауға болады.'))}</p></div></div></div>`; };
+
+  SCREENS.settings = {
+    title: () => navLabel('settings'),
+    sub: () => T('Центр конфигурации и управления', 'Konfigurations- und Governance-Center', 'Company Configuration & Governance Center', 'Конфигурация және басқару орталығы'),
+    actions: () => `<span class="dirty${dirty() ? ' on' : ''}" id="dirtyChip"><i class="dot warn"></i>${esc(T('Есть несохранённые изменения', 'Ungespeicherte Änderungen', 'Unsaved changes', 'Сақталмаған өзгерістер'))}</span><button class="btn grey" data-act="cfgExport">${esc(T('Экспорт конфигурации', 'Konfiguration exportieren', 'Export Configuration', 'Конфигурацияны экспорттау'))}</button><button class="btn primary" data-act="cfgSave"${dirty() ? '' : ' style="opacity:.6"'}>${esc(T('Сохранить всё', 'Alles speichern', 'Save All Changes', 'Барлығын сақтау'))}</button>`,
+    body: () => cCompany() + cInteg() + cNotify() + cAI() + cSec() + cSrc(),
+  };
+  DRAWERS.integ = d => { const x = CFG.cur.integ[d.i]; return { title: x.t, html: `<div class="drawer-section"><div class="ident">${tile(x.ic, '', '', x.tint)}<div><b>${esc(x.p)}</b><div class="sub">${esc(ago(x.m))}</div></div></div><div class="kv"><div><small>${esc(T('Статус', 'Status', 'Status', 'Күйі'))}</small>${chip('green', T('Подключено', 'Verbunden', 'Connected', 'Қосылған'))}</div><div><small>${esc(T('Последняя синхронизация', 'Letzte Synchronisation', 'Last sync', 'Соңғы синхрондау'))}</small><b>${esc(ago(x.m))}</b></div></div></div><div class="drawer-section actbar"><button class="btn primary" data-act="intSync" data-i="${d.i}">${esc(T('Синхронизировать', 'Jetzt synchronisieren', 'Sync now', 'Синхрондау'))}</button><button class="btn red" data-act="intOff" data-i="${d.i}">${esc(T('Отключить', 'Trennen', 'Disconnect', 'Ажырату'))}</button></div>` }; };
+  const dl = (name, text, mime) => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: mime })); a.download = name; a.click(); };
+  Object.assign(ACT, {
+    cfgT: d => { setp(d.p, !getp(d.p)); render(); },
+    cfgS: d => { setp(d.p, d.v); render(); },
+    intConn: d => { const x = CFG.cur.integ[+d.i]; x.on = true; x.m = 0; render(); },
+    intCfg: d => openDrawer({ type: 'integ', i: +d.i }),
+    intSync: d => { CFG.cur.integ[+d.i].m = 0; toast(T('Синхронизация выполнена', 'Synchronisation abgeschlossen', 'Sync completed', 'Синхрондау аяқталды')); },
+    intOff: d => { CFG.cur.integ[+d.i].on = false; S.drawer = null; render(); },
+    siteAdd: () => { const v = ($('#newsite') || {}).value || ''; if (!v.trim()) return toast(T('Укажите название площадки', 'Standortname angeben', 'Enter a site name', 'Алаң атауын көрсетіңіз'), 'err'); CFG.cur.company.sites.push({ n: v.trim(), lic: T('заявка не подана', 'nicht beantragt', 'not applied', 'өтінім берілмеген'), st: 'pending' }); render(); },
+    auditToggle: () => { CFG.auditOpen = !CFG.auditOpen; render(); },
+    auditCsv: () => dl('audit-log.csv', '﻿' + [['time', 'user', 'module', 'subject', 'decision', 'reason']].concat(S.audit.map(a => [a.t, a.user, a.module, a.subject, a.decision, a.reason])).map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';')).join('\n'), 'text/csv'),
+    cfgExport: () => { dl('olymp-config.json', JSON.stringify({ exportedAt: new Date().toISOString(), lang: LANG, saved: JSON.parse(CFG.saved), unsaved: dirty() ? CFG.cur : null }, null, 2), 'application/json'); },
+    cfgSave: () => {
+      const e = errors(); if (Object.keys(e).length) { toast(T('Исправьте ошибки: ', 'Fehler beheben: ', 'Fix errors first: ', 'Қателерді түзетіңіз: ') + Object.keys(e).length, 'err'); return; }
+      if (!dirty()) return toast(T('Нет изменений', 'Keine Änderungen', 'Nothing to save', 'Өзгеріс жоқ'));
+      const was = JSON.parse(CFG.saved), now = CFG.cur, ch = Object.keys(now).filter(k => JSON.stringify(now[k]) !== JSON.stringify(was[k]));
+      CFG.saved = JSON.stringify(CFG.cur); apply(); audit('Settings', ch.join(', '), T('Сохранено', 'Gespeichert', 'Saved', 'Сақталды'), '');
+      toast(T('Настройки сохранены и применены', 'Einstellungen gespeichert und angewendet', 'Settings saved and applied', 'Баптаулар сақталды және қолданылды'));
+    },
+  });
+  const paint = () => { const c = $('#dirtyChip'); if (c) c.classList.toggle('on', dirty()); const b = $('[data-act=cfgSave]'); if (b) b.style.opacity = dirty() ? '' : '.6'; };
+  const read = el => (el.dataset.num ? (el.value === '' ? NaN : +el.value) : el.value);
+  document.addEventListener('input', e => {
+    const el = e.target, p = el.dataset && el.dataset.cf; if (!p || S.route !== 'settings') return;
+    setp(p, read(el));
+    if (el.type === 'range') { const o = document.getElementById(el.dataset.live); if (o) o.textContent = el.value + '%'; paint(); } else render();
+  });
+  document.addEventListener('change', e => { const el = e.target; if (el.type === 'range' && el.dataset.cf && S.route === 'settings') render(); });
+  apply();
+})();
+
+/* AI Ops Assistant (spec 5.11): advisory only. Recommendations are computed from the live rules (compat / temperature state / costs / invoices);
+   every Accept / Dismiss / Override is written to the audit trail (GDP: who / when / why). Override needs a reason. */
+(function () {
+  const A = S.ai = { done: {}, exp: '', hist: false };
+  const nf = n => Math.round(n).toLocaleString('ru-RU');
+  const dec = s => (LANG === 'en' ? s : String(s).replace('.', ','));
+  const rt = l => HUBS[l.from].city + ' → ' + HUBS[l.to].city;
+  const esfOf = i => (i.load && load(i.load) ? load(i.load).esf : i.esf);
+  const lvl = c => { const t = aiThr(); return c >= t.high ? 'high' : c >= t.medium ? 'medium' : 'low'; };
+  const LV = { high: ['green', T('Высокая', 'Hoch', 'High', 'Жоғары')], medium: ['yellow', T('Средняя', 'Mittel', 'Medium', 'Орташа')], low: ['red', T('Низкая', 'Niedrig', 'Low', 'Төмен')] };
+  const score = (l, d, t) => Math.max(35, Math.min(99, Math.round(72 + (d.rating - 4.5) * 30 + Math.min(d.rto - needRto(l), 4) * 3 - (t.cap - l.pallets) * 0.4)));
+
+  function driverRecs() {
+    const rank = { high: 0, medium: 1, low: 2 }, out = [];
+    S.loads.filter(l => l.status === 'unassigned').sort((a, b) => rank[a.priority] - rank[b.priority] || a.eta.localeCompare(b.eta)).forEach(l => {
+      let best = null;
+      S.drivers.forEach(d => S.trucks.forEach(t => { if (!compat(l, d, t).length) { const s = score(l, d, t); if (!best || s > best.s) best = { d, t, s }; } }));
+      out.push(best ? { key: 'dt:' + l.id, l, d: best.d, t: best.t, c: best.s } : { key: 'dt:' + l.id, l, c: 0 });
+    });
+    return out.filter(r => r.c === 0 || r.c >= aiThr().low).slice(0, 4);
+  }
+  function excRecs() {
+    const out = [];
+    S.loads.filter(l => ['loading', 'in_transit', 'problem'].includes(l.status) && tempState(l) !== 'ok').forEach(l => out.push({ key: 'ex:' + l.id, l, sev: tempState(l) === 'breach' ? 'high' : 'mid' }));
+    S.loads.filter(l => ['assigned', 'loading'].includes(l.status) && l.zone === 'ambient').forEach(l => out.push({ key: 'fx:' + l.id, l, sev: 'low', fc: true }));
+    return out.slice(0, 4);
+  }
+  function leakRecs() {
+    const out = [], det = S.costs.filter(c => c.cat === 'detention'), fuel = S.costs.filter(c => c.cat === 'fuel').reduce((s, c) => s + c.amount, 0);
+    if (det.length) out.push({ key: 'lk:det', sub: T('Простои на рампах / Standgeld', 'Standzeiten an Rampen / Standgeld', 'Ramp detention / Standgeld', 'Рампадағы тұрып қалу / Standgeld'), amt: -det.reduce((s, c) => s + c.amount, 0), why: T('Начислено за ', 'Berechnet für ', 'Charged for ', 'Есептелген: ') + det.length + T(' приёмок сверх бесплатных 45 мин; проверьте, выставлено ли клиенту.', ' Wareneingänge über die freien 45 Min.; prüfen, ob dem Kunden berechnet.', ' receipts beyond the free 45 min; check whether it was billed to the customer.', ' қабылдау тегін 45 мин-тан асты; клиентке шығарылғанын тексеріңіз.'), go: 'cost' });
+    if (fuel) out.push({ key: 'lk:fuel', sub: T('Холостой ход реф-агрегатов (оценка)', 'Leerlauf der Kühlaggregate (Schätzung)', 'Reefer unit idling (estimate)', 'Реф-агрегаттардың бос жүрісі (бағалау)'), amt: -Math.round(fuel * 0.08), why: T('≈ 8 % топлива уходит на стоянках с работающим агрегатом (оценка по телематике, демо).', '≈ 8 % des Kraftstoffs bei Stillstand mit laufendem Aggregat (Telematik-Schätzung, Demo).', '≈ 8 % of fuel burns while parked with the unit running (telematics estimate, demo).', 'Отынның ≈ 8 % агрегат жұмыс істеп тұрғанда кетеді (телематика бағасы, демо).'), go: 'cost' });
+    const back = []; S.loads.filter(l => l.status === 'delivered').forEach(dl => S.loads.filter(u => u.status === 'unassigned' && u.from === dl.to && !back.some(b => b.u === u)).slice(0, 1).forEach(u => back.push({ dl, u })));
+    back.slice(0, 2).forEach(b => out.push({ key: 'lk:bh:' + b.u.id, sub: T('Порожний возврат · ', 'Leerrückfahrt · ', 'Empty return · ', 'Бос қайту · ') + HUBS[b.dl.to].city, amt: Math.round(revenue(b.u) * 0.5), why: T('Рейс ', 'Fahrt ', 'Load ', 'Рейс ') + b.dl.id + T(' вернулся порожним, а рейс ', ' kam leer zurück, während Fahrt ', ' returned empty while load ', ' бос қайтты, ал рейс ') + b.u.id + ' (' + rt(b.u) + T(') ждёт назначения.', ') wartet.', ') is waiting.', ') тағайындауды күтуде.'), go: 'dispatch' }));
+    return out.slice(0, 4);
+  }
+  function anomRecs() {
+    const out = [], seen = {};
+    S.invoices.forEach(i => {
+      const e = esfOf(i), paid = !!i.paidAt, k = i.cust + '|' + i.route + '|' + i.total;
+      if (seen[k]) out.push({ key: 'an:dup:' + i.id, i, sub: T('Дубликат счёта · ', 'Doppelte Rechnung · ', 'Duplicate invoice · ', 'Шот қайталануы · ') + i.id, amt: -i.total, why: T('Тот же клиент, маршрут и сумма, что в ', 'Gleicher Kunde, Route und Betrag wie ', 'Same customer, route and amount as ', 'Сол клиент, маршрут және сома: ') + seen[k] + '.' }); seen[k] = i.id;
+      if (i.dispute && i.dispute.open && e === 'confirmed') out.push({ key: 'an:dis:' + i.id, i, sub: T('ЭСФ подтверждена при открытом споре · ', 'ESF bestätigt bei offenem Streit · ', 'ESF confirmed while dispute is open · ', 'Дау ашық кезде ЭШФ расталған · ') + i.id, amt: -i.total, why: T('Клиент оспаривает температуру; может потребоваться корректировочная ЭСФ.', 'Kunde bestreitet Temperatur; ggf. Korrektur-ESF nötig.', 'Customer disputes temperature; a corrective ESF may be needed.', 'Клиент температураны дауласады; түзету ЭШФ қажет болуы мүмкін.') });
+      if (e === 'rejected') out.push({ key: 'an:rej:' + i.id, i, sub: T('ЭСФ отклонена · ', 'ESF abgelehnt · ', 'ESF rejected · ', 'ЭШФ қабылданбады · ') + i.id, amt: 0, rev: 1, why: T('Выпишите заново и согласуйте с клиентом.', 'Neu ausstellen und mit Kunde abstimmen.', 'Re-issue and align with the customer.', 'Қайта жазып, клиентпен келісіңіз.') });
+      else if (paid && (e === 'none' || e === 'issued')) out.push({ key: 'an:pnoesf:' + i.id, i, sub: T('Оплачен без подтверждённой ЭСФ · ', 'Bezahlt ohne bestätigte ESF · ', 'Paid without confirmed ESF · ', 'Расталған ЭШФ-сіз төленген · ') + i.id, amt: 0, rev: 1, why: T('Платёж получен, а ЭСФ в статусе «', 'Zahlung erhalten, ESF-Status „', 'Payment received but ESF status is “', 'Төлем алынды, ал ЭШФ күйі «') + (e === 'none' ? T('нет', 'keine', 'none', 'жоқ') : T('выписана', 'ausgestellt', 'issued', 'жазылды')) + '».' });
+      if (i.zone !== 'ambient' && !i.lines.some(x => x.type === 'reefer')) out.push({ key: 'an:ref:' + i.id, i, sub: T('Нет реф-доплаты · ', 'Kein Kühlzuschlag · ', 'Missing reefer surcharge · ', 'Реф-үстеме жоқ · ') + i.id, amt: Math.round(i.net * 0.18), why: T('Температурный груз без строки доплаты.', 'Temperaturgeführte Ladung ohne Zuschlagszeile.', 'Temperature-controlled cargo without a surcharge line.', 'Температуралы жүкте үстеме жолы жоқ.') });
+      if (Math.abs(i.vat - Math.round(i.net * 0.12)) > 1) out.push({ key: 'an:vat:' + i.id, i, sub: T('НДС ≠ 12 % · ', 'MwSt ≠ 12 % · ', 'VAT ≠ 12 % · ', 'ҚҚС ≠ 12 % · ') + i.id, amt: 0, rev: 1, why: T('Проверьте расчёт НДС.', 'MwSt-Berechnung prüfen.', 'Check the VAT calculation.', 'ҚҚС есебін тексеріңіз.') });
+    });
+    return out.slice(0, 5);
+  }
+
+  const dismissBtn = key => `<button class="btn sm dismiss" data-act="aiDis" data-k="${esc(key)}">Dismiss</button>`;
+  const doneRow = (r, label) => `<div class="rec done"><div class="t"><b>${esc(label)}</b>${chip('gray', A.done[r.key])}</div></div>`;
+  const head = (mod, ic_, tint, title, src) => `<div class="card-head"><span class="itile ${tint}">${ic(ic_, 18)}</span><h3>${esc(title)}</h3>${chip('gray', 'Data Source: ' + src)}</div>`;
+  const off = (m) => `<div class="ai-body"><p class="note">${esc(T('Модуль отключён в Settings → AI & Automation.', 'Modul in Settings → AI & Automation deaktiviert.', 'Module is switched off in Settings → AI & Automation.', 'Модуль Settings → AI & Automation бөлімінде өшірілген.'))} <a class="lnk" data-act="aiSet">${esc(T('Открыть', 'Öffnen', 'Open', 'Ашу'))}</a></p></div>`;
+  const none = () => `<p class="note">${esc(T('Сейчас рекомендаций нет.', 'Derzeit keine Empfehlungen.', 'No recommendations right now.', 'Қазір ұсыныс жоқ.'))}</p>`;
+  const money = a => a === 0 ? '' : `<span class="amt" style="color:${a < 0 ? 'var(--label-red)' : '#2a9d52'}">${a < 0 ? '−' : '+'}${nf(Math.abs(a))} ₸</span>`;
+
+  function card1() {
+    if (!aiOn('match')) return off();
+    const rs = driverRecs(), body = rs.map(r => {
+      const l = r.l, tag = `${l.id} · ${rt(l)} · ${ZONES[l.zone].label}`;
+      if (A.done[r.key]) return doneRow(r, tag);
+      if (!r.d) return `<div class="rec"><div class="t"><b>${esc(tag)}</b>${chip('red', T('нет допустимой пары', 'kein zulässiges Paar', 'no eligible pair', 'жарамды жұп жоқ'))}</div><p class="why">${esc(T('Проверьте РТО, документы водителей и поверку датчиков.', 'RTO, Fahrerdokumente und Sensorkalibrierung prüfen.', 'Check RTO, driver documents and sensor calibration.', 'РТО, құжаттар мен датчик поверкасын тексеріңіз.'))}</p><div class="btns">${dismissBtn(r.key)}</div></div>`;
+      const lv = LV[lvl(r.c)], ex = A.exp === r.key;
+      return `<div class="rec"><div class="t"><div><b>${esc(r.d.name)} → ${esc(r.t.plate)}</b><div class="sub">${esc(tag)}</div></div><div>${chip(lv[0], lv[1] + ' · ' + r.c + '%')}</div></div>
+<p class="why">${esc(T('Допуск', 'Zulassung', 'Eligibility', 'Рұқсат'))}: ✓ | RTO: ${dec(r.d.rto)} ${esc(T('ч', 'Std.', 'h', 'сағ'))} / ${dec(needRto(l).toFixed(1))} | ${esc(T('Рейтинг', 'Bewertung', 'Rating', 'Рейтинг'))}: ${dec(r.d.rating)}/5 | ${esc(T('Поверка', 'Kalibrierung', 'Calibration', 'Поверка'))}: ${esc(DOCST[docState(r.t.docs.calib)].l)}</p>
+${ex && CFG.cur.ai.expl ? `<p class="why"><i>${esc(T('Почему: ТС поддерживает зону ', 'Warum: Fahrzeug unterstützt Zone ', 'Why: truck supports zone ', 'Неге: КҚ аймақты қолдайды '))}${ZONES[l.zone].label}${esc(T(', вместимость ', ', Kapazität ', ', capacity ', ', сыйымдылық '))}${r.t.cap} ≥ ${l.pallets}${esc(T(' пал.; минимальный запас вместимости среди допустимых.', ' Pal.; geringste Überkapazität unter den zulässigen.', ' pallets; smallest spare capacity among eligible trucks.', ' паллет; жарамдылар ішінде ең аз артық сыйымдылық.'))}</i></p>` : ''}
+<div class="btns"><button class="btn sm green" data-act="aiAcc" data-k="${r.key}">Accept</button>${dismissBtn(r.key)}<button class="btn sm amber" data-act="aiOvr" data-k="${r.key}">Override</button>${CFG.cur.ai.expl ? `<a class="lnk" style="margin-left:auto;font-size:12px" data-act="aiExp" data-k="${r.key}">${ex ? '⌃' : '⌄'}</a>` : ''}</div></div>`;
+    }).join('');
+    return `<div class="ai-body">${body || none()}</div>`;
+  }
+  function card2() {
+    if (!aiOn('exc')) return off();
+    const body = excRecs().map(r => {
+      const l = r.l, hint = r.fc ? T('Прогноз заморозков ночью: риск выхода за +15…+25 °C', 'Nachtfrost-Prognose: Risiko außerhalb +15…+25 °C', 'Overnight frost forecast: risk of leaving +15…+25 °C', 'Түнгі аяз болжамы: +15…+25 °C-тан шығу қаупі') : tempState(l) === 'breach' ? T('Температура ', 'Temperatur ', 'Temperature ', 'Температура ') + dec(l.temp) + ' °C ' + T('вне диапазона ', 'außerhalb ', 'outside ', 'тыс ') + ZONES[l.zone].label : T('Температура ', 'Temperatur ', 'Temperature ', 'Температура ') + dec(l.temp) + ' °C ' + T('у границы диапазона ', 'nahe der Grenze ', 'near the limit of ', 'шекке жақын ') + ZONES[l.zone].label;
+      if (A.done[r.key]) return doneRow(r, l.id + ' · ' + rt(l));
+      const rk = r.sev === 'high' ? ['red', T('Высокий риск', 'Hohes Risiko', 'High risk', 'Жоғары қауіп')] : r.sev === 'mid' ? ['yellow', T('Средний риск', 'Mittleres Risiko', 'Medium risk', 'Орташа қауіп')] : ['green', T('Низкий риск', 'Geringes Risiko', 'Low risk', 'Төмен қауіп')];
+      const d = drv(l.driver);
+      return `<div class="rec risk-card ${r.sev === 'high' ? 'high' : r.sev === 'mid' ? 'mid' : ''}"><div class="t"><span><b>${l.id} · ${esc(rt(l))}</b></span><span>${chip(rk[0], rk[1])}</span></div><p class="why">${esc(hint)}${d ? ' · ' + esc(d.name) : ''}</p>
+<div class="btns"><button class="btn sm green" data-act="aiNotify" data-k="${r.key}">Notify customer</button>${r.fc ? '' : `<button class="btn sm primary" data-act="aiReroute" data-k="${r.key}">${esc(T('В ближайший хаб', 'Zum nächsten Hub', 'Reroute to nearest hub', 'Жақын хабқа'))}</button>`}${d ? `<button class="btn sm grey" data-act="aiCall" data-k="${r.key}">${esc(T('Позвонить', 'Anrufen', 'Call driver', 'Қоңырау'))}</button>` : ''}${dismissBtn(r.key)}</div></div>`;
+    }).join('');
+    return `<div class="ai-body">${body || none()}</div>`;
+  }
+  function card3() {
+    if (!aiOn('leak')) return off();
+    const body = leakRecs().map(r => A.done[r.key] ? doneRow(r, r.sub) : `<div class="rec"><div class="t"><b>${esc(r.sub)}</b>${money(r.amt)}</div><p class="why">${esc(r.why)}</p><div class="btns"><button class="btn sm primary" data-act="aiGo" data-k="${r.key}" data-v="${r.go}">${esc(r.go === 'dispatch' ? T('Найти обратную загрузку', 'Rückladung suchen', 'Find backhaul', 'Кері жүк табу') : T('Проверить затраты', 'Kosten prüfen', 'Review costs', 'Шығыстарды тексеру'))}</button>${dismissBtn(r.key)}</div></div>`).join('');
+    return `<div class="ai-body">${body || none()}</div>`;
+  }
+  function card4() {
+    if (!aiOn('anom')) return off();
+    const body = anomRecs().map(r => A.done[r.key] ? doneRow(r, r.sub) : `<div class="rec"><div class="t"><b>${esc(r.sub)}</b>${r.rev ? `<span class="amt" style="color:#b7791f">Review</span>` : money(r.amt)}</div><p class="why">${esc(r.why)}</p><div class="btns"><button class="btn sm primary" data-act="aiInv" data-k="${r.key}" data-id="${r.i.id}">${esc(T('Открыть счёт', 'Rechnung öffnen', 'Open invoice', 'Шотты ашу'))}</button>${dismissBtn(r.key)}</div></div>`).join('');
+    return `<div class="ai-body">${body || none()}</div>`;
+  }
+  SCREENS.ai = {
+    title: () => navLabel('ai'),
+    sub: () => T('Поддержка решений и операционные подсказки', 'Entscheidungsunterstützung und operative Hinweise', 'Decision Support & Operational Insights', 'Шешімдерді қолдау және операциялық кеңестер'),
+    actions: () => `<button class="btn grey" data-act="aiHist">⟲ View History</button><button class="btn primary" data-act="aiSet">${ic('cog')} AI Settings</button>`,
+    body: () => `<div class="banner-ai ai-banner">⚠ ${esc(T('AI предлагает, не выполняет. Решения принимает диспетчер/QA (GDP): AI не назначает рейсы, не перемещает грузы и не проводит финансовые операции сам.', 'KI schlägt vor, führt nicht aus. Entscheidungen treffen Disponent/QA (GDP): KI weist keine Fahrten zu, bewegt keine Ladung und führt keine Finanzaktionen selbst aus.', 'AI assists operations. It does not auto-dispatch, move loads, or execute financial actions. All decisions remain human-controlled (dispatcher / QA, GDP).', 'AI ұсынады, орындамайды. Шешімді диспетчер/QA (GDP) қабылдайды: AI рейс тағайындамайды, жүкті жылжытпайды, қаржы операцияларын өзі жасамайды.'))}</div>
+<div class="ai-grid"><div class="card ai-card">${head('', 'user', 'blue', T('Подбор водитель–реф-юнит', 'Fahrer–Kühlfahrzeug', 'Driver–Reefer Suggestions', 'Жүргізуші–реф-юнит'), 'Dispatch')}${card1()}</div>
+<div class="card ai-card">${head('', 'therm', 'red', T('Риск температурного отклонения', 'Risiko Temperaturabweichung', 'Temperature-Excursion Risk', 'Температура ауытқуы қаупі'), 'Routes')}${card2()}</div>
+<div class="card ai-card">${head('', 'chart', 'yellow', T('Утечки затрат', 'Kostenlecks', 'Cost Leak Detection', 'Шығын ағып кетуі'), 'Fleet | Billing')}${card3()}</div>
+<div class="card ai-card">${head('', 'receipt', 'green', T('Аномалии ЭСФ и счетов', 'ESF-/Rechnungsanomalien', 'ESF & Invoice Anomalies', 'ЭШФ және шот ауытқулары'), 'Billing')}${card4()}</div></div>
+<div class="card" id="audit-trail"><div class="card-head" style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px"><h3 style="margin:0;font-size:15px">Audit Trail · ${S.audit.length}</h3><a class="lnk" data-act="aiHist">${esc(A.hist ? T('Скрыть', 'Ausblenden', 'Hide', 'Жасыру') : T('Показать последние действия', 'Letzte Aktionen zeigen', 'Show Recent Actions', 'Соңғы әрекеттер'))}</a></div>${A.hist ? `<div class="tcard">${auditTable()}</div>` : ''}</div>`,
+  };
+  const find = key => [].concat(driverRecs(), excRecs(), leakRecs(), anomRecs()).find(r => r.key === key);
+  const mark = (key, label) => { A.done[key] = label; };
+  const mod = k => k.startsWith('dt') ? 'AI · ' + T('Водитель–ТС', 'Fahrer–Fzg.', 'Driver–truck', 'Жүргізуші–КҚ') : k.startsWith('ex') || k.startsWith('fx') ? 'AI · ' + T('Температура', 'Temperatur', 'Temperature', 'Температура') : k.startsWith('lk') ? 'AI · ' + T('Затраты', 'Kosten', 'Costs', 'Шығыс') : 'AI · ' + T('ЭСФ / счета', 'ESF / Rechnungen', 'ESF / invoices', 'ЭШФ / шоттар');
+  const subj = r => r.l ? r.l.id : r.i ? r.i.id : r.sub;
+  DRAWERS.aiOvr = d => { const r = find(d.k); if (!r) return { title: 'Override', html: '' }; const l = r.l;
+    return { title: 'Override · ' + l.id, html: `<div class="drawer-section"><p class="note">${esc(T('Вы заменяете рекомендацию AI. Причина обязательна и попадёт в журнал GDP.', 'Sie ersetzen die KI-Empfehlung. Begründung ist Pflicht und geht ins GDP-Protokoll.', 'You are replacing the AI recommendation. A reason is mandatory and goes to the GDP log.', 'Сіз AI ұсынысын ауыстырып жатырсыз. Себеп міндетті, GDP журналына жазылады.'))}</p>
+<label class="fl">${esc(T('Водитель', 'Fahrer', 'Driver', 'Жүргізуші'))}<select class="select" id="ov_d">${S.drivers.map(x => `<option value="${x.id}"${r.d && x.id === r.d.id ? ' selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>
+<label class="fl">${esc(T('ТС', 'Fahrzeug', 'Truck', 'КҚ'))}<select class="select" id="ov_t">${S.trucks.map(x => `<option value="${x.id}"${r.t && x.id === r.t.id ? ' selected' : ''}>${esc(x.plate)} · ${esc(x.model)}</option>`).join('')}</select></label>
+<label class="fl">${esc(T('Причина', 'Grund', 'Reason', 'Себебі'))}<textarea class="ta" id="ov_r" rows="3"></textarea></label><p class="note" id="ov_e" style="color:var(--chip-red-fg)"></p><button class="btn amber block" data-act="aiOvrGo" data-k="${d.k}">Override</button></div>` }; };
+  Object.assign(ACT, {
+    aiExp: d => { A.exp = A.exp === d.k ? '' : d.k; render(); },
+    aiAcc: d => { const r = find(d.k); if (!r) return; const err = assign(r.l.id, r.d.id, r.t.id); if (err) return toast(err, 'err'); audit(mod(d.k), r.l.id + ' → ' + r.d.name + ' / ' + r.t.plate, 'Accept', ''); toast(T('Принято: назначение выполнено диспетчером', 'Akzeptiert: Zuweisung durch Disponent', 'Accepted: assignment made by the dispatcher', 'Қабылданды: диспетчер тағайындады')); },
+    aiDis: d => { const r = find(d.k); if (!r) return; mark(d.k, T('Отклонено', 'Abgelehnt', 'Dismissed', 'Қабылданбады')); audit(mod(d.k), subj(r), 'Dismiss', ''); render(); },
+    aiOvr: d => openDrawer({ type: 'aiOvr', k: d.k }),
+    aiOvrGo: d => { const r = find(d.k), why = ($('#ov_r') || {}).value.trim(); if (!why) { $('#ov_e').textContent = T('Укажите причину', 'Grund angeben', 'A reason is required', 'Себепті көрсетіңіз'); return; }
+      const dr = drv($('#ov_d').value), tr = trk($('#ov_t').value), err = assign(r.l.id, dr.id, tr.id); if (err) { $('#ov_e').textContent = err; return; }
+      audit(mod(d.k), r.l.id + ' → ' + dr.name + ' / ' + tr.plate, 'Override', why); S.drawer = null; toast(T('Override записан в журнал', 'Override protokolliert', 'Override recorded in the log', 'Override журналға жазылды')); },
+    aiNotify: d => { const r = find(d.k); if (!r) return; r.l.notes.push({ who: 'AI/' + 'Sarah J.', t: p2(new Date().getHours()) + ':' + p2(new Date().getMinutes()), text: T('Клиент уведомлён о температурном риске', 'Kunde über Temperaturrisiko informiert', 'Customer notified about temperature risk', 'Клиентке температура қаупі туралы хабарланды') }); mark(d.k, T('Клиент уведомлён', 'Kunde informiert', 'Customer notified', 'Клиентке хабарланды')); audit(mod(d.k), r.l.id, 'Notify customer', ''); toast(T('Клиент уведомлён', 'Kunde informiert', 'Customer notified', 'Клиентке хабарланды')); },
+    aiReroute: d => { const r = find(d.k); if (!r) return; const hubs = Object.keys(HUBS).filter(h => h !== r.l.from).sort((a, b) => dist(r.l.to, a) - dist(r.l.to, b)); r.l.notes.push({ who: 'Sarah J.', t: p2(new Date().getHours()) + ':' + p2(new Date().getMinutes()), text: T('Заход в ближайший холодный хаб: ', 'Umleitung zum nächsten Kühlhub: ', 'Diverted to nearest cold hub: ', 'Жақын суық хабқа бұру: ') + HUBS[hubs[0]].name }); mark(d.k, T('Перенаправлен', 'Umgeleitet', 'Rerouted', 'Бағыт өзгертілді')); audit(mod(d.k), r.l.id, 'Reroute → ' + HUBS[hubs[0]].city, ''); toast(HUBS[hubs[0]].name); },
+    aiCall: d => { const r = find(d.k); if (!r) return; audit(mod(d.k), r.l.id, 'Call driver', ''); toast(drv(r.l.driver).name + ' · ' + drv(r.l.driver).phone); },
+    aiGo: d => { audit(mod(d.k), d.k, 'Review', ''); if (d.v === 'cost') ACT.bTab({ v: 'cost' }); go(d.v); },
+    aiInv: d => { audit(mod(d.k), d.id, 'Review', ''); go('billing'); ACT.bTab({ v: 'inv' }); openDrawer({ type: 'inv', id: d.id }); },
+    aiSet: () => { go('settings'); setTimeout(() => { const e = $('#sc-ai'); if (e) e.scrollIntoView({ block: 'start' }); }, 30); },
+    aiHist: () => { A.hist = !A.hist; render(); if (A.hist) { const e = $('#audit-trail'); if (e) e.scrollIntoView({ block: 'nearest' }); } },
+  });
 })();
 
 render();

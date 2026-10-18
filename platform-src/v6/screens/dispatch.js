@@ -43,11 +43,19 @@ ${S.dispTab === 'board' ? `<div class="filters">${sel('pri', T('Приорите
   /* drag & drop (HTML5) */
   let dragId = null;
   document.addEventListener('dragstart', e => { const c = e.target.closest && e.target.closest('.kcard'); if (c) { dragId = c.dataset.id; e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', dragId); } catch (_) {} } });
-  document.addEventListener('dragover', e => { if (dragId && e.target.closest && e.target.closest('.col')) e.preventDefault(); });
+  const colOf = e => e.target.closest && e.target.closest('.col');
+  const clearHi = () => $$('.col.drop-ok,.col.drop-no').forEach(c => c.classList.remove('drop-ok', 'drop-no'));
+  document.addEventListener('dragover', e => { const col = colOf(e); if (!dragId || !col) return; e.preventDefault(); const l = load(dragId), ok = l.status === col.dataset.col || !canMove(l, col.dataset.col) || (l.status === 'unassigned' && col.dataset.col === 'assigned'); if (!col.classList.contains(ok ? 'drop-ok' : 'drop-no')) { clearHi(); col.classList.add(ok ? 'drop-ok' : 'drop-no'); } });
+  document.addEventListener('dragend', () => { dragId = null; clearHi(); });
   document.addEventListener('drop', e => {
-    const col = e.target.closest && e.target.closest('.col'); if (!col || !dragId) return; e.preventDefault();
+    const col = colOf(e); clearHi(); if (!col || !dragId) return; e.preventDefault();
     const l = load(dragId), to = col.dataset.col; dragId = null; if (l.status === to) return;
-    const err = canMove(l, to); if (err) { if (l.status === 'unassigned') openDrawer({ type: 'load', id: l.id, tab: 'overview' }); return toast(err, 'err'); }
+    if (l.status === 'unassigned' && to === 'assigned') {   // dropping an open load on "Assigned" picks the best eligible driver + truck
+      const ts = S.trucks.filter(t => t.zones.includes(l.zone)).sort((a, b) => a.cap - b.cap), ds = S.drivers.slice().sort((a, b) => a.rto - b.rto);
+      for (const t of ts) for (const d of ds) if (!compat(l, d, t).length && !assign(l.id, d.id, t.id)) { return toast(T('Назначено: ', 'Zugewiesen: ', 'Assigned: ', 'Тағайындалды: ') + d.name + ' / ' + t.plate); }
+      openDrawer({ type: 'load', id: l.id, tab: 'overview' }); return toast(T('Нет подходящей пары водитель + ТС — назначьте вручную', 'Kein passendes Paar Fahrer + Fahrzeug — manuell zuweisen', 'No eligible driver + truck pair — assign manually', 'Жарамды жұп жоқ — қолмен тағайындаңыз'), 'err');
+    }
+    const err = canMove(l, to); if (err) return toast(err, 'err');
     setStatus(l.id, to); render();
   });
 })();
