@@ -405,6 +405,15 @@ main{overflow:auto;height:100vh;position:relative}
 .sidebar .langs a{text-decoration:none;padding:4px 8px;border-radius:8px;font-size:12px;display:inline-block}
 .drawer-tabs{gap:14px!important;padding:0 16px!important} .drawer-tabs .tab{font-size:13px}
 
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}} .dot.bad.pulse,.dot.pulse{animation:pulse 1.4s infinite}
+.dot.good{background:var(--dot-good)}.dot.warn{background:var(--dot-warn)}.dot.bad{background:var(--dot-bad)}
+.kpi-row.k5{grid-template-columns:repeat(5,minmax(0,1fr))}.kpi-row.k4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.mapfull{position:relative;border-radius:var(--r-card);overflow:hidden;border:1px solid var(--border);background:#f6fbf7} .mapfull .kzmap{border-radius:0;min-height:380px;width:100%}
+.zoom{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;background:#fff;border-radius:8px;box-shadow:var(--sh-pop);overflow:hidden} .zoom button{border:0;background:#fff;width:32px;height:32px;font-size:18px;cursor:pointer} .zoom button+button{border-top:1px solid var(--border)}
+.docrow{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:var(--r-btn);margin-bottom:8px} .docrow.valid{background:var(--tint-green-50)} .docrow.soon{background:var(--tint-yellow-50)} .docrow.expired{background:var(--tint-red-50)}
+.stars{color:#e5b800;letter-spacing:1px} .center{text-align:center} .bar-lab{display:flex;justify-content:space-between;font-size:12px;margin:10px 0 4px}
+.kebab{color:var(--text-faint);cursor:pointer;padding:4px 8px;border-radius:6px} .kebab:hover{background:var(--bg-subtle)}
+
 </style></head><body><div id="root"></div><script>
 /* v6 core: i18n, helpers, icons, store + dispatch rules, shell, drawer, router. */
 const LANG = 'ru';
@@ -460,6 +469,10 @@ const ESF = {
 const chip = (c, t) => `<span class="chip ${c}">${esc(t)}</span>`;
 const stChip = s => chip(ST[s].c, ST[s].l);
 const zoneChip = z => `<span class="chip zone-${z}">${ZONES[z].label}</span>`;
+const fd = iso => { const d = new Date(iso); return p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '.' + d.getFullYear(); };
+/* document validity: expired / renew soon (<= 30 d) / valid */
+const docState = iso => { const days = Math.floor((new Date(iso + 'T23:59:59+05:00') - NOW) / 864e5); return days < 0 ? 'expired' : days <= 30 ? 'soon' : 'valid'; };
+const DOCST = { valid: { c: 'green', l: T('Действует', 'Gültig', 'Valid', 'Жарамды') }, soon: { c: 'yellow', l: T('Скоро истекает', 'Läuft bald ab', 'Renew soon', 'Жақында аяқталады') }, expired: { c: 'red', l: T('Просрочен', 'Abgelaufen', 'Expired', 'Мерзімі өтті') } };
 const avatar = (ini, n) => `<span class="avatar sm" style="background:var(--av-${n || 1})">${esc(ini)}</span>`;
 
 /* ---------- store ---------- */
@@ -469,6 +482,13 @@ const S = {
   f: { q: '', status: '', cust: '', zone: '', pri: '', hub: '', drv: '', page: 1 },
   dispTab: 'board', nextId: 1856,
 };
+const loadOfTruck = id => S.loads.find(l => l.truck === id && isActive(l));
+const loadOfDriver = id => S.loads.find(l => l.driver === id && isActive(l));
+const truckLoc = t => { const l = loadOfTruck(t.id); return l && (l.status === 'in_transit' || l.status === 'problem') ? { city: HUBS[l.from].city + ' → ' + HUBS[l.to].city, sub: T('в пути', 'unterwegs', 'en route', 'жолда') } : { city: HUBS[t.hub].city, sub: HUBS[t.hub].name }; };
+const truckState = t => { const l = loadOfTruck(t.id); if (t.status === 'service') return 'service'; if (t.health === 'red' || (l && tempState(l) === 'breach')) return 'critical'; return t.status === 'busy' ? 'busy' : 'available'; };
+const TS = { available: { c: 'green', l: T('Свободен', 'Frei', 'Available', 'Бос') }, busy: { c: 'yellow', l: T('В рейсе', 'Im Einsatz', 'In use', 'Рейсте') }, service: { c: 'red', l: T('Сервис', 'Service', 'Maintenance', 'Сервис') }, critical: { c: 'red', l: T('Критично', 'Kritisch', 'Critical', 'Сыни') } };
+const rtoDot = d => (d.status === 'rest' || d.rto < 4) ? 'bad' : d.rto < 6 ? 'warn' : 'good';
+const agoTxt = m => m < 60 ? m + ' ' + T('мин назад', 'Min. her', 'min ago', 'мин бұрын') : Math.round(m / 60) + ' ' + T('ч назад', 'Std. her', 'h ago', 'сағ бұрын');
 const cust = id => CUSTOMERS.find(c => c.id === id);
 const drv = id => S.drivers.find(d => d.id === id);
 const trk = id => S.trucks.find(t => t.id === id);
@@ -489,6 +509,8 @@ function compat(l, d, t) {
   if (t.status !== 'available') why.push(T('ТС занято или в сервисе', 'Fahrzeug belegt oder im Service', 'Truck busy or in service', 'КҚ бос емес немесе сервисте'));
   if (d.status !== 'available') why.push(T('Водитель недоступен', 'Fahrer nicht verfügbar', 'Driver unavailable', 'Жүргізуші қолжетімсіз'));
   if (d.rto < needRto(l)) why.push(T('Не хватает времени вождения (РТО)', 'Lenkzeit reicht nicht (RTO)', 'Not enough driving time (RTO)', 'Жүргізу уақыты (РТО) жеткіліксіз'));
+  if (d.docs && d.docs.some(x => (x.type === 'lic' || x.type === 'med') && docState(x.to) === 'expired')) why.push(T('У водителя просрочены права или медосмотр', 'Führerschein oder Untersuchung des Fahrers abgelaufen', 'Driver licence or medical certificate expired', 'Жүргізушінің куәлігі немесе медтексеруі мерзімі өтті'));
+  if (l.zone === 'pharma' && t.docs && docState(t.docs.calib) === 'expired') why.push(T('Поверка датчиков ТС просрочена (GDP, фарма)', 'Kalibrierung der Sensoren abgelaufen (GDP, Pharma)', 'Sensor calibration expired (GDP, pharma)', 'Датчиктер поверкасы мерзімі өтті (GDP, фарма)'));
   return why;
 }
 function assign(id, did, tid) {
@@ -503,9 +525,11 @@ function autoAssign() {
   let ok = 0, fail = 0;
   const rank = { high: 0, medium: 1, low: 2 };
   S.loads.filter(l => l.status === 'unassigned').sort((a, b) => rank[a.priority] - rank[b.priority] || a.eta.localeCompare(b.eta)).forEach(l => {
-    const ts = S.trucks.filter(t => t.status === 'available' && t.zones.includes(l.zone) && t.cap >= l.pallets).sort((a, b) => a.cap - b.cap);
-    const ds = S.drivers.filter(d => d.status === 'available' && d.rto >= needRto(l)).sort((a, b) => a.rto - b.rto);
-    if (ts[0] && ds[0] && !assign(l.id, ds[0].id, ts[0].id)) ok++; else fail++;
+    const ts = S.trucks.filter(t => t.zones.includes(l.zone)).sort((a, b) => a.cap - b.cap);
+    const ds = S.drivers.slice().sort((a, b) => a.rto - b.rto);
+    let done = false;
+    for (const t of ts) { for (const d of ds) { if (!compat(l, d, t).length && !assign(l.id, d.id, t.id)) { done = true; break; } } if (done) break; }
+    if (done) ok++; else fail++;
   });
   return { ok, fail };
 }
@@ -581,7 +605,7 @@ function placeholder(id) {
 }
 function drawerHtml() {
   const d = S.drawer; if (!d) return '';
-  const r = d.type === 'create' ? DRAWERS.create() : DRAWERS.load(d);
+  const r = DRAWERS[d.type](d);
   return `<aside class="drawer open"><div class="drawer-head"><span>${esc(r.title)}</span><span class="x" data-act="close">${ic('x', 18)}</span></div>${r.html}</aside>`;
 }
 const DRAWERS = {};
@@ -635,23 +659,38 @@ const CUSTOMERS = [
   { id: 'c4', name: 'ТОО «Ледяной Путь Ритейл»',  bin: '130940007790', ini: 'ЛП', av: 2 },
   { id: 'c5', name: 'ТОО «СеверПродукт»',         bin: '090640003321', ini: 'СП', av: 3 },
 ];
+const D = (type, to) => ({ type, to });
 const mkDrivers = () => [
-  { id: 'd1', name: 'Ерлан Сейтқали',   ini: 'ЕС', rto: 8.5, status: 'available' },
-  { id: 'd2', name: 'Асхат Нургалиев',  ini: 'АН', rto: 9,   status: 'available' },
-  { id: 'd3', name: 'Дмитрий Орлов',    ini: 'ДО', rto: 3.5, status: 'available' },
-  { id: 'd4', name: 'Марат Жунусов',    ini: 'МЖ', rto: 9,   status: 'busy' },
-  { id: 'd5', name: 'Алишер Бектурганов', ini: 'АБ', rto: 6, status: 'available' },
-  { id: 'd6', name: 'Сергей Ким',       ini: 'СК', rto: 9,   status: 'rest' },
-  { id: 'd7', name: 'Нұрлан Омаров',    ini: 'НО', rto: 9,   status: 'busy' },
+  { id: 'd1', code: 'DRV-001', name: 'Ерлан Сейтқали',     ini: 'ЕС', rto: 8.5, status: 'available', lic: 'CE', exp: 11, rating: 4.9, phone: '+7 701 123 45 67', hub: 'KAR', onDuty: 2.5, week: 41,
+    docs: [D('lic', '2029-05-14'), D('med', '2027-02-03'), D('gdp', '2027-06-01')] },
+  { id: 'd2', code: 'DRV-002', name: 'Асхат Нургалиев',    ini: 'АН', rto: 9,   status: 'available', lic: 'CE', exp: 8,  rating: 4.7, phone: '+7 702 234 56 78', hub: 'ALA', onDuty: 0,   week: 38,
+    docs: [D('lic', '2028-09-22'), D('med', '2027-04-18'), D('gdp', '2026-11-02')] },
+  { id: 'd3', code: 'DRV-003', name: 'Дмитрий Орлов',      ini: 'ДО', rto: 3.5, status: 'available', lic: 'C',  exp: 12, rating: 4.8, phone: '+7 705 345 67 89', hub: 'AST', onDuty: 5.5, week: 51,
+    docs: [D('lic', '2027-12-15'), D('med', '2027-08-22'), D('gdp', '2027-03-10')] },
+  { id: 'd4', code: 'DRV-004', name: 'Марат Жунусов',      ini: 'МЖ', rto: 9,   status: 'busy',      lic: 'CE', exp: 6,  rating: 4.6, phone: '+7 707 456 78 90', hub: 'AST', onDuty: 4,   week: 33,
+    docs: [D('lic', '2030-01-30'), D('med', '2027-01-12'), D('gdp', '2027-09-09')] },
+  { id: 'd5', code: 'DRV-005', name: 'Алишер Бектурганов', ini: 'АБ', rto: 6,   status: 'available', lic: 'C',  exp: 9,  rating: 4.9, phone: '+7 708 567 89 01', hub: 'AST', onDuty: 3,   week: 29,
+    docs: [D('lic', '2028-03-03'), D('med', '2026-10-30'), D('gdp', '2027-05-05')] },
+  { id: 'd6', code: 'DRV-006', name: 'Сергей Ким',         ini: 'СК', rto: 9,   status: 'rest',      lic: 'CE', exp: 15, rating: 4.5, phone: '+7 700 678 90 12', hub: 'SHY', onDuty: 0,   week: 56,
+    docs: [D('lic', '2027-07-07'), D('med', '2027-06-06'), D('gdp', '2027-02-02')] },
+  { id: 'd7', code: 'DRV-007', name: 'Нұрлан Омаров',      ini: 'НО', rto: 9,   status: 'busy',      lic: 'CE', exp: 7,  rating: 4.8, phone: '+7 771 789 01 23', hub: 'AST', onDuty: 6,   week: 44,
+    docs: [D('lic', '2029-11-11'), D('med', '2026-10-05'), D('gdp', '2027-04-04')] },
 ];
 const mkTrucks = () => [
-  { id: 't1', plate: '123 ABC 01', model: 'Reefer 20 t', zones: ['frozen', 'chilled', 'pharma'], cap: 33, status: 'available' },
-  { id: 't2', plate: '456 DEF 02', model: 'Reefer 12 t', zones: ['chilled', 'pharma'],             cap: 20, status: 'available' },
-  { id: 't3', plate: '789 GHI 01', model: 'Reefer 20 t', zones: ['frozen', 'chilled'],              cap: 33, status: 'available' },
-  { id: 't4', plate: '321 JKL 02', model: 'Van 10 t',    zones: ['ambient', 'chilled'],             cap: 14, status: 'available' },
-  { id: 't5', plate: '654 MNO 09', model: 'Reefer 20 t', zones: ['pharma', 'chilled', 'frozen'],    cap: 33, status: 'busy' },
-  { id: 't6', plate: '987 PQR 01', model: 'Reefer 12 t', zones: ['chilled', 'frozen'],              cap: 20, status: 'busy' },
-  { id: 't7', plate: '135 STU 02', model: 'Tent 20 t',   zones: ['ambient'],                        cap: 33, status: 'service' },
+  { id: 't1', plate: '123 ABC 01', make: 'Volvo FH 500 + Schmitz', year: 2023, km: 148200, model: 'Reefer 20 t', zones: ['frozen', 'chilled', 'pharma'], cap: 33, status: 'available', hub: 'AST', ping: 2,   health: 'green', unit: 'Thermo King SLXi', unitH: 3120,
+    docs: { osago: '2027-03-01', cargo: '2027-01-15', calib: '2027-02-20', to: '2027-01-10' }, svc: { last: '2026-09-02', lastKm: 140000, nextKm: 155000 } },
+  { id: 't2', plate: '456 DEF 02', make: 'MAN TGL 12.250',          year: 2021, km: 262900, model: 'Reefer 12 t', zones: ['chilled', 'pharma'],           cap: 20, status: 'available', hub: 'ALA', ping: 5,   health: 'amber', unit: 'Carrier Supra 850', unitH: 6410,
+    docs: { osago: '2027-02-10', cargo: '2026-12-20', calib: '2026-10-10', to: '2026-11-25' }, svc: { last: '2026-07-14', lastKm: 255000, nextKm: 270000 } },
+  { id: 't3', plate: '789 GHI 01', make: 'Scania R 450 + Krone',    year: 2022, km: 205500, model: 'Reefer 20 t', zones: ['frozen', 'chilled'],           cap: 33, status: 'available', hub: 'KAR', ping: 8,   health: 'green', unit: 'Thermo King SLXi', unitH: 4980,
+    docs: { osago: '2027-05-01', cargo: '2027-03-01', calib: '2027-04-01', to: '2027-02-18' }, svc: { last: '2026-08-20', lastKm: 198000, nextKm: 213000 } },
+  { id: 't4', plate: '321 JKL 02', make: 'Isuzu NPR 10 t',          year: 2020, km: 301400, model: 'Van 10 t',    zones: ['ambient', 'chilled'],          cap: 14, status: 'available', hub: 'ALA', ping: 11,  health: 'green', unit: 'Carrier Xarios 350', unitH: 7800,
+    docs: { osago: '2026-12-01', cargo: '2026-12-01', calib: '2027-01-12', to: '2026-12-15' }, svc: { last: '2026-06-01', lastKm: 290000, nextKm: 305000 } },
+  { id: 't5', plate: '654 MNO 09', make: 'DAF XF 480 + Schmitz',    year: 2023, km: 119800, model: 'Reefer 20 t', zones: ['pharma', 'chilled', 'frozen'], cap: 33, status: 'busy',      hub: 'AST', ping: 1,   health: 'green', unit: 'Thermo King SLXi', unitH: 2210,
+    docs: { osago: '2027-06-01', cargo: '2027-04-01', calib: '2027-05-01', to: '2027-03-12' }, svc: { last: '2026-09-25', lastKm: 115000, nextKm: 130000 } },
+  { id: 't6', plate: '987 PQR 01', make: 'Mercedes Actros + Krone', year: 2021, km: 233300, model: 'Reefer 12 t', zones: ['chilled', 'frozen'],           cap: 20, status: 'busy',      hub: 'AST', ping: 3,   health: 'green', unit: 'Carrier Supra 950', unitH: 5400,
+    docs: { osago: '2027-01-20', cargo: '2027-01-20', calib: '2026-12-30', to: '2026-12-02' }, svc: { last: '2026-08-02', lastKm: 226000, nextKm: 241000 } },
+  { id: 't7', plate: '135 STU 02', make: 'Hyundai HD 120',          year: 2019, km: 389000, model: 'Tent 20 t',   zones: ['ambient'],                     cap: 33, status: 'service',   hub: 'ALA', ping: 120, health: 'amber', unit: '—', unitH: 0,
+    docs: { osago: '2026-11-18', cargo: '2026-11-18', calib: '2027-01-01', to: '2026-10-20' }, svc: { last: '2026-04-10', lastKm: 372000, nextKm: 387000 } },
 ];
 const mkLoad = (id, c, from, to, zone, pal, kg, pri, st, eta, o = {}) => Object.assign({
   id: 'LD-2026-' + id, cust: c, from, to, zone, pallets: pal, kg, priority: pri, status: st, eta,
@@ -660,7 +699,7 @@ const mkLoad = (id, c, from, to, zone, pal, kg, pri, st, eta, o = {}) => Object.
 }, o);
 const mkLoads = () => [
   mkLoad('001847', 'c1', 'AST', 'ALA', 'pharma', 24, 8200, 'high', 'in_transit', '2026-10-19T08:00:00+05:00', { driver: 'd4', truck: 't5', progress: 0.58, temp: 5.1 }),
-  mkLoad('001848', 'c2', 'AST', 'KAR', 'chilled', 18, 6100, 'medium', 'in_transit', '2026-10-18T18:30:00+05:00', { driver: 'd7', truck: 't6', progress: 0.72, temp: 4.9 }),
+  mkLoad('001848', 'c2', 'AST', 'KAR', 'chilled', 18, 6100, 'medium', 'in_transit', '2026-10-18T18:30:00+05:00', { driver: 'd7', truck: 't6', progress: 0.72, temp: 3.4 }),
   mkLoad('001849', 'c3', 'ALA', 'SHY', 'pharma', 12, 3400, 'high', 'problem', '2026-10-18T20:00:00+05:00', { driver: 'd2', truck: 't2', progress: 0.4, temp: 9.6, notes: [{ who: 'System', t: '14:12', text: T('Температура вне диапазона 2–8 °C более 10 мин', 'Temperatur seit über 10 Min außerhalb 2–8 °C', 'Temperature outside 2–8 °C for over 10 min', 'Температура 2–8 °C-тан тыс 10 мин астам') }] }),
   mkLoad('001850', 'c4', 'KAR', 'AST', 'frozen', 30, 15200, 'medium', 'loading', '2026-10-19T10:00:00+05:00', { driver: 'd1', truck: 't3' }),
   mkLoad('001851', 'c5', 'AST', 'SHY', 'ambient', 14, 4800, 'low', 'assigned', '2026-10-20T09:00:00+05:00', { driver: 'd5', truck: 't4' }),
@@ -780,6 +819,7 @@ ${kpi('green', 'chart', T('Выручка', 'Umsatz', 'Revenue', 'Түсім'), 
     const ex = pts.filter(v => v < z.lo || v > z.hi).length * 15;
     return { ex, svg: `<svg viewBox="0 0 285 84" class="spark"><rect x="0" y="${Y(z.hi)}" width="285" height="${Y(z.lo) - Y(z.hi)}" fill="var(--temp-ok-bg)"/><polyline points="${p}" fill="none" stroke="var(--chart-blue)" stroke-width="2"/></svg>` };
   }
+  globalThis.sparkOf = spark;
   const kv = (k, v) => `<div><small>${esc(k)}</small><b>${v}</b></div>`;
   DRAWERS.load = d => {
     const l = load(d.id), c = cust(l.cust), tab = d.tab, dd = l.driver && drv(l.driver), tt = l.truck && trk(l.truck), pr = [['overview', T('Обзор', 'Übersicht', 'Overview', 'Шолу')], ['stops', T('Остановки', 'Stopps', 'Stops', 'Аялдамалар')], ['docs', T('Документы', 'Dokumente', 'Docs', 'Құжаттар')], ['notes', T('Заметки', 'Notizen', 'Notes', 'Жазбалар')], ['billing', T('Счёт', 'Abrechnung', 'Billing', 'Шот')], ['temp', T('Температура', 'Temperatur', 'Temperature', 'Температура')]];
@@ -885,6 +925,178 @@ ${S.dispTab === 'board' ? `<div class="filters">${sel('pri', T('Приорите
     const err = canMove(l, to); if (err) { if (l.status === 'unassigned') openDrawer({ type: 'load', id: l.id, tab: 'overview' }); return toast(err, 'err'); }
     setStatus(l.id, to); render();
   });
+})();
+
+/* Fleet (spec 5.4): 5 KPI, filters, table with temperature column, vehicle drawer, add vehicle, schedule maintenance. */
+(function () {
+  const ALL = T('Все', 'Alle', 'All', 'Барлығы');
+  const F = { type: '', st: '', hub: '', health: '' };
+  const sel = (key, label, opts) => `<label>${esc(label)}:</label><select class="select" data-ff="${key}">${opts.map(o => `<option value="${esc(o[0])}"${F[key] === o[0] ? ' selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
+  const hdot = t => `<span class="dot ${t.health === 'green' ? 'good' : t.health === 'amber' ? 'warn' : 'bad pulse'}" style="width:16px;height:16px"></span>`;
+  const tk = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls === 'blue' ? 'blue' : cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
+  const tempTxt = t => { const l = loadOfTruck(t.id); if (!l) return '<span class="faint">—</span>'; const z = ZONES[l.zone]; return `<b>${z.mid > 0 ? '+' : ''}${z.mid} / </b>${tempChip(l)}`; };
+  const rows = () => S.trucks.filter(t => { const st = truckState(t); return (!F.type || t.model.startsWith(F.type)) && (!F.st || st === F.st) && (!F.hub || t.hub === F.hub) && (!F.health || t.health === F.health); });
+  function table() {
+    const body = rows().map(t => { const st = truckState(t), l = loadOfTruck(t.id), d = l && drv(l.driver), loc = truckLoc(t);
+      return `<tr class="${S.drawer && S.drawer.id === t.id ? 'is-selected' : ''}" data-act="openT" data-id="${t.id}"><td><b>${esc(t.plate)}</b><div class="sub">${esc(t.make)}</div></td><td>${esc(t.model)}<div class="sub">${t.zones.map(z => ZONES[z].label).join(' · ')}</div></td><td>${chip(TS[st].c, TS[st].l)}</td>
+<td>${d ? `<span class="cell">${avatar(d.ini, 1)}<span><b>${esc(d.name)}</b><div class="sub">${esc(ST[l.status].l)}</div></span></span>` : `<span class="faint">${esc(T('Не назначен', 'Nicht zugewiesen', 'Unassigned', 'Тағайындалмаған'))}</span>`}</td>
+<td><b>${esc(loc.city)}</b><div class="sub">${esc(loc.sub)}</div></td><td>${tempTxt(t)}</td><td><b>${esc(agoTxt(t.ping))}</b></td><td class="center">${hdot(t)}</td><td><span class="kebab" data-act="openT" data-id="${t.id}">···</span></td></tr>`; }).join('');
+    const th = [T('ТС / ГРЗ', 'Fahrzeug / Kennz.', 'Vehicle / Plate', 'КҚ / МНТ'), T('Тип', 'Typ', 'Type', 'Түрі'), T('Статус', 'Status', 'Status', 'Күйі'), T('Водитель', 'Fahrer', 'Assigned driver', 'Жүргізуші'), T('Местоположение', 'Standort', 'Location', 'Орналасуы'), T('Уставка / факт °C', 'Soll / Ist °C', 'Set / actual °C', 'Белгіленген / нақты °C'), T('Последний пинг', 'Letzter Ping', 'Last GPS ping', 'Соңғы пинг'), T('Здоровье', 'Zustand', 'Health', 'Жай-күйі'), ''];
+    return `<div class="card tcard"><table class="table"><thead><tr>${th.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${body || `<tr><td colspan="9" class="empty">${esc(T('Нет ТС по фильтрам', 'Keine Fahrzeuge', 'No vehicles match', 'Сүзгі бойынша КҚ жоқ'))}</td></tr>`}</tbody></table></div>`;
+  }
+  SCREENS.fleet = {
+    title: () => navLabel('fleet'),
+    sub: () => T('Парк рефрижераторов: статус, температура, документы и ТО', 'Kühlfahrzeugpark: Status, Temperatur, Dokumente und Wartung', 'Reefer fleet: status, temperature, documents and maintenance', 'Рефрижератор паркі: күйі, температура, құжаттар және ТҚ'),
+    actions: () => `<button class="btn grey" data-act="impF">${esc(T('Импорт', 'Import', 'Import Fleet Data', 'Импорт'))}</button><button class="btn green" data-act="schedAny">${esc(T('Запланировать ТО', 'Wartung planen', 'Schedule Maintenance', 'ТҚ жоспарлау'))}</button><button class="btn primary" data-act="addT">${ic('plus')} ${esc(T('Добавить ТС', 'Fahrzeug hinzufügen', 'Add Vehicle', 'КҚ қосу'))}</button>`,
+    body: () => {
+      const sts = S.trucks.map(truckState), cnt = k => sts.filter(x => x === k).length;
+      const alarms = S.loads.filter(l => isActive(l) && tempState(l) === 'breach').length;
+      const comp = Math.round(S.trucks.filter(t => t.docs && docState(t.docs.calib) !== 'expired' && docState(t.docs.osago) !== 'expired').length / S.trucks.length * 100);
+      return `<div class="kpi-row k5">${tk('blue', 'truck', S.trucks.length, T('Всего ТС', 'Fahrzeuge gesamt', 'Total vehicles', 'КҚ барлығы'))}${tk('green', 'check', cnt('available'), T('Свободно', 'Frei', 'Available', 'Бос'))}${tk('yellow', 'truck', cnt('busy'), T('В рейсе', 'Im Einsatz', 'In use', 'Рейсте'))}${tk('red', 'alert', cnt('service') + cnt('critical'), T('Сервис / тревоги', 'Service / Alarme', 'Maintenance / alarms', 'Сервис / дабыл'))}${tk('purple', 'therm', comp + ' %', T('Соответствие GDP (поверка, ОСАГО)', 'GDP-Konformität (Kalibr., Haftpfl.)', 'GDP compliance (calibration, insurance)', 'GDP сәйкестігі (поверка, сақтандыру)'))}</div>
+<div class="filters">${sel('type', T('Тип', 'Typ', 'Type', 'Түрі'), [['', ALL], ['Reefer', 'Reefer'], ['Van', 'Van'], ['Tent', 'Tent']])}${sel('st', T('Статус', 'Status', 'Status', 'Күйі'), [['', ALL], ...Object.keys(TS).map(k => [k, TS[k].l])])}${sel('hub', T('Хаб', 'Hub', 'Hub', 'Хаб'), [['', ALL], ...Object.keys(HUBS).map(k => [k, HUBS[k].city])])}${sel('health', T('Здоровье', 'Zustand', 'Health', 'Жай-күйі'), [['', ALL], ['green', T('Норма', 'OK', 'Good', 'Қалыпты')], ['amber', T('Внимание', 'Achtung', 'Watch', 'Назар')], ['red', T('Критично', 'Kritisch', 'Critical', 'Сыни')]])}<button class="clear-all" data-act="clrF">× ${esc(T('Сбросить', 'Zurücksetzen', 'Clear All', 'Тазалау'))}</button></div>${table()}
+<p class="note">${esc(T('Предупреждения: ТС с просроченной поверкой датчиков не назначается на фарма-рейсы (GDP).', 'Hinweis: Fahrzeuge mit abgelaufener Sensor-Kalibrierung werden nicht für Pharma-Fahrten eingeplant (GDP).', 'Note: trucks with expired sensor calibration cannot be assigned to pharma loads (GDP).', 'Ескерту: датчиктер поверкасы өткен КҚ фарма рейстерге тағайындалмайды (GDP).'))}</p>`;
+    },
+  };
+  const kv = (k, v) => `<div><small>${esc(k)}</small><b>${v}</b></div>`;
+  const docRow = (label, iso) => { const s = docState(iso); return `<div class="docrow ${s}"><span><b>${esc(label)}</b><div class="sub">${esc(T('до', 'bis', 'until', 'дейін'))} ${fd(iso)}</div></span>${chip(DOCST[s].c, DOCST[s].l)}</div>`; };
+  DRAWERS.truck = d => {
+    const t = trk(d.id), l = loadOfTruck(t.id), dr = l && drv(l.driver), st = truckState(t), loc = truckLoc(t);
+    const toNext = t.svc.nextKm - t.km;
+    return { title: T('Карточка ТС', 'Fahrzeugdetails', 'Vehicle Details', 'КҚ мәліметі'), html: `<div class="drawer-section"><div class="ident"><span class="avatar" style="background:var(--primary)">${ic('truck', 18)}</span><div><b>${esc(t.plate)}</b><div class="sub">${esc(t.make)}</div></div><span style="margin-left:auto">${chip(TS[st].c, TS[st].l)}</span></div>
+<div class="kv">${kv(T('Тип', 'Typ', 'Type', 'Түрі'), esc(t.model))}${kv(T('Год', 'Baujahr', 'Year', 'Жылы'), t.year)}${kv(T('Пробег', 'Laufleistung', 'Mileage', 'Жүрісі'), t.km.toLocaleString('ru-RU') + ' ' + T('км', 'km', 'km', 'км'))}${kv(T('Паллето-мест', 'Palettenplätze', 'Pallet places', 'Паллет орны'), t.cap)}${kv(T('Зоны', 'Zonen', 'Zones', 'Аймақтар'), t.zones.map(z => zoneChip(z)).join(' '))}${kv(T('Реф-установка', 'Kühlaggregat', 'Reefer unit', 'Реф-қондырғы'), esc(t.unit) + (t.unitH ? ' · ' + t.unitH + ' ' + T('м-ч', 'Bh', 'h', 'м-сағ') : ''))}</div></div>
+<div class="drawer-section"><h4>${esc(T('Текущее назначение', 'Aktuelle Zuweisung', 'Current Assignment', 'Ағымдағы тағайындау'))}</h4>${dr ? `<div class="ident">${avatar(dr.ini, 1)}<div><b>${esc(dr.name)}</b><div class="sub">${esc(dr.code)} · ${esc(T('категория', 'Klasse', 'class', 'санат'))} ${dr.lic}</div></div></div><div class="kv">${kv(T('Рейс', 'Fahrt', 'Load', 'Рейс'), `<a class="lnk" data-act="open" data-id="${l.id}">${l.id}</a>`)}${kv(T('Температура', 'Temperatur', 'Temperature', 'Температура'), tempChip(l))}</div>` : `<p class="note">${esc(T('Не назначен на рейс', 'Keiner Fahrt zugewiesen', 'Not assigned to a load', 'Рейске тағайындалмаған'))}</p>`}
+<div class="kv" style="margin-top:12px">${kv(T('Местоположение', 'Standort', 'Location', 'Орналасуы'), esc(loc.city))}${kv(T('Последний пинг', 'Letzter Ping', 'Last check-in', 'Соңғы пинг'), esc(agoTxt(t.ping)))}</div></div>
+<div class="drawer-section"><h4>${esc(T('Документы и допуски', 'Dokumente und Zulassungen', 'Documents & compliance', 'Құжаттар мен рұқсаттар'))}</h4>${docRow(T('Поверка датчиков температуры', 'Kalibrierung Temperatursensoren', 'Temperature sensor calibration', 'Температура датчиктерінің поверкасы'), t.docs.calib)}${docRow(T('Техосмотр', 'Technische Prüfung', 'Technical inspection', 'Техникалық қарау'), t.docs.to)}${docRow('ОСАГО', t.docs.osago)}${docRow(T('Страхование груза', 'Frachtversicherung', 'Cargo insurance', 'Жүкті сақтандыру'), t.docs.cargo)}</div>
+<div class="drawer-section"><h4>${esc(T('График ТО', 'Wartungsplan', 'Maintenance Schedule', 'ТҚ кестесі'))}</h4><div class="kv">${kv(T('Последнее ТО', 'Letzte Wartung', 'Last service', 'Соңғы ТҚ'), fd(t.svc.last) + ' · ' + t.svc.lastKm.toLocaleString('ru-RU') + ' ' + T('км', 'km', 'km', 'км'))}${kv(T('Следующее ТО', 'Nächste Wartung', 'Next service', 'Келесі ТҚ'), t.svc.nextKm.toLocaleString('ru-RU') + ' ' + T('км', 'km', 'km', 'км'))}</div><p class="note">${toNext <= 3000 ? chip('yellow', T('Скоро ТО', 'Wartung bald', 'Due soon', 'ТҚ жақын')) + ' ' : ''}${esc(T('Осталось', 'Verbleibend', 'Remaining', 'Қалды'))} ${toNext.toLocaleString('ru-RU')} ${esc(T('км', 'km', 'km', 'км'))}</p></div>
+<div class="drawer-section actbar">${t.status === 'service' ? `<button class="btn green" data-act="backSvc" data-id="${t.id}">${esc(T('Вернуть в эксплуатацию', 'Wieder in Betrieb', 'Return to service', 'Қызметке қайтару'))}</button>` : t.status === 'available' ? `<button class="btn primary" data-act="toSvc" data-id="${t.id}">${esc(T('Запланировать ТО', 'Wartung planen', 'Schedule maintenance', 'ТҚ жоспарлау'))}</button>` : `<p class="note">${esc(T('ТО недоступно: ТС в рейсе', 'Wartung nicht möglich: Fahrzeug im Einsatz', 'Maintenance unavailable: vehicle is on a trip', 'ТҚ қолжетімсіз: КҚ рейсте'))}</p>`}</div>` };
+  };
+  DRAWERS.addTruck = () => ({ title: T('Новое ТС', 'Neues Fahrzeug', 'New Vehicle', 'Жаңа КҚ'), html: `<div class="drawer-section"><label class="fl">${esc(T('ГРЗ (123 ABC 01)', 'Kennzeichen (123 ABC 01)', 'Plate (123 ABC 01)', 'МНТ (123 ABC 01)'))}<input class="select" id="nt_plate" placeholder="123 ABC 01"></label><label class="fl">${esc(T('Марка / модель', 'Marke / Modell', 'Make / model', 'Маркасы / моделі'))}<input class="select" id="nt_make" placeholder="Volvo FH 500"></label><div class="two"><label class="fl">${esc(T('Паллето-мест', 'Palettenplätze', 'Pallet places', 'Паллет орны'))}<input class="select" id="nt_cap" type="number" value="33" min="1" max="40"></label><label class="fl">${esc(T('Хаб', 'Hub', 'Hub', 'Хаб'))}<select class="select" id="nt_hub">${Object.keys(HUBS).map(k => `<option value="${k}">${esc(HUBS[k].city)}</option>`).join('')}</select></label></div><div class="fl">${esc(T('Температурные зоны', 'Temperaturzonen', 'Temperature zones', 'Температура аймақтары'))}<div class="actbar">${Object.keys(ZONES).map(z => `<label><input type="checkbox" class="nt_z" value="${z}"${z === 'chilled' ? ' checked' : ''}> ${ZONES[z].label}</label>`).join('')}</div></div><p class="note" id="nt_err" style="color:var(--chip-red-fg)"></p><button class="btn primary block" data-act="saveT">${esc(T('Добавить', 'Hinzufügen', 'Add vehicle', 'Қосу'))}</button></div>` });
+  Object.assign(ACT, {
+    openT: d => openDrawer({ type: 'truck', id: d.id }),
+    clrF: () => { Object.keys(F).forEach(k => F[k] = ''); render(); },
+    impF: () => toast(T('Импорт парка: будет позже', 'Flottenimport: später', 'Fleet import: later', 'Парк импорты: кейінірек')),
+    schedAny: () => { const t = S.trucks.find(x => x.status === 'available' && x.svc.nextKm - x.km <= 3000) || S.trucks.find(x => x.status === 'available'); if (t) openDrawer({ type: 'truck', id: t.id }); else toast(T('Нет свободных ТС для ТО', 'Keine freien Fahrzeuge', 'No free vehicles for maintenance', 'ТҚ үшін бос КҚ жоқ'), 'err'); },
+    toSvc: d => { const t = trk(d.id); t.status = 'service'; toast(T('ТО запланировано: ', 'Wartung geplant: ', 'Maintenance scheduled: ', 'ТҚ жоспарланды: ') + t.plate); },
+    backSvc: d => { const t = trk(d.id); t.status = 'available'; t.svc.last = '2026-10-18'; t.svc.lastKm = t.km; t.svc.nextKm = t.km + 15000; t.health = 'green'; toast(T('ТС возвращено в эксплуатацию', 'Fahrzeug wieder im Betrieb', 'Vehicle back in service', 'КҚ қызметке қайтарылды')); },
+    addT: () => openDrawer({ type: 'addTruck' }),
+    saveT: () => { const plate = $('#nt_plate').value.trim().toUpperCase(), zs = $$('.nt_z').filter(x => x.checked).map(x => x.value), cap = +$('#nt_cap').value;
+      const err = !/^\d{3} [A-Z]{3} \d{2}$/.test(plate) ? T('ГРЗ в формате 123 ABC 01', 'Kennzeichen im Format 123 ABC 01', 'Plate format: 123 ABC 01', 'МНТ форматы: 123 ABC 01') : S.trucks.some(t => t.plate === plate) ? T('Такой ГРЗ уже есть', 'Kennzeichen existiert bereits', 'Plate already exists', 'Мұндай МНТ бар') : !zs.length ? T('Выберите зону', 'Zone wählen', 'Select a zone', 'Аймақ таңдаңыз') : !(cap >= 1 && cap <= 40) ? T('Паллет: 1–40', 'Paletten: 1–40', 'Pallets: 1–40', 'Паллет: 1–40') : '';
+      if (err) { $('#nt_err').textContent = err; return; }
+      const id = 't' + (S.trucks.length + 1); S.trucks.push({ id, plate, make: $('#nt_make').value.trim() || '—', year: 2026, km: 0, model: cap > 20 ? 'Reefer 20 t' : 'Reefer 12 t', zones: zs, cap, status: 'available', hub: $('#nt_hub').value, ping: 0, health: 'green', unit: '—', unitH: 0, docs: { osago: '2027-10-01', cargo: '2027-10-01', calib: '2027-10-01', to: '2027-10-01' }, svc: { last: '2026-10-18', lastKm: 0, nextKm: 15000 } });
+      S.drawer = { type: 'truck', id }; toast(T('ТС добавлено: ', 'Fahrzeug hinzugefügt: ', 'Vehicle added: ', 'КҚ қосылды: ') + plate); },
+  });
+  document.addEventListener('input', e => { const k = e.target.dataset && e.target.dataset.ff; if (k) { F[k] = e.target.value; render(); } });
+})();
+
+/* Drivers (spec 5.5): compliance-first view. RTO = driving/rest-time risk; documents expire; add driver; compliance report (CSV). */
+(function () {
+  const ALL = T('Все', 'Alle', 'All', 'Барлығы');
+  const F = { st: '', rto: '', hub: '', rate: '' };
+  const DS = { available: { c: 'green', l: T('Свободен', 'Frei', 'Available', 'Бос') }, busy: { c: 'yellow', l: T('В рейсе', 'Im Einsatz', 'On trip', 'Рейсте') }, rest: { c: 'gray', l: T('Отдых', 'Ruhe', 'Resting', 'Демалыс') } };
+  const DOCN = { lic: T('Водительское удостоверение', 'Führerschein', 'Driving licence', 'Жүргізуші куәлігі'), med: T('Медицинская справка', 'Ärztliche Bescheinigung', 'Medical certificate', 'Медициналық анықтама'), gdp: T('Обучение GDP', 'GDP-Schulung', 'GDP training', 'GDP оқуы') };
+  const hm = h => { const m = Math.round(h * 60); return Math.floor(m / 60) + T(' ч ', ' h ', 'h ', ' сағ ') + p2(m % 60) + T(' мин', ' min', 'm', ' мин'); };
+  const stars = r => `<span class="stars">${'★'.repeat(Math.round(r))}${'☆'.repeat(5 - Math.round(r))}</span> <b>${String(r).replace('.', ',')}</b>`;
+  const rto = d => (d.status === 'rest' || d.rto < 4) ? 'red' : d.rto < 6 ? 'amber' : 'green';
+  const sel = (key, label, opts) => `<label>${esc(label)}:</label><select class="select" data-df="${key}">${opts.map(o => `<option value="${esc(o[0])}"${F[key] === o[0] ? ' selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
+  const lastTrip = d => { const l = S.loads.filter(x => x.driver === d.id).sort((a, b) => b.eta.localeCompare(a.eta))[0]; return l ? { l, txt: HUBS[l.from].city + ' → ' + HUBS[l.to].city, sub: isActive(l) ? T('в процессе · ETA ', 'laufend · ETA ', 'in progress · ETA ', 'орындалуда · ETA ') + fdt(l.eta) : T('завершён ', 'abgeschlossen ', 'completed ', 'аяқталды ') + fdt(l.eta).slice(0, 5) } : null; };
+  const expired = d => d.docs.filter(x => docState(x.to) === 'expired').length, soon = d => d.docs.filter(x => docState(x.to) === 'soon').length;
+  const tk = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
+  const list = () => S.drivers.filter(d => (!F.st || d.status === F.st) && (!F.rto || rto(d) === F.rto) && (!F.hub || d.hub === F.hub) && (!F.rate || d.rating >= +F.rate));
+  function table() {
+    const body = list().map(d => { const lt = lastTrip(d), t = loadOfDriver(d.id) && trk(loadOfDriver(d.id).truck), bad = expired(d), sn = soon(d);
+      return `<tr class="${S.drawer && S.drawer.id === d.id ? 'is-selected' : ''}" data-act="openD" data-id="${d.id}"><td><span class="cell">${avatar(d.ini, 1)}<span><b>${esc(d.name)}</b><div class="sub">${d.code} · ${esc(T('кат.', 'Kl.', 'class', 'сан.'))} ${d.lic} · ${d.exp} ${esc(T('лет стажа', 'J. Erfahrung', 'yrs exp.', 'жыл өтіл'))}</div></span></span></td>
+<td>${chip(DS[d.status].c, DS[d.status].l)}</td><td class="center"><span class="dot ${rtoDot(d)}${rto(d) === 'red' ? ' pulse' : ''}" style="width:16px;height:16px"></span></td><td>${stars(d.rating)}</td>
+<td>${lt ? `<b>${esc(lt.txt)}</b><div class="sub">${esc(lt.sub)}</div>` : '<span class="faint">—</span>'}</td><td><b>${esc(HUBS[d.hub].city)}</b><div class="sub">${t ? esc(T('в рейсе, ', 'im Einsatz, ', 'on trip, ', 'рейсте, ') + t.plate) : d.status === 'rest' ? esc(T('отдых (РТО)', 'Ruhezeit (RTO)', 'rest period (RTO)', 'демалыс (РТО)')) : esc(HUBS[d.hub].name)}</div></td>
+<td>${bad ? chip('red', T('Док.: просрочено ', 'Dok.: abgelaufen ', 'Docs: expired ', 'Құж.: мерзімі өтті ') + bad) : sn ? chip('yellow', T('Док.: скоро ', 'Dok.: bald ', 'Docs: soon ', 'Құж.: жақында ') + sn) : chip('green', T('Док. в порядке', 'Dok. OK', 'Docs OK', 'Құж. дұрыс'))}</td></tr>`; }).join('');
+    const th = [T('Водитель', 'Fahrer', 'Driver', 'Жүргізуші'), T('Статус', 'Status', 'Status', 'Күйі'), T('РТО', 'RTO', 'RTO risk', 'РТО'), T('Рейтинг', 'Bewertung', 'Rating', 'Рейтинг'), T('Последний рейс', 'Letzte Fahrt', 'Last trip', 'Соңғы рейс'), T('Местоположение', 'Standort', 'Location', 'Орналасуы'), T('Документы', 'Dokumente', 'Documents', 'Құжаттар')];
+    return `<div class="card tcard"><table class="table"><thead><tr>${th.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${body || `<tr><td colspan="7" class="empty">${esc(T('Нет водителей по фильтрам', 'Keine Fahrer', 'No drivers match', 'Сүзгі бойынша жүргізуші жоқ'))}</td></tr>`}</tbody></table></div>`;
+  }
+  SCREENS.drivers = {
+    title: () => navLabel('drivers'),
+    sub: () => T('Кто свободен, у кого заканчивается время вождения и просрочены документы', 'Wer ist frei, wessen Lenkzeit endet, welche Dokumente laufen ab', 'Who is available, whose driving time is running out, whose documents expire', 'Кім бос, кімнің жүргізу уақыты бітеді, құжаттар мерзімі'),
+    actions: () => `<button class="btn grey" data-act="impD">${esc(T('Импорт', 'Import', 'Import Drivers', 'Импорт'))}</button><button class="btn green" data-act="compRep">${ic('file')} ${esc(T('Отчёт по соответствию', 'Compliance-Bericht', 'Compliance Report', 'Сәйкестік есебі'))}</button><button class="btn primary" data-act="addD">${ic('plus')} ${esc(T('Добавить водителя', 'Fahrer hinzufügen', 'Add New Driver', 'Жүргізуші қосу'))}</button>`,
+    body: () => { const avg = S.drivers.reduce((s, d) => s + d.rating, 0) / S.drivers.length;
+      return `<div class="kpi-row k4">${tk('blue', 'user', S.drivers.length, T('Активные водители', 'Aktive Fahrer', 'Total active drivers', 'Белсенді жүргізушілер'))}${tk('green', 'check', S.drivers.filter(d => d.status === 'available').length, T('Свободны сейчас', 'Jetzt frei', 'Available now', 'Қазір бос'))}${tk('red', 'alert', S.drivers.filter(d => rto(d) === 'red' || expired(d)).length, T('Риски РТО / документы', 'RTO- / Dokumentrisiken', 'RTO / document alerts', 'РТО / құжат тәуекелі'))}${tk('yellow', 'spark', avg.toFixed(1).replace('.', ','), T('Средний рейтинг', 'Ø Bewertung', 'Average rating', 'Орташа рейтинг'))}</div>
+<div class="filters">${sel('st', T('Статус', 'Status', 'Status', 'Күйі'), [['', ALL], ...Object.keys(DS).map(k => [k, DS[k].l])])}${sel('rto', T('Риск РТО', 'RTO-Risiko', 'RTO risk', 'РТО тәуекелі'), [['', ALL], ['green', T('Норма', 'OK', 'OK', 'Қалыпты')], ['amber', T('Приближается', 'Nahe Grenze', 'Approaching', 'Жақындады')], ['red', T('Нарушение / отдых', 'Verstoß / Ruhe', 'Violation / rest', 'Бұзу / демалыс')]])}${sel('hub', T('Хаб', 'Hub', 'Hub', 'Хаб'), [['', ALL], ...Object.keys(HUBS).map(k => [k, HUBS[k].city])])}${sel('rate', T('Рейтинг', 'Bewertung', 'Rating', 'Рейтинг'), [['', ALL], ['4.8', '≥ 4,8'], ['4.5', '≥ 4,5']])}<button class="clear-all" data-act="clrD">× ${esc(T('Сбросить', 'Zurücksetzen', 'Clear Filters', 'Тазалау'))}</button></div>${table()}`; },
+  };
+  const kv = (k, v) => `<div><small>${esc(k)}</small><b>${v}</b></div>`;
+  DRAWERS.driver = d => {
+    const dr = drv(d.id), lt = lastTrip(dr), left = Math.max(0, 56 - dr.week);
+    return { title: T('Профиль водителя', 'Fahrerprofil', 'Driver Profile', 'Жүргізуші профилі'), html: `<div class="drawer-section center"><span class="avatar" style="background:var(--primary);width:62px;height:62px;font-size:20px">${esc(dr.ini)}</span><h3 style="margin:10px 0 2px">${esc(dr.name)}</h3><div class="sub">${dr.code} · ${dr.exp} ${esc(T('лет стажа', 'J. Erfahrung', 'years experience', 'жыл өтіл'))}</div><div style="margin-top:8px">${chip(DS[dr.status].c, DS[dr.status].l)}</div></div>
+<div class="drawer-section"><div class="kv">${kv(T('Телефон', 'Telefon', 'Phone', 'Телефон'), esc(dr.phone))}${kv(T('Категория', 'Klasse', 'Licence class', 'Санат'), dr.lic)}${kv(T('Рейтинг', 'Bewertung', 'Rating', 'Рейтинг'), stars(dr.rating))}${kv(T('Хаб', 'Hub', 'Hub', 'Хаб'), esc(HUBS[dr.hub].city))}</div></div>
+<div class="drawer-section"><h4>${esc(T('Соответствие и документы', 'Compliance und Dokumente', 'Compliance & Documents', 'Сәйкестік және құжаттар'))}</h4>${dr.docs.map(x => { const s = docState(x.to); return `<div class="docrow ${s}"><span><b>${esc(DOCN[x.type])}</b><div class="sub">${esc(T('до', 'bis', 'Expires', 'дейін'))} ${fd(x.to)}</div></span>${chip(DOCST[s].c, DOCST[s].l)}</div>`; }).join('')}${expired(dr) ? `<p class="note" style="color:var(--chip-red-fg)">${esc(T('Просроченные права/медсправка блокируют назначение на рейс.', 'Abgelaufener Führerschein/Bescheinigung sperrt die Zuweisung.', 'Expired licence/medical certificate blocks assignment.', 'Мерзімі өткен куәлік/анықтама тағайындауды бұғаттайды.'))}</p>` : ''}</div>
+<div class="drawer-section"><h4>${esc(T('Время вождения и отдых (РТО)', 'Lenk- und Ruhezeit (RTO)', 'Driving & rest time (RTO)', 'Жүргізу және демалыс уақыты (РТО)'))}</h4><div class="kv">${kv(T('Осталось вождения', 'Verbleibende Lenkzeit', 'Drive time remaining', 'Қалған жүргізу'), `<span style="color:${rto(dr) === 'green' ? '#16a34a' : rto(dr) === 'amber' ? '#b8860b' : 'var(--label-red)'}">${hm(dr.rto)}</span>`)}${kv(T('На смене', 'Im Dienst', 'On duty', 'Ауысымда'), hm(dr.onDuty))}${kv(T('Осталось за неделю', 'Woche verbleibend', 'Weekly remaining', 'Аптасына қалды'), left + ' ' + T('ч', 'h', 'h', 'сағ'))}</div><p class="note">${esc(T('Лимиты ориентировочные (смена 9 ч, неделя 56 ч); нормы РК подлежат уточнению.', 'Richtwerte (Schicht 9 h, Woche 56 h); RK-Normen werden geprüft.', 'Indicative limits (9 h shift, 56 h week); KZ norms to be verified.', 'Бағдарлы лимиттер (ауысым 9 сағ, апта 56 сағ); ҚР нормалары нақтыланады.'))}</p></div>
+<div class="drawer-section"><h4>${esc(T('Последний рейс', 'Letzte Fahrt', 'Last trip', 'Соңғы рейс'))}</h4>${lt ? `<a class="lnk" data-act="open" data-id="${lt.l.id}">${lt.l.id}</a><div class="sub">${esc(lt.txt)} · ${esc(lt.sub)}</div>` : '<span class="faint">—</span>'}</div>
+<div class="drawer-section actbar">${dr.status === 'available' ? `<button class="btn grey" data-act="toRest" data-id="${dr.id}">${esc(T('Отправить на отдых', 'In Ruhezeit schicken', 'Send to rest', 'Демалысқа жіберу'))}</button>` : dr.status === 'rest' ? `<button class="btn green" data-act="fromRest" data-id="${dr.id}">${esc(T('Вернуть в работу', 'Wieder verfügbar', 'Back to available', 'Жұмысқа қайтару'))}</button>` : ''}</div>` };
+  };
+  DRAWERS.addDriver = () => ({ title: T('Новый водитель', 'Neuer Fahrer', 'New Driver', 'Жаңа жүргізуші'), html: `<div class="drawer-section"><label class="fl">${esc(T('ФИО', 'Name', 'Full name', 'Аты-жөні'))}<input class="select" id="nd_name"></label><div class="two"><label class="fl">${esc(T('Категория', 'Klasse', 'Class', 'Санат'))}<select class="select" id="nd_lic"><option>C</option><option>CE</option></select></label><label class="fl">${esc(T('Стаж, лет', 'Erfahrung, Jahre', 'Experience, years', 'Өтілі, жыл'))}<input class="select" id="nd_exp" type="number" value="3" min="0"></label></div><label class="fl">${esc(T('Хаб', 'Hub', 'Hub', 'Хаб'))}<select class="select" id="nd_hub">${Object.keys(HUBS).map(k => `<option value="${k}">${esc(HUBS[k].city)}</option>`).join('')}</select></label><p class="note" id="nd_err" style="color:var(--chip-red-fg)"></p><button class="btn primary block" data-act="saveD">${esc(T('Добавить', 'Hinzufügen', 'Add driver', 'Қосу'))}</button></div>` });
+  Object.assign(ACT, {
+    openD: d => openDrawer({ type: 'driver', id: d.id }),
+    clrD: () => { Object.keys(F).forEach(k => F[k] = ''); render(); },
+    impD: () => toast(T('Импорт водителей: будет позже', 'Fahrerimport: später', 'Driver import: later', 'Жүргізуші импорты: кейінірек')),
+    addD: () => openDrawer({ type: 'addDriver' }),
+    toRest: d => { drv(d.id).status = 'rest'; toast(T('Водитель отправлен на отдых', 'Fahrer in Ruhezeit', 'Driver sent to rest', 'Жүргізуші демалысқа жіберілді')); },
+    fromRest: d => { const x = drv(d.id); x.status = 'available'; x.rto = 9; toast(T('Водитель снова доступен', 'Fahrer wieder verfügbar', 'Driver available again', 'Жүргізуші қайта қолжетімді')); },
+    saveD: () => { const n = $('#nd_name').value.trim(); if (n.split(/\s+/).length < 2) { $('#nd_err').textContent = T('Укажите имя и фамилию', 'Vor- und Nachname angeben', 'Enter first and last name', 'Аты-жөнін көрсетіңіз'); return; }
+      const id = 'd' + (S.drivers.length + 1), ini = n.split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+      S.drivers.push({ id, code: 'DRV-' + String(S.drivers.length + 1).padStart(3, '0'), name: n, ini, rto: 9, status: 'available', lic: $('#nd_lic').value, exp: +$('#nd_exp').value || 0, rating: 4.5, phone: '+7 7— — — —', hub: $('#nd_hub').value, onDuty: 0, week: 0, docs: [{ type: 'lic', to: '2030-01-01' }, { type: 'med', to: '2027-10-01' }, { type: 'gdp', to: '2027-10-01' }] });
+      S.drawer = { type: 'driver', id }; toast(T('Водитель добавлен: ', 'Fahrer hinzugefügt: ', 'Driver added: ', 'Жүргізуші қосылды: ') + n); },
+    compRep: () => { const rows = [['code', 'name', 'doc', 'expires', 'state']]; S.drivers.forEach(d => d.docs.forEach(x => rows.push([d.code, d.name, x.type, x.to, docState(x.to)])));
+      const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';')).join('\n'), a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv' })); a.download = 'driver-compliance.csv'; a.click();
+      toast(T('Отчёт сформирован: просрочено ', 'Bericht erstellt: abgelaufen ', 'Report created: expired ', 'Есеп жасалды: мерзімі өткен ') + rows.slice(1).filter(r => r[4] === 'expired').length + T(', скоро истекают ', ', bald ablaufend ', ', expiring soon ', ', жақында аяқталады ') + rows.slice(1).filter(r => r[4] === 'soon').length); },
+  });
+  document.addEventListener('input', e => { const k = e.target.dataset && e.target.dataset.df; if (k) { F[k] = e.target.value; render(); } });
+})();
+
+/* Routes & Tracking (spec 5.6): map-first live tracking with temperature state, route drawer. */
+(function () {
+  const ALL = T('Все', 'Alle', 'All', 'Барлығы');
+  const F = { rs: '', drv: '' }; let zoom = 1;
+  const RS = { on_time: { c: 'green', l: T('В срок', 'Pünktlich', 'On time', 'Уақытында') }, at_risk: { c: 'yellow', l: T('Риск', 'Risiko', 'At risk', 'Тәуекел') }, critical: { c: 'red', l: T('Критично', 'Kritisch', 'Critical', 'Сыни') } };
+  const rstate = l => l.status === 'problem' || tempState(l) === 'breach' ? 'critical' : tempState(l) === 'warn' ? 'at_risk' : 'on_time';
+  const live = () => S.loads.filter(l => (l.status === 'in_transit' || l.status === 'problem') && (!F.rs || rstate(l) === F.rs) && (!F.drv || l.driver === F.drv));
+  const sel = (key, label, opts) => `<label>${esc(label)}:</label><select class="select" data-rf="${key}">${opts.map(o => `<option value="${esc(o[0])}"${F[key] === o[0] ? ' selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
+  const tk = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
+  function map() {
+    const W = 600 / zoom, H = 340 / zoom, cx = 330, cy = 180, vb = `${cx - W / 2} ${cy - H / 2} ${W} ${H}`, k = 1 / zoom;
+    const hubs = Object.values(HUBS).map(h => `<g><circle cx="${h.x}" cy="${h.y}" r="${7 * k}" fill="#fff" stroke="var(--primary)" stroke-width="${3 * k}"/><rect x="${h.x + 10 * k}" y="${h.y - 9 * k}" width="${(h.city.length * 7 + 12) * k}" height="${18 * k}" rx="${9 * k}" fill="#fff" stroke="var(--border-input)"/><text x="${h.x + 16 * k}" y="${h.y + 4 * k}" font-size="${12 * k}" class="maplbl" style="font-size:${12 * k}px">${esc(h.city)}</text></g>`).join('');
+    const ls = live(), lines = ls.map(l => { const a = HUBS[l.from], b = HUBS[l.to]; const sel = S.drawer && S.drawer.id === l.id; return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="var(--primary)" stroke-opacity="${sel ? 1 : .35}" stroke-width="${(sel ? 3 : 2) * k}" stroke-dasharray="${5 * k} ${4 * k}"/>`; }).join('');
+    const mk = ls.map(l => { const a = HUBS[l.from], b = HUBS[l.to], x = a.x + (b.x - a.x) * l.progress, y = a.y + (b.y - a.y) * l.progress, rs = rstate(l), t = trk(l.truck), sel = S.drawer && S.drawer.id === l.id, sc = (sel ? 1.3 : 1) * k;
+      const col = rs === 'critical' ? 'var(--mk-red)' : rs === 'at_risk' ? 'var(--mk-status-yellow)' : 'var(--mk-green)';
+      return `<g class="mk" data-act="openR" data-id="${l.id}" transform="translate(${x},${y}) scale(${sc})">${sel ? '<circle r="22" fill="var(--primary)" fill-opacity=".15"/>' : ''}<circle r="14" fill="${col}"/><path d="M-7 -3h9v6h-9zM2 -1h4l3 3v2h-7z" fill="#fff"/><rect x="-48" y="18" width="96" height="17" rx="6" fill="#fff" stroke="var(--border-input)"/><text x="0" y="30" text-anchor="middle" class="maplbl sm">${esc(t.plate)} · ${l.temp > 0 ? '+' : ''}${String(l.temp).replace('.', ',')}°</text></g>`; }).join('');
+    return `<div class="mapfull"><svg viewBox="${vb}" class="kzmap"><path d="M40 120 L110 70 L230 60 L330 40 L450 60 L560 90 L580 160 L540 230 L560 290 L440 310 L330 318 L230 300 L140 250 L60 200 Z" fill="#eef2f6" stroke="#d7dee7" stroke-width="${2 * k}"/>${lines}${hubs}${mk}</svg><div class="zoom"><button data-act="zoom" data-v="1">+</button><button data-act="zoom" data-v="-1">−</button></div></div>`;
+  }
+  SCREENS.routes = {
+    title: () => navLabel('routes'),
+    sub: () => T('Где сейчас каждая машина, какие рейсы выбиваются из графика и температуры', 'Wo ist jedes Fahrzeug, welche Fahrten weichen von Zeit und Temperatur ab', 'Where every truck is now and which loads are off schedule or off temperature', 'Әр көлік қазір қайда, қай рейс кесте мен температурадан ауытқыған'),
+    actions: () => `<button class="btn grey" data-act="expR">${esc(T('Экспорт', 'Export', 'Export Data', 'Экспорт'))}</button><button class="btn primary" data-act="optR">${ic('route')} ${esc(T('Оптимизация маршрутов', 'Routenoptimierung', 'Route Optimization', 'Маршрутты оңтайландыру'))}</button>`,
+    body: () => { const all = S.loads.filter(l => l.status === 'in_transit' || l.status === 'problem'), crit = all.filter(l => rstate(l) === 'critical').length, ok = all.length ? Math.round((all.length - crit) / all.length * 100) : 100, act = S.trucks.filter(t => t.status !== 'service');
+      return `<div class="kpi-row k4">${tk('blue', 'route', all.length, T('Активные маршруты', 'Aktive Routen', 'Active routes', 'Белсенді маршруттар'))}${tk('green', 'check', ok + ' %', T('В срок и в диапазоне', 'Pünktlich & im Bereich', 'On time & in range', 'Уақытында және диапазонда'))}${tk('red', 'alert', crit, T('Критические отклонения', 'Kritische Abweichungen', 'Critical deviations', 'Сыни ауытқулар'))}${tk('purple', 'truck', S.trucks.filter(t => t.status === 'busy').length + '/' + act.length, T('Парк в рейсе', 'Fuhrpark im Einsatz', 'Fleet status', 'Парк рейсте'))}</div>
+<div class="filters">${sel('rs', T('Статус маршрута', 'Routenstatus', 'Route status', 'Маршрут күйі'), [['', ALL], ...Object.keys(RS).map(k => [k, RS[k].l])])}${sel('drv', T('Водитель', 'Fahrer', 'Driver', 'Жүргізуші'), [['', ALL], ...S.drivers.map(d => [d.id, d.name])])}<button class="clear-all" data-act="clrR">× ${esc(T('Сбросить', 'Zurücksetzen', 'Clear Filters', 'Тазалау'))}</button></div>${map()}
+<div class="card tcard"><table class="table"><thead><tr><th>${esc(T('Рейс', 'Fahrt', 'Load', 'Рейс'))}</th><th>${esc(T('Маршрут', 'Route', 'Route', 'Маршрут'))}</th><th>${esc(T('Водитель / ТС', 'Fahrer / Fzg.', 'Driver / Truck', 'Жүргізуші / КҚ'))}</th><th>${esc(T('Прогресс', 'Fortschritt', 'Progress', 'Барысы'))}</th><th>${esc(T('Температура', 'Temperatur', 'Temperature', 'Температура'))}</th><th>${esc(T('Статус', 'Status', 'Status', 'Күйі'))}</th></tr></thead><tbody>${live().map(l => `<tr class="${S.drawer && S.drawer.id === l.id ? 'is-selected' : ''}" data-act="openR" data-id="${l.id}"><td><a class="lnk">${l.id}</a></td><td>${esc(HUBS[l.from].city)} → ${esc(HUBS[l.to].city)}</td><td><b>${esc(drv(l.driver).name)}</b><div class="sub">${esc(trk(l.truck).plate)}</div></td><td style="width:20%"><div class="progress ${rstate(l) === 'critical' ? 'crit' : ''}"><i style="width:${Math.round(l.progress * 100)}%"></i></div><div class="sub">${Math.round(l.progress * 100)} %</div></td><td>${tempChip(l)}</td><td>${chip(RS[rstate(l)].c, RS[rstate(l)].l)}</td></tr>`).join('') || `<tr><td colspan="6" class="empty">${esc(T('Нет маршрутов по фильтрам', 'Keine Routen', 'No routes match', 'Маршрут жоқ'))}</td></tr>`}</tbody></table></div>`; },
+  };
+  const kv = (k, v) => `<div><small>${esc(k)}</small><b>${v}</b></div>`;
+  DRAWERS.route = d => {
+    const l = load(d.id), dr = drv(l.driver), t = trk(l.truck), km = dist(l.from, l.to), done = Math.round(km * l.progress), rs = rstate(l), s = sparkOf(l);
+    const evs = [['green', T('Отправление с хаба', 'Abfahrt vom Hub', 'Departed hub', 'Хабтан шықты'), HUBS[l.from].name], ['blue', T('На трассе', 'Auf der Strecke', 'On the highway', 'Тасжолда'), done + ' ' + T('км от старта', 'km ab Start', 'km from start', 'км старттан')]].concat(l.notes.slice(-2).map(n => ['red', n.who, n.text]));
+    const comp = Math.max(0, 100 - Math.round(s.ex / 15) * 4);
+    return { title: T('Детали маршрута', 'Routendetails', 'Route Details', 'Маршрут мәліметі'), html: `<div class="drawer-section"><div class="ident"><span class="avatar" style="background:var(--${rs === 'critical' ? 'red' : rs === 'at_risk' ? 'yellow' : 'green'})">${ic('truck', 18)}</span><div><a class="lnk" data-act="open" data-id="${l.id}">${l.id}</a><div class="sub">${esc(dr.name)} · ${esc(t.plate)}</div></div><span style="margin-left:auto">${chip(RS[rs].c, RS[rs].l)}</span></div>
+<div class="kv">${kv(T('Откуда', 'Von', 'Origin', 'Қайдан'), esc(HUBS[l.from].city))}${kv(T('Куда', 'Nach', 'Destination', 'Қайда'), esc(HUBS[l.to].city))}${kv(T('Расстояние', 'Strecke', 'Distance', 'Қашықтық'), km + ' ' + T('км', 'km', 'km', 'км'))}${kv(T('Температура', 'Temperatur', 'Temperature', 'Температура'), tempChip(l))}</div></div>
+<div class="drawer-section"><h4>${esc(T('ETA и прогресс', 'ETA und Fortschritt', 'ETA & Progress', 'ETA және барысы'))}</h4><div class="kv">${kv(T('Прибытие', 'Ankunft', 'Estimated arrival', 'Келу'), fdt(l.eta))}${kv(T('Пройдено', 'Zurückgelegt', 'Progress', 'Жүргені'), done + ' / ' + km + ' ' + T('км', 'km', 'km', 'км'))}</div><div class="progress ${rs === 'critical' ? 'crit' : ''}" style="margin-top:12px"><i style="width:${Math.round(l.progress * 100)}%"></i></div><p class="note">${esc(T('Последний GPS: ', 'Letztes GPS: ', 'Last GPS update: ', 'Соңғы GPS: '))}${esc(agoTxt(t.ping))}</p></div>
+<div class="drawer-section stops"><h4>${esc(T('Этапы', 'Etappen', 'Stop Progress', 'Кезеңдер'))}</h4>${[[T('Погрузка', 'Beladung', 'Pickup', 'Тиеу'), HUBS[l.from].name, true], [T('В пути', 'Unterwegs', 'In transit', 'Жолда'), done + ' ' + T('км', 'km', 'km', 'км'), true], [T('Выгрузка', 'Entladung', 'Delivery', 'Түсіру'), HUBS[l.to].name + ' · ETA ' + fdt(l.eta), false]].map(x => `<div class="stop ${x[2] ? 'done' : ''}"><i></i><div><b>${esc(x[0])}</b><div class="sub">${esc(x[1])}</div></div></div>`).join('')}</div>
+<div class="drawer-section"><h4>${esc(T('Температура (6 ч)', 'Temperatur (6 h)', 'Temperature (6 h)', 'Температура (6 сағ)'))}</h4>${s.svg}<p class="note">${esc(T('Отклонение, мин: ', 'Abweichung, Min: ', 'Excursion, min: ', 'Ауытқу, мин: '))}${s.ex} · ${zoneChip(l.zone)}</p></div>
+<div class="drawer-section"><h4>${esc(T('Последние события', 'Letzte Ereignisse', 'Recent Events', 'Соңғы оқиғалар'))}</h4>${evs.map(e => `<div class="tinted-row ${e[0] === 'green' ? 'green' : e[0] === 'blue' ? 'blue' : 'red'}"><span><b>${esc(e[1])}</b><div class="sub">${esc(e[2])}</div></span></div>`).join('')}</div>
+<div class="drawer-section"><h4>${esc(T('Показатели', 'Kennzahlen', 'Performance Metrics', 'Көрсеткіштер'))}</h4><div class="kv">${kv(T('Соблюдение температуры', 'Temperatur-Compliance', 'Temperature compliance', 'Температура сақталуы'), comp + ' %')}${kv(T('Открытий двери', 'Türöffnungen', 'Door-open events', 'Есік ашылуы'), rs === 'critical' ? 2 : 0)}${kv(T('Скоростной режим', 'Tempo-Compliance', 'Speed compliance', 'Жылдамдық режимі'), '98,2 %')}${kv(T('Простой, мин', 'Stillstand, Min', 'Idle, min', 'Тоқтап тұру, мин'), rs === 'critical' ? 18 : 4)}</div></div>` };
+  };
+  Object.assign(ACT, {
+    openR: d => openDrawer({ type: 'route', id: d.id }),
+    clrR: () => { F.rs = ''; F.drv = ''; render(); },
+    zoom: d => { zoom = Math.min(3, Math.max(1, zoom + (+d.v) * 0.5)); render(); },
+    expR: () => toast(T('Экспорт маршрутов: будет позже', 'Routenexport: später', 'Route export: later', 'Маршрут экспорты: кейінірек')),
+    optR: () => { const c = S.loads.filter(l => (l.status === 'in_transit' || l.status === 'problem') && rstate(l) !== 'on_time'); toast(c.length ? T('Рекомендация: пересмотреть ', 'Empfehlung: prüfen ', 'Recommendation: review ', 'Ұсыныс: қайта қарау ') + c.map(l => l.id.slice(-6)).join(', ') + T(' — ближайший холодный хаб', ' — nächster Kühlhub', ' — nearest cold hub', ' — жақын суық хаб') : T('Все маршруты в норме', 'Alle Routen in Ordnung', 'All routes are fine', 'Барлық маршруттар қалыпты')); },
+  });
+  document.addEventListener('input', e => { const k = e.target.dataset && e.target.dataset.rf; if (k) { F[k] = e.target.value; render(); } });
 })();
 
 render();

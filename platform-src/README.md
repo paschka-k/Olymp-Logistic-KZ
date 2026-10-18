@@ -60,3 +60,8 @@ platform-src/v6/
   app.css        app-specific styles on top of shared/design/*
 ```
 Rules implemented: truck must support the load's temperature zone and have enough pallet places; driver must be available with enough driving time (RTO, one shift max 9 h; norms to be verified, spec Q5); status flow assigned → loading → in transit → delivered, problem only from loading/in transit; delivered frees driver/truck and creates a POD placeholder (`pod: pending`). Other menu items show a placeholder naming the phase that builds them. Add a screen: new file in `v6/screens/`, register it in `SCREENS`, add it to the list in `build-v6.mjs`.
+
+### Phase 3 additions (Fleet, Drivers, Routes & Tracking)
+`screens/fleet.js` (5 KPI, filters, temperature set/actual column, vehicle drawer with documents and service schedule, add vehicle with plate validation `123 ABC 01`, schedule maintenance / return to service) · `screens/drivers.js` (4 KPI, RTO dot, document validity, driver drawer, add driver, compliance report as CSV) · `screens/routes.js` (map with zoom, route status on time / at risk / critical from temperature, route drawer with progress, stops, temperature series, metrics).
+New dispatch rules (`compat` in `core.js`): a driver with an expired licence or medical certificate cannot be assigned; a truck with expired sensor calibration cannot take pharma loads (GDP). Auto-Assign now uses the same `compat` check. Demo data is in `data.js` (`mkDrivers`, `mkTrucks`); document dates are checked against the fixed clock `NOW`.
+

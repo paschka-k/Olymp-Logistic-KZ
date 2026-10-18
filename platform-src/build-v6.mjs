@@ -12,7 +12,7 @@ const outDir = resolve(arg('out', join(here, '..')));
 const langs = arg('lang', 'ru,de,en,kk').split(',');
 const rd = (...p) => readFileSync(join(here, ...p), 'utf8');
 const css = ['tokens.css', 'shell.css', 'components.css', 'components-kz.css'].map(f => rd('shared', 'design', f)).join('\n') + '\n' + rd('v6', 'app.css');
-const js = ['core.js', 'data.js', 'screens/dashboard.js', 'screens/orders.js', 'screens/dispatch.js', 'app.js'].map(f => rd('v6', f)).join('\n');
+const js = ['core.js', 'data.js', 'screens/dashboard.js', 'screens/orders.js', 'screens/dispatch.js', 'screens/fleet.js', 'screens/drivers.js', 'screens/routes.js', 'app.js'].map(f => rd('v6', f)).join('\n');
 mkdirSync(outDir, { recursive: true });
 for (const lang of langs) {
   const code = js.replaceAll('@@LANG@@', lang).replace(/<\/script/gi, '<\\/script');

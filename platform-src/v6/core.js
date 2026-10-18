@@ -52,6 +52,10 @@ const ESF = {
 const chip = (c, t) => `<span class="chip ${c}">${esc(t)}</span>`;
 const stChip = s => chip(ST[s].c, ST[s].l);
 const zoneChip = z => `<span class="chip zone-${z}">${ZONES[z].label}</span>`;
+const fd = iso => { const d = new Date(iso); return p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '.' + d.getFullYear(); };
+/* document validity: expired / renew soon (<= 30 d) / valid */
+const docState = iso => { const days = Math.floor((new Date(iso + 'T23:59:59+05:00') - NOW) / 864e5); return days < 0 ? 'expired' : days <= 30 ? 'soon' : 'valid'; };
+const DOCST = { valid: { c: 'green', l: T('Действует', 'Gültig', 'Valid', 'Жарамды') }, soon: { c: 'yellow', l: T('Скоро истекает', 'Läuft bald ab', 'Renew soon', 'Жақында аяқталады') }, expired: { c: 'red', l: T('Просрочен', 'Abgelaufen', 'Expired', 'Мерзімі өтті') } };
 const avatar = (ini, n) => `<span class="avatar sm" style="background:var(--av-${n || 1})">${esc(ini)}</span>`;
 
 /* ---------- store ---------- */
@@ -61,6 +65,13 @@ const S = {
   f: { q: '', status: '', cust: '', zone: '', pri: '', hub: '', drv: '', page: 1 },
   dispTab: 'board', nextId: 1856,
 };
+const loadOfTruck = id => S.loads.find(l => l.truck === id && isActive(l));
+const loadOfDriver = id => S.loads.find(l => l.driver === id && isActive(l));
+const truckLoc = t => { const l = loadOfTruck(t.id); return l && (l.status === 'in_transit' || l.status === 'problem') ? { city: HUBS[l.from].city + ' → ' + HUBS[l.to].city, sub: T('в пути', 'unterwegs', 'en route', 'жолда') } : { city: HUBS[t.hub].city, sub: HUBS[t.hub].name }; };
+const truckState = t => { const l = loadOfTruck(t.id); if (t.status === 'service') return 'service'; if (t.health === 'red' || (l && tempState(l) === 'breach')) return 'critical'; return t.status === 'busy' ? 'busy' : 'available'; };
+const TS = { available: { c: 'green', l: T('Свободен', 'Frei', 'Available', 'Бос') }, busy: { c: 'yellow', l: T('В рейсе', 'Im Einsatz', 'In use', 'Рейсте') }, service: { c: 'red', l: T('Сервис', 'Service', 'Maintenance', 'Сервис') }, critical: { c: 'red', l: T('Критично', 'Kritisch', 'Critical', 'Сыни') } };
+const rtoDot = d => (d.status === 'rest' || d.rto < 4) ? 'bad' : d.rto < 6 ? 'warn' : 'good';
+const agoTxt = m => m < 60 ? m + ' ' + T('мин назад', 'Min. her', 'min ago', 'мин бұрын') : Math.round(m / 60) + ' ' + T('ч назад', 'Std. her', 'h ago', 'сағ бұрын');
 const cust = id => CUSTOMERS.find(c => c.id === id);
 const drv = id => S.drivers.find(d => d.id === id);
 const trk = id => S.trucks.find(t => t.id === id);
@@ -81,6 +92,8 @@ function compat(l, d, t) {
   if (t.status !== 'available') why.push(T('ТС занято или в сервисе', 'Fahrzeug belegt oder im Service', 'Truck busy or in service', 'КҚ бос емес немесе сервисте'));
   if (d.status !== 'available') why.push(T('Водитель недоступен', 'Fahrer nicht verfügbar', 'Driver unavailable', 'Жүргізуші қолжетімсіз'));
   if (d.rto < needRto(l)) why.push(T('Не хватает времени вождения (РТО)', 'Lenkzeit reicht nicht (RTO)', 'Not enough driving time (RTO)', 'Жүргізу уақыты (РТО) жеткіліксіз'));
+  if (d.docs && d.docs.some(x => (x.type === 'lic' || x.type === 'med') && docState(x.to) === 'expired')) why.push(T('У водителя просрочены права или медосмотр', 'Führerschein oder Untersuchung des Fahrers abgelaufen', 'Driver licence or medical certificate expired', 'Жүргізушінің куәлігі немесе медтексеруі мерзімі өтті'));
+  if (l.zone === 'pharma' && t.docs && docState(t.docs.calib) === 'expired') why.push(T('Поверка датчиков ТС просрочена (GDP, фарма)', 'Kalibrierung der Sensoren abgelaufen (GDP, Pharma)', 'Sensor calibration expired (GDP, pharma)', 'Датчиктер поверкасы мерзімі өтті (GDP, фарма)'));
   return why;
 }
 function assign(id, did, tid) {
@@ -95,9 +108,11 @@ function autoAssign() {
   let ok = 0, fail = 0;
   const rank = { high: 0, medium: 1, low: 2 };
   S.loads.filter(l => l.status === 'unassigned').sort((a, b) => rank[a.priority] - rank[b.priority] || a.eta.localeCompare(b.eta)).forEach(l => {
-    const ts = S.trucks.filter(t => t.status === 'available' && t.zones.includes(l.zone) && t.cap >= l.pallets).sort((a, b) => a.cap - b.cap);
-    const ds = S.drivers.filter(d => d.status === 'available' && d.rto >= needRto(l)).sort((a, b) => a.rto - b.rto);
-    if (ts[0] && ds[0] && !assign(l.id, ds[0].id, ts[0].id)) ok++; else fail++;
+    const ts = S.trucks.filter(t => t.zones.includes(l.zone)).sort((a, b) => a.cap - b.cap);
+    const ds = S.drivers.slice().sort((a, b) => a.rto - b.rto);
+    let done = false;
+    for (const t of ts) { for (const d of ds) { if (!compat(l, d, t).length && !assign(l.id, d.id, t.id)) { done = true; break; } } if (done) break; }
+    if (done) ok++; else fail++;
   });
   return { ok, fail };
 }
@@ -173,7 +188,7 @@ function placeholder(id) {
 }
 function drawerHtml() {
   const d = S.drawer; if (!d) return '';
-  const r = d.type === 'create' ? DRAWERS.create() : DRAWERS.load(d);
+  const r = DRAWERS[d.type](d);
   return `<aside class="drawer open"><div class="drawer-head"><span>${esc(r.title)}</span><span class="x" data-act="close">${ic('x', 18)}</span></div>${r.html}</aside>`;
 }
 const DRAWERS = {};

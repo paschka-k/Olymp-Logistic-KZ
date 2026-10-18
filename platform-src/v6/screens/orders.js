@@ -39,6 +39,7 @@
     const ex = pts.filter(v => v < z.lo || v > z.hi).length * 15;
     return { ex, svg: `<svg viewBox="0 0 285 84" class="spark"><rect x="0" y="${Y(z.hi)}" width="285" height="${Y(z.lo) - Y(z.hi)}" fill="var(--temp-ok-bg)"/><polyline points="${p}" fill="none" stroke="var(--chart-blue)" stroke-width="2"/></svg>` };
   }
+  globalThis.sparkOf = spark;
   const kv = (k, v) => `<div><small>${esc(k)}</small><b>${v}</b></div>`;
   DRAWERS.load = d => {
     const l = load(d.id), c = cust(l.cust), tab = d.tab, dd = l.driver && drv(l.driver), tt = l.truck && trk(l.truck), pr = [['overview', T('Обзор', 'Übersicht', 'Overview', 'Шолу')], ['stops', T('Остановки', 'Stopps', 'Stops', 'Аялдамалар')], ['docs', T('Документы', 'Dokumente', 'Docs', 'Құжаттар')], ['notes', T('Заметки', 'Notizen', 'Notes', 'Жазбалар')], ['billing', T('Счёт', 'Abrechnung', 'Billing', 'Шот')], ['temp', T('Температура', 'Temperatur', 'Temperature', 'Температура')]];
