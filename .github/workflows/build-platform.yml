@@ -1,6 +1,6 @@
-name: Build platform-v5.3
+name: Build platform (v5.3 + v6)
 
-# Rebuilds platform-v5.3.html / -de / -en from platform-src/ whenever the sources change.
+# Rebuilds platform-v5.3.html / -de / -en and platform-v6.html / -de / -en / -kk from platform-src/ whenever the sources change.
 # The commit made here only touches the generated HTML (outside platform-src/), so it does not retrigger this job.
 on:
   push:
@@ -28,20 +28,26 @@ jobs:
           node-version: '20'
       - name: Build the three language bundles
         run: node platform-src/build.mjs
+      - name: Build the v6 prototype (4 languages)
+        run: node platform-src/build-v6.mjs
       - name: Sanity check
         run: |
           for f in platform-v5.3.html platform-v5.3-de.html platform-v5.3-en.html; do
             test -s "$f" || { echo "missing $f"; exit 1; }
             grep -q 'inbound' "$f" || { echo "$f has no inbound screen"; exit 1; }
           done
+          for f in platform-v6.html platform-v6-de.html platform-v6-en.html platform-v6-kk.html; do
+            test -s "$f" || { echo "missing $f"; exit 1; }
+            grep -q 'SCREENS.settings' "$f" || { echo "$f has no settings screen"; exit 1; }
+          done
       - name: Commit regenerated HTML
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add platform-v5.3.html platform-v5.3-de.html platform-v5.3-en.html
+          git add platform-v5.3.html platform-v5.3-de.html platform-v5.3-en.html platform-v6.html platform-v6-de.html platform-v6-en.html platform-v6-kk.html
           if git diff --cached --quiet; then
             echo "HTML already up to date"
           else
-            git commit -m "build: regenerate platform-v5.3 from platform-src [skip ci]"
+            git commit -m "build: regenerate platform-v5.3 and v6 from platform-src [skip ci]"
             git push
           fi

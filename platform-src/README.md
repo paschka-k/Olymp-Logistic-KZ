@@ -83,3 +83,6 @@ Chain (spec section 3, decision Q3): load delivered -> POD pending -> upload/sub
 
 ## Phase 7 (v6): legacy screens as tabs
 `screens/quality.js` (POD tab: deviations/CAPA, calibration registry), `monitor.js` (Routes tabs: Temperature, Weather, Security), `partners.js` (Dispatch tab). Loads handed to a partner use `p:<id>` pseudo driver/truck ids (see `drv`/`trk` in `core.js`).
+
+## Phase 8 (v6): tests and CI
+`tests-v6.html` (29 tests) runs v6 in hidden iframes; same `window.__TESTS` contract as `tests.html`, so `node tools/run-ui-tests.cjs http://localhost:8080/tests-v6.html` runs it. `ui-tests.yml` builds v6 and runs both suites; `build-platform.yml` regenerates v5.3 and v6.

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Olymp Logistic KZ · v6 tests</title>
+<style>body{font:14px/1.5 system-ui,sans-serif;margin:24px;max-width:960px}h1{font-size:20px}.ok{color:#166534}.bad{color:#be123c;font-weight:600}#sum{padding:10px 14px;border-radius:8px;background:#f3f4f6;margin:12px 0}li{margin:2px 0}iframe{display:none}</style></head>
+<body><h1>Platform v6 tests</h1><div id="sum">running…</div><ul id="out"></ul><div id="frames"></div>
+<script>
+/* Same contract as tests.html (window.__TESTS) so tools/run-ui-tests.cjs runs it unchanged.
+   Every group loads a fresh copy of platform-v6*.html in a hidden iframe, so tests never share state. */
+window.__TESTS = { total: 0, passed: 0, failed: 0, failures: [], done: false };
+const LANGS = ['ru', 'de', 'en', 'kk'], file = l => (l === 'ru' ? 'platform-v6.html' : 'platform-v6-' + l + '.html');
+const out = document.getElementById('out');
+const log = (name, err) => { const R = window.__TESTS; R.total++; if (err) { R.failed++; R.failures.push(name + ' — ' + err); } else R.passed++; const li = document.createElement('li'); li.className = err ? 'bad' : 'ok'; li.textContent = (err ? '✗ ' : '✓ ') + name + (err ? ' — ' + err : ''); out.appendChild(li); };
+const assert = (c, msg) => { if (!c) throw new Error(msg || 'assertion failed'); };
+const eq = (a, b, msg) => assert(a === b, (msg || 'expected equal') + ': ' + JSON.stringify(a) + ' !== ' + JSON.stringify(b));
+async function fresh(lang) {
+  const f = document.createElement('iframe'); f.style.cssText = 'width:1316px;height:760px'; f.src = file(lang); document.getElementById('frames').appendChild(f);
+  await new Promise((ok, no) => { f.onload = ok; f.onerror = no; setTimeout(() => no(new Error('iframe timeout')), 20000); });
+  const w = f.contentWindow; w.__errs = []; w.addEventListener('error', e => w.__errs.push(e.message));
+  return { w, ev: c => w.eval(c), done: () => f.remove() };
+}
+async function group(name, lang, fn) { let g; try { g = await fresh(lang || 'ru'); } catch (e) { return log(name, 'cannot load: ' + e.message); } try { await fn(g, g.ev, g.w); log(name); } catch (e) { log(name, e.message); } finally { g.done(); } }
+const clean = (w, where) => { const t = w.document.querySelector('#root').innerText; const m = t.match(/.{0,20}(undefined|NaN|\[object|\bnull\b).{0,20}/); assert(!m, where + ' contains "' + (m && m[0]) + '"'); assert(!w.__errs.length, where + ' threw: ' + w.__errs[0]); };
+
+(async () => {
+  /* ---- navigation: 12 items, every screen / tab / drawer renders in all four languages ---- */
+  for (const lang of LANGS) await group('[' + lang + '] 12 menu items, every screen renders', lang, async (g, ev, w) => {
+    eq(ev('NAV.length'), 12, 'menu items'); eq(w.document.querySelectorAll('.nav-item').length, 12, 'rendered items');
+    const ids = ev('NAV.map(n=>n[0])'); const labels = ev('NAV.map(n=>n[2])'); assert(labels.every(Boolean) && new Set(labels).size === 12, 'labels empty or duplicated');
+    for (const id of ids) { ev(`go('${id}')`); eq(w.document.querySelector('.nav-item.active').dataset.v, id, 'active item'); assert(!w.document.querySelector('.card-body .note') || !/phase|фазе|Phase/.test(w.document.querySelector('main').innerText.slice(0, 400)), id + ' is still a placeholder'); clean(w, id); }
+  });
+  for (const lang of LANGS) await group('[' + lang + '] tabs and drawers render', lang, async (g, ev, w) => {
+    for (const t of ['board', 'planning', 'partners']) { ev(`go('dispatch');ACT.dtab({v:'${t}'})`); clean(w, 'dispatch/' + t); }
+    for (const t of ['map', 'temp', 'wx', 'sec']) { ev(`go('routes');ACT.rtab({v:'${t}'})`); clean(w, 'routes/' + t); }
+    for (const t of ['queue', 'quality']) { ev(`go('pod');ACT.podTab({v:'${t}'})`); clean(w, 'pod/' + t); }
+    for (const t of ['hubs', 'receiving']) { ev(`go('hubs');S.hubTab='${t}';render()`); clean(w, 'hubs/' + t); }
+    for (const t of ['inv', 'cost']) { ev(`go('billing');ACT.bTab({v:'${t}'})`); clean(w, 'billing/' + t); }
+    for (const id of ['otif', 'exc', 'drv', 'rev', 'mrg', 'acc']) { ev(`go('reports');ACT.rOpen({id:'${id}'})`); assert(w.document.querySelector('.drawer.xl'), 'report drawer'); clean(w, 'report ' + id); ev('closeDrawer()'); }
+    ev(`ACT.open({id:S.loads[0].id})`); clean(w, 'load drawer'); ev('closeDrawer()');
+    ev(`go('settings');ACT.intCfg({i:0})`); clean(w, 'integration drawer');
+  });
+  await group('language switcher links to all four files', 'ru', async (g, ev, w) => { const hrefs = [...w.document.querySelectorAll('.langs a')].map(a => a.getAttribute('href')); eq(hrefs.join(','), LANGS.map(file).join(','), 'links'); });
+
+  /* ---- phase 2: dispatch rules ---- */
+  await group('create load, assign, status chain to delivered', 'ru', async (g, ev) => {
+    const id = ev(`createLoad({cust:'c1',from:'AST',to:'KAR',zone:'ambient',pallets:10,priority:'low'}).ok`).slice(8); assert(id, 'load created');
+    eq(ev(`assign('LD-2026-${id}','d5','t4')`), null, 'assign'); eq(ev(`load('LD-2026-${id}').status`), 'assigned');
+    for (const s of ['loading', 'in_transit', 'delivered']) { eq(ev(`canMove(load('LD-2026-${id}'),'${s}')`), null, 'canMove ' + s); ev(`setStatus('LD-2026-${id}','${s}')`); }
+    eq(ev(`load('LD-2026-${id}').pod`), 'pending', 'POD pending'); eq(ev('drv("d5").status'), 'available', 'driver freed');
+  });
+  await group('invalid transitions and creation are refused', 'ru', async (g, ev) => {
+    assert(ev(`canMove(load('LD-2026-001852'),'in_transit')`), 'unassigned -> in_transit must be refused'); assert(ev(`canMove(load('LD-2026-001847'),'unassigned')`), 'moving back to unassigned must be refused');
+    assert(typeof ev(`createLoad({cust:'c1',from:'AST',to:'AST',zone:'pharma',pallets:5,priority:'low'})`) === 'string', 'same origin/destination must be refused'); assert(typeof ev(`createLoad({cust:'c1',from:'AST',to:'ALA',zone:'pharma',pallets:99,priority:'low'})`) === 'string', 'pallets > 33 must be refused');
+  });
+  await group('eligibility: expired licence, expired calibration, zone, capacity', 'ru', async (g, ev) => {
+    assert(ev(`compat(load('LD-2026-001852'),drv('d1'),trk('t3')).length`) > 0, 't3 has no pharma zone');
+    ev(`drv('d1').docs[0].to='2020-01-01'`); assert(ev(`compat(load('LD-2026-001850'),drv('d1'),trk('t1')).some(x=>/права|licen|Führer|куәлік/i.test(x))`), 'expired licence not blocking');
+    ev(`trk('t1').docs.calib='2020-01-01'`); assert(ev(`compat(load('LD-2026-001852'),drv('d2'),trk('t1')).some(x=>/GDP/.test(x))`), 'expired calibration not blocking pharma');
+    assert(ev(`compat(load('LD-2026-001853'),drv('d2'),trk('t1')).every(x=>!/GDP/.test(x))`), 'calibration must not block chilled loads');
+  });
+  await group('auto-assign assigns loads without breaking rules', 'ru', async (g, ev) => {
+    const before = ev("S.loads.filter(l=>l.status==='unassigned').map(l=>l.id)"); const r = ev('autoAssign()'); assert(r.ok > 0, 'nothing assigned');
+    assert(ev(`${JSON.stringify(before)}.map(load).filter(l=>l.status==='assigned').every(l=>trk(l.truck).zones.includes(l.zone)&&trk(l.truck).cap>=l.pallets&&drv(l.driver).docs.every(x=>docState(x.to)!=='expired'||x.type==='gdp')&&drv(l.driver).rto>=needRto(l))`), 'assignment violates rules');
+  });
+  await group('dispatch drag & drop: highlight, auto-pick on assign, refuse illegal', 'ru', async (g, ev, w) => {
+    ev("go('dispatch')"); const dnd = (id, col) => w.eval(`(()=>{const c=document.querySelector('.kcard[data-id="${id}"]'),t=document.querySelector('.col[data-col="${col}"]'),dt=new DataTransfer();c.dispatchEvent(new DragEvent('dragstart',{bubbles:true,dataTransfer:dt}));t.dispatchEvent(new DragEvent('dragover',{bubbles:true,cancelable:true,dataTransfer:dt}));const cls=t.className;t.dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:dt}));return cls})()`);
+    assert(/drop-ok/.test(dnd('LD-2026-001852', 'assigned')), 'no ok highlight'); eq(ev(`load('LD-2026-001852').status`), 'assigned'); assert(ev(`load('LD-2026-001852').driver`), 'driver picked');
+    assert(/drop-no/.test(dnd('LD-2026-001852', 'in_transit')), 'no refuse highlight'); eq(ev(`load('LD-2026-001852').status`), 'assigned', 'illegal move executed');
+  });
+
+  /* ---- phases 3-5: hubs, POD -> invoice -> ESF -> payment ---- */
+  await group('receiving: Standgeld 6 000 ₸ per started 30 min after 45 min', 'ru', async (g, ev) => { eq(ev('RECV.rate'), 6000); eq(ev('RECV.free'), 45); eq(ev('RECV.step'), 30); });
+  await group('delivered -> POD -> invoice -> ESF -> paid', 'ru', async (g, ev, w) => {
+    const L = 'LD-2026-001840'; ev(`ACT.pDemo({id:'${L}'});ACT.pSubmit({id:'${L}'})`); eq(ev(`load('${L}').pod`), 'submitted');
+    ev(`ACT.pApprove({id:'${L}'})`); if (ev(`load('${L}').pod`) !== 'approved') { ev(`openDrawer({type:'pod',id:'${L}'})`); const acc = w.document.querySelector('#pacc'); if (acc) acc.checked = true; ev(`ACT.pApprove({id:'${L}'})`); }
+    eq(ev(`load('${L}').pod`), 'approved', 'POD approved'); const inv = ev(`invOfLoad('${L}').id`); assert(inv, 'invoice created on approval');
+    ev(`ACT.bEsf({id:'${inv}'})`); eq(ev(`load('${L}').esf`), 'issued'); ev(`ACT.bEsfOk({id:'${inv}'})`); eq(ev(`load('${L}').esf`), 'confirmed'); ev(`ACT.bPay({id:'${inv}'})`); assert(ev(`invOfLoad('${L}').paidAt`), 'not paid');
+  });
+  await group('open dispute blocks sending, ESF and payment; resolving frees them', 'ru', async (g, ev) => {
+    const inv = ev(`invOfLoad('LD-2026-001841').id`); ev(`invOfLoad('LD-2026-001841').dispute={open:true,reason:'temp',text:'x',notes:[]}`);
+    ev(`ACT.bSend({id:'${inv}'});ACT.bPay({id:'${inv}'})`); assert(!ev(`invOfLoad('LD-2026-001841').sent`) && !ev(`invOfLoad('LD-2026-001841').paidAt`), 'blocked actions went through');
+    ev(`ACT.bDisClose({id:'${inv}'});ACT.bPay({id:'${inv}'})`); assert(ev(`invOfLoad('LD-2026-001841').paidAt`), 'payment still blocked after resolve');
+  });
+  await group('invoice maths: VAT 12 % and totals', 'ru', async (g, ev) => { assert(ev(`S.invoices.every(i=>Math.abs(i.vat-Math.round(i.net*0.12))<=1&&i.net+i.vat===i.total&&i.lines.reduce((s,x)=>s+x.amount,0)===i.net)`), 'invoice arithmetic'); });
+
+  /* ---- phase 6: reports, AI, settings ---- */
+  await group('reports: six cards with exactly three KPIs, filters re-query', 'ru', async (g, ev, w) => {
+    ev("go('reports')"); const cs = w.document.querySelectorAll('.report-card'); eq(cs.length, 6, 'cards'); cs.forEach(c => eq(c.querySelectorAll('.kpi3 > div').length, 3, 'KPIs per card'));
+    const before = w.document.querySelector('.report-card[data-id=rev] .kpi3 b').textContent; w.document.querySelector('[data-rf=zone]').value = 'pharma'; w.document.querySelector('[data-rf=zone]').dispatchEvent(new w.Event('input', { bubbles: true }));
+    assert(w.document.querySelector('.report-card[data-id=rev] .kpi3 b').textContent !== before, 'filter did not change revenue');
+  });
+  await group('settings: dirty state, validation blocks save, save applies values', 'ru', async (g, ev, w) => {
+    ev("go('settings')"); const set = (id, v) => { const e = w.document.getElementById(id); e.value = v; e.dispatchEvent(new w.Event('input', { bubbles: true })); };
+    assert(!w.document.querySelector('#dirtyChip').classList.contains('on'), 'dirty at start'); set('cf_params_rate', 9000); assert(w.document.querySelector('#dirtyChip').classList.contains('on'), 'not dirty after edit'); eq(ev('RECV.rate'), 6000, 'applied before save');
+    set('cf_params_free', 999); ev("ACT.cfgSave()"); eq(ev('RECV.rate'), 6000, 'invalid save applied'); set('cf_params_free', 30); set('cf_params_shift', 8); ev("ACT.cfgSave()");
+    eq(ev('RECV.rate'), 9000); eq(ev('RECV.free'), 30); eq(ev('CFG.live.shift'), 8); eq(ev("needRto({from:'AST',to:'ALA'})"), 8, 'RTO shift not applied'); assert(!w.document.querySelector('#dirtyChip').classList.contains('on'), 'dirty after save');
+  });
+  await group('AI: accept assigns, override needs a reason, decisions are audited', 'ru', async (g, ev, w) => {
+    ev("go('ai')"); const n0 = ev("S.loads.filter(l=>l.status==='unassigned').length"); ev(`ACT.aiAcc({k:document.querySelector('[data-act=aiAcc]').dataset.k})`); eq(ev("S.loads.filter(l=>l.status==='unassigned').length"), n0 - 1, 'accept did not assign'); eq(ev('S.audit[0].decision'), 'Accept');
+    ev(`ACT.aiOvr({k:document.querySelector('[data-act=aiOvr]').dataset.k})`); ev(`ACT.aiOvrGo({k:S.drawer.k})`); assert(w.document.querySelector('#ov_e').textContent, 'override without reason accepted');
+    w.document.querySelector('#ov_r').value = 'test'; ev(`ACT.aiOvrGo({k:S.drawer.k})`); eq(ev('S.audit[0].decision'), 'Override'); eq(ev('S.audit[0].reason'), 'test');
+  });
+  await group('AI modules can be switched off in settings', 'ru', async (g, ev, w) => { ev("CFG.cur.ai.mod.match=false;ACT.cfgSave()"); ev("go('ai')"); assert(!w.document.querySelector('[data-act=aiAcc]'), 'matching card still active'); });
+
+  /* ---- phase 7: legacy screens as tabs ---- */
+  await group('temperature alarm: load turns problem, deviation opens, QA flow closes it', 'ru', async (g, ev, w) => {
+    const L = 'LD-2026-001847'; ev("go('routes');ACT.rtab({v:'temp'})"); w.document.querySelector('#sim_l').value = L; ev("ACT.sim({v:'freeze'})");
+    eq(ev(`load('${L}').status`), 'problem'); const d = ev(`S.devs.find(x=>x.load==='${L}').id`); assert(d, 'no deviation');
+    ev(`for(let i=0;i<3;i++)ACT.qNext({id:'${d}'});ACT.qDec({id:'${d}',v:'quarantine'});for(let i=0;i<3;i++)ACT.qNext({id:'${d}'})`); eq(ev(`S.devs.find(x=>x.id==='${d}').step`), 7); eq(ev(`load('${L}').qa`), 'quarantine');
+  });
+  await group('calibration registry unblocks pharma assignment', 'ru', async (g, ev) => { ev(`trk('t1').docs.calib='2020-01-01'`); assert(ev(`compat(load('LD-2026-001852'),drv('d2'),trk('t1')).some(x=>/GDP/.test(x))`), 'not blocked'); ev(`ACT.qCal({id:'t1'})`); assert(!ev(`compat(load('LD-2026-001852'),drv('d2'),trk('t1')).some(x=>/GDP/.test(x))`), 'still blocked'); });
+  await group('partner handover: capability check, approval, load keeps working everywhere', 'ru', async (g, ev, w) => {
+    ev("go('dispatch');ACT.dtab({v:'partners'})"); w.document.querySelector('#ho_l').value = 'LD-2026-001852'; w.document.querySelector('#ho_p').value = 'PL-04'; ev('ACT.hoNew()'); assert(w.document.querySelector('#ho_e').textContent, 'unsuitable partner accepted'); eq(ev('S.handovers.length'), 0);
+    w.document.querySelector('#ho_p').value = 'PL-01'; ev('ACT.hoNew()'); eq(ev('S.handovers.length'), 1); ev('ACT.hoOk({id:S.handovers[0].id})'); eq(ev("load('LD-2026-001852').status"), 'assigned');
+    for (const id of ev('NAV.map(n=>n[0])')) { ev(`go('${id}')`); clean(w, id + ' after handover'); } ev(`ACT.open({id:'LD-2026-001852'})`); clean(w, 'drawer');
+  });
+  await group('blocked partners cannot be chosen; unblock only after CAPA closes', 'ru', async (g, ev, w) => {
+    ev("go('dispatch');ACT.dtab({v:'partners'})"); assert(w.document.querySelector('#ho_p option[value=PL-10]').disabled, 'blocked partner selectable'); assert(!/data-act="ptUnb" data-id="PL-10"/.test(w.document.body.innerHTML), 'unblock offered while CAPA open');
+    ev("S.devs.find(d=>d.id==='DEV-0011').step=7;render()"); assert(/data-act="ptUnb" data-id="PL-10"/.test(w.document.body.innerHTML), 'unblock not offered after CAPA'); ev("ACT.ptUnb({id:'PL-10'})"); eq(ev("S.partners.find(p=>p.id==='PL-10').tier"), 'bronze');
+  });
+  await group('workshop request books a service cost', 'ru', async (g, ev, w) => { ev("go('dispatch');ACT.dtab({v:'partners'});ACT.wrNew()"); const n = ev('S.costs.length'); w.document.querySelector('#wc_WR-001').value = 85000; ev("ACT.wrClose({id:'WR-001'})"); eq(ev('S.costs.length'), n + 1); eq(ev('S.costs[S.costs.length-1].cat'), 'service'); });
+  await group('security incidents: accept / escalate / close are audited', 'ru', async (g, ev) => { const id = ev('S.inc[0].id'); ev(`ACT.incSt({id:'${id}',v:'accepted'})`); eq(ev('S.inc[0].st'), 'accepted'); ev(`ACT.incSt({id:'${id}',v:'closed'})`); eq(ev('S.inc[0].st'), 'closed'); assert(ev('S.audit.length') >= 2, 'not audited'); });
+  await group('weather risk is computed for every active load', 'ru', async (g, ev, w) => { ev("go('routes');ACT.rtab({v:'wx'})"); assert(w.document.querySelectorAll('table tbody tr').length >= 4, 'forecast matrix'); assert(w.document.querySelector('main').innerText.includes('LD-2026-001847'), 'route risk list'); });
+
+  const R = window.__TESTS; document.getElementById('sum').textContent = R.passed + '/' + R.total + ' passed, ' + R.failed + ' failed'; R.done = true;
+})().catch(e => { log('harness', e.message); window.__TESTS.done = true; });
+</script></body></html>
