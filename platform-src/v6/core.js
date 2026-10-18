@@ -1,6 +1,8 @@
 /* v6 core: i18n, helpers, icons, store + dispatch rules, shell, drawer, router. */
 const LANG = '@@LANG@@';
 const LI = { ru: 0, de: 1, en: 2, kk: 3 }[LANG];
+const HOOKS = { status: [] };   // screens subscribe here (e.g. hubs create inbound jobs when a load departs)
+const hmm = m => { const x = Math.floor(m + 1e-9); return p2(Math.floor(x / 60) % 24) + ':' + p2(x % 60); };
 const fileFor = l => (l === 'ru' ? 'platform-v6.html' : 'platform-v6-' + l + '.html');
 const T = (...a) => (a[LI] != null ? a[LI] : a[0]);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -64,6 +66,7 @@ const S = {
   route: 'dashboard', drawer: null, toast: null,
   f: { q: '', status: '', cust: '', zone: '', pri: '', hub: '', drv: '', page: 1 },
   dispTab: 'board', nextId: 1856,
+  hubTab: 'hubs', hubView: 'cards', clock: 14 * 60 + 32, costs: [], views: [], rf: { st: '', hub: '', q: '', flag: '' },
 };
 const loadOfTruck = id => S.loads.find(l => l.truck === id && isActive(l));
 const loadOfDriver = id => S.loads.find(l => l.driver === id && isActive(l));
@@ -128,6 +131,7 @@ function setStatus(id, st) {
   if (st === 'problem') { l.temp = ZONES[l.zone].hi + 1.4; }
   if (was === 'problem' && st === 'in_transit') { l.temp = ZONES[l.zone].mid; }
   l.notes.push({ who: 'System', t: fdt(NOW).slice(-5), text: ST[was].l + ' → ' + ST[st].l });
+  HOOKS.status.forEach(f => f(l, was, st));
 }
 function canMove(l, to) {
   if (to === 'assigned' && l.status === 'unassigned') return T('Сначала назначьте водителя и ТС', 'Erst Fahrer und Fahrzeug zuweisen', 'Assign a driver and truck first', 'Алдымен жүргізуші мен КҚ тағайындаңыз');

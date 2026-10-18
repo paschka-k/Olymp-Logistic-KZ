@@ -78,3 +78,31 @@ const mkLoads = () => [
 ];
 
 S.loads = mkLoads(); S.drivers = mkDrivers(); S.trucks = mkTrucks();
+
+/* ---------- hubs & goods receiving (phase 4; ports the logic of legacy screen 17) ---------- */
+const RECV = { rate: 6000, step: 30, free: 45 };   // Standgeld: 6 000 ₸ per started 30 min after the free time
+const mkHubs = () => ({
+  AST: { addr: T('г. Астана, пр. Кабанбай батыра, 15', 'Astana, Qabanbay-Batyr-Allee 15', 'Astana, 15 Kabanbay Batyr Ave', 'Астана қ., Қабанбай батыр даңғ., 15'), places: { frozen: [500, 430], chilled: [800, 700], pharma: [600, 520], ambient: [1200, 1030] }, ramps: ['ambient', 'ambient', 'chilled', 'pharma', 'frozen'], blocked: [], io: [142, 238], done: [212, 300], maint: false },
+  ALA: { addr: T('г. Алматы, ул. Рыскулова, 87', 'Almaty, Ryskulov-Str. 87', 'Almaty, 87 Ryskulov St', 'Алматы қ., Рысқұлов к-сі, 87'), places: { frozen: [400, 390], chilled: [700, 670], pharma: [500, 480], ambient: [900, 830] }, ramps: ['ambient', 'chilled', 'pharma', 'frozen'], blocked: [2, 4], io: [89, 156], done: [160, 190], maint: false },
+  KAR: { addr: T('г. Караганда, ул. Ермекова, 54', 'Karaganda, Ermekov-Str. 54', 'Karaganda, 54 Ermekov St', 'Қарағанды қ., Ермеков к-сі, 54'), places: { frozen: [200, 80], chilled: [400, 170], pharma: [200, 90], ambient: [600, 300] }, ramps: ['ambient', 'chilled', 'frozen'], blocked: [], io: [34, 67], done: [60, 90], maint: true },
+  SHY: { addr: T('г. Шымкент, пр. Байдибек би, 120', 'Schymkent, Baidibek-Bi-Allee 120', 'Shymkent, 120 Baidibek Bi Ave', 'Шымкент қ., Байдібек би даңғ., 120'), places: { frozen: [200, 120], chilled: [500, 320], pharma: [300, 190], ambient: [800, 520] }, ramps: ['ambient', 'chilled'], blocked: [], io: [76, 124], done: [90, 140], maint: false },
+});
+const mkJob = (id, hub, zone, o) => Object.assign({ id: 'IN-' + id, hub, zone, carrier: '', plate: '', veh: '', senders: [], plan: true, ramp: null, win: null, pallets: 10, load: null,
+  ev: { ci: null, rp: null, st: null, en: null }, chk: { temp: null, logger: false }, delay: null, reason: '', booked: 0, flags: [], log: [] }, o);
+const mkJobs = () => [
+  mkJob('0611', 'AST', 'pharma',  { plate: '075 KGN 02', veh: 'Reefer 20 t', carrier: 'ТОО «Север Карго»',    senders: ['ТОО «МедФарм Дистрибьюшн»'],       win: [900, 930],  ramp: 4, pallets: 14, flags: ['gdp'] }),
+  mkJob('0613', 'AST', 'ambient', { plate: '',           veh: 'Tent 20 t',   carrier: 'ТОО «Центр Транзит»', senders: ['ТОО «СеверПродукт»'],              win: [1020, 1050], plan: false, pallets: 22, flags: ['fix'] }),
+  mkJob('0614', 'AST', 'frozen',  { plate: '630 CTR 09', veh: 'Reefer −20 °C', carrier: 'ТОО «Север Карго»',  senders: ['ТОО «Ледяной Путь Ритейл»'],       win: [840, 870],  ramp: 5, pallets: 26, ev: { ci: 850, rp: null, st: null, en: null }, flags: ['gdp', 'adr'] }),
+  mkJob('0615', 'AST', 'ambient', { plate: '470 JTS 05', veh: 'Tent 20 t',   carrier: 'ТОО «Центр Транзит»', senders: ['ТОО «СеверПродукт»'],              win: [720, 765],  ramp: 1, pallets: 31, ev: { ci: 715, rp: 718, st: 730, en: 760 } }),
+  mkJob('0616', 'AST', 'chilled', { plate: '987 PQR 01', veh: 'Reefer 12 t', carrier: 'ТОО «Север Карго»',    senders: ['ТОО «Фрэш Маркет»'],               win: [790, 820],  ramp: 3, pallets: 18, ev: { ci: 800, rp: 805, st: 815, en: null }, chk: { temp: 3.2, logger: true } }),
+  mkJob('0621', 'ALA', 'pharma',  { plate: '908 KEX 05', veh: 'Reefer 20 t', carrier: 'ТОО «Жетісу Карго»',   senders: ['ТОО «Аптека Сервис»', 'ТОО «МедФарм Дистрибьюшн»'], win: [870, 900],  ramp: 3, pallets: 20, ev: { ci: 860, rp: null, st: null, en: null }, flags: ['gdp', 'block'] }),
+  mkJob('0622', 'ALA', 'ambient', { plate: '321 JKL 02', veh: 'Van 10 t',    carrier: 'ТОО «Жетісу Карго»',   senders: ['Филиал Талдыкорган'],             win: [990, 1020], ramp: 1, pallets: 9 }),
+  mkJob('0623', 'ALA', 'chilled', { plate: '',           veh: 'Reefer 12 t', carrier: 'ТОО «Алатау Логистик»', senders: ['ТОО «Фрэш Маркет»'],             win: [1080, 1110], plan: false, pallets: 16, flags: ['fix'] }),
+  mkJob('0624', 'ALA', 'frozen',  { plate: '135 STU 02', veh: 'Reefer −20 °C', carrier: 'ТОО «Алатау Логистик»', senders: ['ТОО «Ледяной Путь Ритейл»'],    win: [600, 630],  ramp: 4, pallets: 24, ev: { ci: 600, rp: 604, st: 610, en: 730 }, chk: { temp: -19, logger: true }, flags: ['gdp'] }),
+  mkJob('0631', 'KAR', 'chilled', { plate: '987 PQR 01', veh: 'Reefer 12 t', carrier: 'собственный парк',     senders: ['ТОО «Фрэш Маркет»'],               win: [1100, 1130], ramp: 2, pallets: 18, load: 'LD-2026-001848', flags: ['gdp'] }),
+];
+S.hubs = mkHubs(); S.jobs = mkJobs();
+S.costs = [
+  { id: 'C-1', date: '2026-10-12', hub: 'AST', text: T('Дизельное топливо', 'Diesel', 'Diesel fuel', 'Дизель отыны'), amount: 1850000, ref: '' },
+  { id: 'C-2', date: '2026-10-14', hub: 'ALA', text: T('Сервис ТС 135 STU 02', 'Service Fzg. 135 STU 02', 'Service truck 135 STU 02', 'КҚ сервисі 135 STU 02'), amount: 420000, ref: '' },
+];
