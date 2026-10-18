@@ -1,0 +1,78 @@
+/* Components added by spec v1.0 section 4.1 (not in part-D-tokens.css). Uses tokens.css only. */
+.page-head .actions { display:flex; gap:12px; align-items:center; }
+.page-sub { color:var(--text-muted); font-size:var(--fs-body); margin:4px 0 0; }
+.page-head.stuck { box-shadow:0 1px 0 var(--border); }
+
+/* KPI variant A icon badge (white tile) */
+.kpi-tile .icon { width:48px; height:48px; border-radius:var(--r-icon); display:grid; place-items:center; }
+
+/* utilisation / threshold bar: ok(default) warn crit low */
+.progress > i { display:block; height:100%; border-radius:999px; background:var(--bar-ok); }
+.progress.warn > i { background:var(--bar-warn); } .progress.crit > i { background:var(--bar-crit); } .progress.low > i { background:var(--bar-low); }
+/* zone bar: several segments in one track */
+.zonebar { display:flex; height:8px; border-radius:999px; overflow:hidden; background:var(--bar-track); gap:2px; }
+.zonebar > i { display:block; height:100%; }
+.zonebar .z-frozen{background:var(--zone-frozen)} .zonebar .z-chilled{background:var(--zone-chilled)}
+.zonebar .z-pharma{background:var(--zone-pharma)} .zonebar .z-ambient{background:var(--zone-ambient)}
+
+/* hub card (spec 5.7) */
+.hub-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--gap); }
+.hub-card { background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--r-card); box-shadow:var(--sh-card); padding:24px; cursor:pointer; transition:box-shadow .15s; }
+.hub-card:hover { box-shadow:var(--sh-hover); }
+.hub-card.is-selected { outline:2px solid var(--primary); outline-offset:-2px; }
+.hub-card .row { display:flex; justify-content:space-between; align-items:center; }
+.hub-card h4 { margin:0; font-size:16px; font-weight:600; color:var(--text-strong); }
+.hub-card .addr { color:var(--text-faint); font-size:var(--fs-small); margin:4px 0 16px; }
+.mini-tiles { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:16px 0; }
+.mini-tile { border-radius:var(--r-btn); padding:12px 8px; text-align:center; }
+.mini-tile b { display:block; font-size:20px; font-weight:600; }
+.mini-tile small { font-size:var(--fs-small); color:var(--text-muted); }
+.mini-tile.blue{background:var(--tint-blue-50);color:var(--on-blue)} .mini-tile.green{background:var(--tint-green-50);color:var(--on-green)} .mini-tile.purple{background:var(--tint-purple-50);color:var(--on-purple)}
+.hub-card .foot { text-align:center; font-weight:600; font-size:var(--fs-small); color:var(--text); margin-top:12px; }
+
+/* temperature chip / zone chip */
+.chip.temp-ok{background:var(--temp-ok-bg);color:var(--chip-green-fg)} .chip.temp-warn{background:var(--temp-warn-bg);color:var(--chip-yellow-fg)} .chip.temp-breach{background:var(--temp-breach-bg);color:var(--chip-red-fg)}
+.chip.zone-frozen{background:var(--zone-frozen-bg);color:#1d4ed8} .chip.zone-chilled{background:var(--zone-chilled-bg);color:#0f766e}
+.chip.zone-pharma{background:var(--zone-pharma-bg);color:#6d28d9} .chip.zone-ambient{background:var(--zone-ambient-bg);color:#57534e}
+
+/* step dots (POD 3-4 steps) */
+.steps { display:inline-flex; align-items:center; }
+.steps i { width:8px; height:8px; border-radius:50%; background:var(--step-todo); display:block; }
+.steps i + i { margin-left:14px; position:relative; }
+.steps i + i::before { content:""; position:absolute; right:8px; top:3px; width:14px; height:2px; background:var(--step-todo); }
+.steps i.done { background:var(--step-done); } .steps i.current { background:var(--step-current); } .steps i.failed { background:var(--step-failed); }
+.steps i.done + i::before { background:var(--step-done); }
+
+/* inline drop zone */
+.drop-zone { border:2px dashed var(--primary); background:#eef7fd; border-radius:var(--r-btn); padding:20px; text-align:center; color:var(--text-muted); }
+.drop-zone:hover { background:#e0f0fb; } .drop-zone b { display:block; color:var(--text-strong); }
+
+/* tinted status row (yard queue, linked loads) */
+.tinted-row { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-radius:var(--r-btn); margin-bottom:8px; }
+.tinted-row.green{background:var(--tint-green-50)} .tinted-row.blue{background:var(--tint-blue-50)} .tinted-row.yellow{background:var(--tint-yellow-50)} .tinted-row.red{background:var(--tint-red-50)}
+
+/* dock timeline: time rows x door bands */
+.dock-grid { display:grid; grid-template-columns:64px repeat(4,1fr); gap:6px; font-size:var(--fs-small); }
+.dock-grid .h { color:var(--text-muted); font-weight:500; } .dock-grid .slot { border-radius:8px; padding:6px 8px; background:var(--bg-subtle); color:var(--text-faint); text-align:center; }
+.dock-grid .slot.in{background:#c1d9fa;color:var(--on-blue)} .dock-grid .slot.out{background:#c1fdd3;color:var(--on-green)}
+
+/* tabs: pill tabs with counts (POD) */
+.pill-tabs { display:flex; gap:8px; }
+.pill-tab { display:inline-flex; align-items:center; gap:8px; height:32px; padding:0 14px; border-radius:999px; color:var(--text-muted); cursor:pointer; font-weight:500; }
+.pill-tab .n { min-width:20px; height:20px; border-radius:999px; background:var(--bg-subtle); display:inline-grid; place-items:center; font-size:11px; padding:0 6px; }
+.pill-tab.active { background:var(--primary); color:#fff; } .pill-tab.active .n { background:rgba(0,0,0,.18); color:#fff; }
+
+/* AI card / risk card / report card / settings / toggle / integration */
+.risk-card { border-radius:var(--r-btn); padding:16px; margin-bottom:12px; border-left:4px solid var(--risk-low-bd); background:var(--risk-low-bg); }
+.risk-card.high{background:var(--risk-high-bg);border-left-color:var(--risk-high-bd)} .risk-card.mid{background:var(--risk-mid-bg);border-left-color:var(--risk-mid-bd)}
+.risk-card .actions { display:flex; gap:8px; margin-top:12px; }
+.report-card { padding:20px; } .report-card .chart { height:160px; margin:12px 0; background:linear-gradient(180deg,var(--chart-area),transparent); border-radius:var(--r-btn); }
+.report-card .kpi3 { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.report-card .kpi3 > div { background:#fdfdfd; border-radius:var(--r-btn); padding:10px 8px; text-align:center; }
+.report-card .kpi3 b { display:block; font-size:18px; } .report-card .kpi3 small { color:var(--text-muted); font-size:11px; }
+.toggle-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border); }
+.switch { width:40px; height:22px; border-radius:999px; background:#d0d4dc; position:relative; flex:none; }
+.switch::after { content:""; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#fff; transition:left .15s; }
+.switch.on { background:var(--primary); } .switch.on::after { left:20px; }
+.integration-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:var(--gap); }
+.integration-tile { border:1px solid var(--border-input); border-radius:var(--r-btn); padding:16px; }

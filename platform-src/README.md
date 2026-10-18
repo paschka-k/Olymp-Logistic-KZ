@@ -36,3 +36,12 @@ The existing legacy screens are still per-language (they were translated by hand
 ## Screen 17 — Goods receipt (`shared/screens/inbound/`)
 Inbound list per hub (Astana / Almaty), status ordered → planned → at gate → unloaded, numbered sender and stop chips (green = unloaded), pre-carriage data, ramp windows, dwell clock turning red, delay question, Standgeld (free time, 6 000 ₸ per started 30 min, booked into screen 16), process timestamps, gate cold-chain check (temperature, logger, SSCC), side panel with progress and audit footer, feature chips (fixed slot, ADR, shortage, QA hold, customs, GDP, temperature class, ЭСФ / ЭСУТД), column filters, saved views, CSV export.
 Tune: `INB_RATE`, `INB_STEP`, `INB_TR` (temperature ranges), ramps `INB_RAMPS`, and the demo jobs `INBJ` in `data.js`.
+
+## v6 design system (phase 1, spec v1.0 released 2026-10-18)
+`shared/design/` = language-neutral tokens and components for the redesign (sample-based look, KZ cold-chain additions):
+`tokens.css` (all CSS custom properties) · `shell.css` (app grid, sidebar, topbar, page-head, nav) · `components.css` (card, kpi-tile, chip, btn, table, drawer, filters, progress…) · `components-kz.css` (hub-card, zonebar, steps, drop-zone, dock-grid, risk-card, report-card, toggle, integration tiles) · `preview/` (demo page).
+```powershell
+node platform-src/build-design.mjs            # design-preview-v6-{ru,de,en,kk}.html next to platform-src/
+node platform-src/build-design.mjs --lang kk
+```
+Texts in `preview/body.html` use `[[ru::de::en::kk]]` (four parts are mandatory; the build fails otherwise). The legacy `platform-v5.3*` bundle is untouched; the next phases move screens onto these tokens/components.

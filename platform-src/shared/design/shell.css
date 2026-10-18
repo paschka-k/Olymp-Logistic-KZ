@@ -1,0 +1,20 @@
+/* ============================ base ============================ */
+* { box-sizing: border-box; }
+body { margin:0; font-family:var(--font); font-size:var(--fs-body); color:var(--text); background:var(--bg-page); }
+
+/* ============================ shell ============================ */
+.app { display:grid; grid-template-columns:var(--sidebar-w) 1fr; min-height:100vh; }
+.sidebar { position:sticky; top:0; height:100vh; background:var(--bg-surface); border-right:1px solid var(--border); padding:16px; }
+.topbar  { position:sticky; top:0; z-index:20; height:var(--topbar-h); background:var(--bg-surface);
+           border-bottom:1px solid var(--border); display:flex; align-items:center; gap:16px; padding:0 var(--page-pad); }
+.page-head { position:sticky; top:var(--topbar-h); z-index:10; background:var(--bg-surface); border-bottom:1px solid var(--border); padding:16px var(--page-pad); }
+.page-title { font-size:var(--fs-title); font-weight:var(--fw-title); color:var(--text-strong); margin:0; }
+.content { padding:var(--page-pad); display:flex; flex-direction:column; gap:var(--gap); }
+
+/* ============================ nav ============================ */
+.nav-item { display:flex; align-items:center; gap:12px; height:var(--nav-h); padding:0 12px; margin-bottom:4px;
+            border-radius:var(--r-nav); color:var(--text); font-weight:500; cursor:pointer; }
+.nav-item:hover  { background:var(--bg-subtle); }
+.nav-item.active { background:var(--primary); color:var(--on-primary); }
+.nav-item svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:1.75; }  /* line icons, ~Lucide */
+

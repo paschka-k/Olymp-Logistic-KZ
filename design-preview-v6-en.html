@@ -1,0 +1,442 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Olymp Logistic KZ · design preview v6 (en)</title><style>
+/* ==========================================================================
+   part-D-tokens.css  -  FleetFlow-style design tokens (light theme)
+   Source: pixel measurements of 2026-10-18_SampleStructure_Aufzeichnung.mp4
+   [M] = measured from frames (video colours drift +-6 per channel; saturated
+         colours are ~5% darker than their Tailwind equivalents)
+   [I] = inferred (Tailwind-like scale, thin text colours, sizes)
+   All lengths are CSS px at design scale 1:1. The video shows the app at
+   ~0.76x (1296 recorded px = ~1705 CSS px), so values = video px / 0.76,
+   snapped to a 4px grid.  [I]
+   ========================================================================== */
+:root {
+  /* ---- surfaces ---- */
+  --bg-page:        #f9fafb;  /* [M #faf9fc] content area behind cards, table header */
+  --bg-surface:     #ffffff;  /* [M] sidebar, top bar, cards, drawer, table rows */
+  --bg-subtle:      #f3f4f6;  /* [M #f3f3f5] grey button, count badges, 'Data source' chip */
+  --bg-selected:    #eff6ff;  /* [M #eff5ff] selected table row, blue alert */
+  --bg-hover:       #f9fafb;  /* [M #f7f9fb] hovered table row */
+  --border:         #f3f4f6;  /* [M #f3f3f3] sidebar/topbar/card hairlines */
+  --border-input:   #e5e7eb;  /* [M ~#e5e5e9] input/select border, progress track, dashed drop zone */
+
+  /* ---- text ---- */
+  --text-strong:    #111827;  /* [M #0b0b0e] KPI value, page title */
+  --text:           #374151;  /* [I] table body, nav inactive */
+  --text-muted:     #6b7280;  /* [I] KPI label, sub-lines, table header caps */
+  --text-faint:     #9ca3af;  /* [I] placeholder, 'Not assigned', captions */
+  --link:           #2f66c8;  /* [I] Load ID links (thin text looks lighter than it is) */
+
+  /* ---- brand / primary ---- */
+  --primary:        #3b82f6;  /* [M #4381ed] active nav pill, primary button, tab, pagination */
+  --primary-hover:  #2563eb;  /* [I] */
+  --primary-tint:   #dbeafe;  /* [M #dbe9fb] icon badge bg, 'Assigned' chip bg */
+  --primary-ring:   #93c5fd;  /* [I] focused select/input ring */
+  --on-primary:     #ffffff;
+
+  /* ---- solid accents (icon badges, dots, bars, small buttons) ---- */
+  --blue:    #3b82f6;  /* [M #4581eb] */
+  --green:   #33d965;  /* [M #33d965] progress fill, icon badge, Accept btn, map 'on time' dot */
+  --yellow:  #e1b917;  /* [M #e1b917] icon badge, Override btn, progress warn, delayed dot */
+  --red:     #df3149;  /* [M #df3149] icon badge, PDF btn, critical dot */
+  --purple:  #9f45ed;  /* [M #9f45ed] icon badge */
+  --orange:  #f97316;  /* [I] orange icon badge (fuel KPI measured #d59471 inside pastel) */
+  --grey:    #6f737d;  /* [M] Dismiss button */
+
+  /* ---- solid action buttons (large, Quick Actions / header CTAs) ---- */
+  --btn-blue:       #4381ed;  /* [M] */
+  --btn-green:      #1fcd83;  /* [M] 'Auto-Assign', 'Schedule Maintenance', 'Compliance Report', 'Assign Driver' */
+  --btn-purple:     #8d1de5;  /* [M] 'Generate Invoice' */
+  --btn-orange:     #dd4d11;  /* [M] 'Plan Route' */
+  --btn-red:        #df3147;  /* [M] 'Export PDF' */
+  --btn-grey-bg:    #f3f4f6;  /* [M #f3f3f5] 'Import Loads', 'Export Data', 'View History' */
+  --btn-grey-text:  #4b5563;  /* [I] */
+
+  /* ---- pastel tints: [bg-from (50) , bg-to (100)] for KPI gradient tiles, [text-strong 900], [label 600] ---- */
+  --tint-blue-50:   #eff6ff; --tint-blue-100:   #dbeafe;  /* [M #eaf2fb -> #dce9fa] */
+  --tint-green-50:  #f0fdf4; --tint-green-100:  #dcfce7;  /* [M #ecfdf3 -> #e0fee9] */
+  --tint-yellow-50: #fefce8; --tint-yellow-100: #fef9c3;  /* [M #fcfcde -> #fcfac9] */
+  --tint-red-50:    #fef2f2; --tint-red-100:    #ffe4e6;  /* [M #fcebec -> #f9dfe3] */
+  --tint-purple-50: #faf5ff; --tint-purple-100: #f3e8ff;  /* [M #f6effd -> #f0e6fb] */
+  --tint-orange-100:#ffedd5;                              /* [M #fbebd7] */
+  --tint-gray-100:  #f3f4f6;                              /* [M] */
+  --on-blue:   #1e3a8a;  --label-blue:   #3b6fd1;         /* [M value #262e63] */
+  --on-green:  #14532d;  --label-green:  #2a9d52;         /* [M value #265333] */
+  --on-yellow: #713f12;  --label-yellow: #a16207;         /* [I] */
+  --on-red:    #7f1d1d;  --label-red:    #c0394d;         /* [I] */
+  --on-purple: #581c87;  --label-purple: #7e3fbf;         /* [M value #42195b] */
+
+  /* ---- status chips: bg [M] / text [I = 800 shade] ---- */
+  --chip-green-bg:  #dcfce7;  --chip-green-fg:  #166534;  /* In Transit, Available, Active, On Time, Approved/Paid, Valid, Low(prio) */
+  --chip-blue-bg:   #dbeafe;  --chip-blue-fg:   #1e40af;  /* Assigned, Submitted */
+  --chip-yellow-bg: #fef9c3;  --chip-yellow-fg: #854d0e;  /* Loading, In Use, Pending, On Trip, Maintenance(wh), Delayed, Medium(prio), Review soon */
+  --chip-purple-bg: #f3e8ff;  --chip-purple-fg: #6b21a8;  /* Delivered */
+  --chip-red-bg:    #ffe4e6;  --chip-red-fg:    #be123c;  /* Critical, Maintenance(fleet), Overdue, Rejected, High(prio), Blocked */
+  --chip-gray-bg:   #f3f4f6;  --chip-gray-fg:   #4b5563;  /* Unassigned, Off Duty, Pending Upload, counts */
+
+  /* ---- health / risk dots ---- */
+  --dot-good:  #6de38f;  /* [M #5fe587 fleet / #6de38f HOS] */
+  --dot-warn:  #e9cb59;  /* [M] */
+  --dot-bad:   #dd4359;  /* [M HOS red; fleet 'critical' is pale #f3c1c9] */
+  --dot-bad-soft: #f3c1c9; /* [M] */
+
+  /* ---- progress / utilisation thresholds (Warehouses) ---- */
+  --bar-track: #e5e7eb;  /* [M #e5e5e9] */
+  --bar-ok:    #35d567;  /* [M] <~75 % */
+  --bar-warn:  #dfbb17;  /* [M] ~85-90 % (87.3 %) */
+  --bar-crit:  #d1374b;  /* [M] >~90 % (94.8 %) */
+  --bar-low:   #4583e7;  /* [M] <50 % (45.2 %, maintenance site) */
+
+  /* ---- map ---- */
+  --map-land:   #e5e3df;  /* [M] Google-Maps-like standard tiles */
+  --map-park:   #cfe7bf;  /* [M] */
+  --map-water:  #80d1e4;  /* [M] */
+  --map-road:   #ffffff;  /* [M] minor roads; motorway #e8d576 [M], routes in Routes page: yellow #f2c94c [I] */
+  --mk-blue:    #2f61dd; --mk-green: #25b753; --mk-orange: #d95117;
+  --mk-red:     #c9172f; --mk-purple: #891fdf; --mk-teal: #1ba183;   /* [M] round markers, white icon */
+  --mk-status-green: #37d969; --mk-status-yellow: #dfbb17;           /* [M] corner dot, 8px */
+
+  /* ---- chart palette (Reports) ---- */
+  --chart-line: #5aa8d0;  --chart-area: #e8f2fb;   /* [M approx] sky line + gradient area */
+  --chart-mint: #94dcc4;  --chart-sky: #5cbce4;    /* [M] stacked bars */
+  --chart-amber:#f4bc74;  --chart-blue: #4484ec;   /* [M] */
+  --chart-grid: #e5e7eb;                           /* [I] */
+
+  /* ---- avatars (initials, customer colour) ---- */
+  --av-1:#315fd1; --av-2:#c7152f; --av-3:#d5511d; --av-4:#8921db;
+  --av-5:#1fa183; --av-6:#533bd9; --av-7:#23b553; --av-8:#c7116f;  /* [M] */
+
+  /* ---- alert cards (dashboard, [M] bg) + left border (AI page, [M]) ---- */
+  --alert-red-bg:#fef2f2;    --alert-red-fg:#9b1c31;    --alert-red-bd:#970f25;
+  --alert-orange-bg:#fff7ed; --alert-orange-fg:#9a3412;
+  --alert-blue-bg:#eff6ff;   --alert-blue-fg:#1e3a8a;
+  --alert-yellow-bg:#fefce8; --alert-yellow-fg:#854d0e;
+  --banner-from:#fef3c7; --banner-to:#fcd9a8; --banner-bd:#d3a739;   /* [M #fdf3c9 -> #fbdbb1], AI disclaimer strip */
+
+  /* ---- radii ---- */
+  --r-card:   12px;  /* [M ~9 video px] cards, KPI tiles, drawer sections */
+  --r-btn:    10px;  /* [M] buttons, top-bar selects */
+  --r-input:  999px; /* [M] filter pill selects, search box, nav pill is 14px */
+  --r-nav:    14px;  /* [M] sidebar active pill (28 px high in video -> near full pill) */
+  --r-chip:   999px; /* [M] status & priority chips, count badges */
+  --r-icon:   12px;  /* [M] KPI icon badge (rounded square); Fleet-style tinted tiles use circle 999px */
+  --r-badge:  6px;   /* [I] small PDF/CSV buttons */
+
+  /* ---- shadows ---- */
+  --sh-card:  0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);   /* [M subtle 2-3px darker edge] */
+  --sh-hover: 0 10px 15px -3px rgba(0,0,0,.10), 0 4px 6px -4px rgba(0,0,0,.06); /* [M] warehouse card hover/selected */
+  --sh-pop:   0 4px 12px rgba(0,0,0,.12);                             /* [M] map legend / stat strip */
+  --sh-drawer: -8px 0 24px rgba(0,0,0,.08);                           /* [I] left shadow, no scrim */
+
+  /* ---- layout (CSS px @1x) ---- */
+  --sidebar-w:  256px;  /* [M 194 video px] */
+  --topbar-h:   80px;   /* [M 60 video px] */
+  --page-pad:   24px;   /* [M 18 video px] */
+  --gap:        24px;   /* [M 19 video px] KPI/card gap */
+  --drawer-w:   384px;  /* [M 280 video px] standard detail drawer */
+  --drawer-w-xl:840px;  /* [M 641 video px] Reports 'detailed view' */
+  --nav-h:      37px;   /* [M 28 video px] */  --nav-pitch: 41px;
+  --row-h:      70px;   /* [M orders 53 vp] fleet 74, billing 78, drivers 90 */
+  --kpi-h:      125px;  /* [M dashboard tiles 95 vp]; tinted tiles 85 [M 64 vp] */
+
+  /* ---- type ---- */
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;  /* [I] */
+  --fs-title: 24px; --fw-title: 700;   /* page title [M cap-height 13 vp] */
+  --fs-card:  18px; --fw-card: 600;    /* card title 'Live Operations' */
+  --fs-kpi:   30px; --fw-kpi: 700;     /* [M] */
+  --fs-body:  14px;                    /* table cells, nav, buttons */
+  --fs-small: 12px;                    /* captions, chips, KPI sublines */
+  --fs-th:    12px; --fw-th: 500; --ls-th: .05em;  /* TABLE HEADER CAPS */
+}
+
+/* ==========================================================================
+   Olymp Logistic KZ additions (spec v1.0 §6) - cold chain, ESF, zones
+   ========================================================================== */
+:root {
+  /* temperature status */
+  --temp-ok:     #35d567;  --temp-ok-bg:     #dcfce7;
+  --temp-warn:   #dfbb17;  --temp-warn-bg:   #fef9c3;
+  --temp-breach: #d1374b;  --temp-breach-bg: #ffe4e6;
+  /* temperature zones (muted so status colours stay dominant) */
+  --zone-frozen:  #60a5fa;  --zone-frozen-bg:  #eff6ff;   /* -18 C */
+  --zone-chilled: #2dd4bf;  --zone-chilled-bg: #f0fdfa;   /* 0..+4 C */
+  --zone-pharma:  #a78bfa;  --zone-pharma-bg:  #f5f3ff;   /* +2..+8 C */
+  --zone-ambient: #a8a29e;  --zone-ambient-bg: #f5f5f4;   /* +15..+25 C */
+  /* ESF / ESUTD document state chips reuse chip-* pairs: issued=blue, confirmed=green, rejected=red, draft=gray */
+  --step-done: #23cb85; --step-current: #4581eb; --step-failed: #c71531; --step-todo: #e7e7e9;
+  --risk-high-bg:#fbdfe1;   --risk-high-bd:#970f25;
+  --risk-mid-bg:#fdf3c9;    --risk-mid-bd:#d0a02c;
+  --risk-low-bg:#dfffe7;    --risk-low-bd:#33a25b;
+  --drawer-w-report: var(--drawer-w-xl);
+}
+
+/* ============================ base ============================ */
+* { box-sizing: border-box; }
+body { margin:0; font-family:var(--font); font-size:var(--fs-body); color:var(--text); background:var(--bg-page); }
+
+/* ============================ shell ============================ */
+.app { display:grid; grid-template-columns:var(--sidebar-w) 1fr; min-height:100vh; }
+.sidebar { position:sticky; top:0; height:100vh; background:var(--bg-surface); border-right:1px solid var(--border); padding:16px; }
+.topbar  { position:sticky; top:0; z-index:20; height:var(--topbar-h); background:var(--bg-surface);
+           border-bottom:1px solid var(--border); display:flex; align-items:center; gap:16px; padding:0 var(--page-pad); }
+.page-head { position:sticky; top:var(--topbar-h); z-index:10; background:var(--bg-surface); border-bottom:1px solid var(--border); padding:16px var(--page-pad); }
+.page-title { font-size:var(--fs-title); font-weight:var(--fw-title); color:var(--text-strong); margin:0; }
+.content { padding:var(--page-pad); display:flex; flex-direction:column; gap:var(--gap); }
+
+/* ============================ nav ============================ */
+.nav-item { display:flex; align-items:center; gap:12px; height:var(--nav-h); padding:0 12px; margin-bottom:4px;
+            border-radius:var(--r-nav); color:var(--text); font-weight:500; cursor:pointer; }
+.nav-item:hover  { background:var(--bg-subtle); }
+.nav-item.active { background:var(--primary); color:var(--on-primary); }
+.nav-item svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:1.75; }  /* line icons, ~Lucide */
+
+
+/* ============================ card ============================ */
+.card { background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--r-card); box-shadow:var(--sh-card); }
+.card-head { padding:20px 24px; border-bottom:1px solid var(--border); font-size:var(--fs-card); font-weight:var(--fw-card); color:var(--text-strong); }
+.card-body { padding:24px; }
+.card.is-selected, .card:hover.is-hoverable { box-shadow:var(--sh-hover); }
+
+/* ============================ KPI tile ============================ */
+.kpi-row  { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:var(--gap); }
+.kpi-tile { display:flex; justify-content:space-between; align-items:center; padding:20px 24px;
+            background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--r-card); box-shadow:var(--sh-card); }
+.kpi-tile .label { font-size:var(--fs-body); color:var(--text-muted); }
+.kpi-tile .value { font-size:var(--fs-kpi); font-weight:var(--fw-kpi); color:var(--text-strong); line-height:1.2; }
+.kpi-tile .delta { font-size:var(--fs-small); color:#2fa365; }  .kpi-tile .delta.neg { color:#c0394d; }
+.kpi-tile .icon  { width:48px; height:48px; border-radius:var(--r-icon); display:grid; place-items:center; background:var(--tint-blue-100); color:#3b6fd1; }
+/* tinted variant (Fleet/Drivers/Warehouses/Routes): gradient 50->100, strong coloured value, circle solid icon */
+.kpi-tile.tint { padding:16px 24px; border-color:transparent; }
+.kpi-tile.tint .icon { width:40px; height:40px; border-radius:50%; color:#fff; }
+.kpi-tile.blue   { background:linear-gradient(135deg,var(--tint-blue-50),var(--tint-blue-100)); }   .kpi-tile.blue   .value{color:var(--on-blue)}   .kpi-tile.blue   .label{color:var(--label-blue)}   .kpi-tile.blue   .icon{background:var(--blue)}
+.kpi-tile.green  { background:linear-gradient(135deg,var(--tint-green-50),var(--tint-green-100)); } .kpi-tile.green  .value{color:var(--on-green)}  .kpi-tile.green  .label{color:var(--label-green)}  .kpi-tile.green  .icon{background:var(--green)}
+.kpi-tile.yellow { background:linear-gradient(135deg,var(--tint-yellow-50),var(--tint-yellow-100));} .kpi-tile.yellow .value{color:var(--on-yellow)} .kpi-tile.yellow .label{color:var(--label-yellow)} .kpi-tile.yellow .icon{background:var(--yellow)}
+.kpi-tile.red    { background:linear-gradient(135deg,var(--tint-red-50),var(--tint-red-100)); }     .kpi-tile.red    .value{color:var(--on-red)}    .kpi-tile.red    .label{color:var(--label-red)}    .kpi-tile.red    .icon{background:var(--red)}
+.kpi-tile.purple { background:linear-gradient(135deg,var(--tint-purple-50),var(--tint-purple-100));} .kpi-tile.purple .value{color:var(--on-purple)} .kpi-tile.purple .label{color:var(--label-purple)} .kpi-tile.purple .icon{background:var(--purple)}
+
+/* ============================ chip ============================ */
+.chip { display:inline-flex; align-items:center; height:22px; padding:0 10px; border-radius:var(--r-chip);
+        font-size:var(--fs-small); font-weight:500; background:var(--chip-gray-bg); color:var(--chip-gray-fg); white-space:nowrap; }
+.chip.green  { background:var(--chip-green-bg);  color:var(--chip-green-fg); }
+.chip.blue   { background:var(--chip-blue-bg);   color:var(--chip-blue-fg); }
+.chip.yellow { background:var(--chip-yellow-bg); color:var(--chip-yellow-fg); }
+.chip.purple { background:var(--chip-purple-bg); color:var(--chip-purple-fg); }
+.chip.red    { background:var(--chip-red-bg);    color:var(--chip-red-fg); }
+.chip.gray   { background:var(--chip-gray-bg);   color:var(--chip-gray-fg); }
+.dot { width:20px; height:20px; border-radius:50%; display:inline-block; }  /* health / HOS dot: 20px [M 15 vp] */
+.dot.good { background:var(--dot-good); } .dot.warn { background:var(--dot-warn); } .dot.bad { background:var(--dot-bad); }
+
+/* ============================ button ============================ */
+.btn { display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 16px; border:0; border-radius:var(--r-btn);
+       font:500 var(--fs-body)/1 var(--font); cursor:pointer; background:var(--btn-grey-bg); color:var(--btn-grey-text); }
+.btn.primary { background:var(--btn-blue);   color:#fff; }  .btn.primary:hover { background:var(--primary-hover); }
+.btn.green   { background:var(--btn-green);  color:#fff; }
+.btn.purple  { background:var(--btn-purple); color:#fff; }
+.btn.orange  { background:var(--btn-orange); color:#fff; }
+.btn.red     { background:var(--btn-red);    color:#fff; }
+.btn.grey    { background:var(--btn-grey-bg);color:var(--btn-grey-text); }
+.btn.dark    { background:var(--grey);       color:#fff; }
+.btn.block   { height:72px; justify-content:center; width:100%; }   /* Quick Actions tiles */
+.btn.sm      { height:28px; padding:0 10px; font-size:var(--fs-small); border-radius:var(--r-badge); }
+
+/* ============================ inputs / filter row ============================ */
+.filters { display:flex; flex-wrap:wrap; align-items:center; gap:16px; }
+.filters label { font-size:var(--fs-small); font-weight:500; color:var(--text); }
+.select, .search { height:40px; padding:0 16px; border:1px solid var(--border-input); border-radius:var(--r-input);
+                   background:var(--bg-surface); font:var(--fs-body) var(--font); color:var(--text); }
+.select:focus, .search:focus { outline:2px solid var(--primary); outline-offset:0; border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-ring); }
+.clear-all { color:var(--text-muted); background:none; border:0; cursor:pointer; }   /* '× Clear All' */
+
+/* ============================ table ============================ */
+.table { width:100%; border-collapse:collapse; background:var(--bg-surface); }
+.table th { position:sticky; top:0; background:var(--bg-page); text-align:left; padding:14px 16px; font-size:var(--fs-th);
+            font-weight:var(--fw-th); letter-spacing:var(--ls-th); text-transform:uppercase; color:var(--text-muted); }
+.table td { padding:12px 16px; border-top:1px solid var(--border); height:var(--row-h); vertical-align:middle; }
+.table tr:hover td { background:var(--bg-hover); }
+.table tr.is-selected td { background:var(--bg-selected); }
+.table .sub { display:block; font-size:var(--fs-small); color:var(--text-faint); }
+.table a { color:var(--link); font-weight:500; text-decoration:none; }
+
+/* ============================ drawer ============================ */
+.drawer { position:fixed; top:0; right:0; bottom:0; width:var(--drawer-w); background:var(--bg-surface);
+          border-left:1px solid var(--border); box-shadow:var(--sh-drawer); z-index:30; overflow:auto;
+          transform:translateX(100%); transition:transform .25s ease; }    /* NO scrim in the recording */
+.drawer.open { transform:none; }
+.drawer.xl { width:var(--drawer-w-xl); }
+.drawer-head { display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid var(--border); font-weight:600; font-size:16px; color:var(--text-strong); }
+.drawer-tabs { display:flex; gap:24px; padding:0 24px; border-bottom:1px solid var(--border); }
+.drawer-tabs .tab { padding:12px 0; color:var(--text-muted); border-bottom:2px solid transparent; }
+.drawer-tabs .tab.active { color:var(--primary); border-color:var(--primary); }
+.drawer-section { padding:20px 24px; border-bottom:1px solid var(--border); }
+.drawer-section h4 { margin:0 0 12px; font-size:16px; font-weight:600; color:var(--text-strong); }
+
+/* ============================ misc ============================ */
+.progress { height:8px; border-radius:999px; background:var(--bar-track); overflow:hidden; }
+.progress > i { display:block; height:100%; border-radius:999px; background:var(--bar-ok); }
+.progress.warn > i { background:var(--bar-warn); } .progress.crit > i { background:var(--bar-crit); } .progress.low > i { background:var(--bar-low); }
+.avatar { width:36px; height:36px; border-radius:50%; display:inline-grid; place-items:center; color:#fff; font-size:12px; font-weight:600; }
+.badge-count { min-width:18px; height:18px; border-radius:50%; background:var(--red); color:#fff; font-size:10px; display:inline-grid; place-items:center; } /* bell badge [M #e3616d..#df3149] */
+.alert-card { border-radius:var(--r-btn); padding:16px; border:1px solid rgba(0,0,0,.04); }
+.alert-card.risk { border-left:4px solid var(--alert-red-bd); }
+.banner-ai { background:linear-gradient(90deg,var(--banner-from),var(--banner-to)); border-left:4px solid var(--banner-bd); padding:12px 24px; color:#92400e; }
+.map { background:var(--map-land); border-radius:var(--r-card); position:relative; }
+.marker { width:28px; height:28px; border-radius:50%; display:grid; place-items:center; color:#fff; box-shadow:0 1px 3px rgba(0,0,0,.3); }
+.marker-label { background:#fff; border-radius:6px; padding:1px 6px; font-size:11px; box-shadow:var(--sh-pop); }
+
+/* Components added by spec v1.0 section 4.1 (not in part-D-tokens.css). Uses tokens.css only. */
+.page-head .actions { display:flex; gap:12px; align-items:center; }
+.page-sub { color:var(--text-muted); font-size:var(--fs-body); margin:4px 0 0; }
+.page-head.stuck { box-shadow:0 1px 0 var(--border); }
+
+/* KPI variant A icon badge (white tile) */
+.kpi-tile .icon { width:48px; height:48px; border-radius:var(--r-icon); display:grid; place-items:center; }
+
+/* utilisation / threshold bar: ok(default) warn crit low */
+.progress > i { display:block; height:100%; border-radius:999px; background:var(--bar-ok); }
+.progress.warn > i { background:var(--bar-warn); } .progress.crit > i { background:var(--bar-crit); } .progress.low > i { background:var(--bar-low); }
+/* zone bar: several segments in one track */
+.zonebar { display:flex; height:8px; border-radius:999px; overflow:hidden; background:var(--bar-track); gap:2px; }
+.zonebar > i { display:block; height:100%; }
+.zonebar .z-frozen{background:var(--zone-frozen)} .zonebar .z-chilled{background:var(--zone-chilled)}
+.zonebar .z-pharma{background:var(--zone-pharma)} .zonebar .z-ambient{background:var(--zone-ambient)}
+
+/* hub card (spec 5.7) */
+.hub-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--gap); }
+.hub-card { background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--r-card); box-shadow:var(--sh-card); padding:24px; cursor:pointer; transition:box-shadow .15s; }
+.hub-card:hover { box-shadow:var(--sh-hover); }
+.hub-card.is-selected { outline:2px solid var(--primary); outline-offset:-2px; }
+.hub-card .row { display:flex; justify-content:space-between; align-items:center; }
+.hub-card h4 { margin:0; font-size:16px; font-weight:600; color:var(--text-strong); }
+.hub-card .addr { color:var(--text-faint); font-size:var(--fs-small); margin:4px 0 16px; }
+.mini-tiles { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:16px 0; }
+.mini-tile { border-radius:var(--r-btn); padding:12px 8px; text-align:center; }
+.mini-tile b { display:block; font-size:20px; font-weight:600; }
+.mini-tile small { font-size:var(--fs-small); color:var(--text-muted); }
+.mini-tile.blue{background:var(--tint-blue-50);color:var(--on-blue)} .mini-tile.green{background:var(--tint-green-50);color:var(--on-green)} .mini-tile.purple{background:var(--tint-purple-50);color:var(--on-purple)}
+.hub-card .foot { text-align:center; font-weight:600; font-size:var(--fs-small); color:var(--text); margin-top:12px; }
+
+/* temperature chip / zone chip */
+.chip.temp-ok{background:var(--temp-ok-bg);color:var(--chip-green-fg)} .chip.temp-warn{background:var(--temp-warn-bg);color:var(--chip-yellow-fg)} .chip.temp-breach{background:var(--temp-breach-bg);color:var(--chip-red-fg)}
+.chip.zone-frozen{background:var(--zone-frozen-bg);color:#1d4ed8} .chip.zone-chilled{background:var(--zone-chilled-bg);color:#0f766e}
+.chip.zone-pharma{background:var(--zone-pharma-bg);color:#6d28d9} .chip.zone-ambient{background:var(--zone-ambient-bg);color:#57534e}
+
+/* step dots (POD 3-4 steps) */
+.steps { display:inline-flex; align-items:center; }
+.steps i { width:8px; height:8px; border-radius:50%; background:var(--step-todo); display:block; }
+.steps i + i { margin-left:14px; position:relative; }
+.steps i + i::before { content:""; position:absolute; right:8px; top:3px; width:14px; height:2px; background:var(--step-todo); }
+.steps i.done { background:var(--step-done); } .steps i.current { background:var(--step-current); } .steps i.failed { background:var(--step-failed); }
+.steps i.done + i::before { background:var(--step-done); }
+
+/* inline drop zone */
+.drop-zone { border:2px dashed var(--primary); background:#eef7fd; border-radius:var(--r-btn); padding:20px; text-align:center; color:var(--text-muted); }
+.drop-zone:hover { background:#e0f0fb; } .drop-zone b { display:block; color:var(--text-strong); }
+
+/* tinted status row (yard queue, linked loads) */
+.tinted-row { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-radius:var(--r-btn); margin-bottom:8px; }
+.tinted-row.green{background:var(--tint-green-50)} .tinted-row.blue{background:var(--tint-blue-50)} .tinted-row.yellow{background:var(--tint-yellow-50)} .tinted-row.red{background:var(--tint-red-50)}
+
+/* dock timeline: time rows x door bands */
+.dock-grid { display:grid; grid-template-columns:64px repeat(4,1fr); gap:6px; font-size:var(--fs-small); }
+.dock-grid .h { color:var(--text-muted); font-weight:500; } .dock-grid .slot { border-radius:8px; padding:6px 8px; background:var(--bg-subtle); color:var(--text-faint); text-align:center; }
+.dock-grid .slot.in{background:#c1d9fa;color:var(--on-blue)} .dock-grid .slot.out{background:#c1fdd3;color:var(--on-green)}
+
+/* tabs: pill tabs with counts (POD) */
+.pill-tabs { display:flex; gap:8px; }
+.pill-tab { display:inline-flex; align-items:center; gap:8px; height:32px; padding:0 14px; border-radius:999px; color:var(--text-muted); cursor:pointer; font-weight:500; }
+.pill-tab .n { min-width:20px; height:20px; border-radius:999px; background:var(--bg-subtle); display:inline-grid; place-items:center; font-size:11px; padding:0 6px; }
+.pill-tab.active { background:var(--primary); color:#fff; } .pill-tab.active .n { background:rgba(0,0,0,.18); color:#fff; }
+
+/* AI card / risk card / report card / settings / toggle / integration */
+.risk-card { border-radius:var(--r-btn); padding:16px; margin-bottom:12px; border-left:4px solid var(--risk-low-bd); background:var(--risk-low-bg); }
+.risk-card.high{background:var(--risk-high-bg);border-left-color:var(--risk-high-bd)} .risk-card.mid{background:var(--risk-mid-bg);border-left-color:var(--risk-mid-bd)}
+.risk-card .actions { display:flex; gap:8px; margin-top:12px; }
+.report-card { padding:20px; } .report-card .chart { height:160px; margin:12px 0; background:linear-gradient(180deg,var(--chart-area),transparent); border-radius:var(--r-btn); }
+.report-card .kpi3 { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.report-card .kpi3 > div { background:#fdfdfd; border-radius:var(--r-btn); padding:10px 8px; text-align:center; }
+.report-card .kpi3 b { display:block; font-size:18px; } .report-card .kpi3 small { color:var(--text-muted); font-size:11px; }
+.toggle-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border); }
+.switch { width:40px; height:22px; border-radius:999px; background:#d0d4dc; position:relative; flex:none; }
+.switch::after { content:""; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#fff; transition:left .15s; }
+.switch.on { background:var(--primary); } .switch.on::after { left:20px; }
+.integration-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:var(--gap); }
+.integration-tile { border:1px solid var(--border-input); border-radius:var(--r-btn); padding:16px; }
+
+/* preview-only layout helpers (not part of the design system) */
+.logo{font:italic 700 26px Georgia,serif;color:#3b6fd1;padding:4px 8px 22px}
+.tb-search{width:420px}.who{margin-left:auto;display:flex;align-items:center;gap:12px;text-align:right}.who small{display:block;color:var(--text-faint);font-size:12px}
+.topbar{display:flex;align-items:center;gap:16px;padding:0 var(--page-pad)}
+.panel{margin:var(--gap) 0 0;background:#fff;border-radius:12px;padding:24px;box-shadow:var(--sh-card)}
+.panel h3{margin:0 0 12px;font-size:16px;color:var(--text-strong)}
+.sw{display:inline-flex;flex-direction:column;width:118px;margin:0 8px 12px 0;font-size:11px}.sw i{height:44px;border-radius:8px;border:1px solid rgba(0,0,0,.08)}.sw b{margin-top:4px;font-weight:600;color:var(--text-strong)}.sw span{color:var(--text-muted)}
+.note{font-size:12px;color:var(--text-muted);margin:0 0 8px}
+.preview-drawer{position:fixed;top:var(--topbar-h);right:0;bottom:0}
+.langs{position:fixed;left:12px;bottom:12px;z-index:50;display:flex;gap:6px}.langs a{background:#fff;border:1px solid var(--border-input);border-radius:8px;padding:4px 10px;font-size:12px;color:var(--text);text-decoration:none}.langs a.on{background:var(--primary);color:#fff}
+@media (max-width:1100px){.hub-grid,.integration-grid{grid-template-columns:1fr}.app{grid-template-columns:1fr}.sidebar{display:none}}
+
+</style></head><body>
+<div class="app">
+<aside class="sidebar"><div class="logo">Olymp&nbsp;Logistic</div>
+<div class="nav-item"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Dashboard</div>
+<div class="nav-item"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Orders & Loads</div>
+<div class="nav-item"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Dispatch Board</div>
+<div class="nav-item"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Fleet</div>
+<div class="nav-item"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Drivers</div>
+<div class="nav-item"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Routes & Tracking</div>
+<div class="nav-item active"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Warehouses & Hubs</div>
+<div class="nav-item"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Proof of Delivery</div>
+<div class="nav-item"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Billing & Invoices</div>
+<div class="nav-item"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Reports</div>
+<div class="nav-item"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>AI Ops Assistant</div>
+<div class="nav-item"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Settings</div>
+</aside>
+<main>
+<header class="topbar"><span>Dashboard › <b>Warehouses & Hubs</b></span>
+<div class="who"><input class="search tb-search" placeholder="Search warehouses…"><span class="badge-count">3</span><div><b style="color:var(--text-strong)">Sarah Johnson</b><small>Operations Manager</small></div><span class="avatar" style="background:var(--primary)">SJ</span></div></header>
+<div class="page-head" style="display:flex;justify-content:space-between;align-items:center"><h1 class="page-title">Warehouses & Hubs</h1><div class="actions"><button class="btn grey">Settings</button><button class="btn primary">+ Add Hub</button></div></div>
+<div class="content">
+<div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">
+<div class="kpi-tile tint blue"><div><div class="value" style="font-size:24px">4</div><div class="label">Active Hubs</div></div></div>
+<div class="kpi-tile tint green"><div><div class="value" style="font-size:24px">78,4 %</div><div class="label">Avg Utilization</div></div></div>
+<div class="kpi-tile tint red"><div><div class="value" style="font-size:24px">2</div><div class="label">Critical Alerts</div></div></div>
+<div class="kpi-tile tint purple"><div><div class="value" style="font-size:24px">847 / 1 205</div><div class="label">Pallets today</div></div></div></div>
+<div class="filters"><label>Hub:</label><select class="select"><option>All</option></select><label>Status:</label><select class="select"><option>All</option></select><button class="clear-all">× Clear Filters</button></div>
+<div class="hub-grid">
+<div class="hub-card is-selected"><div class="row"><h4>Hub Astana North</h4><span class="chip green">Active</span></div>
+<div class="addr">Astana, Kabanbay Batyr Ave</div>
+<div class="row" style="font-size:12px;margin-bottom:6px"><span>Zone utilization</span><b>87,3 %</b></div>
+<div class="zonebar"><i class="z-frozen" style="width:30%"></i><i class="z-chilled" style="width:20%"></i><i class="z-pharma" style="width:25%"></i><i class="z-ambient" style="width:12%"></i></div>
+<div class="mini-tiles"><div class="mini-tile blue"><b>142</b><small>Inbound</small></div><div class="mini-tile green"><b>238</b><small>Outbound</small></div><div class="mini-tile purple"><b>5 847</b><small>On-hand</small></div></div>
+<div class="row" style="font-size:12px"><span><span class="dot good" style="width:8px;height:8px"></span> Docks: 8 free</span><span><span class="dot warn" style="width:8px;height:8px"></span> Yard: queue</span></div>
+<div class="foot">Today's appointments: 45 in / 52 out</div></div>
+<div class="hub-card"><div class="row"><h4>Hub Almaty Zhetysu</h4><span class="chip red">Critical</span></div>
+<div class="addr">Almaty, Ryskulov St</div>
+<div class="row" style="font-size:12px;margin-bottom:6px"><span>Zone utilization</span><b>94,8 %</b></div>
+<div class="progress crit"><i style="width:95%"></i></div>
+<div class="mini-tiles"><div class="mini-tile blue"><b>89</b><small>Inbound</small></div><div class="mini-tile green"><b>156</b><small>Outbound</small></div><div class="mini-tile purple"><b>8 234</b><small>On-hand</small></div></div>
+<div class="row" style="font-size:12px"><span><span class="dot bad" style="width:8px;height:8px"></span> Docks: 2 blocked</span><span class="chip temp-breach">Temp. alarm</span></div>
+<div class="foot">Today's appointments: 38 in / 41 out</div></div>
+<div class="hub-card"><div class="row"><h4>Hub Karaganda</h4><span class="chip yellow">Maintenance</span></div>
+<div class="addr">Karaganda</div>
+<div class="row" style="font-size:12px;margin-bottom:6px"><span>Zone utilization</span><b>45,2 %</b></div>
+<div class="progress low"><i style="width:45%"></i></div>
+<div class="mini-tiles"><div class="mini-tile blue"><b>34</b><small>Inbound</small></div><div class="mini-tile green"><b>67</b><small>Outbound</small></div><div class="mini-tile purple"><b>2 431</b><small>On-hand</small></div></div></div>
+</div>
+<div class="panel"><h3>Components</h3>
+<span class="chip green">In Transit</span> <span class="chip blue">Assigned</span> <span class="chip yellow">Loading</span> <span class="chip purple">Delivered</span> <span class="chip red">Overdue</span> <span class="chip gray">Unassigned</span>
+<span class="chip zone-frozen">−18 °C</span> <span class="chip zone-chilled">0…+4 °C</span> <span class="chip zone-pharma">+2…+8 °C</span> <span class="chip zone-ambient">+15…+25 °C</span>
+<span class="chip temp-ok">+4,2 °C</span> <span class="chip temp-warn">+7,8 °C</span> <span class="chip temp-breach">+9,5 °C</span>
+<p class="note" style="margin-top:16px">POD steps</p><span class="steps"><i class="done"></i><i class="current"></i><i></i></span> &nbsp; <span class="steps"><i class="done"></i><i class="failed"></i><i></i></span> &nbsp; <span class="steps"><i class="done"></i><i class="done"></i><i class="done"></i></span>
+<div class="drop-zone" style="margin:16px 0"><b>Upload POD documents (image/PDF)</b>Drag and drop files here or click</div>
+<div class="pill-tabs"><span class="pill-tab active">All <span class="n">179</span></span><span class="pill-tab">Pending <span class="n">12</span></span><span class="pill-tab">Submitted <span class="n">8</span></span></div>
+<div class="risk-card high" style="margin-top:16px"><b>Temperature excursion risk</b><div>Trip Astana → Almaty: door open > 10 min</div><div class="actions"><button class="btn sm green">Accept</button><button class="btn sm dark">Dismiss</button></div></div>
+<div class="toggle-row"><div><b>Temperature excursions</b><div class="note">outside 2–8 °C for more than X min</div></div><span class="switch on"></span></div>
+<div style="margin-top:16px;max-width:600px"><div class="dock-grid"><div class="h"></div><div class="h">Docks 1–4</div><div class="h">5–8</div><div class="h">9–12</div><div class="h">13–16</div><div class="h">08:00</div><div class="slot in">IN-2401 ❄ −18</div><div class="slot out">OUT-1847 +4</div><div class="slot">—</div><div class="slot in">IN-2402 +2…+8</div></div></div>
+<p class="note" style="margin-top:16px">Colour tokens: see tokens.css</p>
+<div class="sw"><i style="background:var(--primary)"></i><b>--primary</b><span>#3b82f6</span></div><div class="sw"><i style="background:var(--temp-breach)"></i><b>--temp-breach</b><span>#d1374b</span></div><div class="sw"><i style="background:var(--zone-pharma)"></i><b>--zone-pharma</b><span>#a78bfa</span></div><div class="sw"><i style="background:var(--bg-page)"></i><b>--bg-page</b><span>#f9fafb</span></div></div>
+</div></main>
+<aside class="drawer open preview-drawer"><div class="drawer-head"><span>Warehouse Details</span><span>×</span></div>
+<div class="drawer-tabs"><span class="tab active">Overview</span><span class="tab">Docks</span><span class="tab">Receiving</span></div>
+<div class="drawer-section"><h4>Inventory breakdown</h4><div class="tinted-row blue"><span>Frozen −18 °C</span><b>1 847</b></div><div class="tinted-row green"><span>Chilled</span><b>2 156</b></div><div class="tinted-row yellow"><span>Pharma 2–8 °C</span><b>1 844</b></div></div>
+</aside></div>
+
+<div class="langs"><a href="design-preview-v6-ru.html">RU</a><a href="design-preview-v6-de.html">DE</a><a href="design-preview-v6-en.html" class="on">EN</a><a href="design-preview-v6-kk.html">KK</a></div></body></html>

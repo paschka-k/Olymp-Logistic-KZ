@@ -1,0 +1,11 @@
+/* preview-only layout helpers (not part of the design system) */
+.logo{font:italic 700 26px Georgia,serif;color:#3b6fd1;padding:4px 8px 22px}
+.tb-search{width:420px}.who{margin-left:auto;display:flex;align-items:center;gap:12px;text-align:right}.who small{display:block;color:var(--text-faint);font-size:12px}
+.topbar{display:flex;align-items:center;gap:16px;padding:0 var(--page-pad)}
+.panel{margin:var(--gap) 0 0;background:#fff;border-radius:12px;padding:24px;box-shadow:var(--sh-card)}
+.panel h3{margin:0 0 12px;font-size:16px;color:var(--text-strong)}
+.sw{display:inline-flex;flex-direction:column;width:118px;margin:0 8px 12px 0;font-size:11px}.sw i{height:44px;border-radius:8px;border:1px solid rgba(0,0,0,.08)}.sw b{margin-top:4px;font-weight:600;color:var(--text-strong)}.sw span{color:var(--text-muted)}
+.note{font-size:12px;color:var(--text-muted);margin:0 0 8px}
+.preview-drawer{position:fixed;top:var(--topbar-h);right:0;bottom:0}
+.langs{position:fixed;left:12px;bottom:12px;z-index:50;display:flex;gap:6px}.langs a{background:#fff;border:1px solid var(--border-input);border-radius:8px;padding:4px 10px;font-size:12px;color:var(--text);text-decoration:none}.langs a.on{background:var(--primary);color:#fff}
+@media (max-width:1100px){.hub-grid,.integration-grid{grid-template-columns:1fr}.app{grid-template-columns:1fr}.sidebar{display:none}}

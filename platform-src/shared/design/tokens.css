@@ -1,0 +1,169 @@
+/* ==========================================================================
+   part-D-tokens.css  -  FleetFlow-style design tokens (light theme)
+   Source: pixel measurements of 2026-10-18_SampleStructure_Aufzeichnung.mp4
+   [M] = measured from frames (video colours drift +-6 per channel; saturated
+         colours are ~5% darker than their Tailwind equivalents)
+   [I] = inferred (Tailwind-like scale, thin text colours, sizes)
+   All lengths are CSS px at design scale 1:1. The video shows the app at
+   ~0.76x (1296 recorded px = ~1705 CSS px), so values = video px / 0.76,
+   snapped to a 4px grid.  [I]
+   ========================================================================== */
+:root {
+  /* ---- surfaces ---- */
+  --bg-page:        #f9fafb;  /* [M #faf9fc] content area behind cards, table header */
+  --bg-surface:     #ffffff;  /* [M] sidebar, top bar, cards, drawer, table rows */
+  --bg-subtle:      #f3f4f6;  /* [M #f3f3f5] grey button, count badges, 'Data source' chip */
+  --bg-selected:    #eff6ff;  /* [M #eff5ff] selected table row, blue alert */
+  --bg-hover:       #f9fafb;  /* [M #f7f9fb] hovered table row */
+  --border:         #f3f4f6;  /* [M #f3f3f3] sidebar/topbar/card hairlines */
+  --border-input:   #e5e7eb;  /* [M ~#e5e5e9] input/select border, progress track, dashed drop zone */
+
+  /* ---- text ---- */
+  --text-strong:    #111827;  /* [M #0b0b0e] KPI value, page title */
+  --text:           #374151;  /* [I] table body, nav inactive */
+  --text-muted:     #6b7280;  /* [I] KPI label, sub-lines, table header caps */
+  --text-faint:     #9ca3af;  /* [I] placeholder, 'Not assigned', captions */
+  --link:           #2f66c8;  /* [I] Load ID links (thin text looks lighter than it is) */
+
+  /* ---- brand / primary ---- */
+  --primary:        #3b82f6;  /* [M #4381ed] active nav pill, primary button, tab, pagination */
+  --primary-hover:  #2563eb;  /* [I] */
+  --primary-tint:   #dbeafe;  /* [M #dbe9fb] icon badge bg, 'Assigned' chip bg */
+  --primary-ring:   #93c5fd;  /* [I] focused select/input ring */
+  --on-primary:     #ffffff;
+
+  /* ---- solid accents (icon badges, dots, bars, small buttons) ---- */
+  --blue:    #3b82f6;  /* [M #4581eb] */
+  --green:   #33d965;  /* [M #33d965] progress fill, icon badge, Accept btn, map 'on time' dot */
+  --yellow:  #e1b917;  /* [M #e1b917] icon badge, Override btn, progress warn, delayed dot */
+  --red:     #df3149;  /* [M #df3149] icon badge, PDF btn, critical dot */
+  --purple:  #9f45ed;  /* [M #9f45ed] icon badge */
+  --orange:  #f97316;  /* [I] orange icon badge (fuel KPI measured #d59471 inside pastel) */
+  --grey:    #6f737d;  /* [M] Dismiss button */
+
+  /* ---- solid action buttons (large, Quick Actions / header CTAs) ---- */
+  --btn-blue:       #4381ed;  /* [M] */
+  --btn-green:      #1fcd83;  /* [M] 'Auto-Assign', 'Schedule Maintenance', 'Compliance Report', 'Assign Driver' */
+  --btn-purple:     #8d1de5;  /* [M] 'Generate Invoice' */
+  --btn-orange:     #dd4d11;  /* [M] 'Plan Route' */
+  --btn-red:        #df3147;  /* [M] 'Export PDF' */
+  --btn-grey-bg:    #f3f4f6;  /* [M #f3f3f5] 'Import Loads', 'Export Data', 'View History' */
+  --btn-grey-text:  #4b5563;  /* [I] */
+
+  /* ---- pastel tints: [bg-from (50) , bg-to (100)] for KPI gradient tiles, [text-strong 900], [label 600] ---- */
+  --tint-blue-50:   #eff6ff; --tint-blue-100:   #dbeafe;  /* [M #eaf2fb -> #dce9fa] */
+  --tint-green-50:  #f0fdf4; --tint-green-100:  #dcfce7;  /* [M #ecfdf3 -> #e0fee9] */
+  --tint-yellow-50: #fefce8; --tint-yellow-100: #fef9c3;  /* [M #fcfcde -> #fcfac9] */
+  --tint-red-50:    #fef2f2; --tint-red-100:    #ffe4e6;  /* [M #fcebec -> #f9dfe3] */
+  --tint-purple-50: #faf5ff; --tint-purple-100: #f3e8ff;  /* [M #f6effd -> #f0e6fb] */
+  --tint-orange-100:#ffedd5;                              /* [M #fbebd7] */
+  --tint-gray-100:  #f3f4f6;                              /* [M] */
+  --on-blue:   #1e3a8a;  --label-blue:   #3b6fd1;         /* [M value #262e63] */
+  --on-green:  #14532d;  --label-green:  #2a9d52;         /* [M value #265333] */
+  --on-yellow: #713f12;  --label-yellow: #a16207;         /* [I] */
+  --on-red:    #7f1d1d;  --label-red:    #c0394d;         /* [I] */
+  --on-purple: #581c87;  --label-purple: #7e3fbf;         /* [M value #42195b] */
+
+  /* ---- status chips: bg [M] / text [I = 800 shade] ---- */
+  --chip-green-bg:  #dcfce7;  --chip-green-fg:  #166534;  /* In Transit, Available, Active, On Time, Approved/Paid, Valid, Low(prio) */
+  --chip-blue-bg:   #dbeafe;  --chip-blue-fg:   #1e40af;  /* Assigned, Submitted */
+  --chip-yellow-bg: #fef9c3;  --chip-yellow-fg: #854d0e;  /* Loading, In Use, Pending, On Trip, Maintenance(wh), Delayed, Medium(prio), Review soon */
+  --chip-purple-bg: #f3e8ff;  --chip-purple-fg: #6b21a8;  /* Delivered */
+  --chip-red-bg:    #ffe4e6;  --chip-red-fg:    #be123c;  /* Critical, Maintenance(fleet), Overdue, Rejected, High(prio), Blocked */
+  --chip-gray-bg:   #f3f4f6;  --chip-gray-fg:   #4b5563;  /* Unassigned, Off Duty, Pending Upload, counts */
+
+  /* ---- health / risk dots ---- */
+  --dot-good:  #6de38f;  /* [M #5fe587 fleet / #6de38f HOS] */
+  --dot-warn:  #e9cb59;  /* [M] */
+  --dot-bad:   #dd4359;  /* [M HOS red; fleet 'critical' is pale #f3c1c9] */
+  --dot-bad-soft: #f3c1c9; /* [M] */
+
+  /* ---- progress / utilisation thresholds (Warehouses) ---- */
+  --bar-track: #e5e7eb;  /* [M #e5e5e9] */
+  --bar-ok:    #35d567;  /* [M] <~75 % */
+  --bar-warn:  #dfbb17;  /* [M] ~85-90 % (87.3 %) */
+  --bar-crit:  #d1374b;  /* [M] >~90 % (94.8 %) */
+  --bar-low:   #4583e7;  /* [M] <50 % (45.2 %, maintenance site) */
+
+  /* ---- map ---- */
+  --map-land:   #e5e3df;  /* [M] Google-Maps-like standard tiles */
+  --map-park:   #cfe7bf;  /* [M] */
+  --map-water:  #80d1e4;  /* [M] */
+  --map-road:   #ffffff;  /* [M] minor roads; motorway #e8d576 [M], routes in Routes page: yellow #f2c94c [I] */
+  --mk-blue:    #2f61dd; --mk-green: #25b753; --mk-orange: #d95117;
+  --mk-red:     #c9172f; --mk-purple: #891fdf; --mk-teal: #1ba183;   /* [M] round markers, white icon */
+  --mk-status-green: #37d969; --mk-status-yellow: #dfbb17;           /* [M] corner dot, 8px */
+
+  /* ---- chart palette (Reports) ---- */
+  --chart-line: #5aa8d0;  --chart-area: #e8f2fb;   /* [M approx] sky line + gradient area */
+  --chart-mint: #94dcc4;  --chart-sky: #5cbce4;    /* [M] stacked bars */
+  --chart-amber:#f4bc74;  --chart-blue: #4484ec;   /* [M] */
+  --chart-grid: #e5e7eb;                           /* [I] */
+
+  /* ---- avatars (initials, customer colour) ---- */
+  --av-1:#315fd1; --av-2:#c7152f; --av-3:#d5511d; --av-4:#8921db;
+  --av-5:#1fa183; --av-6:#533bd9; --av-7:#23b553; --av-8:#c7116f;  /* [M] */
+
+  /* ---- alert cards (dashboard, [M] bg) + left border (AI page, [M]) ---- */
+  --alert-red-bg:#fef2f2;    --alert-red-fg:#9b1c31;    --alert-red-bd:#970f25;
+  --alert-orange-bg:#fff7ed; --alert-orange-fg:#9a3412;
+  --alert-blue-bg:#eff6ff;   --alert-blue-fg:#1e3a8a;
+  --alert-yellow-bg:#fefce8; --alert-yellow-fg:#854d0e;
+  --banner-from:#fef3c7; --banner-to:#fcd9a8; --banner-bd:#d3a739;   /* [M #fdf3c9 -> #fbdbb1], AI disclaimer strip */
+
+  /* ---- radii ---- */
+  --r-card:   12px;  /* [M ~9 video px] cards, KPI tiles, drawer sections */
+  --r-btn:    10px;  /* [M] buttons, top-bar selects */
+  --r-input:  999px; /* [M] filter pill selects, search box, nav pill is 14px */
+  --r-nav:    14px;  /* [M] sidebar active pill (28 px high in video -> near full pill) */
+  --r-chip:   999px; /* [M] status & priority chips, count badges */
+  --r-icon:   12px;  /* [M] KPI icon badge (rounded square); Fleet-style tinted tiles use circle 999px */
+  --r-badge:  6px;   /* [I] small PDF/CSV buttons */
+
+  /* ---- shadows ---- */
+  --sh-card:  0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);   /* [M subtle 2-3px darker edge] */
+  --sh-hover: 0 10px 15px -3px rgba(0,0,0,.10), 0 4px 6px -4px rgba(0,0,0,.06); /* [M] warehouse card hover/selected */
+  --sh-pop:   0 4px 12px rgba(0,0,0,.12);                             /* [M] map legend / stat strip */
+  --sh-drawer: -8px 0 24px rgba(0,0,0,.08);                           /* [I] left shadow, no scrim */
+
+  /* ---- layout (CSS px @1x) ---- */
+  --sidebar-w:  256px;  /* [M 194 video px] */
+  --topbar-h:   80px;   /* [M 60 video px] */
+  --page-pad:   24px;   /* [M 18 video px] */
+  --gap:        24px;   /* [M 19 video px] KPI/card gap */
+  --drawer-w:   384px;  /* [M 280 video px] standard detail drawer */
+  --drawer-w-xl:840px;  /* [M 641 video px] Reports 'detailed view' */
+  --nav-h:      37px;   /* [M 28 video px] */  --nav-pitch: 41px;
+  --row-h:      70px;   /* [M orders 53 vp] fleet 74, billing 78, drivers 90 */
+  --kpi-h:      125px;  /* [M dashboard tiles 95 vp]; tinted tiles 85 [M 64 vp] */
+
+  /* ---- type ---- */
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;  /* [I] */
+  --fs-title: 24px; --fw-title: 700;   /* page title [M cap-height 13 vp] */
+  --fs-card:  18px; --fw-card: 600;    /* card title 'Live Operations' */
+  --fs-kpi:   30px; --fw-kpi: 700;     /* [M] */
+  --fs-body:  14px;                    /* table cells, nav, buttons */
+  --fs-small: 12px;                    /* captions, chips, KPI sublines */
+  --fs-th:    12px; --fw-th: 500; --ls-th: .05em;  /* TABLE HEADER CAPS */
+}
+
+/* ==========================================================================
+   Olymp Logistic KZ additions (spec v1.0 §6) - cold chain, ESF, zones
+   ========================================================================== */
+:root {
+  /* temperature status */
+  --temp-ok:     #35d567;  --temp-ok-bg:     #dcfce7;
+  --temp-warn:   #dfbb17;  --temp-warn-bg:   #fef9c3;
+  --temp-breach: #d1374b;  --temp-breach-bg: #ffe4e6;
+  /* temperature zones (muted so status colours stay dominant) */
+  --zone-frozen:  #60a5fa;  --zone-frozen-bg:  #eff6ff;   /* -18 C */
+  --zone-chilled: #2dd4bf;  --zone-chilled-bg: #f0fdfa;   /* 0..+4 C */
+  --zone-pharma:  #a78bfa;  --zone-pharma-bg:  #f5f3ff;   /* +2..+8 C */
+  --zone-ambient: #a8a29e;  --zone-ambient-bg: #f5f5f4;   /* +15..+25 C */
+  /* ESF / ESUTD document state chips reuse chip-* pairs: issued=blue, confirmed=green, rejected=red, draft=gray */
+  --step-done: #23cb85; --step-current: #4581eb; --step-failed: #c71531; --step-todo: #e7e7e9;
+  --risk-high-bg:#fbdfe1;   --risk-high-bd:#970f25;
+  --risk-mid-bg:#fdf3c9;    --risk-mid-bd:#d0a02c;
+  --risk-low-bg:#dfffe7;    --risk-low-bd:#33a25b;
+  --drawer-w-report: var(--drawer-w-xl);
+}
