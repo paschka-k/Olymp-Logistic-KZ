@@ -80,3 +80,6 @@ Chain (spec section 3, decision Q3): load delivered -> POD pending -> upload/sub
 
 ## Phase 6 (v6): Reports, AI Ops, Settings
 `v6/screens/reports.js`, `ai.js`, `settings.js` (build order in `build-v6.mjs`). Settings (`CFG`) drive Standgeld (`RECV`), RTO shift (`needRto`) and AI confidence thresholds; every AI decision and settings save goes to `S.audit`.
+
+## Phase 7 (v6): legacy screens as tabs
+`screens/quality.js` (POD tab: deviations/CAPA, calibration registry), `monitor.js` (Routes tabs: Temperature, Weather, Security), `partners.js` (Dispatch tab). Loads handed to a partner use `p:<id>` pseudo driver/truck ids (see `drv`/`trk` in `core.js`).

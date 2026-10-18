@@ -76,8 +76,12 @@ const TS = { available: { c: 'green', l: T('Свободен', 'Frei', 'Availabl
 const rtoDot = d => (d.status === 'rest' || d.rto < 4) ? 'bad' : d.rto < 6 ? 'warn' : 'good';
 const agoTxt = m => m < 60 ? m + ' ' + T('мин назад', 'Min. her', 'min ago', 'мин бұрын') : Math.round(m / 60) + ' ' + T('ч назад', 'Std. her', 'h ago', 'сағ бұрын');
 const cust = id => CUSTOMERS.find(c => c.id === id);
-const drv = id => S.drivers.find(d => d.id === id);
-const trk = id => S.trucks.find(t => t.id === id);
+/* loads handed to a partner carrier have no own driver / truck: frozen placeholders keep every screen safe */
+const NODRV = Object.freeze({ id: null, code: '—', name: '—', ini: '—', rto: 0, status: 'busy', lic: '—', exp: 0, rating: 0, phone: '—', hub: 'AST', onDuty: 0, week: 0, docs: [] });
+const NOTRK = Object.freeze({ id: null, plate: '—', make: '—', year: 0, km: 0, model: '—', zones: [], cap: 0, status: 'busy', hub: 'AST', ping: 0, health: 'green', unit: '—', unitH: 0, docs: { osago: '2099-01-01', cargo: '2099-01-01', calib: '2099-01-01', to: '2099-01-01' }, svc: { last: '2026-01-01', lastKm: 0, nextKm: 0 } });
+const pname = id => { const p = (S.partners || []).find(x => 'p:' + x.id === id); return p ? p.name : null; };
+const drv = id => S.drivers.find(d => d.id === id) || (pname(id) ? Object.freeze(Object.assign({}, NODRV, { name: pname(id) })) : NODRV);
+const trk = id => S.trucks.find(t => t.id === id) || (pname(id) ? Object.freeze(Object.assign({}, NOTRK, { plate: id.slice(2), make: T('Партнёр', 'Partner', 'Partner', 'Серіктес') })) : NOTRK);
 const load = id => S.loads.find(l => l.id === id);
 const hrs = l => Math.round(dist(l.from, l.to) / 65 * 10) / 10;
 /* driving time the driver must still have: one shift (max 9 h); longer routes get planned rest stops (norms to be verified, spec Q5) */
@@ -101,7 +105,7 @@ function compat(l, d, t) {
 }
 function assign(id, did, tid) {
   const l = load(id), d = drv(did), t = trk(tid);
-  if (!l || !d || !t) return T('Выберите водителя и ТС', 'Fahrer und Fahrzeug wählen', 'Select driver and truck', 'Жүргізуші мен КҚ таңдаңыз');
+  if (!l || !did || !tid || !d.id || !t.id) return T('Выберите водителя и ТС', 'Fahrer und Fahrzeug wählen', 'Select driver and truck', 'Жүргізуші мен КҚ таңдаңыз');
   const why = compat(l, d, t); if (why.length) return why[0];
   l.driver = did; l.truck = tid; l.status = 'assigned'; d.status = 'busy'; t.status = 'busy';
   l.notes.push({ who: 'System', t: fdt(NOW).slice(-5), text: T('Назначено: ', 'Zugewiesen: ', 'Assigned: ', 'Тағайындалды: ') + d.name + ' / ' + t.plate });
