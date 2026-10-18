@@ -1,0 +1,892 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Olymp Logistic KZ · Platform v6 (de)</title><style>
+/* ==========================================================================
+   part-D-tokens.css  -  FleetFlow-style design tokens (light theme)
+   Source: pixel measurements of 2026-10-18_SampleStructure_Aufzeichnung.mp4
+   [M] = measured from frames (video colours drift +-6 per channel; saturated
+         colours are ~5% darker than their Tailwind equivalents)
+   [I] = inferred (Tailwind-like scale, thin text colours, sizes)
+   All lengths are CSS px at design scale 1:1. The video shows the app at
+   ~0.76x (1296 recorded px = ~1705 CSS px), so values = video px / 0.76,
+   snapped to a 4px grid.  [I]
+   ========================================================================== */
+:root {
+  /* ---- surfaces ---- */
+  --bg-page:        #f9fafb;  /* [M #faf9fc] content area behind cards, table header */
+  --bg-surface:     #ffffff;  /* [M] sidebar, top bar, cards, drawer, table rows */
+  --bg-subtle:      #f3f4f6;  /* [M #f3f3f5] grey button, count badges, 'Data source' chip */
+  --bg-selected:    #eff6ff;  /* [M #eff5ff] selected table row, blue alert */
+  --bg-hover:       #f9fafb;  /* [M #f7f9fb] hovered table row */
+  --border:         #f3f4f6;  /* [M #f3f3f3] sidebar/topbar/card hairlines */
+  --border-input:   #e5e7eb;  /* [M ~#e5e5e9] input/select border, progress track, dashed drop zone */
+
+  /* ---- text ---- */
+  --text-strong:    #111827;  /* [M #0b0b0e] KPI value, page title */
+  --text:           #374151;  /* [I] table body, nav inactive */
+  --text-muted:     #6b7280;  /* [I] KPI label, sub-lines, table header caps */
+  --text-faint:     #9ca3af;  /* [I] placeholder, 'Not assigned', captions */
+  --link:           #2f66c8;  /* [I] Load ID links (thin text looks lighter than it is) */
+
+  /* ---- brand / primary ---- */
+  --primary:        #3b82f6;  /* [M #4381ed] active nav pill, primary button, tab, pagination */
+  --primary-hover:  #2563eb;  /* [I] */
+  --primary-tint:   #dbeafe;  /* [M #dbe9fb] icon badge bg, 'Assigned' chip bg */
+  --primary-ring:   #93c5fd;  /* [I] focused select/input ring */
+  --on-primary:     #ffffff;
+
+  /* ---- solid accents (icon badges, dots, bars, small buttons) ---- */
+  --blue:    #3b82f6;  /* [M #4581eb] */
+  --green:   #33d965;  /* [M #33d965] progress fill, icon badge, Accept btn, map 'on time' dot */
+  --yellow:  #e1b917;  /* [M #e1b917] icon badge, Override btn, progress warn, delayed dot */
+  --red:     #df3149;  /* [M #df3149] icon badge, PDF btn, critical dot */
+  --purple:  #9f45ed;  /* [M #9f45ed] icon badge */
+  --orange:  #f97316;  /* [I] orange icon badge (fuel KPI measured #d59471 inside pastel) */
+  --grey:    #6f737d;  /* [M] Dismiss button */
+
+  /* ---- solid action buttons (large, Quick Actions / header CTAs) ---- */
+  --btn-blue:       #4381ed;  /* [M] */
+  --btn-green:      #1fcd83;  /* [M] 'Auto-Assign', 'Schedule Maintenance', 'Compliance Report', 'Assign Driver' */
+  --btn-purple:     #8d1de5;  /* [M] 'Generate Invoice' */
+  --btn-orange:     #dd4d11;  /* [M] 'Plan Route' */
+  --btn-red:        #df3147;  /* [M] 'Export PDF' */
+  --btn-grey-bg:    #f3f4f6;  /* [M #f3f3f5] 'Import Loads', 'Export Data', 'View History' */
+  --btn-grey-text:  #4b5563;  /* [I] */
+
+  /* ---- pastel tints: [bg-from (50) , bg-to (100)] for KPI gradient tiles, [text-strong 900], [label 600] ---- */
+  --tint-blue-50:   #eff6ff; --tint-blue-100:   #dbeafe;  /* [M #eaf2fb -> #dce9fa] */
+  --tint-green-50:  #f0fdf4; --tint-green-100:  #dcfce7;  /* [M #ecfdf3 -> #e0fee9] */
+  --tint-yellow-50: #fefce8; --tint-yellow-100: #fef9c3;  /* [M #fcfcde -> #fcfac9] */
+  --tint-red-50:    #fef2f2; --tint-red-100:    #ffe4e6;  /* [M #fcebec -> #f9dfe3] */
+  --tint-purple-50: #faf5ff; --tint-purple-100: #f3e8ff;  /* [M #f6effd -> #f0e6fb] */
+  --tint-orange-100:#ffedd5;                              /* [M #fbebd7] */
+  --tint-gray-100:  #f3f4f6;                              /* [M] */
+  --on-blue:   #1e3a8a;  --label-blue:   #3b6fd1;         /* [M value #262e63] */
+  --on-green:  #14532d;  --label-green:  #2a9d52;         /* [M value #265333] */
+  --on-yellow: #713f12;  --label-yellow: #a16207;         /* [I] */
+  --on-red:    #7f1d1d;  --label-red:    #c0394d;         /* [I] */
+  --on-purple: #581c87;  --label-purple: #7e3fbf;         /* [M value #42195b] */
+
+  /* ---- status chips: bg [M] / text [I = 800 shade] ---- */
+  --chip-green-bg:  #dcfce7;  --chip-green-fg:  #166534;  /* In Transit, Available, Active, On Time, Approved/Paid, Valid, Low(prio) */
+  --chip-blue-bg:   #dbeafe;  --chip-blue-fg:   #1e40af;  /* Assigned, Submitted */
+  --chip-yellow-bg: #fef9c3;  --chip-yellow-fg: #854d0e;  /* Loading, In Use, Pending, On Trip, Maintenance(wh), Delayed, Medium(prio), Review soon */
+  --chip-purple-bg: #f3e8ff;  --chip-purple-fg: #6b21a8;  /* Delivered */
+  --chip-red-bg:    #ffe4e6;  --chip-red-fg:    #be123c;  /* Critical, Maintenance(fleet), Overdue, Rejected, High(prio), Blocked */
+  --chip-gray-bg:   #f3f4f6;  --chip-gray-fg:   #4b5563;  /* Unassigned, Off Duty, Pending Upload, counts */
+
+  /* ---- health / risk dots ---- */
+  --dot-good:  #6de38f;  /* [M #5fe587 fleet / #6de38f HOS] */
+  --dot-warn:  #e9cb59;  /* [M] */
+  --dot-bad:   #dd4359;  /* [M HOS red; fleet 'critical' is pale #f3c1c9] */
+  --dot-bad-soft: #f3c1c9; /* [M] */
+
+  /* ---- progress / utilisation thresholds (Warehouses) ---- */
+  --bar-track: #e5e7eb;  /* [M #e5e5e9] */
+  --bar-ok:    #35d567;  /* [M] <~75 % */
+  --bar-warn:  #dfbb17;  /* [M] ~85-90 % (87.3 %) */
+  --bar-crit:  #d1374b;  /* [M] >~90 % (94.8 %) */
+  --bar-low:   #4583e7;  /* [M] <50 % (45.2 %, maintenance site) */
+
+  /* ---- map ---- */
+  --map-land:   #e5e3df;  /* [M] Google-Maps-like standard tiles */
+  --map-park:   #cfe7bf;  /* [M] */
+  --map-water:  #80d1e4;  /* [M] */
+  --map-road:   #ffffff;  /* [M] minor roads; motorway #e8d576 [M], routes in Routes page: yellow #f2c94c [I] */
+  --mk-blue:    #2f61dd; --mk-green: #25b753; --mk-orange: #d95117;
+  --mk-red:     #c9172f; --mk-purple: #891fdf; --mk-teal: #1ba183;   /* [M] round markers, white icon */
+  --mk-status-green: #37d969; --mk-status-yellow: #dfbb17;           /* [M] corner dot, 8px */
+
+  /* ---- chart palette (Reports) ---- */
+  --chart-line: #5aa8d0;  --chart-area: #e8f2fb;   /* [M approx] sky line + gradient area */
+  --chart-mint: #94dcc4;  --chart-sky: #5cbce4;    /* [M] stacked bars */
+  --chart-amber:#f4bc74;  --chart-blue: #4484ec;   /* [M] */
+  --chart-grid: #e5e7eb;                           /* [I] */
+
+  /* ---- avatars (initials, customer colour) ---- */
+  --av-1:#315fd1; --av-2:#c7152f; --av-3:#d5511d; --av-4:#8921db;
+  --av-5:#1fa183; --av-6:#533bd9; --av-7:#23b553; --av-8:#c7116f;  /* [M] */
+
+  /* ---- alert cards (dashboard, [M] bg) + left border (AI page, [M]) ---- */
+  --alert-red-bg:#fef2f2;    --alert-red-fg:#9b1c31;    --alert-red-bd:#970f25;
+  --alert-orange-bg:#fff7ed; --alert-orange-fg:#9a3412;
+  --alert-blue-bg:#eff6ff;   --alert-blue-fg:#1e3a8a;
+  --alert-yellow-bg:#fefce8; --alert-yellow-fg:#854d0e;
+  --banner-from:#fef3c7; --banner-to:#fcd9a8; --banner-bd:#d3a739;   /* [M #fdf3c9 -> #fbdbb1], AI disclaimer strip */
+
+  /* ---- radii ---- */
+  --r-card:   12px;  /* [M ~9 video px] cards, KPI tiles, drawer sections */
+  --r-btn:    10px;  /* [M] buttons, top-bar selects */
+  --r-input:  999px; /* [M] filter pill selects, search box, nav pill is 14px */
+  --r-nav:    14px;  /* [M] sidebar active pill (28 px high in video -> near full pill) */
+  --r-chip:   999px; /* [M] status & priority chips, count badges */
+  --r-icon:   12px;  /* [M] KPI icon badge (rounded square); Fleet-style tinted tiles use circle 999px */
+  --r-badge:  6px;   /* [I] small PDF/CSV buttons */
+
+  /* ---- shadows ---- */
+  --sh-card:  0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);   /* [M subtle 2-3px darker edge] */
+  --sh-hover: 0 10px 15px -3px rgba(0,0,0,.10), 0 4px 6px -4px rgba(0,0,0,.06); /* [M] warehouse card hover/selected */
+  --sh-pop:   0 4px 12px rgba(0,0,0,.12);                             /* [M] map legend / stat strip */
+  --sh-drawer: -8px 0 24px rgba(0,0,0,.08);                           /* [I] left shadow, no scrim */
+
+  /* ---- layout (CSS px @1x) ---- */
+  --sidebar-w:  256px;  /* [M 194 video px] */
+  --topbar-h:   80px;   /* [M 60 video px] */
+  --page-pad:   24px;   /* [M 18 video px] */
+  --gap:        24px;   /* [M 19 video px] KPI/card gap */
+  --drawer-w:   384px;  /* [M 280 video px] standard detail drawer */
+  --drawer-w-xl:840px;  /* [M 641 video px] Reports 'detailed view' */
+  --nav-h:      37px;   /* [M 28 video px] */  --nav-pitch: 41px;
+  --row-h:      70px;   /* [M orders 53 vp] fleet 74, billing 78, drivers 90 */
+  --kpi-h:      125px;  /* [M dashboard tiles 95 vp]; tinted tiles 85 [M 64 vp] */
+
+  /* ---- type ---- */
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;  /* [I] */
+  --fs-title: 24px; --fw-title: 700;   /* page title [M cap-height 13 vp] */
+  --fs-card:  18px; --fw-card: 600;    /* card title 'Live Operations' */
+  --fs-kpi:   30px; --fw-kpi: 700;     /* [M] */
+  --fs-body:  14px;                    /* table cells, nav, buttons */
+  --fs-small: 12px;                    /* captions, chips, KPI sublines */
+  --fs-th:    12px; --fw-th: 500; --ls-th: .05em;  /* TABLE HEADER CAPS */
+}
+
+/* ==========================================================================
+   Olymp Logistic KZ additions (spec v1.0 §6) - cold chain, ESF, zones
+   ========================================================================== */
+:root {
+  /* temperature status */
+  --temp-ok:     #35d567;  --temp-ok-bg:     #dcfce7;
+  --temp-warn:   #dfbb17;  --temp-warn-bg:   #fef9c3;
+  --temp-breach: #d1374b;  --temp-breach-bg: #ffe4e6;
+  /* temperature zones (muted so status colours stay dominant) */
+  --zone-frozen:  #60a5fa;  --zone-frozen-bg:  #eff6ff;   /* -18 C */
+  --zone-chilled: #2dd4bf;  --zone-chilled-bg: #f0fdfa;   /* 0..+4 C */
+  --zone-pharma:  #a78bfa;  --zone-pharma-bg:  #f5f3ff;   /* +2..+8 C */
+  --zone-ambient: #a8a29e;  --zone-ambient-bg: #f5f5f4;   /* +15..+25 C */
+  /* ESF / ESUTD document state chips reuse chip-* pairs: issued=blue, confirmed=green, rejected=red, draft=gray */
+  --step-done: #23cb85; --step-current: #4581eb; --step-failed: #c71531; --step-todo: #e7e7e9;
+  --risk-high-bg:#fbdfe1;   --risk-high-bd:#970f25;
+  --risk-mid-bg:#fdf3c9;    --risk-mid-bd:#d0a02c;
+  --risk-low-bg:#dfffe7;    --risk-low-bd:#33a25b;
+  --drawer-w-report: var(--drawer-w-xl);
+}
+
+/* ============================ base ============================ */
+* { box-sizing: border-box; }
+body { margin:0; font-family:var(--font); font-size:var(--fs-body); color:var(--text); background:var(--bg-page); }
+
+/* ============================ shell ============================ */
+.app { display:grid; grid-template-columns:var(--sidebar-w) 1fr; min-height:100vh; }
+.sidebar { position:sticky; top:0; height:100vh; background:var(--bg-surface); border-right:1px solid var(--border); padding:16px; }
+.topbar  { position:sticky; top:0; z-index:20; height:var(--topbar-h); background:var(--bg-surface);
+           border-bottom:1px solid var(--border); display:flex; align-items:center; gap:16px; padding:0 var(--page-pad); }
+.page-head { position:sticky; top:var(--topbar-h); z-index:10; background:var(--bg-surface); border-bottom:1px solid var(--border); padding:16px var(--page-pad); }
+.page-title { font-size:var(--fs-title); font-weight:var(--fw-title); color:var(--text-strong); margin:0; }
+.content { padding:var(--page-pad); display:flex; flex-direction:column; gap:var(--gap); }
+
+/* ============================ nav ============================ */
+.nav-item { display:flex; align-items:center; gap:12px; height:var(--nav-h); padding:0 12px; margin-bottom:4px;
+            border-radius:var(--r-nav); color:var(--text); font-weight:500; cursor:pointer; }
+.nav-item:hover  { background:var(--bg-subtle); }
+.nav-item.active { background:var(--primary); color:var(--on-primary); }
+.nav-item svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:1.75; }  /* line icons, ~Lucide */
+
+
+/* ============================ card ============================ */
+.card { background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--r-card); box-shadow:var(--sh-card); }
+.card-head { padding:20px 24px; border-bottom:1px solid var(--border); font-size:var(--fs-card); font-weight:var(--fw-card); color:var(--text-strong); }
+.card-body { padding:24px; }
+.card.is-selected, .card:hover.is-hoverable { box-shadow:var(--sh-hover); }
+
+/* ============================ KPI tile ============================ */
+.kpi-row  { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:var(--gap); }
+.kpi-tile { display:flex; justify-content:space-between; align-items:center; padding:20px 24px;
+            background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--r-card); box-shadow:var(--sh-card); }
+.kpi-tile .label { font-size:var(--fs-body); color:var(--text-muted); }
+.kpi-tile .value { font-size:var(--fs-kpi); font-weight:var(--fw-kpi); color:var(--text-strong); line-height:1.2; }
+.kpi-tile .delta { font-size:var(--fs-small); color:#2fa365; }  .kpi-tile .delta.neg { color:#c0394d; }
+.kpi-tile .icon  { width:48px; height:48px; border-radius:var(--r-icon); display:grid; place-items:center; background:var(--tint-blue-100); color:#3b6fd1; }
+/* tinted variant (Fleet/Drivers/Warehouses/Routes): gradient 50->100, strong coloured value, circle solid icon */
+.kpi-tile.tint { padding:16px 24px; border-color:transparent; }
+.kpi-tile.tint .icon { width:40px; height:40px; border-radius:50%; color:#fff; }
+.kpi-tile.blue   { background:linear-gradient(135deg,var(--tint-blue-50),var(--tint-blue-100)); }   .kpi-tile.blue   .value{color:var(--on-blue)}   .kpi-tile.blue   .label{color:var(--label-blue)}   .kpi-tile.blue   .icon{background:var(--blue)}
+.kpi-tile.green  { background:linear-gradient(135deg,var(--tint-green-50),var(--tint-green-100)); } .kpi-tile.green  .value{color:var(--on-green)}  .kpi-tile.green  .label{color:var(--label-green)}  .kpi-tile.green  .icon{background:var(--green)}
+.kpi-tile.yellow { background:linear-gradient(135deg,var(--tint-yellow-50),var(--tint-yellow-100));} .kpi-tile.yellow .value{color:var(--on-yellow)} .kpi-tile.yellow .label{color:var(--label-yellow)} .kpi-tile.yellow .icon{background:var(--yellow)}
+.kpi-tile.red    { background:linear-gradient(135deg,var(--tint-red-50),var(--tint-red-100)); }     .kpi-tile.red    .value{color:var(--on-red)}    .kpi-tile.red    .label{color:var(--label-red)}    .kpi-tile.red    .icon{background:var(--red)}
+.kpi-tile.purple { background:linear-gradient(135deg,var(--tint-purple-50),var(--tint-purple-100));} .kpi-tile.purple .value{color:var(--on-purple)} .kpi-tile.purple .label{color:var(--label-purple)} .kpi-tile.purple .icon{background:var(--purple)}
+
+/* ============================ chip ============================ */
+.chip { display:inline-flex; align-items:center; height:22px; padding:0 10px; border-radius:var(--r-chip);
+        font-size:var(--fs-small); font-weight:500; background:var(--chip-gray-bg); color:var(--chip-gray-fg); white-space:nowrap; }
+.chip.green  { background:var(--chip-green-bg);  color:var(--chip-green-fg); }
+.chip.blue   { background:var(--chip-blue-bg);   color:var(--chip-blue-fg); }
+.chip.yellow { background:var(--chip-yellow-bg); color:var(--chip-yellow-fg); }
+.chip.purple { background:var(--chip-purple-bg); color:var(--chip-purple-fg); }
+.chip.red    { background:var(--chip-red-bg);    color:var(--chip-red-fg); }
+.chip.gray   { background:var(--chip-gray-bg);   color:var(--chip-gray-fg); }
+.dot { width:20px; height:20px; border-radius:50%; display:inline-block; }  /* health / HOS dot: 20px [M 15 vp] */
+.dot.good { background:var(--dot-good); } .dot.warn { background:var(--dot-warn); } .dot.bad { background:var(--dot-bad); }
+
+/* ============================ button ============================ */
+.btn { display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 16px; border:0; border-radius:var(--r-btn);
+       font:500 var(--fs-body)/1 var(--font); cursor:pointer; background:var(--btn-grey-bg); color:var(--btn-grey-text); }
+.btn.primary { background:var(--btn-blue);   color:#fff; }  .btn.primary:hover { background:var(--primary-hover); }
+.btn.green   { background:var(--btn-green);  color:#fff; }
+.btn.purple  { background:var(--btn-purple); color:#fff; }
+.btn.orange  { background:var(--btn-orange); color:#fff; }
+.btn.red     { background:var(--btn-red);    color:#fff; }
+.btn.grey    { background:var(--btn-grey-bg);color:var(--btn-grey-text); }
+.btn.dark    { background:var(--grey);       color:#fff; }
+.btn.block   { height:72px; justify-content:center; width:100%; }   /* Quick Actions tiles */
+.btn.sm      { height:28px; padding:0 10px; font-size:var(--fs-small); border-radius:var(--r-badge); }
+
+/* ============================ inputs / filter row ============================ */
+.filters { display:flex; flex-wrap:wrap; align-items:center; gap:16px; }
+.filters label { font-size:var(--fs-small); font-weight:500; color:var(--text); }
+.select, .search { height:40px; padding:0 16px; border:1px solid var(--border-input); border-radius:var(--r-input);
+                   background:var(--bg-surface); font:var(--fs-body) var(--font); color:var(--text); }
+.select:focus, .search:focus { outline:2px solid var(--primary); outline-offset:0; border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-ring); }
+.clear-all { color:var(--text-muted); background:none; border:0; cursor:pointer; }   /* '× Clear All' */
+
+/* ============================ table ============================ */
+.table { width:100%; border-collapse:collapse; background:var(--bg-surface); }
+.table th { position:sticky; top:0; background:var(--bg-page); text-align:left; padding:14px 16px; font-size:var(--fs-th);
+            font-weight:var(--fw-th); letter-spacing:var(--ls-th); text-transform:uppercase; color:var(--text-muted); }
+.table td { padding:12px 16px; border-top:1px solid var(--border); height:var(--row-h); vertical-align:middle; }
+.table tr:hover td { background:var(--bg-hover); }
+.table tr.is-selected td { background:var(--bg-selected); }
+.table .sub { display:block; font-size:var(--fs-small); color:var(--text-faint); }
+.table a { color:var(--link); font-weight:500; text-decoration:none; }
+
+/* ============================ drawer ============================ */
+.drawer { position:fixed; top:0; right:0; bottom:0; width:var(--drawer-w); background:var(--bg-surface);
+          border-left:1px solid var(--border); box-shadow:var(--sh-drawer); z-index:30; overflow:auto;
+          transform:translateX(100%); transition:transform .25s ease; }    /* NO scrim in the recording */
+.drawer.open { transform:none; }
+.drawer.xl { width:var(--drawer-w-xl); }
+.drawer-head { display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid var(--border); font-weight:600; font-size:16px; color:var(--text-strong); }
+.drawer-tabs { display:flex; gap:24px; padding:0 24px; border-bottom:1px solid var(--border); }
+.drawer-tabs .tab { padding:12px 0; color:var(--text-muted); border-bottom:2px solid transparent; }
+.drawer-tabs .tab.active { color:var(--primary); border-color:var(--primary); }
+.drawer-section { padding:20px 24px; border-bottom:1px solid var(--border); }
+.drawer-section h4 { margin:0 0 12px; font-size:16px; font-weight:600; color:var(--text-strong); }
+
+/* ============================ misc ============================ */
+.progress { height:8px; border-radius:999px; background:var(--bar-track); overflow:hidden; }
+.progress > i { display:block; height:100%; border-radius:999px; background:var(--bar-ok); }
+.progress.warn > i { background:var(--bar-warn); } .progress.crit > i { background:var(--bar-crit); } .progress.low > i { background:var(--bar-low); }
+.avatar { width:36px; height:36px; border-radius:50%; display:inline-grid; place-items:center; color:#fff; font-size:12px; font-weight:600; }
+.badge-count { min-width:18px; height:18px; border-radius:50%; background:var(--red); color:#fff; font-size:10px; display:inline-grid; place-items:center; } /* bell badge [M #e3616d..#df3149] */
+.alert-card { border-radius:var(--r-btn); padding:16px; border:1px solid rgba(0,0,0,.04); }
+.alert-card.risk { border-left:4px solid var(--alert-red-bd); }
+.banner-ai { background:linear-gradient(90deg,var(--banner-from),var(--banner-to)); border-left:4px solid var(--banner-bd); padding:12px 24px; color:#92400e; }
+.map { background:var(--map-land); border-radius:var(--r-card); position:relative; }
+.marker { width:28px; height:28px; border-radius:50%; display:grid; place-items:center; color:#fff; box-shadow:0 1px 3px rgba(0,0,0,.3); }
+.marker-label { background:#fff; border-radius:6px; padding:1px 6px; font-size:11px; box-shadow:var(--sh-pop); }
+
+/* Components added by spec v1.0 section 4.1 (not in part-D-tokens.css). Uses tokens.css only. */
+.page-head .actions { display:flex; gap:12px; align-items:center; }
+.page-sub { color:var(--text-muted); font-size:var(--fs-body); margin:4px 0 0; }
+.page-head.stuck { box-shadow:0 1px 0 var(--border); }
+
+/* KPI variant A icon badge (white tile) */
+.kpi-tile .icon { width:48px; height:48px; border-radius:var(--r-icon); display:grid; place-items:center; }
+
+/* utilisation / threshold bar: ok(default) warn crit low */
+.progress > i { display:block; height:100%; border-radius:999px; background:var(--bar-ok); }
+.progress.warn > i { background:var(--bar-warn); } .progress.crit > i { background:var(--bar-crit); } .progress.low > i { background:var(--bar-low); }
+/* zone bar: several segments in one track */
+.zonebar { display:flex; height:8px; border-radius:999px; overflow:hidden; background:var(--bar-track); gap:2px; }
+.zonebar > i { display:block; height:100%; }
+.zonebar .z-frozen{background:var(--zone-frozen)} .zonebar .z-chilled{background:var(--zone-chilled)}
+.zonebar .z-pharma{background:var(--zone-pharma)} .zonebar .z-ambient{background:var(--zone-ambient)}
+
+/* hub card (spec 5.7) */
+.hub-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--gap); }
+.hub-card { background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--r-card); box-shadow:var(--sh-card); padding:24px; cursor:pointer; transition:box-shadow .15s; }
+.hub-card:hover { box-shadow:var(--sh-hover); }
+.hub-card.is-selected { outline:2px solid var(--primary); outline-offset:-2px; }
+.hub-card .row { display:flex; justify-content:space-between; align-items:center; }
+.hub-card h4 { margin:0; font-size:16px; font-weight:600; color:var(--text-strong); }
+.hub-card .addr { color:var(--text-faint); font-size:var(--fs-small); margin:4px 0 16px; }
+.mini-tiles { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:16px 0; }
+.mini-tile { border-radius:var(--r-btn); padding:12px 8px; text-align:center; }
+.mini-tile b { display:block; font-size:20px; font-weight:600; }
+.mini-tile small { font-size:var(--fs-small); color:var(--text-muted); }
+.mini-tile.blue{background:var(--tint-blue-50);color:var(--on-blue)} .mini-tile.green{background:var(--tint-green-50);color:var(--on-green)} .mini-tile.purple{background:var(--tint-purple-50);color:var(--on-purple)}
+.hub-card .foot { text-align:center; font-weight:600; font-size:var(--fs-small); color:var(--text); margin-top:12px; }
+
+/* temperature chip / zone chip */
+.chip.temp-ok{background:var(--temp-ok-bg);color:var(--chip-green-fg)} .chip.temp-warn{background:var(--temp-warn-bg);color:var(--chip-yellow-fg)} .chip.temp-breach{background:var(--temp-breach-bg);color:var(--chip-red-fg)}
+.chip.zone-frozen{background:var(--zone-frozen-bg);color:#1d4ed8} .chip.zone-chilled{background:var(--zone-chilled-bg);color:#0f766e}
+.chip.zone-pharma{background:var(--zone-pharma-bg);color:#6d28d9} .chip.zone-ambient{background:var(--zone-ambient-bg);color:#57534e}
+
+/* step dots (POD 3-4 steps) */
+.steps { display:inline-flex; align-items:center; }
+.steps i { width:8px; height:8px; border-radius:50%; background:var(--step-todo); display:block; }
+.steps i + i { margin-left:14px; position:relative; }
+.steps i + i::before { content:""; position:absolute; right:8px; top:3px; width:14px; height:2px; background:var(--step-todo); }
+.steps i.done { background:var(--step-done); } .steps i.current { background:var(--step-current); } .steps i.failed { background:var(--step-failed); }
+.steps i.done + i::before { background:var(--step-done); }
+
+/* inline drop zone */
+.drop-zone { border:2px dashed var(--primary); background:#eef7fd; border-radius:var(--r-btn); padding:20px; text-align:center; color:var(--text-muted); }
+.drop-zone:hover { background:#e0f0fb; } .drop-zone b { display:block; color:var(--text-strong); }
+
+/* tinted status row (yard queue, linked loads) */
+.tinted-row { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-radius:var(--r-btn); margin-bottom:8px; }
+.tinted-row.green{background:var(--tint-green-50)} .tinted-row.blue{background:var(--tint-blue-50)} .tinted-row.yellow{background:var(--tint-yellow-50)} .tinted-row.red{background:var(--tint-red-50)}
+
+/* dock timeline: time rows x door bands */
+.dock-grid { display:grid; grid-template-columns:64px repeat(4,1fr); gap:6px; font-size:var(--fs-small); }
+.dock-grid .h { color:var(--text-muted); font-weight:500; } .dock-grid .slot { border-radius:8px; padding:6px 8px; background:var(--bg-subtle); color:var(--text-faint); text-align:center; }
+.dock-grid .slot.in{background:#c1d9fa;color:var(--on-blue)} .dock-grid .slot.out{background:#c1fdd3;color:var(--on-green)}
+
+/* tabs: pill tabs with counts (POD) */
+.pill-tabs { display:flex; gap:8px; }
+.pill-tab { display:inline-flex; align-items:center; gap:8px; height:32px; padding:0 14px; border-radius:999px; color:var(--text-muted); cursor:pointer; font-weight:500; }
+.pill-tab .n { min-width:20px; height:20px; border-radius:999px; background:var(--bg-subtle); display:inline-grid; place-items:center; font-size:11px; padding:0 6px; }
+.pill-tab.active { background:var(--primary); color:#fff; } .pill-tab.active .n { background:rgba(0,0,0,.18); color:#fff; }
+
+/* AI card / risk card / report card / settings / toggle / integration */
+.risk-card { border-radius:var(--r-btn); padding:16px; margin-bottom:12px; border-left:4px solid var(--risk-low-bd); background:var(--risk-low-bg); }
+.risk-card.high{background:var(--risk-high-bg);border-left-color:var(--risk-high-bd)} .risk-card.mid{background:var(--risk-mid-bg);border-left-color:var(--risk-mid-bd)}
+.risk-card .actions { display:flex; gap:8px; margin-top:12px; }
+.report-card { padding:20px; } .report-card .chart { height:160px; margin:12px 0; background:linear-gradient(180deg,var(--chart-area),transparent); border-radius:var(--r-btn); }
+.report-card .kpi3 { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.report-card .kpi3 > div { background:#fdfdfd; border-radius:var(--r-btn); padding:10px 8px; text-align:center; }
+.report-card .kpi3 b { display:block; font-size:18px; } .report-card .kpi3 small { color:var(--text-muted); font-size:11px; }
+.toggle-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border); }
+.switch { width:40px; height:22px; border-radius:999px; background:#d0d4dc; position:relative; flex:none; }
+.switch::after { content:""; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#fff; transition:left .15s; }
+.switch.on { background:var(--primary); } .switch.on::after { left:20px; }
+.integration-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:var(--gap); }
+.integration-tile { border:1px solid var(--border-input); border-radius:var(--r-btn); padding:16px; }
+
+/* v6 app-specific CSS (on top of shared/design/*) */
+html,body{height:100%} body{overflow:hidden}
+#root,.app{height:100vh} .app{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:0}
+.sidebar{overflow:auto;position:relative;height:100vh} .sidebar .langs{position:static;margin-top:20px;padding:0 8px} .sidebar .langs a{background:var(--bg-subtle);color:var(--text-muted);margin-right:4px}.sidebar .langs a.on{background:var(--primary);color:#fff}
+main{overflow:auto;height:100vh;position:relative}
+.nav-item span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar{display:flex;align-items:center;gap:16px;padding:0 var(--page-pad)} .crumb{color:var(--text-muted)} .crumb b{color:var(--text-strong)}
+.who{margin-left:auto;display:flex;align-items:center;gap:14px}.usr{text-align:right;line-height:1.2}.usr small{display:block;color:var(--text-faint);font-size:12px}
+.searchbox{display:flex;align-items:center;gap:8px;border:1px solid var(--border-input);border-radius:999px;padding:0 14px;height:38px;width:360px;color:var(--text-faint)} .searchbox input{border:0;outline:0;flex:1;font:inherit;background:transparent}
+.bell{position:relative;color:var(--text-muted);display:flex} .bell .badge-count{position:absolute;top:-6px;right:-8px}
+.avatar.sm{width:28px;height:28px;font-size:11px;flex:none}
+.cell{display:flex;align-items:center;gap:10px} .sub{font-size:12px;color:var(--text-faint);margin-top:2px}.faint{color:var(--text-faint)}.note{font-size:12px;color:var(--text-muted)}
+.lnk{color:var(--link);font-weight:600;cursor:pointer}
+.page-head{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.kpi-row.k6{grid-template-columns:repeat(6,minmax(0,1fr))} .kpi-tile .value{font-size:26px;white-space:nowrap}.kpi-tile .label{font-size:13px;color:var(--text-muted)}.kpi-tile .delta{font-size:12px;color:var(--text-muted);margin-top:2px}.kpi-tile .delta.pos{color:#2a9d52}.kpi-tile .delta.neg{color:var(--label-red)}
+.grid2{display:grid;grid-template-columns:2fr 1fr;gap:var(--gap)} .grid2.eq{grid-template-columns:1fr 1fr}
+.mapwrap{position:relative;padding:12px} .kzmap{width:100%;height:auto;display:block;background:#f6fbf7;border-radius:var(--r-card)} .mk{cursor:pointer} .maplbl{font:600 12px var(--font);fill:var(--text)} .maplbl.sm{font-size:10px}
+.legend{position:absolute;top:24px;right:24px;padding:10px 12px;font-size:12px;box-shadow:var(--sh-pop)} .legend div{display:flex;align-items:center;gap:6px;margin-top:4px} .legend i{width:8px;height:8px;border-radius:50%;display:block}
+.statstrip{position:absolute;left:24px;bottom:24px;padding:8px 14px;display:flex;gap:16px;font-size:12px;box-shadow:var(--sh-pop)} .statstrip b{font-size:15px}.statstrip .g{color:#2a9d52}.statstrip .b{color:var(--primary)}
+.dlist{padding:4px 12px 12px} .drow{display:flex;justify-content:space-between;gap:8px;padding:10px 8px;border-bottom:1px solid var(--border);cursor:pointer} .drow:hover{background:var(--bg-hover)} .drow .r{text-align:right}
+.alert-card{margin-bottom:10px;cursor:pointer} .al-red{background:var(--alert-red-bg);color:var(--alert-red-fg)} .al-orange{background:var(--alert-orange-bg);color:var(--alert-orange-fg)} .al-blue{background:var(--alert-blue-bg);color:var(--alert-blue-fg)} .al-yellow{background:var(--alert-yellow-bg);color:var(--alert-yellow-fg)}
+.qa{display:grid;grid-template-columns:1fr 1fr;gap:16px} .qa .btn{justify-content:center;height:55px}
+.tcard{overflow:auto} .table tbody tr{cursor:pointer;height:var(--row-h)} .table tbody tr:hover{background:var(--bg-hover)} .table tr.is-selected{background:var(--bg-selected)} .table th,.table td{text-align:left;padding:10px 14px;vertical-align:middle} .empty{text-align:center;color:var(--text-faint);padding:24px}
+.pager{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:12px;color:var(--text-muted);border-top:1px solid var(--border)} .pgb{border:1px solid var(--border-input);background:#fff;border-radius:8px;min-width:30px;height:30px;margin-left:4px;cursor:pointer} .pgb.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+.filters{margin:0} .filters label{font-size:12px;font-weight:500;color:var(--text-muted)} .select{border:1px solid var(--border-input);border-radius:999px;background:#fff;height:36px;padding:0 12px;font:inherit}
+.drawer{z-index:40;top:0;width:var(--drawer-w);overflow:auto} .drawer-head .x{cursor:pointer;color:var(--text-muted)} .drawer-tabs{overflow-x:auto} .drawer-tabs .tab{cursor:pointer;padding:12px 0;font-weight:500;color:var(--text-muted);white-space:nowrap}.drawer-tabs .tab.active{color:var(--primary);border-bottom:2px solid var(--primary)}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:14px} .kv small{display:block;color:var(--text-muted);font-size:12px} .kv b{font-weight:600}
+.ident{display:flex;gap:12px;align-items:center;margin-bottom:16px} .fl{display:block;font-size:12px;color:var(--text-muted);margin-bottom:12px} .fl .select{display:block;width:100%;margin-top:4px;border-radius:10px} .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ta{width:100%;border:1px solid var(--border-input);border-radius:10px;padding:10px;font:inherit;margin:8px 0;resize:vertical} .note-i{padding:8px 0;border-bottom:1px solid var(--border)} .note-i small{color:var(--text-faint)}
+.actbar{display:flex;gap:10px;flex-wrap:wrap} .tinted-row.gray{background:var(--bg-subtle)} .spark{width:100%;height:auto;margin-top:12px}
+.stops .stop{display:flex;gap:12px;align-items:flex-start;padding:10px 0;position:relative} .stops .stop i{width:12px;height:12px;border-radius:50%;background:var(--step-todo);margin-top:4px;flex:none} .stops .stop.done i{background:var(--step-done)}
+.pill-tabs{margin-bottom:0}
+.board{display:grid;grid-template-columns:repeat(6,minmax(240px,1fr));gap:16px;overflow-x:auto;padding-bottom:12px;align-items:start}
+.col{background:#f3f4f6;border-radius:var(--r-card);padding:12px;min-height:200px} .colh{display:flex;align-items:center;gap:8px;margin-bottom:12px} .colh .d{width:10px;height:10px;border-radius:50%} .colh .cnt{margin-left:auto;background:#fff;border-radius:999px;padding:0 8px;font-size:12px}
+.d.gray{background:#9ca3af}.d.blue{background:var(--blue)}.d.yellow{background:var(--yellow)}.d.green{background:var(--green)}.d.purple{background:var(--purple)}.d.red{background:var(--red)}
+.kcard{background:#fff;border:1px solid var(--border);border-radius:var(--r-btn);padding:14px;margin-bottom:10px;box-shadow:var(--sh-card);cursor:grab;transition:box-shadow .15s} .kcard:hover{box-shadow:var(--sh-hover)} .kcard.sel{outline:2px solid var(--primary)}
+.kcard .r1,.kcard .r2{display:flex;justify-content:space-between;align-items:center} .kcard .rt{font-weight:600;margin:8px 0 4px} .kcard .r2{margin-top:10px;font-size:12px} .kcard .r2 small{color:var(--text-faint)} .prob{display:flex;gap:6px;align-items:center;color:var(--label-red);font-size:12px;margin-top:6px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:12px 20px;border-radius:10px;box-shadow:var(--sh-pop);z-index:80;font-size:14px} .toast.err{background:#be123c}
+@media (max-width:1100px){.kpi-row.k6{grid-template-columns:repeat(2,1fr)}.grid2,.grid2.eq{grid-template-columns:1fr}.app{grid-template-columns:1fr}.sidebar{display:none}.drawer{width:100%}}
+
+.kpi-tile{padding:16px 16px;gap:8px} .kpi-tile .value{font-size:22px!important} .kpi-tile .icon{width:40px;height:40px;flex:none} .kpi-tile>div:first-child{min-width:0}
+.sidebar .langs a{text-decoration:none;padding:4px 8px;border-radius:8px;font-size:12px;display:inline-block}
+.drawer-tabs{gap:14px!important;padding:0 16px!important} .drawer-tabs .tab{font-size:13px}
+
+</style></head><body><div id="root"></div><script>
+/* v6 core: i18n, helpers, icons, store + dispatch rules, shell, drawer, router. */
+const LANG = 'de';
+const LI = { ru: 0, de: 1, en: 2, kk: 3 }[LANG];
+const fileFor = l => (l === 'ru' ? 'platform-v6.html' : 'platform-v6-' + l + '.html');
+const T = (...a) => (a[LI] != null ? a[LI] : a[0]);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const kzt = n => Math.round(n).toLocaleString('ru-RU').replace(/ | /g, ' ') + ' ₸';
+const p2 = n => String(n).padStart(2, '0');
+const fdt = iso => { const d = new Date(iso); return p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + ', ' + p2(d.getHours()) + ':' + p2(d.getMinutes()); };
+
+const IC = {
+  grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+  package: '<path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>',
+  kanban: '<rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="4" height="8" rx="1"/>',
+  truck: '<path d="M2 6h11v10H2z"/><path d="M13 9h4l4 4v3h-8z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+  route: '<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h8a3 3 0 000-6H8a3 3 0 010-6h8"/>',
+  warehouse: '<path d="M3 21V9l9-5 9 5v12"/><path d="M7 21v-8h10v8"/>',
+  file: '<path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M14 3v6h6"/><path d="M9 15l2 2 4-4"/>',
+  receipt: '<path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+  chart: '<path d="M4 20V4"/><path d="M4 20h16"/><rect x="8" y="11" width="3" height="6"/><rect x="14" y="7" width="3" height="10"/>',
+  spark: '<path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>',
+  cog: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
+  bell: '<path d="M6 8a6 6 0 0112 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 21a2 2 0 004 0"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  therm: '<path d="M14 14.8V5a2 2 0 00-4 0v9.8a4 4 0 104 0z"/>',
+  alert: '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/>',
+  up: '<path d="M7 17L17 7M9 7h8v8"/>',
+};
+const ic = (n, s = 16) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${IC[n] || ''}</svg>`;
+
+/* ---------- labels & status vocabulary (one palette everywhere, spec P3) ---------- */
+const ST = {
+  unassigned: { c: 'gray',   l: T('Не назначен', 'Offen', 'Unassigned', 'Тағайындалмаған') },
+  assigned:   { c: 'blue',   l: T('Назначен', 'Zugewiesen', 'Assigned', 'Тағайындалған') },
+  loading:    { c: 'yellow', l: T('Погрузка', 'Beladung', 'Loading', 'Тиеу') },
+  in_transit: { c: 'green',  l: T('В пути', 'Unterwegs', 'In Transit', 'Жолда') },
+  delivered:  { c: 'purple', l: T('Доставлен', 'Geliefert', 'Delivered', 'Жеткізілді') },
+  problem:    { c: 'red',    l: T('Проблема', 'Problem', 'Problem', 'Мәселе') },
+};
+const ORDER = ['unassigned', 'assigned', 'loading', 'in_transit', 'delivered', 'problem'];
+const PRI = { high: { c: 'red', l: T('Высокий', 'Hoch', 'High', 'Жоғары') }, medium: { c: 'yellow', l: T('Средний', 'Mittel', 'Medium', 'Орташа') }, low: { c: 'green', l: T('Низкий', 'Niedrig', 'Low', 'Төмен') } };
+const ESF = {
+  none:      { c: 'gray',   l: T('ЭСФ: нет', 'ESF: keine', 'ESF: none', 'ЭШФ: жоқ') },
+  issued:    { c: 'blue',   l: T('ЭСФ: выписана', 'ESF: ausgestellt', 'ESF: issued', 'ЭШФ: жазылды') },
+  confirmed: { c: 'green',  l: T('ЭСФ: подтверждена', 'ESF: bestätigt', 'ESF: confirmed', 'ЭШФ: расталды') },
+};
+const chip = (c, t) => `<span class="chip ${c}">${esc(t)}</span>`;
+const stChip = s => chip(ST[s].c, ST[s].l);
+const zoneChip = z => `<span class="chip zone-${z}">${ZONES[z].label}</span>`;
+const avatar = (ini, n) => `<span class="avatar sm" style="background:var(--av-${n || 1})">${esc(ini)}</span>`;
+
+/* ---------- store ---------- */
+const S = {
+  loads: [], drivers: [], trucks: [],
+  route: 'dashboard', drawer: null, toast: null,
+  f: { q: '', status: '', cust: '', zone: '', pri: '', hub: '', drv: '', page: 1 },
+  dispTab: 'board', nextId: 1856,
+};
+const cust = id => CUSTOMERS.find(c => c.id === id);
+const drv = id => S.drivers.find(d => d.id === id);
+const trk = id => S.trucks.find(t => t.id === id);
+const load = id => S.loads.find(l => l.id === id);
+const hrs = l => Math.round(dist(l.from, l.to) / 65 * 10) / 10;
+/* driving time the driver must still have: one shift (max 9 h); longer routes get planned rest stops (norms to be verified, spec Q5) */
+const needRto = l => Math.min(hrs(l), 9);
+const tempState = l => { const z = ZONES[l.zone]; if (l.temp < z.lo || l.temp > z.hi) return 'breach'; return (l.temp - z.lo < 0.8 || z.hi - l.temp < 0.8) ? 'warn' : 'ok'; };
+const tempChip = l => `<span class="chip temp-${tempState(l)}">${l.temp > 0 ? '+' : ''}${String(l.temp).replace('.', ',')} °C</span>`;
+const revenue = l => dist(l.from, l.to) * ZONES[l.zone].rate;
+const cost = l => Math.round(revenue(l) * 0.78);
+const isActive = l => ['assigned', 'loading', 'in_transit', 'problem'].includes(l.status);
+
+function compat(l, d, t) {
+  const why = [];
+  if (!t.zones.includes(l.zone)) why.push(T('ТС не подходит по температурной зоне', 'Fahrzeug passt nicht zur Temperaturzone', 'Truck does not support the temperature zone', 'КҚ температура аймағына сәйкес емес'));
+  if (t.cap < l.pallets) why.push(T('Недостаточно паллето-мест', 'Zu wenige Palettenplätze', 'Not enough pallet places', 'Паллет орны жеткіліксіз'));
+  if (t.status !== 'available') why.push(T('ТС занято или в сервисе', 'Fahrzeug belegt oder im Service', 'Truck busy or in service', 'КҚ бос емес немесе сервисте'));
+  if (d.status !== 'available') why.push(T('Водитель недоступен', 'Fahrer nicht verfügbar', 'Driver unavailable', 'Жүргізуші қолжетімсіз'));
+  if (d.rto < needRto(l)) why.push(T('Не хватает времени вождения (РТО)', 'Lenkzeit reicht nicht (RTO)', 'Not enough driving time (RTO)', 'Жүргізу уақыты (РТО) жеткіліксіз'));
+  return why;
+}
+function assign(id, did, tid) {
+  const l = load(id), d = drv(did), t = trk(tid);
+  if (!l || !d || !t) return T('Выберите водителя и ТС', 'Fahrer und Fahrzeug wählen', 'Select driver and truck', 'Жүргізуші мен КҚ таңдаңыз');
+  const why = compat(l, d, t); if (why.length) return why[0];
+  l.driver = did; l.truck = tid; l.status = 'assigned'; d.status = 'busy'; t.status = 'busy';
+  l.notes.push({ who: 'System', t: fdt(NOW).slice(-5), text: T('Назначено: ', 'Zugewiesen: ', 'Assigned: ', 'Тағайындалды: ') + d.name + ' / ' + t.plate });
+  return null;
+}
+function autoAssign() {
+  let ok = 0, fail = 0;
+  const rank = { high: 0, medium: 1, low: 2 };
+  S.loads.filter(l => l.status === 'unassigned').sort((a, b) => rank[a.priority] - rank[b.priority] || a.eta.localeCompare(b.eta)).forEach(l => {
+    const ts = S.trucks.filter(t => t.status === 'available' && t.zones.includes(l.zone) && t.cap >= l.pallets).sort((a, b) => a.cap - b.cap);
+    const ds = S.drivers.filter(d => d.status === 'available' && d.rto >= needRto(l)).sort((a, b) => a.rto - b.rto);
+    if (ts[0] && ds[0] && !assign(l.id, ds[0].id, ts[0].id)) ok++; else fail++;
+  });
+  return { ok, fail };
+}
+const NEXT = { assigned: 'loading', loading: 'in_transit', in_transit: 'delivered' };
+function setStatus(id, st) {
+  const l = load(id); if (!l) return;
+  const was = l.status; l.status = st;
+  if (st === 'in_transit' && l.progress === 0) l.progress = 0.05;
+  if (st === 'delivered') {
+    l.progress = 1; l.pod = 'pending';
+    const d = drv(l.driver), t = trk(l.truck); if (d) d.status = 'available'; if (t) t.status = 'available';
+  }
+  if (st === 'problem') { l.temp = ZONES[l.zone].hi + 1.4; }
+  if (was === 'problem' && st === 'in_transit') { l.temp = ZONES[l.zone].mid; }
+  l.notes.push({ who: 'System', t: fdt(NOW).slice(-5), text: ST[was].l + ' → ' + ST[st].l });
+}
+function canMove(l, to) {
+  if (to === 'assigned' && l.status === 'unassigned') return T('Сначала назначьте водителя и ТС', 'Erst Fahrer und Fahrzeug zuweisen', 'Assign a driver and truck first', 'Алдымен жүргізуші мен КҚ тағайындаңыз');
+  if (NEXT[l.status] === to) return null;
+  if (to === 'problem' && ['loading', 'in_transit'].includes(l.status)) return null;
+  if (l.status === 'problem' && to === 'in_transit') return null;
+  return T('Недопустимый переход статуса', 'Statuswechsel nicht erlaubt', 'Status change not allowed', 'Күй ауысуына рұқсат жоқ');
+}
+function createLoad(f) {
+  if (f.from === f.to) return T('Пункты отправления и назначения совпадают', 'Start und Ziel sind gleich', 'Origin and destination are the same', 'Жөнелту және межелі пункт бірдей');
+  if (!(f.pallets >= 1 && f.pallets <= 33)) return T('Паллет: от 1 до 33', 'Paletten: 1 bis 33', 'Pallets: 1 to 33', 'Паллет: 1-ден 33-ке дейін');
+  const id = String(S.nextId++).padStart(6, '0');
+  const l = mkLoad(id, f.cust, f.from, f.to, f.zone, f.pallets, f.pallets * 330, f.priority, 'unassigned', new Date(NOW.getTime() + hrs({ from: f.from, to: f.to }) * 3600e3 + 6 * 3600e3).toISOString());
+  S.loads.unshift(l); return { ok: l.id };
+}
+
+/* ---------- navigation (spec 2.1) ---------- */
+const NAV = [
+  ['dashboard', 'grid', T('Обзор', 'Übersicht', 'Dashboard', 'Шолу'), 2],
+  ['orders', 'package', T('Заказы и рейсы', 'Aufträge & Fahrten', 'Orders & Loads', 'Тапсырыстар мен рейстер'), 2],
+  ['dispatch', 'kanban', T('Диспетчерская доска', 'Dispositionstafel', 'Dispatch Board', 'Диспетчерлік тақта'), 2],
+  ['fleet', 'truck', T('Автопарк', 'Fuhrpark', 'Fleet', 'Автопарк'), 3],
+  ['drivers', 'user', T('Водители', 'Fahrer', 'Drivers', 'Жүргізушілер'), 3],
+  ['routes', 'route', T('Маршруты и трекинг', 'Routen & Tracking', 'Routes & Tracking', 'Маршруттар және трекинг'), 3],
+  ['hubs', 'warehouse', T('Хабы и склады', 'Hubs & Lager', 'Warehouses & Hubs', 'Хабтар мен қоймалар'), 4],
+  ['pod', 'file', T('Подтверждение доставки', 'Lieferbestätigung', 'Proof of Delivery', 'Жеткізуді растау'), 5],
+  ['billing', 'receipt', T('Счета и ЭСФ', 'Rechnungen & ESF', 'Billing & Invoices', 'Шоттар және ЭШФ'), 5],
+  ['reports', 'chart', T('Отчёты', 'Berichte', 'Reports', 'Есептер'), 6],
+  ['ai', 'spark', T('AI-ассистент', 'KI-Assistent', 'AI Ops Assistant', 'AI-көмекші'), 6],
+  ['settings', 'cog', T('Настройки', 'Einstellungen', 'Settings', 'Баптаулар'), 6],
+];
+const SCREENS = {};   // id -> { title, sub, actions(), body(), search }
+const navLabel = id => (NAV.find(n => n[0] === id) || [])[2] || id;
+
+function toast(msg, kind) { S.toast = { msg, kind: kind || 'ok' }; render(); clearTimeout(toast.t); toast.t = setTimeout(() => { S.toast = null; render(); }, 3200); }
+function go(r) { S.route = r; S.drawer = null; S.f.page = 1; render(); const m = $('main'); if (m) m.scrollTop = 0; }
+function openDrawer(d) { S.drawer = d; render(); }
+const closeDrawer = () => { S.drawer = null; render(); };
+const alertsCount = () => S.loads.filter(l => tempState(l) === 'breach' && isActive(l)).length + S.drivers.filter(d => d.rto < 4 && d.status === 'available').length;
+
+function shell() {
+  const sc = SCREENS[S.route];
+  const nav = NAV.map(n => `<div class="nav-item${n[0] === S.route ? ' active' : ''}" data-act="go" data-v="${n[0]}">${ic(n[1])}<span>${esc(n[2])}</span></div>`).join('');
+  const lang = ['ru', 'de', 'en', 'kk'].map(l => `<a href="${fileFor(l)}"${l === LANG ? ' class="on"' : ''}>${l.toUpperCase()}</a>`).join('');
+  const body = sc ? sc.body() : placeholder(S.route);
+  const title = sc ? sc.title() : navLabel(S.route);
+  return `<div class="app"><aside class="sidebar"><div class="logo">Olymp&nbsp;Logistic</div>${nav}<div class="langs">${lang}</div></aside>
+<main><header class="topbar"><span class="crumb">${esc(navLabel('dashboard'))} › <b>${esc(navLabel(S.route))}</b></span>
+<div class="who"><label class="searchbox">${ic('search', 14)}<input id="gsearch" placeholder="${esc(T('Поиск рейсов, ТС, водителей…', 'Fahrten, Fahrzeuge, Fahrer suchen…', 'Search loads, trucks, drivers…', 'Рейс, КҚ, жүргізуші іздеу…'))}" value="${esc(S.f.q)}"></label>
+<span class="bell">${ic('bell', 18)}${alertsCount() ? `<span class="badge-count">${alertsCount()}</span>` : ''}</span>
+<div class="usr"><b>Sarah Johnson</b><small>${esc(T('Руководитель операций', 'Betriebsleiterin', 'Operations Manager', 'Операциялар басшысы'))}</small></div><span class="avatar" style="background:var(--primary)">SJ</span></div></header>
+<div class="page-head"><div><h1 class="page-title">${esc(title)}</h1>${sc && sc.sub ? `<p class="page-sub">${esc(sc.sub())}</p>` : ''}</div><div class="actions">${sc && sc.actions ? sc.actions() : ''}</div></div>
+<div class="content">${body}</div></main>${drawerHtml()}${S.toast ? `<div class="toast ${S.toast.kind}">${esc(S.toast.msg)}</div>` : ''}</div>`;
+}
+function placeholder(id) {
+  const ph = NAV.find(n => n[0] === id)[3];
+  return `<div class="card card-body"><h3 style="margin:0 0 8px">${esc(navLabel(id))}</h3><p class="note">${esc(T('Экран будет перенесён на новую дизайн-систему в фазе ', 'Der Screen wird in Phase ', 'This screen moves to the new design system in phase ', 'Бұл экран жаңа дизайн-жүйеге '))}${ph}${esc(T(' (см. спецификацию, раздел 7).', ' auf das neue Designsystem migriert (siehe Spezifikation, Abschnitt 7).', ' (see specification, section 7).', '-кезеңде көшіріледі (спецификация, 7-бөлім).'))}</p></div>`;
+}
+function drawerHtml() {
+  const d = S.drawer; if (!d) return '';
+  const r = d.type === 'create' ? DRAWERS.create() : DRAWERS.load(d);
+  return `<aside class="drawer open"><div class="drawer-head"><span>${esc(r.title)}</span><span class="x" data-act="close">${ic('x', 18)}</span></div>${r.html}</aside>`;
+}
+const DRAWERS = {};
+
+/* ---------- render + events ---------- */
+function render() {
+  const keep = { y: ($('main') || {}).scrollTop || 0, f: document.activeElement && document.activeElement.id };
+  const pos = document.activeElement && document.activeElement.selectionStart;
+  $('#root').innerHTML = shell();
+  const m = $('main'); if (m) m.scrollTop = keep.y;
+  if (keep.f) { const e = document.getElementById(keep.f); if (e) { e.focus(); try { e.setSelectionRange(pos, pos); } catch (_) {} } }
+}
+const ACT = {};
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const fn = ACT[el.dataset.act]; if (fn) { fn(el.dataset, el, e); }
+});
+document.addEventListener('input', e => {
+  if (e.target.id === 'gsearch') { S.f.q = e.target.value; S.f.page = 1; if (S.route !== 'orders') S.route = 'orders'; render(); }
+  else if (e.target.dataset && e.target.dataset.f) { S.f[e.target.dataset.f] = e.target.value; S.f.page = 1; render(); }
+});
+Object.assign(ACT, {
+  go: d => go(d.v), close: closeDrawer,
+  open: d => openDrawer({ type: 'load', id: d.id, tab: 'overview' }),
+  tab: d => { S.drawer.tab = d.v; render(); },
+  clear: () => { S.f = { q: '', status: '', cust: '', zone: '', pri: '', hub: '', drv: '', page: 1 }; render(); },
+  page: d => { S.f.page = +d.v; render(); },
+  create: () => openDrawer({ type: 'create' }),
+});
+
+/* v6 demo data (Kazakhstan cold chain). Fixed clock so the demo is deterministic. */
+const NOW = new Date('2026-10-18T14:30:00+05:00');
+const HUBS = {
+  AST: { name: T('Хаб Астана-Север', 'Hub Astana-Nord', 'Astana North Hub', 'Астана-Солтүстік хабы'), city: T('Астана', 'Astana', 'Astana', 'Астана'), x: 330, y: 95 },
+  ALA: { name: T('Хаб Алматы-Жетысу', 'Hub Almaty-Zhetysu', 'Almaty Zhetysu Hub', 'Алматы-Жетісу хабы'), city: T('Алматы', 'Almaty', 'Almaty', 'Алматы'), x: 478, y: 262 },
+  KAR: { name: T('Хаб Караганда', 'Hub Karaganda', 'Karaganda Hub', 'Қарағанды хабы'), city: T('Караганда', 'Karaganda', 'Karaganda', 'Қарағанды'), x: 352, y: 150 },
+  SHY: { name: T('Хаб Шымкент', 'Hub Schymkent', 'Shymkent Hub', 'Шымкент хабы'), city: T('Шымкент', 'Shymkent', 'Shymkent', 'Шымкент'), x: 330, y: 288 },
+};
+const DIST = { 'AST-ALA': 1200, 'AST-KAR': 220, 'AST-SHY': 1300, 'ALA-KAR': 1000, 'ALA-SHY': 690, 'KAR-SHY': 1100 };
+const dist = (a, b) => DIST[a + '-' + b] || DIST[b + '-' + a] || 0;
+const ZONES = {
+  frozen:  { label: '−18 °C',    lo: -25, hi: -15, mid: -19, rate: 640 },
+  chilled: { label: '0…+4 °C',   lo: 0,   hi: 4,   mid: 2,   rate: 560 },
+  pharma:  { label: '+2…+8 °C',  lo: 2,   hi: 8,   mid: 5,   rate: 700 },
+  ambient: { label: '+15…+25 °C', lo: 15,  hi: 25,  mid: 20,  rate: 420 },
+};
+const CUSTOMERS = [
+  { id: 'c1', name: 'ТОО «Аптека Сервис»',        bin: '120340005671', ini: 'АС', av: 1 },
+  { id: 'c2', name: 'ТОО «Фрэш Маркет»',          bin: '110740012345', ini: 'ФМ', av: 5 },
+  { id: 'c3', name: 'ТОО «МедФарм Дистрибьюшн»', bin: '150240008812', ini: 'МД', av: 4 },
+  { id: 'c4', name: 'ТОО «Ледяной Путь Ритейл»',  bin: '130940007790', ini: 'ЛП', av: 2 },
+  { id: 'c5', name: 'ТОО «СеверПродукт»',         bin: '090640003321', ini: 'СП', av: 3 },
+];
+const mkDrivers = () => [
+  { id: 'd1', name: 'Ерлан Сейтқали',   ini: 'ЕС', rto: 8.5, status: 'available' },
+  { id: 'd2', name: 'Асхат Нургалиев',  ini: 'АН', rto: 9,   status: 'available' },
+  { id: 'd3', name: 'Дмитрий Орлов',    ini: 'ДО', rto: 3.5, status: 'available' },
+  { id: 'd4', name: 'Марат Жунусов',    ini: 'МЖ', rto: 9,   status: 'busy' },
+  { id: 'd5', name: 'Алишер Бектурганов', ini: 'АБ', rto: 6, status: 'available' },
+  { id: 'd6', name: 'Сергей Ким',       ini: 'СК', rto: 9,   status: 'rest' },
+  { id: 'd7', name: 'Нұрлан Омаров',    ini: 'НО', rto: 9,   status: 'busy' },
+];
+const mkTrucks = () => [
+  { id: 't1', plate: '123 ABC 01', model: 'Reefer 20 t', zones: ['frozen', 'chilled', 'pharma'], cap: 33, status: 'available' },
+  { id: 't2', plate: '456 DEF 02', model: 'Reefer 12 t', zones: ['chilled', 'pharma'],             cap: 20, status: 'available' },
+  { id: 't3', plate: '789 GHI 01', model: 'Reefer 20 t', zones: ['frozen', 'chilled'],              cap: 33, status: 'available' },
+  { id: 't4', plate: '321 JKL 02', model: 'Van 10 t',    zones: ['ambient', 'chilled'],             cap: 14, status: 'available' },
+  { id: 't5', plate: '654 MNO 09', model: 'Reefer 20 t', zones: ['pharma', 'chilled', 'frozen'],    cap: 33, status: 'busy' },
+  { id: 't6', plate: '987 PQR 01', model: 'Reefer 12 t', zones: ['chilled', 'frozen'],              cap: 20, status: 'busy' },
+  { id: 't7', plate: '135 STU 02', model: 'Tent 20 t',   zones: ['ambient'],                        cap: 33, status: 'service' },
+];
+const mkLoad = (id, c, from, to, zone, pal, kg, pri, st, eta, o = {}) => Object.assign({
+  id: 'LD-2026-' + id, cust: c, from, to, zone, pallets: pal, kg, priority: pri, status: st, eta,
+  driver: null, truck: null, temp: ZONES[zone].mid, progress: 0, pod: 'none', esf: 'none', notes: [],
+  created: '2026-10-17T09:00:00+05:00',
+}, o);
+const mkLoads = () => [
+  mkLoad('001847', 'c1', 'AST', 'ALA', 'pharma', 24, 8200, 'high', 'in_transit', '2026-10-19T08:00:00+05:00', { driver: 'd4', truck: 't5', progress: 0.58, temp: 5.1 }),
+  mkLoad('001848', 'c2', 'AST', 'KAR', 'chilled', 18, 6100, 'medium', 'in_transit', '2026-10-18T18:30:00+05:00', { driver: 'd7', truck: 't6', progress: 0.72, temp: 4.9 }),
+  mkLoad('001849', 'c3', 'ALA', 'SHY', 'pharma', 12, 3400, 'high', 'problem', '2026-10-18T20:00:00+05:00', { driver: 'd2', truck: 't2', progress: 0.4, temp: 9.6, notes: [{ who: 'System', t: '14:12', text: T('Температура вне диапазона 2–8 °C более 10 мин', 'Temperatur seit über 10 Min außerhalb 2–8 °C', 'Temperature outside 2–8 °C for over 10 min', 'Температура 2–8 °C-тан тыс 10 мин астам') }] }),
+  mkLoad('001850', 'c4', 'KAR', 'AST', 'frozen', 30, 15200, 'medium', 'loading', '2026-10-19T10:00:00+05:00', { driver: 'd1', truck: 't3' }),
+  mkLoad('001851', 'c5', 'AST', 'SHY', 'ambient', 14, 4800, 'low', 'assigned', '2026-10-20T09:00:00+05:00', { driver: 'd5', truck: 't4' }),
+  mkLoad('001852', 'c1', 'ALA', 'AST', 'pharma', 20, 5600, 'high', 'unassigned', '2026-10-19T16:00:00+05:00'),
+  mkLoad('001853', 'c2', 'SHY', 'ALA', 'chilled', 26, 9800, 'medium', 'unassigned', '2026-10-19T12:00:00+05:00'),
+  mkLoad('001854', 'c4', 'ALA', 'KAR', 'frozen', 22, 11800, 'low', 'unassigned', '2026-10-21T08:00:00+05:00'),
+  mkLoad('001855', 'c3', 'AST', 'KAR', 'pharma', 8, 1900, 'high', 'unassigned', '2026-10-18T22:00:00+05:00'),
+  mkLoad('001840', 'c5', 'KAR', 'ALA', 'chilled', 28, 10400, 'medium', 'delivered', '2026-10-17T15:00:00+05:00', { pod: 'pending', progress: 1 }),
+  mkLoad('001841', 'c1', 'AST', 'ALA', 'pharma', 16, 4300, 'high', 'delivered', '2026-10-17T10:30:00+05:00', { pod: 'approved', esf: 'issued', progress: 1, temp: 5.2 }),
+  mkLoad('001842', 'c2', 'SHY', 'AST', 'chilled', 24, 8800, 'low', 'delivered', '2026-10-16T19:00:00+05:00', { pod: 'approved', esf: 'none', progress: 1 }),
+  mkLoad('001843', 'c4', 'ALA', 'SHY', 'frozen', 18, 9100, 'medium', 'delivered', '2026-10-16T11:00:00+05:00', { pod: 'approved', esf: 'confirmed', progress: 1 }),
+  mkLoad('001844', 'c3', 'KAR', 'SHY', 'pharma', 10, 2500, 'medium', 'delivered', '2026-10-15T14:00:00+05:00', { pod: 'approved', esf: 'confirmed', progress: 1 }),
+  mkLoad('001845', 'c5', 'AST', 'KAR', 'ambient', 20, 7000, 'low', 'delivered', '2026-10-15T09:00:00+05:00', { pod: 'approved', esf: 'confirmed', progress: 1 }),
+];
+
+S.loads = mkLoads(); S.drivers = mkDrivers(); S.trucks = mkTrucks();
+
+/* Dashboard (spec 5.1): 6 KPI, schematic KZ map + dispatch list, alerts + quick actions. */
+(function () {
+  const kpi = (cls, ic_, label, val, sub, subCls) => `<div class="kpi-tile"><div><div class="label">${esc(label)}</div><div class="value">${val}</div><div class="delta ${subCls || ''}">${sub}</div></div><div class="icon" style="background:var(--tint-${cls}-100);color:var(--label-${cls})">${ic(ic_, 20)}</div></div>`;
+  function map() {
+    const hubs = Object.entries(HUBS).map(([k, h]) => `<g><circle cx="${h.x}" cy="${h.y}" r="7" fill="#fff" stroke="var(--primary)" stroke-width="3"/><text x="${h.x + 12}" y="${h.y + 4}" class="maplbl">${esc(h.city)}</text></g>`).join('');
+    const lines = S.loads.filter(l => isActive(l) && l.status !== 'assigned').map(l => { const a = HUBS[l.from], b = HUBS[l.to]; return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="var(--primary)" stroke-opacity=".35" stroke-width="2" stroke-dasharray="5 4"/>`; }).join('');
+    const mk = S.loads.filter(l => l.status === 'in_transit' || l.status === 'problem').map(l => {
+      const a = HUBS[l.from], b = HUBS[l.to], x = a.x + (b.x - a.x) * l.progress, y = a.y + (b.y - a.y) * l.progress, ts = tempState(l);
+      const col = ts === 'breach' ? 'var(--mk-red)' : ts === 'warn' ? 'var(--mk-status-yellow)' : 'var(--mk-green)', t = trk(l.truck);
+      return `<g class="mk" data-act="open" data-id="${l.id}" transform="translate(${x},${y})"><circle r="14" fill="${col}"/><path d="M-7 -3h9v6h-9zM2 -1h4l3 3v2h-7z" fill="#fff"/><circle cx="10" cy="-10" r="4.5" fill="${ts === 'ok' ? 'var(--mk-status-green)' : ts === 'warn' ? 'var(--mk-status-yellow)' : 'var(--red)'}" stroke="#fff" stroke-width="1.5"/><rect x="-44" y="18" width="88" height="17" rx="6" fill="#fff" stroke="var(--border-input)"/><text x="0" y="30" text-anchor="middle" class="maplbl sm">${esc(t ? t.plate.slice(0, 10) : '')} · ${l.temp > 0 ? '+' : ''}${String(l.temp).replace('.', ',')}°</text></g>`;
+    }).join('');
+    const free = S.trucks.filter(t => t.status === 'available').length, act = S.loads.filter(isActive).length;
+    return `<div class="card mapcard"><div class="card-head">${esc(T('Живые операции', 'Live-Betrieb', 'Live Operations', 'Тікелей операциялар'))}</div><div class="mapwrap">
+<svg viewBox="0 0 600 340" class="kzmap"><path d="M40 120 L110 70 L230 60 L330 40 L450 60 L560 90 L580 160 L540 230 L560 290 L440 310 L330 318 L230 300 L140 250 L60 200 Z" fill="#eef2f6" stroke="#d7dee7" stroke-width="2"/>${lines}${hubs}${mk}</svg>
+<div class="legend card"><b>${esc(T('Состояние ТС', 'Fahrzeugstatus', 'Vehicle status', 'КҚ күйі'))}</b><div><i style="background:var(--mk-status-green)"></i>${esc(T('В норме', 'In Ordnung', 'On time', 'Қалыпты'))}</div><div><i style="background:var(--mk-status-yellow)"></i>${esc(T('Близко к границе', 'Nahe Grenzwert', 'Near limit', 'Шекке жақын'))}</div><div><i style="background:var(--red)"></i>${esc(T('Темп. тревога', 'Temp.-Alarm', 'Temp. alarm', 'Темп. дабыл'))}</div></div>
+<div class="statstrip card"><span><b>${S.trucks.length}</b> ${esc(T('ТС всего', 'Fahrzeuge', 'Total vehicles', 'КҚ барлығы'))}</span><span><b class="g">${free}</b> ${esc(T('свободно', 'frei', 'available', 'бос'))}</span><span><b class="b">${act}</b> ${esc(T('активных рейсов', 'aktive Fahrten', 'active loads', 'белсенді рейс'))}</span></div></div></div>`;
+  }
+  function dispatchList() {
+    const rows = S.loads.filter(l => l.status !== 'delivered').slice(0, 7).map(l => `<div class="drow" data-act="open" data-id="${l.id}"><div><a class="lnk">${l.id}</a><div class="sub">${esc(HUBS[l.from].city)} → ${esc(HUBS[l.to].city)} · ${zoneChip(l.zone)}</div></div><div class="r">${stChip(l.status)}<div class="sub">${l.driver ? esc(drv(l.driver).name) : '—'}</div></div></div>`).join('');
+    return `<div class="card"><div class="card-head">${esc(T('Рейсы сегодня', 'Fahrten heute', "Today's Dispatch", 'Бүгінгі рейстер'))}</div><div class="dlist">${rows}</div></div>`;
+  }
+  function alerts() {
+    const a = [];
+    S.loads.filter(l => isActive(l) && tempState(l) === 'breach').forEach(l => a.push(['red', T('Температурная тревога', 'Temperatur-Alarm', 'Temperature alert', 'Температуралық дабыл'), `${l.id}: ${l.temp > 0 ? '+' : ''}${String(l.temp).replace('.', ',')} °C (${ZONES[l.zone].label})`, l.id]));
+    S.drivers.filter(d => d.status === 'available' && d.rto < 4).forEach(d => a.push(['orange', T('Предупреждение РТО', 'RTO-Warnung', 'Driving-time warning', 'РТО ескертуі'), `${d.name}: ${T('осталось', 'noch', 'left', 'қалды')} ${String(d.rto).replace('.', ',')} ${T('ч', 'h', 'h', 'сағ')}`]));
+    S.loads.filter(l => l.status === 'delivered' && l.esf === 'none' && l.pod === 'approved').forEach(l => a.push(['yellow', T('ЭСФ не выписана', 'ESF nicht ausgestellt', 'ESF not issued', 'ЭШФ жазылмаған'), `${l.id} · ${kzt(revenue(l))}`, l.id]));
+    S.loads.filter(l => l.status === 'delivered' && l.pod === 'pending').forEach(l => a.push(['blue', T('Ожидает POD', 'POD ausstehend', 'POD pending', 'POD күтілуде'), l.id, l.id]));
+    return `<div class="card"><div class="card-head">${esc(T('Оповещения', 'Meldungen', 'Alerts', 'Дабылдар'))}</div><div class="card-body">${a.length ? a.slice(0, 5).map(x => `<div class="alert-card al-${x[0]}"${x[3] ? ` data-act="open" data-id="${x[3]}"` : ''}><b>${esc(x[1])}</b><div>${esc(x[2])}</div></div>`).join('') : `<p class="note">${esc(T('Нет активных оповещений', 'Keine aktiven Meldungen', 'No active alerts', 'Белсенді дабыл жоқ'))}</p>`}</div></div>`;
+  }
+  function quick() {
+    const b = (cls, i, t, act) => `<button class="btn block ${cls}" data-act="${act}">${ic(i)} ${esc(t)}</button>`;
+    return `<div class="card"><div class="card-head">${esc(T('Быстрые действия', 'Schnellaktionen', 'Quick Actions', 'Жылдам әрекеттер'))}</div><div class="card-body qa">${b('primary', 'plus', T('Создать рейс', 'Fahrt anlegen', 'Create Load', 'Рейс құру'), 'create')}${b('green', 'user', T('Назначить водителя', 'Fahrer zuweisen', 'Assign Driver', 'Жүргізуші тағайындау'), 'toDispatch')}${b('purple', 'receipt', T('Сформировать ЭСФ', 'ESF erstellen', 'Generate ESF', 'ЭШФ қалыптастыру'), 'esfAll')}${b('orange', 'route', T('План маршрута', 'Route planen', 'Plan Route', 'Маршрут жоспары'), 'planRoute')}</div></div>`;
+  }
+  Object.assign(ACT, {
+    toDispatch: () => go('dispatch'),
+    esfAll: () => { const t = S.loads.filter(l => l.status === 'delivered' && l.pod === 'approved' && l.esf === 'none'); t.forEach(l => l.esf = 'issued'); toast(t.length ? T('Выписано ЭСФ: ', 'ESF ausgestellt: ', 'ESF issued: ', 'ЭШФ жазылды: ') + t.length : T('Нет рейсов для ЭСФ', 'Keine Fahrten für ESF', 'No loads need an ESF', 'ЭШФ үшін рейс жоқ')); },
+    planRoute: () => { S.dispTab = 'planning'; go('dispatch'); },
+  });
+  SCREENS.dashboard = {
+    title: () => navLabel('dashboard'),
+    sub: () => T('Холодовая цепь: Астана · Алматы · Караганда · Шымкент', 'Kühlkette: Astana · Almaty · Karaganda · Schymkent', 'Cold chain: Astana · Almaty · Karaganda · Shymkent', 'Суық тізбек: Астана · Алматы · Қарағанды · Шымкент'),
+    actions: () => `<button class="btn primary" data-act="create">${ic('plus')} ${esc(T('Создать рейс', 'Fahrt anlegen', 'Create Load', 'Рейс құру'))}</button>`,
+    body: () => {
+      const act = S.loads.filter(isActive), breach = act.filter(l => tempState(l) === 'breach').length;
+      const done = S.loads.filter(l => l.status === 'delivered').length;
+      const comp = act.length ? Math.round((act.length - breach) / act.length * 100) : 100;
+      const rev = S.loads.reduce((s, l) => s + revenue(l), 0) / 1e6;
+      const free = S.trucks.filter(t => t.status === 'available' && t.zones.some(z => z !== 'ambient')).length;
+      return `<div class="kpi-row k6">
+${kpi('blue', 'package', T('Активные рейсы', 'Aktive Fahrten', 'Active loads', 'Белсенді рейстер'), act.length, '↑ ' + done + ' ' + T('доставлено', 'geliefert', 'delivered', 'жеткізілді'))}
+${kpi('green', 'check', T('Соблюдение температуры', 'Temperatur-Compliance', 'Temp. compliance', 'Температура сақталуы'), comp + ' %', breach ? '↓ ' + breach + ' ' + T('откл.', 'Abw.', 'excursion', 'ауытқу') : '✓', breach ? 'neg' : 'pos')}
+${kpi('purple', 'truck', T('Свободные рефрижераторы', 'Freie Kühlfahrzeuge', 'Free reefers', 'Бос рефрижераторлар'), free, T('из ', 'von ', 'of ', '/ ') + S.trucks.length)}
+${kpi('red', 'alert', T('Отклонения температуры', 'Temperaturabweichungen', 'Temp. excursions', 'Температура ауытқулары'), breach, breach ? T('требует реакции', 'Handlungsbedarf', 'needs action', 'әрекет қажет') : 'OK', breach ? 'neg' : 'pos')}
+${kpi('orange', 'therm', T('Топливо MTD', 'Kraftstoff MTD', 'Fuel MTD', 'Отын MTD'), '18,4 млн ₸', '↑ 3 %')}
+${kpi('green', 'chart', T('Выручка', 'Umsatz', 'Revenue', 'Түсім'), String(rev.toFixed(1)).replace('.', ',') + ' млн ₸', '↑ 12 %', 'pos')}</div>
+<div class="grid2">${map()}${dispatchList()}</div><div class="grid2 eq">${alerts()}${quick()}</div>`;
+    },
+  };
+  IC.check = '<path d="M5 13l4 4L19 7"/>';
+})();
+
+/* Orders & Loads (spec 5.2): filters, table 8/page, 6-tab drawer, create form. */
+(function () {
+  const PER = 8;
+  const sel = (key, label, opts) => `<label>${esc(label)}:</label><select class="select" data-f="${key}">${opts.map(o => `<option value="${esc(o[0])}"${S.f[key] === o[0] ? ' selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
+  const ALL = T('Все', 'Alle', 'All', 'Барлығы');
+  const filtered = () => {
+    const f = S.f, q = f.q.trim().toLowerCase();
+    return S.loads.filter(l => (!f.status || l.status === f.status) && (!f.cust || l.cust === f.cust) && (!f.zone || l.zone === f.zone) && (!f.pri || l.priority === f.pri) &&
+      (!q || (l.id + ' ' + cust(l.cust).name + ' ' + HUBS[l.from].city + ' ' + HUBS[l.to].city + ' ' + (l.truck ? trk(l.truck).plate : '') + ' ' + (l.driver ? drv(l.driver).name : '')).toLowerCase().includes(q)));
+  };
+  function table() {
+    const all = filtered(), pages = Math.max(1, Math.ceil(all.length / PER)); if (S.f.page > pages) S.f.page = pages;
+    const rows = all.slice((S.f.page - 1) * PER, S.f.page * PER).map(l => { const c = cust(l.cust), d = l.driver && drv(l.driver), t = l.truck && trk(l.truck), m = Math.round((revenue(l) - cost(l)) / revenue(l) * 100);
+      return `<tr class="${S.drawer && S.drawer.id === l.id ? 'is-selected' : ''}" data-act="open" data-id="${l.id}"><td><a class="lnk">${l.id}</a><div class="sub">${esc(T('создан', 'erstellt', 'created', 'құрылды'))} ${fdt(l.created).slice(0, 5)}</div></td>
+<td><div class="cell">${avatar(c.ini, c.av)}<div><b>${esc(c.name)}</b><div class="sub">${esc(T('БИН', 'BIN', 'BIN', 'БСН'))} ${c.bin}</div></div></div></td>
+<td><b>${esc(HUBS[l.from].city)} → ${esc(HUBS[l.to].city)}</b><div class="sub">${dist(l.from, l.to)} ${esc(T('км', 'km', 'km', 'км'))} · ${l.pallets} ${esc(T('пал.', 'Pal.', 'pal.', 'пал.'))}</div></td>
+<td>${fdt(l.eta)}</td><td>${zoneChip(l.zone)}<div class="sub">${tempChip(l)}</div></td><td>${stChip(l.status)}</td><td>${chip(PRI[l.priority].c, PRI[l.priority].l)}</td>
+<td>${d ? `<b>${esc(d.name)}</b><div class="sub">${esc(t.plate)}</div>` : '<span class="faint">—</span>'}</td>
+<td><b>${kzt(revenue(l))}</b><div class="sub">${esc(T('маржа', 'Marge', 'margin', 'маржа'))} ${m} %</div></td><td>${chip(ESF[l.esf].c, ESF[l.esf].l)}</td></tr>`; }).join('');
+    const th = [T('Рейс', 'Fahrt', 'Load ID', 'Рейс'), T('Клиент', 'Kunde', 'Customer', 'Клиент'), T('Маршрут', 'Route', 'Route', 'Маршрут'), 'ETA', T('Темп. зона', 'Temp.-Zone', 'Temp zone', 'Темп. аймақ'), T('Статус', 'Status', 'Status', 'Күйі'), T('Приоритет', 'Priorität', 'Priority', 'Басымдық'), T('Водитель / ТС', 'Fahrer / Fzg.', 'Driver / Truck', 'Жүргізуші / КҚ'), T('Ставка', 'Satz', 'Rate', 'Бағасы'), 'ЭСФ'];
+    const pg = Array.from({ length: pages }, (_, i) => `<button class="pgb${i + 1 === S.f.page ? ' on' : ''}" data-act="page" data-v="${i + 1}">${i + 1}</button>`).join('');
+    return `<div class="card tcard"><table class="table"><thead><tr>${th.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows || `<tr><td colspan="10" class="empty">${esc(T('Ничего не найдено', 'Nichts gefunden', 'No loads match the filters', 'Ештеңе табылмады'))}</td></tr>`}</tbody></table>
+<div class="pager"><span>${esc(T('Показано', 'Angezeigt', 'Showing', 'Көрсетілді'))} ${all.length ? (S.f.page - 1) * PER + 1 : 0}–${Math.min(S.f.page * PER, all.length)} ${esc(T('из', 'von', 'of', '/'))} ${all.length}</span><span>${pg}</span></div></div>`;
+  }
+  SCREENS.orders = {
+    title: () => navLabel('orders'),
+    sub: () => T('Все рейсы: кто, что, куда, когда, статус и маржа', 'Alle Fahrten: wer, was, wohin, wann, Status und Marge', 'Every load: who, what, where, when, status and margin', 'Барлық рейстер: кім, не, қайда, қашан, күйі және маржа'),
+    actions: () => `<button class="btn grey" data-act="imp">${esc(T('Импорт', 'Import', 'Import Loads', 'Импорт'))}</button><button class="btn primary" data-act="create">${ic('plus')} ${esc(T('Создать рейс', 'Fahrt anlegen', 'Create New Load', 'Рейс құру'))}</button>`,
+    body: () => `<div class="filters">${sel('status', T('Статус', 'Status', 'Status', 'Күйі'), [['', ALL], ...ORDER.map(s => [s, ST[s].l])])}${sel('cust', T('Клиент', 'Kunde', 'Customer', 'Клиент'), [['', ALL], ...CUSTOMERS.map(c => [c.id, c.name])])}${sel('zone', T('Зона', 'Zone', 'Zone', 'Аймақ'), [['', ALL], ...Object.keys(ZONES).map(z => [z, ZONES[z].label])])}${sel('pri', T('Приоритет', 'Priorität', 'Priority', 'Басымдық'), [['', ALL], ...Object.keys(PRI).map(p => [p, PRI[p].l])])}<button class="clear-all" data-act="clear">× ${esc(T('Сбросить', 'Zurücksetzen', 'Clear All', 'Тазалау'))}</button></div>${table()}`,
+  };
+
+  /* ---------- drawer: load ---------- */
+  function spark(l) {
+    let h = 0; for (const ch of l.id) h = (h * 31 + ch.charCodeAt(0)) % 997;
+    const z = ZONES[l.zone], pts = Array.from({ length: 24 }, (_, i) => z.mid + Math.sin((i + h) / 2.3) * (z.hi - z.lo) * 0.18 + ((h + i * 7) % 5 - 2) * 0.12);
+    if (tempState(l) === 'breach') for (let i = 18; i < 24; i++) pts[i] = l.temp + (i - 21) * 0.1;
+    else pts[23] = l.temp;
+    const mn = Math.min(z.lo - 1, ...pts), mx = Math.max(z.hi + 1, ...pts), Y = v => 80 - (v - mn) / (mx - mn) * 76, p = pts.map((v, i) => `${i * 12.4},${Y(v).toFixed(1)}`).join(' ');
+    const ex = pts.filter(v => v < z.lo || v > z.hi).length * 15;
+    return { ex, svg: `<svg viewBox="0 0 285 84" class="spark"><rect x="0" y="${Y(z.hi)}" width="285" height="${Y(z.lo) - Y(z.hi)}" fill="var(--temp-ok-bg)"/><polyline points="${p}" fill="none" stroke="var(--chart-blue)" stroke-width="2"/></svg>` };
+  }
+  const kv = (k, v) => `<div><small>${esc(k)}</small><b>${v}</b></div>`;
+  DRAWERS.load = d => {
+    const l = load(d.id), c = cust(l.cust), tab = d.tab, dd = l.driver && drv(l.driver), tt = l.truck && trk(l.truck), pr = [['overview', T('Обзор', 'Übersicht', 'Overview', 'Шолу')], ['stops', T('Остановки', 'Stopps', 'Stops', 'Аялдамалар')], ['docs', T('Документы', 'Dokumente', 'Docs', 'Құжаттар')], ['notes', T('Заметки', 'Notizen', 'Notes', 'Жазбалар')], ['billing', T('Счёт', 'Abrechnung', 'Billing', 'Шот')], ['temp', T('Температура', 'Temperatur', 'Temperature', 'Температура')]];
+    const tabs = `<div class="drawer-tabs">${pr.map(p => `<span class="tab${tab === p[0] ? ' active' : ''}" data-act="tab" data-v="${p[0]}">${esc(p[1])}</span>`).join('')}</div>`;
+    let b = '';
+    if (tab === 'overview') {
+      let asg;
+      if (l.status === 'unassigned') {
+        const ds = S.drivers.filter(x => x.status === 'available'), ts = S.trucks.filter(x => x.status === 'available');
+        asg = `<div class="drawer-section"><h4>${esc(T('Назначение', 'Zuweisung', 'Assignment', 'Тағайындау'))}</h4><label class="fl">${esc(T('Водитель', 'Fahrer', 'Driver', 'Жүргізуші'))}<select class="select" id="as_d"><option value="">—</option>${ds.map(x => `<option value="${x.id}">${esc(x.name)} · РТО ${x.rto} ${esc(T('ч', 'h', 'h', 'сағ'))}</option>`).join('')}</select></label>
+<label class="fl">${esc(T('Транспорт', 'Fahrzeug', 'Truck', 'Көлік'))}<select class="select" id="as_t"><option value="">—</option>${ts.map(x => `<option value="${x.id}">${esc(x.plate)} · ${esc(x.model)} · ${x.cap} ${esc(T('пал.', 'Pal.', 'pal.', 'пал.'))}</option>`).join('')}</select></label>
+<button class="btn primary block" data-act="doAssign" data-id="${l.id}">${esc(T('Назначить', 'Zuweisen', 'Assign', 'Тағайындау'))}</button><p class="note">${esc(T('Требуется ТС с подходящей температурной зоной и водитель с достаточным временем вождения (РТО ≥ ', 'Benötigt: passende Temperaturzone und ausreichende Lenkzeit (RTO ≥ ', 'Needs a truck for the temperature zone and a driver with enough driving time (RTO ≥ ', 'Температура аймағына сай КҚ және жеткілікті жүргізу уақыты (РТО ≥ '))}${needRto(l)} ${esc(T('ч)', 'h)', 'h)', 'сағ)'))}</p></div>`;
+      } else asg = `<div class="drawer-section"><h4>${esc(T('Назначение', 'Zuweisung', 'Assignment', 'Тағайындау'))}</h4><div class="kv">${kv(T('Водитель', 'Fahrer', 'Driver', 'Жүргізуші'), esc(dd.name))}${kv(T('Транспорт', 'Fahrzeug', 'Truck', 'Көлік'), esc(tt.plate))}${kv(T('Тип', 'Typ', 'Type', 'Түрі'), esc(tt.model))}${kv('РТО', String(dd.rto).replace('.', ',') + ' ' + T('ч', 'h', 'h', 'сағ'))}</div></div>`;
+      const nx = NEXT[l.status];
+      const act = l.status === 'delivered' ? '' : `<div class="drawer-section actbar">${nx ? `<button class="btn green" data-act="adv" data-id="${l.id}" data-to="${nx}">→ ${esc(ST[nx].l)}</button>` : ''}${['loading', 'in_transit'].includes(l.status) ? `<button class="btn red" data-act="adv" data-id="${l.id}" data-to="problem">${esc(T('Сообщить о проблеме', 'Problem melden', 'Report problem', 'Мәселе туралы хабарлау'))}</button>` : ''}${l.status === 'problem' ? `<button class="btn primary" data-act="adv" data-id="${l.id}" data-to="in_transit">${esc(T('Проблема решена', 'Problem gelöst', 'Resolved — resume', 'Шешілді'))}</button>` : ''}</div>`;
+      b = `<div class="drawer-section"><div class="ident">${avatar(c.ini, c.av)}<div><b>${esc(c.name)}</b><div class="sub">${esc(T('БИН', 'BIN', 'BIN', 'БСН'))} ${c.bin}</div></div></div><div class="kv">${kv(T('Маршрут', 'Route', 'Route', 'Маршрут'), esc(HUBS[l.from].city) + ' → ' + esc(HUBS[l.to].city))}${kv(T('Расстояние', 'Strecke', 'Distance', 'Қашықтық'), dist(l.from, l.to) + ' ' + T('км', 'km', 'km', 'км'))}${kv('ETA', fdt(l.eta))}${kv(T('Статус', 'Status', 'Status', 'Күйі'), stChip(l.status))}${kv(T('Зона', 'Zone', 'Zone', 'Аймақ'), zoneChip(l.zone))}${kv(T('Темп. сейчас', 'Temp. aktuell', 'Temp now', 'Қазіргі темп.'), tempChip(l))}${kv(T('Паллеты', 'Paletten', 'Pallets', 'Паллеттер'), l.pallets)}${kv(T('Вес', 'Gewicht', 'Weight', 'Салмағы'), l.kg.toLocaleString('ru-RU') + ' ' + T('кг', 'kg', 'kg', 'кг'))}</div></div>${asg}${act}`;
+    } else if (tab === 'stops') {
+      const st = l.status, done = x => x ? 'done' : '';
+      b = `<div class="drawer-section stops">${[[T('Погрузка', 'Beladung', 'Pickup', 'Тиеу'), HUBS[l.from].name, st !== 'unassigned' && st !== 'assigned'], [T('В пути', 'Unterwegs', 'In transit', 'Жолда'), dist(l.from, l.to) + ' ' + T('км', 'km', 'km', 'км'), ['in_transit', 'problem', 'delivered'].includes(st)], [T('Выгрузка', 'Entladung', 'Delivery', 'Түсіру'), HUBS[l.to].name, st === 'delivered']].map(s => `<div class="stop ${done(s[2])}"><i></i><div><b>${esc(s[0])}</b><div class="sub">${esc(s[1])}</div></div></div>`).join('')}</div>`;
+    } else if (tab === 'docs') {
+      const ds = [[T('ТТН / накладная', 'Frachtbrief (TTN)', 'Waybill (TTN)', 'ТТН / жүкқұжат'), l.status !== 'unassigned'], [T('Лог температуры (PDF/CSV)', 'Temperaturlog (PDF/CSV)', 'Temperature log (PDF/CSV)', 'Температура журналы'), ['in_transit', 'problem', 'delivered'].includes(l.status)], [T('Акт приёма-передачи', 'Übergabeprotokoll', 'Handover act', 'Қабылдау-тапсыру актісі'), l.status === 'delivered'], ['POD', l.pod === 'approved'], [T('ЭСФ / ЭСУТД', 'ESF / ESUTD', 'ESF / ESUTD', 'ЭШФ / ЭЖТД'), l.esf !== 'none']];
+      b = `<div class="drawer-section">${ds.map(x => `<div class="tinted-row ${x[1] ? 'green' : 'gray'}"><span>${esc(x[0])}</span><span>${x[1] ? esc(T('Доступно', 'Verfügbar', 'Available', 'Қолжетімді')) : '<span class="faint">' + esc(T('Нет', 'Nein', 'Not available', 'Жоқ')) + '</span>'}</span></div>`).join('')}</div>`;
+    } else if (tab === 'notes') {
+      b = `<div class="drawer-section">${l.notes.map(n => `<div class="note-i"><b>${esc(n.who)}</b> <small>${esc(n.t)}</small><div>${esc(n.text)}</div></div>`).join('') || `<p class="note">${esc(T('Заметок пока нет', 'Noch keine Notizen', 'No notes yet', 'Жазба әзірге жоқ'))}</p>`}<textarea id="newnote" class="ta" rows="3" placeholder="${esc(T('Добавить заметку…', 'Notiz hinzufügen…', 'Add a note…', 'Жазба қосу…'))}"></textarea><button class="btn primary" data-act="addNote" data-id="${l.id}">${esc(T('Добавить', 'Hinzufügen', 'Add note', 'Қосу'))}</button></div>`;
+    } else if (tab === 'billing') {
+      const r = revenue(l), vat = Math.round(r * 0.12 / 1.12), c = cost(l);
+      b = `<div class="drawer-section"><div class="kv">${kv(T('Ставка', 'Satz', 'Rate', 'Бағасы'), kzt(r))}${kv(T('в т.ч. НДС 12 %', 'inkl. MwSt 12 %', 'incl. VAT 12 %', 'оның ішінде ҚҚС 12 %'), kzt(vat))}${kv(T('Затраты', 'Kosten', 'Cost', 'Шығыс'), kzt(c))}${kv(T('Прибыль', 'Gewinn', 'Profit', 'Пайда'), kzt(r - c))}${kv(T('Отсрочка', 'Zahlungsziel', 'Terms', 'Кейінге қалдыру'), T('30 дн.', '30 Tage', '30 days', '30 күн'))}${kv('ЭСФ', chip(ESF[l.esf].c, ESF[l.esf].l))}</div>
+${l.status === 'delivered' ? (l.pod === 'approved' && l.esf === 'none' ? `<button class="btn purple block" data-act="issueEsf" data-id="${l.id}">${esc(T('Выписать ЭСФ', 'ESF ausstellen', 'Issue ESF', 'ЭШФ жазу'))}</button>` : l.pod !== 'approved' ? `<p class="note">${esc(T('ЭСФ доступна после подтверждения POD (фаза 5).', 'ESF nach POD-Freigabe verfügbar (Phase 5).', 'ESF becomes available once the POD is approved (phase 5).', 'ЭШФ POD расталғаннан кейін қолжетімді (5-кезең).'))}</p>` : '') : ''}</div>`;
+    } else if (tab === 'temp') {
+      const s = spark(l);
+      b = `<div class="drawer-section"><div class="kv">${kv(T('Диапазон', 'Bereich', 'Range', 'Диапазон'), zoneChip(l.zone))}${kv(T('Сейчас', 'Aktuell', 'Now', 'Қазір'), tempChip(l))}${kv(T('Отклонение, мин', 'Abweichung, Min', 'Excursion, min', 'Ауытқу, мин'), s.ex)}</div>${s.svg}<p class="note">${esc(T('Серия за последние 6 ч (демо-данные).', 'Verlauf der letzten 6 h (Demodaten).', 'Last 6 h series (demo data).', 'Соңғы 6 сағат (демо).'))}</p></div>`;
+    }
+    return { title: l.id, html: tabs + b };
+  };
+  DRAWERS.create = () => {
+    const o = (arr, fn) => arr.map(fn).join('');
+    return { title: T('Новый рейс', 'Neue Fahrt', 'New Load', 'Жаңа рейс'), html: `<div class="drawer-section"><label class="fl">${esc(T('Клиент', 'Kunde', 'Customer', 'Клиент'))}<select class="select" id="n_cust">${o(CUSTOMERS, c => `<option value="${c.id}">${esc(c.name)}</option>`)}</select></label>
+<div class="two"><label class="fl">${esc(T('Откуда', 'Von', 'From', 'Қайдан'))}<select class="select" id="n_from">${o(Object.keys(HUBS), k => `<option value="${k}">${esc(HUBS[k].city)}</option>`)}</select></label><label class="fl">${esc(T('Куда', 'Nach', 'To', 'Қайда'))}<select class="select" id="n_to">${o(Object.keys(HUBS), k => `<option value="${k}"${k === 'ALA' ? ' selected' : ''}>${esc(HUBS[k].city)}</option>`)}</select></label></div>
+<label class="fl">${esc(T('Температурная зона', 'Temperaturzone', 'Temperature zone', 'Температура аймағы'))}<select class="select" id="n_zone">${o(Object.keys(ZONES), z => `<option value="${z}">${ZONES[z].label}</option>`)}</select></label>
+<div class="two"><label class="fl">${esc(T('Паллет', 'Paletten', 'Pallets', 'Паллет'))}<input class="select" id="n_pal" type="number" min="1" max="33" value="12"></label><label class="fl">${esc(T('Приоритет', 'Priorität', 'Priority', 'Басымдық'))}<select class="select" id="n_pri">${o(Object.keys(PRI), p => `<option value="${p}"${p === 'medium' ? ' selected' : ''}>${esc(PRI[p].l)}</option>`)}</select></label></div>
+<p class="note" id="n_err" style="color:var(--chip-red-fg)"></p><button class="btn primary block" data-act="saveLoad">${esc(T('Создать рейс', 'Fahrt anlegen', 'Create load', 'Рейс құру'))}</button></div>` };
+  };
+  Object.assign(ACT, {
+    imp: () => toast(T('Импорт CSV: будет в фазе 2б', 'CSV-Import: Phase 2b', 'CSV import: phase 2b', 'CSV импорты: 2б кезең')),
+    doAssign: d => { const e = assign(d.id, $('#as_d').value, $('#as_t').value); if (e) toast(e, 'err'); else { S.drawer.tab = 'overview'; toast(T('Рейс назначен', 'Fahrt zugewiesen', 'Load assigned', 'Рейс тағайындалды')); } },
+    adv: d => { const l = load(d.id), e = canMove(l, d.to); if (e) return toast(e, 'err'); setStatus(d.id, d.to); render(); },
+    addNote: d => { const v = $('#newnote').value.trim(); if (!v) return; load(d.id).notes.push({ who: 'Sarah Johnson', t: fdt(NOW).slice(-5), text: v }); render(); },
+    issueEsf: d => { const l = load(d.id); l.esf = 'issued'; toast(T('ЭСФ выписана', 'ESF ausgestellt', 'ESF issued', 'ЭШФ жазылды')); },
+    saveLoad: () => { const r = createLoad({ cust: $('#n_cust').value, from: $('#n_from').value, to: $('#n_to').value, zone: $('#n_zone').value, pallets: +$('#n_pal').value, priority: $('#n_pri').value });
+      if (typeof r === 'string') { $('#n_err').textContent = r; return; } S.drawer = { type: 'load', id: r.ok, tab: 'overview' }; toast(T('Рейс создан: ', 'Fahrt angelegt: ', 'Load created: ', 'Рейс құрылды: ') + r.ok); },
+  });
+})();
+
+/* Dispatch Board (spec 5.3) + Planning tab (decision Q4): kanban, Auto-Assign, drag & drop with status rules. */
+(function () {
+  const ALL = T('Все', 'Alle', 'All', 'Барлығы');
+  const sel = (key, label, opts) => `<label>${esc(label)}:</label><select class="select" data-f="${key}">${opts.map(o => `<option value="${esc(o[0])}"${S.f[key] === o[0] ? ' selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
+  const DRV = { available: T('Свободен', 'Frei', 'Available', 'Бос'), busy: T('В рейсе', 'Im Einsatz', 'On trip', 'Рейсте'), rest: T('Отдых', 'Ruhe', 'Resting', 'Демалыс') };
+  function card(l) {
+    const d = l.driver && drv(l.driver), t = l.truck && trk(l.truck);
+    return `<div class="kcard${S.drawer && S.drawer.id === l.id ? ' sel' : ''}" draggable="true" data-id="${l.id}" data-act="open"><div class="r1"><a class="lnk">${l.id}</a>${chip(PRI[l.priority].c, PRI[l.priority].l)}</div>
+<div class="rt">${esc(HUBS[l.from].city)} → ${esc(HUBS[l.to].city)}</div><div class="sub">${zoneChip(l.zone)} ${l.status === 'in_transit' || l.status === 'problem' ? tempChip(l) : ''}</div>
+<div class="sub">ETA ${fdt(l.eta)} · ${l.pallets} ${esc(T('пал.', 'Pal.', 'pal.', 'пал.'))}</div>
+${l.status === 'problem' ? `<div class="prob">${ic('alert', 14)} ${esc(T('Температура вне диапазона', 'Temperatur außerhalb Bereich', 'Temperature out of range', 'Температура диапазоннан тыс'))}</div>` : ''}
+<div class="r2">${d ? `<span class="cell">${avatar(d.ini, 1)}<span>${esc(d.name.split(' ')[0])}</span><small>${esc(t.plate)}</small></span>` : `<span class="faint">${esc(T('не назначен', 'offen', 'unassigned', 'тағайындалмаған'))}</span>`}<b>${kzt(revenue(l))}</b></div></div>`;
+  }
+  function board() {
+    const f = S.f;
+    const ls = S.loads.filter(l => (!f.pri || l.priority === f.pri) && (!f.hub || l.from === f.hub || l.to === f.hub) && (!f.drv || (l.driver && drv(l.driver).status === f.drv)));
+    return `<div class="board">${ORDER.map(s => { const c = ls.filter(l => l.status === s);
+      return `<div class="col" data-col="${s}"><div class="colh"><span class="d ${ST[s].c}"></span><b>${esc(ST[s].l)}</b><span class="cnt">${c.length}</span></div><div class="colb">${c.map(card).join('') || `<div class="empty">—</div>`}</div></div>`; }).join('')}</div>`;
+  }
+  function planning() {
+    const un = S.loads.filter(l => l.status === 'unassigned');
+    const rows = Object.keys(ZONES).map(z => {
+      const dem = un.filter(l => l.zone === z).reduce((s, l) => s + l.pallets, 0), n = un.filter(l => l.zone === z).length;
+      const cap = S.trucks.filter(t => t.status === 'available' && t.zones.includes(z)).reduce((s, t) => s + t.cap, 0), pct = cap ? Math.round(dem / cap * 100) : (dem ? 100 : 0);
+      const cls = pct >= 90 ? 'crit' : pct >= 80 ? 'warn' : pct < 50 ? 'low' : '';
+      return `<tr><td>${zoneChip(z)}</td><td>${n}</td><td>${dem}</td><td>${cap}</td><td style="width:32%"><div class="progress ${cls}"><i style="width:${Math.min(100, pct)}%"></i></div></td><td><b>${pct} %</b></td></tr>`;
+    }).join('');
+    const dr = S.drivers.map(d => `<tr><td><span class="cell">${avatar(d.ini, 1)}<b>${esc(d.name)}</b></span></td><td>${chip(d.status === 'available' ? 'green' : d.status === 'busy' ? 'blue' : 'gray', DRV[d.status])}</td><td><span class="dot ${d.rto >= 6 ? 'good' : d.rto >= 4 ? 'warn' : 'bad'}" style="width:12px;height:12px"></span> ${String(d.rto).replace('.', ',')} ${esc(T('ч', 'h', 'h', 'сағ'))}</td></tr>`).join('');
+    return `<div class="grid2 eq"><div class="card tcard"><div class="card-head">${esc(T('Спрос и ёмкость по температурным зонам', 'Bedarf und Kapazität je Temperaturzone', 'Demand vs capacity by temperature zone', 'Температура аймақтары бойынша сұраныс пен сыйымдылық'))}</div><table class="table"><thead><tr><th>${esc(T('Зона', 'Zone', 'Zone', 'Аймақ'))}</th><th>${esc(T('Рейсов', 'Fahrten', 'Loads', 'Рейс'))}</th><th>${esc(T('Паллет', 'Paletten', 'Pallets', 'Паллет'))}</th><th>${esc(T('Места', 'Plätze', 'Places', 'Орын'))}</th><th></th><th>${esc(T('Загрузка', 'Auslastung', 'Utilization', 'Жүктеме'))}</th></tr></thead><tbody>${rows}</tbody></table></div>
+<div class="card tcard"><div class="card-head">${esc(T('Водители и время вождения (РТО)', 'Fahrer und Lenkzeit (RTO)', 'Drivers and driving time (RTO)', 'Жүргізушілер және жүргізу уақыты (РТО)'))}</div><table class="table"><thead><tr><th>${esc(T('Водитель', 'Fahrer', 'Driver', 'Жүргізуші'))}</th><th>${esc(T('Статус', 'Status', 'Status', 'Күйі'))}</th><th>${esc(T('Осталось', 'Verbleibend', 'Remaining', 'Қалды'))}</th></tr></thead><tbody>${dr}</tbody></table></div></div>`;
+  }
+  Object.assign(ACT, {
+    auto: () => { const r = autoAssign(); toast(r.ok ? T('Назначено автоматически: ', 'Automatisch zugewiesen: ', 'Auto-assigned: ', 'Автоматты тағайындалды: ') + r.ok + (r.fail ? T('; не удалось: ', '; nicht möglich: ', '; could not assign: ', '; болмады: ') + r.fail : '') : T('Нет подходящих ТС/водителей для свободных рейсов', 'Keine passenden Fahrzeuge/Fahrer', 'No matching trucks/drivers for unassigned loads', 'Сәйкес КҚ/жүргізуші жоқ'), r.ok ? 'ok' : 'err'); },
+    dtab: d => { S.dispTab = d.v; render(); },
+  });
+  SCREENS.dispatch = {
+    title: () => navLabel('dispatch'),
+    sub: () => T('Перетащите карточку в следующий столбец или откройте её для назначения', 'Karte in die nächste Spalte ziehen oder öffnen, um zuzuweisen', 'Drag a card to the next column or open it to assign', 'Картаны келесі бағанға сүйреңіз немесе тағайындау үшін ашыңыз'),
+    actions: () => `<button class="btn green" data-act="auto">${ic('spark')} ${esc(T('Авто-назначение', 'Auto-Zuweisung', 'Auto-Assign', 'Авто-тағайындау'))}</button><button class="btn primary" data-act="create">${ic('plus')} ${esc(T('Создать рейс', 'Fahrt anlegen', 'Create New Load', 'Рейс құру'))}</button>`,
+    body: () => `<div class="pill-tabs"><span class="pill-tab${S.dispTab === 'board' ? ' active' : ''}" data-act="dtab" data-v="board">${esc(T('Доска', 'Tafel', 'Board', 'Тақта'))}</span><span class="pill-tab${S.dispTab === 'planning' ? ' active' : ''}" data-act="dtab" data-v="planning">${esc(T('Планирование', 'Planung', 'Planning', 'Жоспарлау'))}</span></div>
+${S.dispTab === 'board' ? `<div class="filters">${sel('pri', T('Приоритет', 'Priorität', 'Priority', 'Басымдық'), [['', ALL], ...Object.keys(PRI).map(p => [p, PRI[p].l])])}${sel('drv', T('Статус водителя', 'Fahrerstatus', 'Driver status', 'Жүргізуші күйі'), [['', ALL], ...Object.keys(DRV).map(k => [k, DRV[k]])])}${sel('hub', T('Хаб', 'Hub', 'Hub', 'Хаб'), [['', ALL], ...Object.keys(HUBS).map(k => [k, HUBS[k].city])])}<button class="clear-all" data-act="clear">× ${esc(T('Сбросить', 'Zurücksetzen', 'Clear All', 'Тазалау'))}</button></div>${board()}` : planning()}`,
+  };
+  /* drag & drop (HTML5) */
+  let dragId = null;
+  document.addEventListener('dragstart', e => { const c = e.target.closest && e.target.closest('.kcard'); if (c) { dragId = c.dataset.id; e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', dragId); } catch (_) {} } });
+  document.addEventListener('dragover', e => { if (dragId && e.target.closest && e.target.closest('.col')) e.preventDefault(); });
+  document.addEventListener('drop', e => {
+    const col = e.target.closest && e.target.closest('.col'); if (!col || !dragId) return; e.preventDefault();
+    const l = load(dragId), to = col.dataset.col; dragId = null; if (l.status === to) return;
+    const err = canMove(l, to); if (err) { if (l.status === 'unassigned') openDrawer({ type: 'load', id: l.id, tab: 'overview' }); return toast(err, 'err'); }
+    setStatus(l.id, to); render();
+  });
+})();
+
+render();
+
+</script></body></html>

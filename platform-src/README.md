@@ -45,3 +45,18 @@ node platform-src/build-design.mjs            # design-preview-v6-{ru,de,en,kk}.
 node platform-src/build-design.mjs --lang kk
 ```
 Texts in `preview/body.html` use `[[ru::de::en::kk]]` (four parts are mandatory; the build fails otherwise). The legacy `platform-v5.3*` bundle is untouched; the next phases move screens onto these tokens/components.
+
+## v6 prototype (phase 2: Dashboard, Orders & Loads, Dispatch Board)
+Standalone vanilla-JS prototype on the v6 design system (decisions Q1–Q8, spec v1.0). Separate from the legacy v5.3 bundle (no x-dc template engine).
+```powershell
+node platform-src/build-v6.mjs            # platform-v6.html (RU), -de, -en, -kk next to platform-src/
+node platform-src/build-v6.mjs --lang kk
+```
+```
+platform-src/v6/
+  core.js        i18n T(ru,de,en,kk), helpers, icons, store S, dispatch rules (compat/assign/autoAssign/setStatus/canMove/createLoad), shell, drawer, router
+  data.js        demo data (hubs, distances, temperature zones, customers, drivers, trucks, loads); fixed clock NOW
+  screens/       dashboard.js · orders.js (+ load drawer, create form) · dispatch.js (kanban, Planning tab, drag & drop)
+  app.css        app-specific styles on top of shared/design/*
+```
+Rules implemented: truck must support the load's temperature zone and have enough pallet places; driver must be available with enough driving time (RTO, one shift max 9 h; norms to be verified, spec Q5); status flow assigned → loading → in transit → delivered, problem only from loading/in transit; delivered frees driver/truck and creates a POD placeholder (`pod: pending`). Other menu items show a placeholder naming the phase that builds them. Add a screen: new file in `v6/screens/`, register it in `SCREENS`, add it to the list in `build-v6.mjs`.
