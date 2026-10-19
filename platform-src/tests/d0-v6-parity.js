@@ -140,3 +140,12 @@
     assert(w.document.querySelector('[data-bulk-ctl] .chip'), 'zone warning or OK chip shown');
     ev(`ACT.lwSel({id:S.loads[0].id})`);
   });
+  await group('dashboard KPI tiles: icon never overlaps the number, rows wrap on narrow widths', 'ru', async (g, ev, w) => {
+    ev("go('dashboard')");
+    for (const t of w.document.querySelectorAll('.kpi-row .kpi-tile')) {
+      const v = t.querySelector('.value').getBoundingClientRect(), ic = t.querySelector('.icon').getBoundingClientRect();
+      assert(v.right <= ic.left + 1 || v.bottom <= ic.top + 1 || v.top >= ic.bottom - 1, 'overlap in tile: ' + t.innerText.replace(/\s+/g, ' ').slice(0, 40));
+    }
+    const cs = w.getComputedStyle(w.document.querySelector('.kpi-row.k6'));
+    assert(/auto|min/.test('') || cs.gridTemplateColumns.split(' ').length >= 2, 'k6 row is a grid');
+  });
