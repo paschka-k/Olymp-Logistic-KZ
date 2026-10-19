@@ -272,3 +272,18 @@ Files: `platform-src/v6/screens/611-eco-reports-ext.js`, `600-eco-costmodel.js`,
 | FR-116 | Incoming partner / workshop ESF form (BIN, VAT cap, HO-/SR- link), booked to the ledger, audited | Billing → Cost model → Summary | "costs: incoming partner / workshop ESF…" (b2) |
 | B7 | Insurance idle toggles with idle months and registration recommendation | Billing → Cost model → Insurance, tax, registration | "costs: insurance idle toggles…" (b2) |
 | — | All P5 tabs and help articles render in RU / DE / EN / KK without undefined / NaN | all of the above | "[ru/de/en/kk] P5 …" (b1, b2) |
+
+## Q3 — Explanatory notes parity
+
+Files: `platform-src/v6/screens/003-notes.js` (all texts, `howNote(key)` → `<p class="note" data-note="key">`), one-line insertions in the screens below; map `docs/NOTES-0.3.10-v6.md`; test `platform-src/tests/c2-notes.js`.
+
+| 0.3.10 source | Notes (data-note) | v6 menu → tab | Screen file | Test (group name, file) |
+|---|---|---|---|---|
+| Load & weight | third, axle, trailers | Orders → Load & weight (Orders on load, Weight / volume / axles, Truck finder) | 210 | "notes: all 26 ported 0.3.10 notes render in place · RU / DE / EN / KK" (c2) |
+| Shipments, Documents KZ | track, gate, gonogo | Orders → Shipments & labels; Orders → Documents KZ | 220, 230 | "notes: all 26 ported 0.3.10 notes render in place · RU / DE / EN / KK" (c2) |
+| Bookings, Commercial, customer portal | tariff (adapted to v6 bookingPrice), leadHint, bookTerms | Orders → Bookings; Orders → Commercial → CRM; customer portal → Book a shipment | 420, 500, 510 | "notes: all 26 ported 0.3.10 notes render in place · RU / DE / EN / KK" (c2) |
+| Partners | tiers, handover | Dispatch Board → Partners | 160 | "notes: all 26 ported 0.3.10 notes render in place · RU / DE / EN / KK" (c2) |
+| Fleet, Staff, Drivers, Driver app | fees, west, urgent, pdNote, drvOnly | Fleet → Fleet; Drivers → Staff; Drivers → driver card; Drivers → Driver app | 040, 320, 050, 330 | "notes: all 26 ported 0.3.10 notes render in place · RU / DE / EN / KK" (c2) |
+| Temperature, Weather, Security, Coverage, Thermochrons | twolevel, sim, wxrisk, escal, covSchem, thChron | Routes & Tracking → Temperature / Weather & risks / Security / Coverage / Thermochrons & loggers | 150, 340, 360 | "notes: all 26 ported 0.3.10 notes render in place · RU / DE / EN / KK" (c2) |
+| Quality, Cost model, Reports, Reference data | capa, costExcl, fineLink, mdVerified | Proof of Delivery → Deviations & quality; Billing → Cost model; Reports → Fines; Settings → Reference data | 140, 600, 610, 440 | "notes: all 26 ported 0.3.10 notes render in place · RU / DE / EN / KK" (c2) |
+| Convention | every NOTES key has RU / DE / EN / KK, DE / EN without Cyrillic, and every key is placed and checked | all of the above | 003 | "notes: every key in NOTES has RU / DE / EN / KK text…" (c2) |
