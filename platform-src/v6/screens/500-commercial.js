@@ -34,7 +34,8 @@
   };
   globalThis.locName = id => (LOCS[id] ? LOCS[id].n : String(id));
   const STREETS = { AST: ['Мәңгілік Ел', 'Кабанбай батыра', 'Туран', 'Сарыарка', 'Абая', 'Достык', 'Кенесары', 'Республики'], ALA: ['Абая', 'Аль-Фараби', 'Сатпаева', 'Достык', 'Райымбека', 'Толе би', 'Жандосова', 'Фурманова'], KAR: ['Бухар жырау', 'Ерубаева', 'Алиханова', 'Гоголя', 'Абдирова'], SHY: ['Тауке хана', 'Байтурсынова', 'Кунаева', 'Рыскулова', 'Жибек жолы'] };
-  const sNorm = s => String(s || '').toLowerCase().replace(/\b(ул\.?|улица|пр\.?|проспект|просп\.?|str\.?|street|st\.?|avenue|ave\.?|даңғылы|көшесі|даңғ\.?|көш\.?)\b/g, '').replace(/[^a-zа-яёәғқңөұүһі0-9 ]/gi, ' ').replace(/\s+/g, ' ').trim();
+  const STYPES = new Set(['ул', 'улица', 'пр', 'проспект', 'просп', 'пр-т', 'str', 'street', 'st', 'avenue', 'ave', 'даңғылы', 'көшесі', 'даңғ', 'көш']);   // \b does not work for Cyrillic in JS
+  const sNorm = s => String(s || '').toLowerCase().replace(/[.,;]/g, ' ').split(/\s+/).filter(w => w && !STYPES.has(w)).join(' ').replace(/[^a-zа-яёәғқңөұүһі0-9 -]/gi, '').trim();
   /* address check: 'ok' (street in the city directory), 'manual' (unknown street → a staff member checks before confirmation), 'bad' (missing data) */
   globalThis.addrCheck = (city, street, house) => {
     if (!LOCS[city] || !String(street || '').trim() || !String(house || '').trim()) return { st: 'bad', hint: T('Укажите город, улицу и дом', 'Stadt, Straße und Hausnummer angeben', 'Enter city, street and house', 'Қала, көше және үйді көрсетіңіз') };
@@ -52,6 +53,7 @@
     const A = LOCS[a], B = LOCS[b]; if (!A || !B) return null;
     const legs = []; let mode, hub = null;
     if (a === b) { mode = 'city'; legs.push(leg('city', a, b, 10, 0)); }
+    else if (a === A.hub && b === B.hub) { mode = 'direct'; hub = a; legs.push(leg('line', a, b, dist(a, b), 1)); }   // hub ↔ hub: the trunk line, no transshipment
     else if (A.hub === B.hub) {
       hub = A.hub;
       if (a === A.hub) { mode = 'direct'; legs.push(leg('line', a, b, B.km, 1)); }
