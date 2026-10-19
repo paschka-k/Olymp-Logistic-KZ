@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Versionen wählen · Olymp Logistic</title>
+<style>
+  :root { --ink:#0B2230; --muted:#4A6070; --line:#C9D6DC; --brand:#0E6E7E; --soft:#E3F0F2; --bg:#F6F8F9; --card:#fff; }
+  @media (prefers-color-scheme: dark) { :root { --ink:#E7EEF1; --muted:#9FB3BD; --line:#2B414D; --brand:#7FD3DE; --soft:#163640; --bg:#0B1A22; --card:#10242E; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  main { max-width: 1040px; margin: 0 auto; padding: 28px 16px 48px; }
+  header { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom: 20px; }
+  h1 { margin:0 0 4px; font-size: 28px; }
+  .sub { color: var(--muted); margin: 0; }
+  .langs button { border:1px solid var(--line); background:var(--card); color:var(--ink); padding:6px 12px; font:inherit; cursor:pointer; }
+  .langs button[aria-pressed="true"] { background: var(--brand); color: var(--bg); border-color: var(--brand); }
+  h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 28px 0 10px; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display:flex; flex-direction:column; gap: 8px; }
+  .card.now { border: 2px solid var(--brand); }
+  .card h3 { margin:0; font-size: 18px; }
+  .meta { font-size: 13px; color: var(--muted); }
+  .tag { display:inline-block; font-size: 12px; padding: 1px 8px; border-radius: 999px; background: var(--soft); color: var(--ink); margin-right: 6px; }
+  .links { display:flex; flex-wrap:wrap; gap: 8px; margin-top: auto; }
+  .links a { color: var(--brand); text-decoration: none; border: 1px solid var(--line); padding: 4px 10px; border-radius: 6px; font-size: 14px; }
+  .links a:hover, .links a:focus-visible { border-color: var(--brand); }
+  .back { color: var(--brand); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1 data-t="h1">Versionen wählen</h1>
+      <p class="sub" data-t="sub">Aktuelle Vorschau und eingefrorene Stände nebeneinander – jede Version bleibt unter ihrer eigenen Adresse erreichbar.</p>
+    </div>
+    <div class="langs" role="group" aria-label="Sprache / язык / language">
+      <button data-l="de">DE</button><button data-l="ru">RU</button><button data-l="en">EN</button>
+    </div>
+  </header>
+
+  <h2 data-t="h_now">Aktuell</h2>
+  <div class="grid">
+    <div class="card now">
+      <h3>Kökzhol · mock-up v6</h3>
+      <div class="meta"><span class="tag" data-t="tag_now">aktuelle Vorschau</span>/platform/</div>
+      <p data-t="v6">Konzept-Plattform im Kökzhol-Design: 12 Bereiche mit Tabs, Rollen und Portale, Hub Atyrau-West, Hilfe, Autotests. RU · DE · EN · KK.</p>
+      <div class="links"><a href="platform/">RU</a><a href="platform/de.html">DE</a><a href="platform/en.html">EN</a><a href="platform/kk.html">KK</a><a href="platform/tests.html" data-t="tests">Tests</a></div>
+    </div>
+  </div>
+
+  <h2 data-t="h_rel">Releases der Plattform (eingefroren)</h2>
+  <div class="grid" id="releases"></div>
+
+  <h2 data-t="h_old">Frühere Konzept-Mock-ups</h2>
+  <div class="grid">
+    <div class="card"><h3>v5.3</h3><p data-t="v53">v5 + Bildschirm 17 „Wareneingang“ (Rampenfenster, Standzeit, Standgeld).</p>
+      <div class="links"><a href="platform-v5.3.html">RU</a><a href="platform-v5.3-de.html">DE</a><a href="platform-v5.3-en.html">EN</a></div></div>
+    <div class="card"><h3>v5</h3><p data-t="v5">17 Bildschirme, Flotte 4 Fahrzeuge, Kosten, Fahrer-App.</p>
+      <div class="links"><a href="platform-v5.html">RU</a><a href="platform-v5-de.html">DE</a><a href="platform-v5-en.html">EN</a></div></div>
+    <div class="card"><h3>v4 · v3 · v2 · v1</h3><p data-t="vold">Ältere Stände des Konzepts.</p>
+      <div class="links"><a href="platform-v4.html">v4</a><a href="platform-v3.html">v3</a><a href="platform-v2.html">v2</a><a href="platform-v1.html">v1</a></div></div>
+  </div>
+  <p style="margin-top:28px"><a class="back" href="./" data-t="back">← Startseite</a></p>
+</main>
+<script>
+const T = {
+  de: { h1: 'Versionen wählen', sub: 'Aktuelle Vorschau und eingefrorene Stände nebeneinander – jede Version bleibt unter ihrer eigenen Adresse erreichbar.',
+        h_now: 'Aktuell', tag_now: 'aktuelle Vorschau', v6: 'Konzept-Plattform im Kökzhol-Design: 12 Bereiche mit Tabs, Rollen und Portale, Hub Atyrau-West, Hilfe, Autotests. RU · DE · EN · KK.',
+        tests: 'Tests', h_rel: 'Releases der Plattform (eingefroren)', h_old: 'Frühere Konzept-Mock-ups',
+        v53: 'v5 + Bildschirm 17 „Wareneingang“ (Rampenfenster, Standzeit, Standgeld).', v5: '17 Bildschirme, Flotte 4 Fahrzeuge, Kosten, Fahrer-App.',
+        vold: 'Ältere Stände des Konzepts.', back: '← Startseite', stand: 'Stand', built: 'Build', changes: 'Änderungsregister', frozen: 'eingefroren' },
+  ru: { h1: 'Выбор версии', sub: 'Текущий предпросмотр и замороженные версии рядом — каждая версия остаётся доступной по своему адресу.',
+        h_now: 'Текущая', tag_now: 'текущий предпросмотр', v6: 'Концепт-платформа в дизайне Kökzhol: 12 разделов с вкладками, роли и порталы, хаб Атырау-Запад, справка, автотесты. RU · DE · EN · KK.',
+        tests: 'Тесты', h_rel: 'Релизы платформы (заморожены)', h_old: 'Предыдущие концепт-макеты',
+        v53: 'v5 + экран 17 «Приёмка» (окна рамп, время простоя, плата за простой).', v5: '17 экранов, парк 4 ТС, затраты, приложение водителя.',
+        vold: 'Более ранние версии концепта.', back: '← Главная', stand: 'Состояние на', built: 'Сборка', changes: 'Реестр изменений', frozen: 'заморожена' },
+  en: { h1: 'Choose a version', sub: 'The current preview and frozen releases side by side – every version stays reachable at its own address.',
+        h_now: 'Current', tag_now: 'current preview', v6: 'Concept platform in the Kökzhol design: 12 areas with tabs, roles and portals, Atyrau-West hub, help, automated tests. RU · DE · EN · KK.',
+        tests: 'Tests', h_rel: 'Platform releases (frozen)', h_old: 'Earlier concept mock-ups',
+        v53: 'v5 + screen 17 “Goods receipt” (ramp windows, dwell time, demurrage).', v5: '17 screens, 4-vehicle fleet, costs, driver app.',
+        vold: 'Earlier concept versions.', back: '← Home', stand: 'As of', built: 'Build', changes: 'Change register', frozen: 'frozen' },
+};
+const FALLBACK = { releases: [{ version: '0.3.9', date: '2026-10-16', built: '16.10.2026 19:55 UTC+5', path: 'releases/0.3.9/',
+  title: { de: 'Olymp Logistic Platform · Release 0.3.9', ru: 'Платформа Olymp Logistic · релиз 0.3.9', en: 'Olymp Logistic Platform · release 0.3.9' },
+  note: { de: 'Produktive Plattform (Backend + Web-App) als Online-Demo im Browser: 17 Bildschirme, Register & Verwaltung, Kunden- und Partnerportal, FR-01…190, BUG-01…37.',
+          ru: 'Рабочая платформа (бэкенд + веб-приложение), онлайн-демо в браузере: 17 экранов, учёт и администрирование, порталы клиента и партнёра, FR-01…190, BUG-01…37.',
+          en: 'Production platform (backend + web app) as an in-browser online demo: 17 screens, records & administration, customer and partner portal, FR-01…190, BUG-01…37.' } }] };
+let lang = 'de', REL = FALLBACK;
+try { const q = new URLSearchParams(location.search).get('lang'); if (T[q]) lang = q; else { const s = localStorage.getItem('olymp.versions.lang'); if (T[s]) lang = s; } } catch (e) { /* storage unavailable */ }
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmt = (iso) => iso.split('-').reverse().join('.');
+function render() {
+  document.documentElement.lang = lang;
+  const t = T[lang];
+  document.querySelectorAll('[data-t]').forEach((el) => { if (t[el.dataset.t]) el.textContent = t[el.dataset.t]; });
+  document.querySelectorAll('.langs button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.l === lang)));
+  document.title = t.h1 + ' · Olymp Logistic';
+  const rel = [...REL.releases].sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }));
+  document.getElementById('releases').innerHTML = rel.map((r) => `
+    <div class="card"><h3>${esc(r.title[lang] || r.title.en)}</h3>
+      <div class="meta"><span class="tag">${esc(t.frozen)}</span>${esc(t.stand)} ${fmt(r.date)} · ${esc(t.built)} ${esc(r.built)}</div>
+      <p>${esc(r.note[lang] || r.note.en)}</p>
+      <div class="links"><a href="${esc(r.path)}platform.html">RU</a><a href="${esc(r.path)}platform-de.html">DE</a><a href="${esc(r.path)}platform-en.html">EN</a>
+        <a href="${esc(r.path)}changes.html">${esc(t.changes)}</a><a href="${esc(r.path)}tests.html">${esc(t.tests)}</a><a href="${esc(r.path)}">Info</a></div></div>`).join('');
+}
+document.querySelectorAll('.langs button').forEach((b) => b.addEventListener('click', () => { lang = b.dataset.l; try { localStorage.setItem('olymp.versions.lang', lang); } catch (e) { /* ignore */ } render(); }));
+render();
+fetch('releases/releases.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && j.releases) { REL = j; render(); } }).catch(() => {});
+</script>
+</body>
+</html>

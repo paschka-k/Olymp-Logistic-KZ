@@ -1,0 +1,9 @@
+{
+ "releases": [
+  {"version": "0.3.9", "date": "2026-10-16", "built": "16.10.2026 19:55 UTC+5", "path": "releases/0.3.9/",
+   "title": {"ru": "Платформа Olymp Logistic · релиз 0.3.9", "de": "Olymp Logistic Platform · Release 0.3.9", "en": "Olymp Logistic Platform · release 0.3.9"},
+   "note": {"ru": "Рабочая платформа (бэкенд + веб-приложение), онлайн-демо в браузере: 17 экранов, учёт и администрирование, порталы клиента и партнёра, FR-01…190, BUG-01…37.",
+            "de": "Produktive Plattform (Backend + Web-App) als Online-Demo im Browser: 17 Bildschirme, Register & Verwaltung, Kunden- und Partnerportal, FR-01…190, BUG-01…37.",
+            "en": "Production platform (backend + web app) as an in-browser online demo: 17 screens, records & administration, customer and partner portal, FR-01…190, BUG-01…37."}}
+ ]
+}
