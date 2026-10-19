@@ -5,8 +5,10 @@ const HUBS = {
   ALA: { name: T('Хаб Алматы-Жетысу', 'Hub Almaty-Zhetysu', 'Almaty Zhetysu Hub', 'Алматы-Жетісу хабы'), city: T('Алматы', 'Almaty', 'Almaty', 'Алматы'), x: 478, y: 262 },
   KAR: { name: T('Хаб Караганда', 'Hub Karaganda', 'Karaganda Hub', 'Қарағанды хабы'), city: T('Караганда', 'Karaganda', 'Karaganda', 'Қарағанды'), x: 352, y: 150 },
   SHY: { name: T('Хаб Шымкент', 'Hub Schymkent', 'Shymkent Hub', 'Шымкент хабы'), city: T('Шымкент', 'Shymkent', 'Shymkent', 'Шымкент'), x: 330, y: 288 },
+  /* West KZ (P86 / FR-36: the West is served from Astana; Atyrau is the transshipment point of the temperature flows, baseline V-xx): a cross-dock hub for Atyrau, Uralsk, Aktau, Aktobe */
+  ATY: { name: T('Хаб Атырау-Запад (перевалка)', 'Hub Atyrau-West (Umschlag)', 'Atyrau West Hub (cross-dock)', 'Атырау-Батыс хабы (қайта тиеу)'), city: T('Атырау', 'Atyrau', 'Atyrau', 'Атырау'), x: 92, y: 178, west: true },
 };
-const DIST = { 'AST-ALA': 1200, 'AST-KAR': 220, 'AST-SHY': 1300, 'ALA-KAR': 1000, 'ALA-SHY': 690, 'KAR-SHY': 1100 };
+const DIST = { 'AST-ALA': 1200, 'AST-KAR': 220, 'AST-SHY': 1300, 'ALA-KAR': 1000, 'ALA-SHY': 690, 'KAR-SHY': 1100, 'AST-ATY': 1900, 'KAR-ATY': 2100, 'ALA-ATY': 2650, 'SHY-ATY': 2200 };
 const dist = (a, b) => DIST[a + '-' + b] || DIST[b + '-' + a] || 0;
 const ZONES = {
   frozen:  { label: '−18 °C',    lo: -25, hi: -15, mid: -19, rate: 640 },
@@ -66,6 +68,7 @@ const mkLoads = () => [
   mkLoad('001850', 'c4', 'KAR', 'AST', 'frozen', 30, 15200, 'medium', 'loading', '2026-10-19T10:00:00+05:00', { driver: 'd1', truck: 't3' }),
   mkLoad('001851', 'c5', 'AST', 'SHY', 'ambient', 14, 4800, 'low', 'assigned', '2026-10-20T09:00:00+05:00', { driver: 'd5', truck: 't4' }),
   mkLoad('001852', 'c1', 'ALA', 'AST', 'pharma', 20, 5600, 'high', 'unassigned', '2026-10-19T16:00:00+05:00'),
+  mkLoad('001856', 'c3', 'AST', 'ATY', 'pharma', 16, 4900, 'high', 'assigned', '2026-10-21T07:00:00+05:00', { driver: 'd3', truck: 't1' }),
   mkLoad('001853', 'c2', 'SHY', 'ALA', 'chilled', 26, 9800, 'medium', 'unassigned', '2026-10-19T12:00:00+05:00'),
   mkLoad('001854', 'c4', 'ALA', 'KAR', 'frozen', 22, 11800, 'low', 'unassigned', '2026-10-21T08:00:00+05:00'),
   mkLoad('001855', 'c3', 'AST', 'KAR', 'pharma', 8, 1900, 'high', 'unassigned', '2026-10-18T22:00:00+05:00'),
@@ -86,6 +89,7 @@ const mkHubs = () => ({
   ALA: { addr: T('г. Алматы, ул. Рыскулова, 87', 'Almaty, Ryskulov-Str. 87', 'Almaty, 87 Ryskulov St', 'Алматы қ., Рысқұлов к-сі, 87'), places: { frozen: [400, 390], chilled: [700, 670], pharma: [500, 480], ambient: [900, 830] }, ramps: ['ambient', 'chilled', 'pharma', 'frozen'], blocked: [2, 4], io: [89, 156], done: [160, 190], maint: false },
   KAR: { addr: T('г. Караганда, ул. Ермекова, 54', 'Karaganda, Ermekov-Str. 54', 'Karaganda, 54 Ermekov St', 'Қарағанды қ., Ермеков к-сі, 54'), places: { frozen: [200, 80], chilled: [400, 170], pharma: [200, 90], ambient: [600, 300] }, ramps: ['ambient', 'chilled', 'frozen'], blocked: [], io: [34, 67], done: [60, 90], maint: true },
   SHY: { addr: T('г. Шымкент, пр. Байдибек би, 120', 'Schymkent, Baidibek-Bi-Allee 120', 'Shymkent, 120 Baidibek Bi Ave', 'Шымкент қ., Байдібек би даңғ., 120'), places: { frozen: [200, 120], chilled: [500, 320], pharma: [300, 190], ambient: [800, 520] }, ramps: ['ambient', 'chilled'], blocked: [], io: [76, 124], done: [90, 140], maint: false },
+  ATY: { addr: T('г. Атырау, ул. Сатпаева, 44 (кросс-док)', 'Atyrau, Satpayev-Str. 44 (Cross-Dock)', 'Atyrau, 44 Satpayev St (cross-dock)', 'Атырау қ., Сәтбаев к-сі, 44 (кросс-док)'), places: { frozen: [120, 40], chilled: [240, 110], pharma: [160, 70], ambient: [400, 180] }, ramps: ['ambient', 'chilled', 'pharma'], blocked: [], locked: [], io: [18, 31], done: [22, 36], maint: false },
 });
 const mkJob = (id, hub, zone, o) => Object.assign({ id: 'IN-' + id, hub, zone, carrier: '', plate: '', veh: '', senders: [], plan: true, ramp: null, win: null, pallets: 10, load: null,
   ev: { ci: null, rp: null, st: null, en: null }, chk: { temp: null, logger: false }, delay: null, reason: '', booked: 0, flags: [], log: [] }, o);

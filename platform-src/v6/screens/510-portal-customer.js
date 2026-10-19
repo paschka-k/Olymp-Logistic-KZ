@@ -39,7 +39,7 @@
     return out;
   };
   /* FR-96/97/155: departures of the destination hub's lines over the next 7 days; capacity 33 pallets minus booked */
-  const LINES = { AST: { days: [0, 1, 2, 3, 4], dep: '20:00' }, ALA: { days: [0, 2, 4], dep: '21:00' }, KAR: { days: [1, 3], dep: '19:00' }, SHY: { days: [0, 3], dep: '18:00' } };
+  const LINES = { AST: { days: [0, 1, 2, 3, 4], dep: '20:00' }, ALA: { days: [0, 2, 4], dep: '21:00' }, KAR: { days: [1, 3], dep: '19:00' }, SHY: { days: [0, 3], dep: '18:00' }, ATY: { days: [1, 4], dep: '06:00' } };
   const addD = (iso, n) => { const d = new Date(iso + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
   const wd = iso => (new Date(iso + 'T00:00:00Z').getUTCDay() + 6) % 7;
   globalThis.slotsFor = (from, to, pallets, kg) => {

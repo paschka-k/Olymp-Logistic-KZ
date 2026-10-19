@@ -8,7 +8,7 @@
   const daysTo = iso => Math.floor((new Date(iso + 'T23:59:59+05:00') - NOW) / 864e5);
   const clock = () => { const d = new Date(); return p2(d.getHours()) + ':' + p2(d.getMinutes()); };
   Object.assign(R, { ymd, TODAY, addDays, daysTo, clock });
-  R.GEO = { AST: [51.17, 71.43], ALA: [43.24, 76.95], KAR: [49.80, 73.09], SHY: [42.32, 69.59] };
+  R.GEO = { AST: [51.17, 71.43], ALA: [43.24, 76.95], KAR: [49.80, 73.09], SHY: [42.32, 69.59], ATY: [47.11, 51.92] };
   R.MED_FROM = '2027-01-01';   // FR-114: pre-trip medical check mandatory from 01.01.2027 (switchable earlier for training)
   S.res = { views: [], svc: [], abs: [], med: {}, fines: [], waybills: [], rules: { medEnforce: false }, nextSvc: 103, nextFine: 121, nextWb: 934 };
 

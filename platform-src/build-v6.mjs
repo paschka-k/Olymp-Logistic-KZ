@@ -25,7 +25,7 @@ const regFor = lang => { const L = lang === 'kk' ? 'ru' : lang; return JSON.stri
 mkdirSync(outDir, { recursive: true });
 for (const lang of langs) {
   const code = js.replaceAll('@@LANG@@', lang).replaceAll('@@BUILD@@', build).replaceAll('@@ROLEPERMS@@', rolePerms).replaceAll('@@REGISTER@@', () => regFor(lang)).replace(/<\/script/gi, '<\\/script');
-  const html = `<!doctype html><html lang="${lang}" data-design="olymp"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Olymp Logistic KZ · Platform v6 (${lang})</title><style>\n${css}\n</style></head><body><a class="skip" href="#main-content">Skip to content</a><div id="root"></div><script>\n${code}\n</script></body></html>\n`;
+  const html = `<!doctype html><html lang="${lang}" data-design="kokzhol"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kökzhol · Platform v6 (${lang})</title><link rel="icon" type="image/svg+xml" href="assets/brand/kokzhol-favicon.svg"><style>\n${css}\n</style></head><body><a class="skip" href="#main-content">Skip to content</a><div id="root"></div><script>\n${code}\n</script></body></html>\n`;
   const file = join(outDir, lang === 'ru' ? 'index.html' : `${lang}.html`);
   writeFileSync(file, html);
   console.log(`${lang}: ${file} (${(html.length / 1024).toFixed(0)} KB)`);

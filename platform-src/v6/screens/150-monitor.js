@@ -20,8 +20,8 @@
   /* ---------- weather ---------- */
   const DAYS = [0, 1, 2, 3, 4, 5, 6].map(i => { const d = new Date(NOW.getTime() + i * 864e5); return ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][d.getDay()] + ' ' + p2(d.getDate()) + '.' + p2(d.getMonth() + 1); });
   const OFF = { n: [0, -1, -5, -10, -8, -3, -1], s: [0, 1, 0, -3, -4, -1, 1] }, WB = [4, 6, 8, 9, 6, 4, 3];
-  const CITY = [['AST', 8, -1, 'n'], ['KAR', 7, -2, 'n'], ['ALA', 16, 4, 's'], ['SHY', 21, 7, 's']];
-  const EV = { AST: { 3: { wind: 17, snow: 1 } }, KAR: { 2: { wind: 21, snow: 1 }, 3: { wind: 24, snow: 1 } } };
+  const CITY = [['AST', 8, -1, 'n'], ['KAR', 7, -2, 'n'], ['ALA', 16, 4, 's'], ['SHY', 21, 7, 's'], ['ATY', 13, 3, 'n']];
+  const EV = { AST: { 3: { wind: 17, snow: 1 } }, KAR: { 2: { wind: 21, snow: 1 }, 3: { wind: 24, snow: 1 } }, ATY: { 1: { wind: 19 }, 2: { wind: 23, snow: 1 } } };   // West: the blizzard scenario of Planning (W1) starts here
   const WX = {}; CITY.forEach(([h, mx, mn, p]) => { WX[h] = DAYS.map((_, d) => { const o = OFF[p][d], ev = (EV[h] || {})[d] || {}; return { max: mx + o, min: mn + o, wind: ev.wind != null ? ev.wind : WB[d] + h.length % 3, snow: !!ev.snow }; }); });
   const risk = c => c.min < -40 || c.max > 50 ? 3 : c.min < -25 || (c.wind >= 20 && c.snow) ? 2 : c.min < -10 || c.snow || c.max > 40 ? 1 : 0;
   const RL = [['green', T('Норма', 'Normal', 'Normal', 'Қалыпты')], ['yellow', T('Внимание', 'Achtung', 'Watch', 'Назар')], ['red', T('Высокий', 'Hoch', 'High', 'Жоғары')], ['red', T('Критичный', 'Kritisch', 'Critical', 'Сыни')]];

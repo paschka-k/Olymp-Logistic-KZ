@@ -63,7 +63,7 @@ const avatar = (ini, n) => `<span class="avatar sm" style="background:var(--av-$
 /* ---------- store ---------- */
 const S = {
   loads: [], drivers: [], trucks: [],
-  route: 'dashboard', drawer: null, toast: null, tab: {}, role: 'admin', design: 'olymp',
+  route: 'dashboard', drawer: null, toast: null, tab: {}, role: 'admin', design: 'kokzhol',
   f: { q: '', status: '', cust: '', zone: '', pri: '', hub: '', drv: '', page: 1 },
   nextId: 1856,
   hubView: 'cards', clock: 14 * 60 + 32, costs: [], views: [], rf: { st: '', hub: '', q: '', flag: '' },
@@ -191,11 +191,25 @@ function shell() {
   const lang = ['ru', 'de', 'en', 'kk'].map(l => `<a href="${fileFor(l)}"${l === LANG ? ' class="on"' : ''}>${l.toUpperCase()}</a>`).join('');
   const body = sc ? screenBody(S.route) : placeholder(S.route);
   const title = sc ? sc.title() : navLabel(S.route);
-  return `<div class="app"><aside class="sidebar"><div class="logo">Olymp&nbsp;Logistic</div>${nav}<div class="langs">${lang}</div>${ver}</aside>
+  /* Kökzhol lock-up (brand §3.4): Shanyrak-Ö mark + wordmark (Cyrillic for RU / KK) + claim; the ink mark on the dark Kökzhol sidebar, the teal one on the light Olymp sidebar */
+  const cyr = LANG === 'ru' || LANG === 'kk';
+  const brand = `<div class="brand" data-act="go" data-v="${homeRoute()}" role="link" tabindex="0"><img src="assets/brand/${S.design === 'kokzhol' ? 'kokzhol-mark-on-ink' : 'kokzhol-mark'}.svg" alt="Kökzhol" width="36" height="36"><span><span class="wordmark">${cyr ? 'көкжол' : 'kökzhol'}</span><span class="claim">${esc(T('Холодовая цепь точно по графику.', 'Kühlkette im Takt.', 'Cold chain, on schedule.', 'Суық тізбек — кестемен.'))}</span></span></div>`;
+  /* portals, apps and help: always one click away (role shells are reached by switching the role; the public form needs no role) */
+  const shellRole = !!SHELL_NAV[S.role];
+  const tools = `<div class="side-tools"><div class="side-h">${esc(T('Порталы и приложения', 'Portale und Apps', 'Portals and apps', 'Порталдар мен қосымшалар'))}</div>
+${shellRole ? `<a class="side-link" data-act="setRole" data-v="admin">${ic('grid', 14)}<span>${esc(T('← Платформа (администратор)', '← Plattform (Administrator)', '← Platform (administrator)', '← Платформа (әкімші)'))}</span></a>` : ''}
+${S.role !== 'customer' ? `<a class="side-link" data-act="setRole" data-v="customer">${ic('package', 14)}<span>${esc(T('Клиентский портал', 'Kundenportal', 'Customer portal', 'Клиент порталы'))}</span></a>` : ''}
+${S.role !== 'partner' ? `<a class="side-link" data-act="setRole" data-v="partner">${ic('route', 14)}<span>${esc(T('Портал партнёра', 'Partnerportal', 'Partner portal', 'Серіктес порталы'))}</span></a>` : ''}
+${S.role !== 'driver' ? `<a class="side-link" data-act="setRole" data-v="driver">${ic('user', 14)}<span>${esc(T('Приложение водителя', 'Fahrer-App', 'Driver app', 'Жүргізуші қосымшасы'))}</span></a>` : ''}
+<a class="side-link" data-act="go" data-v="request">${ic('file', 14)}<span>${esc(T('Публичная заявка и трекинг', 'Öffentliche Anfrage und Tracking', 'Public request and tracking', 'Жария өтінім және трекинг'))}</span></a>
+${shellRole ? '' : `<a class="side-link${S.route === 'help' ? ' on' : ''}" data-act="go" data-v="help">${ic('spark', 14)}<span>${esc(T('Справка', 'Hilfe', 'Help', 'Анықтама'))}</span></a>`}</div>`;
+  const USER = { admin: ['Sarah Johnson', 'SJ'], dispatcher: ['Айгерим Сапарова', 'АС'], warehouse: ['Болат Ермеков', 'БЕ'], driver: ['Ерлан Сейтқали', 'ЕС'], auditor: ['Olga Berg', 'OB'], viewer: ['Timur Akhmetov', 'TA'], manager: ['Max Keller', 'MK'], finance: ['Дана Жумабаева', 'ДЖ'], quality: ['Anna Schulz', 'AS'], customer: ['ТОО «Аптека Сервис»', 'АС'], partner: ['ТОО «ТрансХолод»', 'ТХ'] };
+  const usr = USER[S.role] || USER.admin;
+  return `<div class="app"><aside class="sidebar">${brand}${nav}${tools}<div class="langs">${lang}</div>${ver}</aside>
 <main id="main-content"><header class="topbar"><span class="crumb">${esc(navLabel('dashboard'))} › <b>${esc(navLabel(S.route))}</b></span>
 <div class="who"><label class="searchbox">${ic('search', 14)}<input id="gsearch" placeholder="${esc(T('Поиск рейсов, ТС, водителей…', 'Fahrten, Fahrzeuge, Fahrer suchen…', 'Search loads, trucks, drivers…', 'Рейс, КҚ, жүргізуші іздеу…'))}" value="${esc(S.f.q)}"></label>
-<select id="roleSel" class="select" aria-label="Role" style="height:32px">${ROLES.map(r => `<option value="${r}"${r === S.role ? ' selected' : ''}>${esc(ROLE_NAME[r])}</option>`).join('')}</select><button class="btn grey sm" data-act="setDesign" title="Olymp / Kökzhol">${S.design === 'olymp' ? '◐' : '◑'}</button><button class="btn grey sm" data-act="helpHere" aria-label="Help">?</button><span class="bell">${ic('bell', 18)}${alertsCount() ? `<span class="badge-count">${alertsCount()}</span>` : ''}</span>
-<div class="usr"><b>Sarah Johnson</b><small>${esc(T('Руководитель операций', 'Betriebsleiterin', 'Operations Manager', 'Операциялар басшысы'))}</small></div><span class="avatar" style="background:var(--primary)">SJ</span></div></header>
+<label class="rolebox" title="${esc(T('Переключить роль: меню и права меняются сразу', 'Rolle wechseln: Menü und Rechte ändern sich sofort', 'Switch the role: menu and permissions change at once', 'Рөлді ауыстыру'))}">${ic('user', 14)}<span>${esc(T('Роль', 'Rolle', 'Role', 'Рөл'))}</span><select id="roleSel" class="select" aria-label="Role" style="height:32px">${ROLES.map(r => `<option value="${r}"${r === S.role ? ' selected' : ''}>${esc(ROLE_NAME[r])}</option>`).join('')}</select></label><button class="btn grey sm" data-act="setDesign" title="${S.design === 'kokzhol' ? 'Kökzhol → Olymp' : 'Olymp → Kökzhol'}">${S.design === 'olymp' ? '◐' : '◑'}</button><button class="btn grey sm" data-act="helpHere" aria-label="Help" title="${esc(T('Справка по этому экрану', 'Hilfe zu diesem Bildschirm', 'Help for this screen', 'Осы экран анықтамасы'))}">?</button><span class="bell">${ic('bell', 18)}${alertsCount() ? `<span class="badge-count">${alertsCount()}</span>` : ''}</span>
+<div class="usr"><b>${esc(usr[0])}</b><small>${esc(ROLE_NAME[S.role])}</small></div><span class="avatar" style="background:var(--primary)">${esc(usr[1])}</span></div></header>
 <div class="page-head"><div><h1 class="page-title">${esc(title)}</h1>${sc && sc.sub ? `<p class="page-sub">${esc(sc.sub())}</p>` : ''}</div><div class="actions">${sc && sc.actions ? sc.actions() : ''}</div></div>
 <div class="content">${body}</div></main>${drawerHtml()}${S.toast ? `<div class="toast ${S.toast.kind}">${esc(S.toast.msg)}</div>` : ''}</div>`;
 }

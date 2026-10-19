@@ -122,3 +122,18 @@ label.drop-zone{display:block;cursor:pointer} .dzrow td{padding:6px 14px!importa
 .tour-pop:focus{outline:none} .tour-eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)} .tour-t{margin:4px 0 6px;font-size:17px} .tour-text{margin:0 0 8px;font-size:13.5px}
 .tour-missing{color:#8a6100;background:#fef3c7;padding:6px 8px;margin:0 0 8px;font-size:12px;border-radius:6px} .tour-btns{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
 @media (prefers-reduced-motion:reduce){.tour-hi{transition:none}} @media print{.tour-layer,.help-nav,.help-q{display:none}}
+
+/* ---------- Kökzhol lock-up, side tools (portals / apps / help), role box, manufacturer logos (phase 10) ---------- */
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 14px;cursor:pointer}.brand img{display:block;flex:none;width:36px;height:36px}
+.brand>span{display:flex;flex-direction:column;line-height:1.1;min-width:0}.brand .wordmark{font-weight:800;font-size:22px;letter-spacing:-.02em;color:var(--text-strong)}
+.brand .claim{font-size:11px;color:var(--text-muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html[data-design="kokzhol"] .brand .wordmark{color:#fff}html[data-design="kokzhol"] .brand .claim{color:#7fd3de}
+.side-tools{margin-top:14px;padding:10px 8px 0;border-top:1px solid var(--border)}html[data-design="kokzhol"] .side-tools{border-top-color:#1e3d4e}
+.side-h{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin:0 0 6px 2px}html[data-design="kokzhol"] .side-h{color:#8fa9b6}
+.side-link{display:flex;align-items:center;gap:8px;padding:6px 6px;border-radius:var(--r-nav);font-size:13px;color:var(--text-muted);cursor:pointer;text-decoration:none}
+.side-link:hover{background:var(--bg-subtle);color:var(--text-strong)}.side-link.on{background:var(--bg-selected);color:var(--primary)}
+html[data-design="kokzhol"] .side-link{color:#c9d8df}html[data-design="kokzhol"] .side-link:hover{background:#123446;color:#fff}html[data-design="kokzhol"] .side-link.on{background:#123446;color:#7fd3de}
+.rolebox{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);border:1px solid var(--border);border-radius:var(--r-btn);padding:0 0 0 8px;background:var(--bg-surface)}
+.rolebox .select{border:0;background:transparent;font-weight:600;color:var(--text-strong);max-width:190px}
+.mlogo.img{background:#fff;border:1px solid var(--border);border-radius:6px;padding:3px;box-sizing:border-box}.mlogo.img img,.sh-logo.img img{width:100%;height:100%;object-fit:contain;display:block}
+.sh-logo.img{background:#fff;border:1px solid var(--border);padding:3px;box-sizing:border-box;width:64px;height:47px}

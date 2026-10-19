@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><title>Olymp Logistic KZ · platform tests</title>
+<html lang="en"><head><meta charset="utf-8"><title>Kökzhol · platform tests</title>
 <style>body{font:14px/1.5 system-ui,sans-serif;margin:24px;max-width:960px}h1{font-size:20px}.ok{color:#166534}.bad{color:#be123c;font-weight:600}#sum{padding:10px 14px;border-radius:8px;background:#f3f4f6;margin:12px 0}li{margin:2px 0}iframe{display:none}</style></head>
 <body><h1>Platform tests</h1><div id="sum">running…</div><ul id="out"></ul><div id="frames"></div>
 <script>
@@ -141,7 +141,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     for (const lang of LANGS) { const gg = await fresh(lang); try { const bad = gg.ev(`HELP.articles.filter(a=>!tx(a.title)||!tx(a.purpose)).map(a=>a.key)`); assert(!bad.length, lang + ' incomplete: ' + bad); if (lang === 'de' || lang === 'en') { const cyr = gg.ev(`HELP.articles.filter(a=>/[А-Яа-яЁё]/.test([tx(a.title),tx(a.sub),tx(a.purpose),tx(a.who),(a.see||[]).map(tx).join(),(a.rules||[]).map(tx).join(),(a.howto||[]).map(h=>tx(h.t)+h.steps.map(tx).join()).join()].join(' '))).map(a=>a.key)`); assert(!cyr.length, lang + ' Cyrillic in: ' + cyr); } } finally { gg.done(); } }
   });
   await group('design switch Olymp / Kökzhol, version block, skip link', 'ru', async (g, ev, w) => {
-    eq(w.document.documentElement.dataset.design, 'olymp'); ev('ACT.setDesign()'); eq(w.document.documentElement.dataset.design, 'kokzhol'); ev('ACT.setDesign()'); eq(w.document.documentElement.dataset.design, 'olymp');
+    eq(w.document.documentElement.dataset.design, 'kokzhol'); ev('ACT.setDesign()'); eq(w.document.documentElement.dataset.design, 'olymp'); ev('ACT.setDesign()'); eq(w.document.documentElement.dataset.design, 'kokzhol');
     assert(new RegExp('v' + ev('VERSION').replace(/\./g, '\\.')).test(w.document.querySelector('.ver').innerText), 'version'); assert(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(w.document.querySelector('.ver').innerText), 'build time'); assert(w.document.querySelector('a.skip') && w.document.getElementById('main-content'), 'skip link target');
   });
 

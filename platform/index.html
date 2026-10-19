@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru" data-design="olymp"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Olymp Logistic KZ · Platform v6 (ru)</title><style>
+<!doctype html><html lang="ru" data-design="kokzhol"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kökzhol · Platform v6 (ru)</title><link rel="icon" type="image/svg+xml" href="assets/brand/kokzhol-favicon.svg"><style>
 /* ==========================================================================
    part-D-tokens.css  -  FleetFlow-style design tokens (light theme)
    Source: pixel measurements of 2026-10-18_SampleStructure_Aufzeichnung.mp4
@@ -493,6 +493,21 @@ label.drop-zone{display:block;cursor:pointer} .dzrow td{padding:6px 14px!importa
 .tour-missing{color:#8a6100;background:#fef3c7;padding:6px 8px;margin:0 0 8px;font-size:12px;border-radius:6px} .tour-btns{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
 @media (prefers-reduced-motion:reduce){.tour-hi{transition:none}} @media print{.tour-layer,.help-nav,.help-q{display:none}}
 
+/* ---------- Kökzhol lock-up, side tools (portals / apps / help), role box, manufacturer logos (phase 10) ---------- */
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 14px;cursor:pointer}.brand img{display:block;flex:none;width:36px;height:36px}
+.brand>span{display:flex;flex-direction:column;line-height:1.1;min-width:0}.brand .wordmark{font-weight:800;font-size:22px;letter-spacing:-.02em;color:var(--text-strong)}
+.brand .claim{font-size:11px;color:var(--text-muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html[data-design="kokzhol"] .brand .wordmark{color:#fff}html[data-design="kokzhol"] .brand .claim{color:#7fd3de}
+.side-tools{margin-top:14px;padding:10px 8px 0;border-top:1px solid var(--border)}html[data-design="kokzhol"] .side-tools{border-top-color:#1e3d4e}
+.side-h{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin:0 0 6px 2px}html[data-design="kokzhol"] .side-h{color:#8fa9b6}
+.side-link{display:flex;align-items:center;gap:8px;padding:6px 6px;border-radius:var(--r-nav);font-size:13px;color:var(--text-muted);cursor:pointer;text-decoration:none}
+.side-link:hover{background:var(--bg-subtle);color:var(--text-strong)}.side-link.on{background:var(--bg-selected);color:var(--primary)}
+html[data-design="kokzhol"] .side-link{color:#c9d8df}html[data-design="kokzhol"] .side-link:hover{background:#123446;color:#fff}html[data-design="kokzhol"] .side-link.on{background:#123446;color:#7fd3de}
+.rolebox{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);border:1px solid var(--border);border-radius:var(--r-btn);padding:0 0 0 8px;background:var(--bg-surface)}
+.rolebox .select{border:0;background:transparent;font-weight:600;color:var(--text-strong);max-width:190px}
+.mlogo.img{background:#fff;border:1px solid var(--border);border-radius:6px;padding:3px;box-sizing:border-box}.mlogo.img img,.sh-logo.img img{width:100%;height:100%;object-fit:contain;display:block}
+.sh-logo.img{background:#fff;border:1px solid var(--border);padding:3px;box-sizing:border-box;width:64px;height:47px}
+
 </style></head><body><a class="skip" href="#main-content">Skip to content</a><div id="root"></div><script>
 /* v6 core: i18n, helpers, icons, store + dispatch rules, shell, drawer, router. */
 const LANG = 'ru';
@@ -559,7 +574,7 @@ const avatar = (ini, n) => `<span class="avatar sm" style="background:var(--av-$
 /* ---------- store ---------- */
 const S = {
   loads: [], drivers: [], trucks: [],
-  route: 'dashboard', drawer: null, toast: null, tab: {}, role: 'admin', design: 'olymp',
+  route: 'dashboard', drawer: null, toast: null, tab: {}, role: 'admin', design: 'kokzhol',
   f: { q: '', status: '', cust: '', zone: '', pri: '', hub: '', drv: '', page: 1 },
   nextId: 1856,
   hubView: 'cards', clock: 14 * 60 + 32, costs: [], views: [], rf: { st: '', hub: '', q: '', flag: '' },
@@ -687,11 +702,25 @@ function shell() {
   const lang = ['ru', 'de', 'en', 'kk'].map(l => `<a href="${fileFor(l)}"${l === LANG ? ' class="on"' : ''}>${l.toUpperCase()}</a>`).join('');
   const body = sc ? screenBody(S.route) : placeholder(S.route);
   const title = sc ? sc.title() : navLabel(S.route);
-  return `<div class="app"><aside class="sidebar"><div class="logo">Olymp&nbsp;Logistic</div>${nav}<div class="langs">${lang}</div>${ver}</aside>
+  /* Kökzhol lock-up (brand §3.4): Shanyrak-Ö mark + wordmark (Cyrillic for RU / KK) + claim; the ink mark on the dark Kökzhol sidebar, the teal one on the light Olymp sidebar */
+  const cyr = LANG === 'ru' || LANG === 'kk';
+  const brand = `<div class="brand" data-act="go" data-v="${homeRoute()}" role="link" tabindex="0"><img src="assets/brand/${S.design === 'kokzhol' ? 'kokzhol-mark-on-ink' : 'kokzhol-mark'}.svg" alt="Kökzhol" width="36" height="36"><span><span class="wordmark">${cyr ? 'көкжол' : 'kökzhol'}</span><span class="claim">${esc(T('Холодовая цепь точно по графику.', 'Kühlkette im Takt.', 'Cold chain, on schedule.', 'Суық тізбек — кестемен.'))}</span></span></div>`;
+  /* portals, apps and help: always one click away (role shells are reached by switching the role; the public form needs no role) */
+  const shellRole = !!SHELL_NAV[S.role];
+  const tools = `<div class="side-tools"><div class="side-h">${esc(T('Порталы и приложения', 'Portale und Apps', 'Portals and apps', 'Порталдар мен қосымшалар'))}</div>
+${shellRole ? `<a class="side-link" data-act="setRole" data-v="admin">${ic('grid', 14)}<span>${esc(T('← Платформа (администратор)', '← Plattform (Administrator)', '← Platform (administrator)', '← Платформа (әкімші)'))}</span></a>` : ''}
+${S.role !== 'customer' ? `<a class="side-link" data-act="setRole" data-v="customer">${ic('package', 14)}<span>${esc(T('Клиентский портал', 'Kundenportal', 'Customer portal', 'Клиент порталы'))}</span></a>` : ''}
+${S.role !== 'partner' ? `<a class="side-link" data-act="setRole" data-v="partner">${ic('route', 14)}<span>${esc(T('Портал партнёра', 'Partnerportal', 'Partner portal', 'Серіктес порталы'))}</span></a>` : ''}
+${S.role !== 'driver' ? `<a class="side-link" data-act="setRole" data-v="driver">${ic('user', 14)}<span>${esc(T('Приложение водителя', 'Fahrer-App', 'Driver app', 'Жүргізуші қосымшасы'))}</span></a>` : ''}
+<a class="side-link" data-act="go" data-v="request">${ic('file', 14)}<span>${esc(T('Публичная заявка и трекинг', 'Öffentliche Anfrage und Tracking', 'Public request and tracking', 'Жария өтінім және трекинг'))}</span></a>
+${shellRole ? '' : `<a class="side-link${S.route === 'help' ? ' on' : ''}" data-act="go" data-v="help">${ic('spark', 14)}<span>${esc(T('Справка', 'Hilfe', 'Help', 'Анықтама'))}</span></a>`}</div>`;
+  const USER = { admin: ['Sarah Johnson', 'SJ'], dispatcher: ['Айгерим Сапарова', 'АС'], warehouse: ['Болат Ермеков', 'БЕ'], driver: ['Ерлан Сейтқали', 'ЕС'], auditor: ['Olga Berg', 'OB'], viewer: ['Timur Akhmetov', 'TA'], manager: ['Max Keller', 'MK'], finance: ['Дана Жумабаева', 'ДЖ'], quality: ['Anna Schulz', 'AS'], customer: ['ТОО «Аптека Сервис»', 'АС'], partner: ['ТОО «ТрансХолод»', 'ТХ'] };
+  const usr = USER[S.role] || USER.admin;
+  return `<div class="app"><aside class="sidebar">${brand}${nav}${tools}<div class="langs">${lang}</div>${ver}</aside>
 <main id="main-content"><header class="topbar"><span class="crumb">${esc(navLabel('dashboard'))} › <b>${esc(navLabel(S.route))}</b></span>
 <div class="who"><label class="searchbox">${ic('search', 14)}<input id="gsearch" placeholder="${esc(T('Поиск рейсов, ТС, водителей…', 'Fahrten, Fahrzeuge, Fahrer suchen…', 'Search loads, trucks, drivers…', 'Рейс, КҚ, жүргізуші іздеу…'))}" value="${esc(S.f.q)}"></label>
-<select id="roleSel" class="select" aria-label="Role" style="height:32px">${ROLES.map(r => `<option value="${r}"${r === S.role ? ' selected' : ''}>${esc(ROLE_NAME[r])}</option>`).join('')}</select><button class="btn grey sm" data-act="setDesign" title="Olymp / Kökzhol">${S.design === 'olymp' ? '◐' : '◑'}</button><button class="btn grey sm" data-act="helpHere" aria-label="Help">?</button><span class="bell">${ic('bell', 18)}${alertsCount() ? `<span class="badge-count">${alertsCount()}</span>` : ''}</span>
-<div class="usr"><b>Sarah Johnson</b><small>${esc(T('Руководитель операций', 'Betriebsleiterin', 'Operations Manager', 'Операциялар басшысы'))}</small></div><span class="avatar" style="background:var(--primary)">SJ</span></div></header>
+<label class="rolebox" title="${esc(T('Переключить роль: меню и права меняются сразу', 'Rolle wechseln: Menü und Rechte ändern sich sofort', 'Switch the role: menu and permissions change at once', 'Рөлді ауыстыру'))}">${ic('user', 14)}<span>${esc(T('Роль', 'Rolle', 'Role', 'Рөл'))}</span><select id="roleSel" class="select" aria-label="Role" style="height:32px">${ROLES.map(r => `<option value="${r}"${r === S.role ? ' selected' : ''}>${esc(ROLE_NAME[r])}</option>`).join('')}</select></label><button class="btn grey sm" data-act="setDesign" title="${S.design === 'kokzhol' ? 'Kökzhol → Olymp' : 'Olymp → Kökzhol'}">${S.design === 'olymp' ? '◐' : '◑'}</button><button class="btn grey sm" data-act="helpHere" aria-label="Help" title="${esc(T('Справка по этому экрану', 'Hilfe zu diesem Bildschirm', 'Help for this screen', 'Осы экран анықтамасы'))}">?</button><span class="bell">${ic('bell', 18)}${alertsCount() ? `<span class="badge-count">${alertsCount()}</span>` : ''}</span>
+<div class="usr"><b>${esc(usr[0])}</b><small>${esc(ROLE_NAME[S.role])}</small></div><span class="avatar" style="background:var(--primary)">${esc(usr[1])}</span></div></header>
 <div class="page-head"><div><h1 class="page-title">${esc(title)}</h1>${sc && sc.sub ? `<p class="page-sub">${esc(sc.sub())}</p>` : ''}</div><div class="actions">${sc && sc.actions ? sc.actions() : ''}</div></div>
 <div class="content">${body}</div></main>${drawerHtml()}${S.toast ? `<div class="toast ${S.toast.kind}">${esc(S.toast.msg)}</div>` : ''}</div>`;
 }
@@ -738,7 +767,7 @@ Object.assign(ACT, {
 
 /* Roles & permissions (FR-14/137): 11 roles, permission matrix generated from the source platform (role-perms.json),
    screen / tab gating, role shells (driver, customer, partner use their own menu), role switcher. */
-const VERSION = '6.0.0', BUILD = '2026-10-19 08:29';
+const VERSION = '6.1.0', BUILD = '2026-10-19 06:29';
 const ROLES = ['admin', 'dispatcher', 'warehouse', 'driver', 'auditor', 'viewer', 'manager', 'finance', 'quality', 'customer', 'partner'];
 const ROLE_NAME = {
   admin: T('Администратор', 'Administrator', 'Administrator', 'Әкімші'), dispatcher: T('Диспетчер', 'Disponent', 'Dispatcher', 'Диспетчер'), warehouse: T('Склад', 'Lager', 'Warehouse', 'Қойма'),
@@ -765,8 +794,10 @@ const HUBS = {
   ALA: { name: T('Хаб Алматы-Жетысу', 'Hub Almaty-Zhetysu', 'Almaty Zhetysu Hub', 'Алматы-Жетісу хабы'), city: T('Алматы', 'Almaty', 'Almaty', 'Алматы'), x: 478, y: 262 },
   KAR: { name: T('Хаб Караганда', 'Hub Karaganda', 'Karaganda Hub', 'Қарағанды хабы'), city: T('Караганда', 'Karaganda', 'Karaganda', 'Қарағанды'), x: 352, y: 150 },
   SHY: { name: T('Хаб Шымкент', 'Hub Schymkent', 'Shymkent Hub', 'Шымкент хабы'), city: T('Шымкент', 'Shymkent', 'Shymkent', 'Шымкент'), x: 330, y: 288 },
+  /* West KZ (P86 / FR-36: the West is served from Astana; Atyrau is the transshipment point of the temperature flows, baseline V-xx): a cross-dock hub for Atyrau, Uralsk, Aktau, Aktobe */
+  ATY: { name: T('Хаб Атырау-Запад (перевалка)', 'Hub Atyrau-West (Umschlag)', 'Atyrau West Hub (cross-dock)', 'Атырау-Батыс хабы (қайта тиеу)'), city: T('Атырау', 'Atyrau', 'Atyrau', 'Атырау'), x: 92, y: 178, west: true },
 };
-const DIST = { 'AST-ALA': 1200, 'AST-KAR': 220, 'AST-SHY': 1300, 'ALA-KAR': 1000, 'ALA-SHY': 690, 'KAR-SHY': 1100 };
+const DIST = { 'AST-ALA': 1200, 'AST-KAR': 220, 'AST-SHY': 1300, 'ALA-KAR': 1000, 'ALA-SHY': 690, 'KAR-SHY': 1100, 'AST-ATY': 1900, 'KAR-ATY': 2100, 'ALA-ATY': 2650, 'SHY-ATY': 2200 };
 const dist = (a, b) => DIST[a + '-' + b] || DIST[b + '-' + a] || 0;
 const ZONES = {
   frozen:  { label: '−18 °C',    lo: -25, hi: -15, mid: -19, rate: 640 },
@@ -826,6 +857,7 @@ const mkLoads = () => [
   mkLoad('001850', 'c4', 'KAR', 'AST', 'frozen', 30, 15200, 'medium', 'loading', '2026-10-19T10:00:00+05:00', { driver: 'd1', truck: 't3' }),
   mkLoad('001851', 'c5', 'AST', 'SHY', 'ambient', 14, 4800, 'low', 'assigned', '2026-10-20T09:00:00+05:00', { driver: 'd5', truck: 't4' }),
   mkLoad('001852', 'c1', 'ALA', 'AST', 'pharma', 20, 5600, 'high', 'unassigned', '2026-10-19T16:00:00+05:00'),
+  mkLoad('001856', 'c3', 'AST', 'ATY', 'pharma', 16, 4900, 'high', 'assigned', '2026-10-21T07:00:00+05:00', { driver: 'd3', truck: 't1' }),
   mkLoad('001853', 'c2', 'SHY', 'ALA', 'chilled', 26, 9800, 'medium', 'unassigned', '2026-10-19T12:00:00+05:00'),
   mkLoad('001854', 'c4', 'ALA', 'KAR', 'frozen', 22, 11800, 'low', 'unassigned', '2026-10-21T08:00:00+05:00'),
   mkLoad('001855', 'c3', 'AST', 'KAR', 'pharma', 8, 1900, 'high', 'unassigned', '2026-10-18T22:00:00+05:00'),
@@ -846,6 +878,7 @@ const mkHubs = () => ({
   ALA: { addr: T('г. Алматы, ул. Рыскулова, 87', 'Almaty, Ryskulov-Str. 87', 'Almaty, 87 Ryskulov St', 'Алматы қ., Рысқұлов к-сі, 87'), places: { frozen: [400, 390], chilled: [700, 670], pharma: [500, 480], ambient: [900, 830] }, ramps: ['ambient', 'chilled', 'pharma', 'frozen'], blocked: [2, 4], io: [89, 156], done: [160, 190], maint: false },
   KAR: { addr: T('г. Караганда, ул. Ермекова, 54', 'Karaganda, Ermekov-Str. 54', 'Karaganda, 54 Ermekov St', 'Қарағанды қ., Ермеков к-сі, 54'), places: { frozen: [200, 80], chilled: [400, 170], pharma: [200, 90], ambient: [600, 300] }, ramps: ['ambient', 'chilled', 'frozen'], blocked: [], io: [34, 67], done: [60, 90], maint: true },
   SHY: { addr: T('г. Шымкент, пр. Байдибек би, 120', 'Schymkent, Baidibek-Bi-Allee 120', 'Shymkent, 120 Baidibek Bi Ave', 'Шымкент қ., Байдібек би даңғ., 120'), places: { frozen: [200, 120], chilled: [500, 320], pharma: [300, 190], ambient: [800, 520] }, ramps: ['ambient', 'chilled'], blocked: [], io: [76, 124], done: [90, 140], maint: false },
+  ATY: { addr: T('г. Атырау, ул. Сатпаева, 44 (кросс-док)', 'Atyrau, Satpayev-Str. 44 (Cross-Dock)', 'Atyrau, 44 Satpayev St (cross-dock)', 'Атырау қ., Сәтбаев к-сі, 44 (кросс-док)'), places: { frozen: [120, 40], chilled: [240, 110], pharma: [160, 70], ambient: [400, 180] }, ramps: ['ambient', 'chilled', 'pharma'], blocked: [], locked: [], io: [18, 31], done: [22, 36], maint: false },
 });
 const mkJob = (id, hub, zone, o) => Object.assign({ id: 'IN-' + id, hub, zone, carrier: '', plate: '', veh: '', senders: [], plan: true, ramp: null, win: null, pallets: 10, load: null,
   ev: { ci: null, rp: null, st: null, en: null }, chk: { temp: null, logger: false }, delay: null, reason: '', booked: 0, flags: [], log: [] }, o);
@@ -910,7 +943,7 @@ S.costs = [
   });
   SCREENS.dashboard = {
     title: () => navLabel('dashboard'),
-    sub: () => T('Холодовая цепь: Астана · Алматы · Караганда · Шымкент', 'Kühlkette: Astana · Almaty · Karaganda · Schymkent', 'Cold chain: Astana · Almaty · Karaganda · Shymkent', 'Суық тізбек: Астана · Алматы · Қарағанды · Шымкент'),
+    sub: () => T('Холодовая цепь: Астана · Алматы · Караганда · Шымкент · Атырау (Запад)', 'Kühlkette: Astana · Almaty · Karaganda · Schymkent · Atyrau (West)', 'Cold chain: Astana · Almaty · Karaganda · Shymkent · Atyrau (West)', 'Суық тізбек: Астана · Алматы · Қарағанды · Шымкент'),
     actions: () => `<button class="btn primary" data-act="create">${ic('plus')} ${esc(T('Создать рейс', 'Fahrt anlegen', 'Create Load', 'Рейс құру'))}</button>`,
     body: () => {
       const act = S.loads.filter(isActive), breach = act.filter(l => tempState(l) === 'breach').length;
@@ -2046,7 +2079,7 @@ ${ex && CFG.cur.ai.expl ? `<p class="why"><i>${esc(T('Почему: ТС под�
 <div class="card card-body"><h3 style="margin:0 0 12px;font-size:15px">${esc(T('Реестр калибровки логгеров и датчиков', 'Kalibrierregister Logger und Sensoren', 'Logger & sensor calibration registry', 'Логгерлер мен датчиктер калибрлеу тізілімі'))}</h3><p class="note">${esc(T('Просроченная поверка блокирует назначение ТС на фарма-рейсы (GDP).', 'Abgelaufene Kalibrierung sperrt Fahrzeuge für Pharma-Fahrten (GDP).', 'Expired calibration blocks the truck for pharma loads (GDP).', 'Мерзімі өткен поверка КҚ-ны фарма-рейстерден бұғаттайды (GDP).'))}</p>${calib()}</div>`; };
   const tk2 = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
   addTab('pod', 'quality', T('Отклонения и качество', 'Abweichungen & Qualität', 'Deviations & quality', 'Ауытқулар және сапа'), () => qualityBody(), { badge: () => S.devs.filter(d => !done(d)).length });
-  Object.assign(ACT, {
+  Object.assign(ACT, {
     qDev: d => { F.dev = d.id; render(); },
     qNext: d => { const x = S.devs.find(v => v.id === d.id); x.step++; audit('QA', x.id, STEPS[x.step - 1], ''); render(); },
     qDec: d => { const x = S.devs.find(v => v.id === d.id); x.decision = d.v; x.step = 4; const l = x.load && load(x.load); if (l) l.qa = d.v === 'quarantine' ? 'quarantine' : 'released'; audit('QA', x.id, d.v === 'release' ? 'Release' : 'Quarantine', ''); toast(d.v === 'release' ? T('Товар допущен', 'Ware freigegeben', 'Goods released', 'Тауарға рұқсат') : T('Товар в карантине', 'Ware in Quarantäne', 'Goods quarantined', 'Тауар карантинде')); },
@@ -2076,8 +2109,8 @@ ${ex && CFG.cur.ai.expl ? `<p class="why"><i>${esc(T('Почему: ТС под�
   /* ---------- weather ---------- */
   const DAYS = [0, 1, 2, 3, 4, 5, 6].map(i => { const d = new Date(NOW.getTime() + i * 864e5); return ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][d.getDay()] + ' ' + p2(d.getDate()) + '.' + p2(d.getMonth() + 1); });
   const OFF = { n: [0, -1, -5, -10, -8, -3, -1], s: [0, 1, 0, -3, -4, -1, 1] }, WB = [4, 6, 8, 9, 6, 4, 3];
-  const CITY = [['AST', 8, -1, 'n'], ['KAR', 7, -2, 'n'], ['ALA', 16, 4, 's'], ['SHY', 21, 7, 's']];
-  const EV = { AST: { 3: { wind: 17, snow: 1 } }, KAR: { 2: { wind: 21, snow: 1 }, 3: { wind: 24, snow: 1 } } };
+  const CITY = [['AST', 8, -1, 'n'], ['KAR', 7, -2, 'n'], ['ALA', 16, 4, 's'], ['SHY', 21, 7, 's'], ['ATY', 13, 3, 'n']];
+  const EV = { AST: { 3: { wind: 17, snow: 1 } }, KAR: { 2: { wind: 21, snow: 1 }, 3: { wind: 24, snow: 1 } }, ATY: { 1: { wind: 19 }, 2: { wind: 23, snow: 1 } } };   // West: the blizzard scenario of Planning (W1) starts here
   const WX = {}; CITY.forEach(([h, mx, mn, p]) => { WX[h] = DAYS.map((_, d) => { const o = OFF[p][d], ev = (EV[h] || {})[d] || {}; return { max: mx + o, min: mn + o, wind: ev.wind != null ? ev.wind : WB[d] + h.length % 3, snow: !!ev.snow }; }); });
   const risk = c => c.min < -40 || c.max > 50 ? 3 : c.min < -25 || (c.wind >= 20 && c.snow) ? 2 : c.min < -10 || c.snow || c.max > 40 ? 1 : 0;
   const RL = [['green', T('Норма', 'Normal', 'Normal', 'Қалыпты')], ['yellow', T('Внимание', 'Achtung', 'Watch', 'Назар')], ['red', T('Высокий', 'Hoch', 'High', 'Жоғары')], ['red', T('Критичный', 'Kritisch', 'Critical', 'Сыни')]];
@@ -2203,19 +2236,23 @@ ${S.wreq.map(r => `<div class="tinted-row ${r.st === 'closed' ? 'green' : 'blue'
   const ssccFromScan = raw => { const s = String(raw).replace(/[^\d]/g, ''); if (s.length === 20 && s.startsWith('00')) return s.slice(2); return s.length === 18 ? s : null; };
 
   /* ---------- goods catalogue: fictitious manufacturers (FR-176 logo badges) and articles per temperature class ---------- */
+  /* Manufacturers of the source platform (screen 04): the six with static logos (platform/assets/manufacturers/<logo>.png, 515 × 380 px,
+     supplied by the product owner) plus two food producers without a logo (initials badge only). */
   const MFRS = {
-    nordpharm: { name: 'Nordpharm AG', co: 'Nordpharm AG, Hamburg', url: 'nordpharm.example', ab: 'NP', col: 1 },
-    helix: { name: 'Helix Diagnostics', co: 'Helix Diagnostics Ltd, Dublin', url: 'helix-dx.example', ab: 'HX', col: 2 },
-    qazmed: { name: 'QazMed Pharma', co: 'ТОО «QazMed Pharma», Астана', url: 'qazmed.example', ab: 'QM', col: 3 },
+    roche: { name: 'Roche Diagnostics', co: 'Roche Diagnostics GmbH, Mannheim', url: 'diagnostics.roche.com', ab: 'RO', col: 1, logo: 'roche' },
+    abbott: { name: 'Abbott', co: 'Abbott Laboratories, Abbott Park', url: 'abbott.com', ab: 'AB', col: 2, logo: 'abbott' },
+    qiagen: { name: 'QIAGEN', co: 'QIAGEN GmbH, Hilden', url: 'qiagen.com', ab: 'QG', col: 3, logo: 'qiagen' },
+    sysmex: { name: 'Sysmex', co: 'Sysmex Europe SE, Norderstedt', url: 'sysmex-europe.com', ab: 'SX', col: 4, logo: 'sysmex' },
+    biomerieux: { name: 'bioMérieux', co: 'bioMérieux SA, Marcy-l\'Étoile', url: 'biomerieux.com', ab: 'BM', col: 5, logo: 'biomerieux' },
+    beckman: { name: 'Beckman Coulter', co: 'Beckman Coulter Inc., Brea', url: 'beckmancoulter.com', ab: 'BC', col: 6, logo: 'beckman-coulter' },
     freshline: { name: 'FreshLine Foods', co: 'ТОО «FreshLine Foods», Алматы', url: 'freshline.example', ab: 'FL', col: 4 },
     polar: { name: 'Polar Fisch GmbH', co: 'Polar Fisch GmbH, Bremerhaven', url: 'polar-fisch.example', ab: 'PF', col: 5 },
-    alatau: { name: 'Alatau Bio', co: 'ТОО «Alatau Bio», Алматы', url: 'alatau-bio.example', ab: 'AB', col: 6 },
   };
   const ART = {
-    pharma: [['RX-1042', T('Вакцина, 10 доз', 'Impfstoff, 10 Dosen', 'Vaccine, 10 doses', 'Вакцина, 10 доза'), 'nordpharm', 5], ['DX-2210', T('Реагент ПЦР, набор', 'PCR-Reagenz, Kit', 'PCR reagent kit', 'ПТР реагенті, жинақ'), 'helix', 3], ['RX-3307', T('Инсулин, картриджи', 'Insulin, Patronen', 'Insulin cartridges', 'Инсулин, картридждер'), 'qazmed', 4]],
+    pharma: [['RX-1042', T('Реагенты иммунохимии, набор', 'Immunchemie-Reagenzien, Kit', 'Immunochemistry reagents, kit', 'Иммунохимия реагенттері, жинақ'), 'roche', 5], ['DX-2210', T('Реагент ПЦР, набор', 'PCR-Reagenz, Kit', 'PCR reagent kit', 'ПТР реагенті, жинақ'), 'qiagen', 3], ['RX-3307', T('Питательные среды, флаконы', 'Nährmedien, Flaschen', 'Culture media, bottles', 'Қоректік орталар, құтылар'), 'biomerieux', 4]],
     chilled: [['FD-501', T('Йогурт 2,5 %, 12×400 г', 'Joghurt 2,5 %, 12×400 g', 'Yoghurt 2.5 %, 12×400 g', 'Йогурт 2,5 %, 12×400 г'), 'freshline', 7], ['FD-517', T('Сыр полутвёрдый', 'Schnittkäse', 'Semi-hard cheese', 'Жартылай қатты ірімшік'), 'freshline', 9]],
     frozen: [['FZ-114', T('Филе лосося, −18 °C', 'Lachsfilet, −18 °C', 'Salmon fillet, −18 °C', 'Лосось филесі, −18 °C'), 'polar', 11], ['FZ-120', T('Мороженое, 24×120 мл', 'Speiseeis, 24×120 ml', 'Ice cream, 24×120 ml', 'Балмұздақ, 24×120 мл'), 'polar', 6]],
-    ambient: [['AB-700', T('Расходники лабораторные', 'Laborverbrauchsmaterial', 'Lab consumables', 'Зертханалық шығын материалдары'), 'alatau', 12], ['AB-712', T('Перчатки нитриловые, 10×100', 'Nitrilhandschuhe, 10×100', 'Nitrile gloves, 10×100', 'Нитрил қолғаптар, 10×100'), 'alatau', 14]],
+    ambient: [['AB-700', T('Расходники гематологии', 'Hämatologie-Verbrauchsmaterial', 'Haematology consumables', 'Гематология шығын материалдары'), 'sysmex', 12], ['AB-712', T('Тест-полоски глюкоза, 10×100', 'Glukose-Teststreifen, 10×100', 'Glucose test strips, 10×100', 'Глюкоза тест-жолақтары, 10×100'), 'abbott', 14], ['AB-730', T('Кюветы и контрольные материалы', 'Küvetten und Kontrollmaterial', 'Cuvettes and control material', 'Кюветалар мен бақылау материалдары'), 'beckman', 10]],
   };
   const BRANCH = n => T('Филиал №', 'Filiale Nr. ', 'Branch no. ', '№') + n;
 
@@ -2670,8 +2707,11 @@ ${rc.map(r => `<div class="lw-row" style="grid-template-columns:100px minmax(0,1
 .sh-zpl{background:#111827;color:#d1d5db;padding:10px;border-radius:8px;font:11px/1.4 monospace;white-space:pre-wrap;max-height:220px;overflow:auto}.sh-ev{display:grid;grid-template-columns:110px 14px minmax(0,1fr);gap:6px;padding:4px 0;font-size:12px}.sh-ev i{width:8px;height:8px;border-radius:50%;background:var(--step-done);margin-top:5px;display:block}.sh-ev.bad i{background:var(--label-red)}.sh-ev.bad{color:var(--label-red)}.sh-ev.todo{color:var(--text-faint)}.sh-ev.todo i{background:var(--step-todo)}
 .sh-short{display:inline-block;background:var(--tint-yellow-50);color:#854d0e;border-radius:4px;padding:0 4px;font-size:10px}.sh-in{border:1px solid var(--border-input);border-radius:999px;height:36px;padding:0 12px;font:inherit;width:320px}`;
   document.head.appendChild(css);
-  const mlogo = (m, size) => `<span class="mlogo c${MFRS[m].col}" style="width:${size}px;height:${size}px;font-size:${Math.round(size * 0.38)}px" title="${esc(MFRS[m].name)}">${MFRS[m].ab}</span>`;
-  const logoBadge = m => `<span class="sh-logo" style="background:${['#1d4ed8', '#0f766e', '#7c3aed', '#16a34a', '#0369a1', '#b45309'][MFRS[m].col - 1]}" data-mfr-logo="${m}">${esc(MFRS[m].name.split(' ')[0].toUpperCase())}</span>`;
+  /* logo in a fixed 515:380 box, contain-fit (same visual weight for every logo, no frame); manufacturers without a file keep the initials badge */
+  const mlogo = (m, size) => MFRS[m].logo ? `<span class="mlogo img" style="width:${Math.round(size * 515 / 380)}px;height:${size}px" title="${esc(MFRS[m].name)}"><img src="assets/manufacturers/${MFRS[m].logo}.png" alt="${esc(MFRS[m].name)}" loading="lazy"></span>`
+    : `<span class="mlogo c${MFRS[m].col}" style="width:${size}px;height:${size}px;font-size:${Math.round(size * 0.38)}px" title="${esc(MFRS[m].name)}">${MFRS[m].ab}</span>`;
+  const logoBadge = m => MFRS[m].logo ? `<span class="sh-logo img" data-mfr-logo="${m}" title="${esc(MFRS[m].name)}"><img src="assets/manufacturers/${MFRS[m].logo}.png" alt="${esc(MFRS[m].name)}" loading="lazy"></span>`
+    : `<span class="sh-logo" style="background:${['#1d4ed8', '#0f766e', '#7c3aed', '#16a34a', '#0369a1', '#b45309'][MFRS[m].col - 1]}" data-mfr-logo="${m}">${esc(MFRS[m].name.split(' ')[0].toUpperCase())}</span>`;
   const EV = { create: T('место создано, этикетка напечатана', 'Packstück angelegt, Etikett gedruckt', 'place created, label printed', 'орын құрылды, затбелгі басылды'), load: T('погружено в ТС', 'ins Fahrzeug geladen', 'loaded into the truck', 'КҚ-ға тиелді'), depart: T('выезд с хаба', 'Abfahrt vom Hub', 'departed from the hub', 'хабтан шықты'), unload: T('выгружено на хабе', 'am Hub entladen', 'unloaded at the hub', 'хабта түсірілді'), receive: T('принято филиалом (ePOD)', 'von Filiale angenommen (ePOD)', 'received by the branch (ePOD)', 'филиал қабылдады (ePOD)') };
   const visibleLoads = () => S.loads.filter(l => (S.ops.shipArch || l.status !== 'delivered') && (!S.ops.shipFrom || l.eta.slice(0, 10) >= S.ops.shipFrom));
   const curLoad = () => { const v = visibleLoads(); let l = v.find(x => x.id === S.ops.shipLoad); if (!l) { l = v[0]; S.ops.shipLoad = l && l.id; } return l; };
@@ -2916,7 +2956,7 @@ ${open.map(row).join('') || `<p class="note">${esc(T('Открытых эксп�
   const daysTo = iso => Math.floor((new Date(iso + 'T23:59:59+05:00') - NOW) / 864e5);
   const clock = () => { const d = new Date(); return p2(d.getHours()) + ':' + p2(d.getMinutes()); };
   Object.assign(R, { ymd, TODAY, addDays, daysTo, clock });
-  R.GEO = { AST: [51.17, 71.43], ALA: [43.24, 76.95], KAR: [49.80, 73.09], SHY: [42.32, 69.59] };
+  R.GEO = { AST: [51.17, 71.43], ALA: [43.24, 76.95], KAR: [49.80, 73.09], SHY: [42.32, 69.59], ATY: [47.11, 51.92] };
   R.MED_FROM = '2027-01-01';   // FR-114: pre-trip medical check mandatory from 01.01.2027 (switchable earlier for training)
   S.res = { views: [], svc: [], abs: [], med: {}, fines: [], waybills: [], rules: { medEnforce: false }, nextSvc: 103, nextFine: 121, nextWb: 934 };
 
@@ -3433,7 +3473,7 @@ ${l.status === 'assigned' ? `<button class="da-main" data-act="daStart"${sh.wb ?
   const LVC = { 0: 'green', 1: 'blue', 2: 'yellow', 3: 'red' };
   const SMS_ST = { sent: ['yellow', T('отправлено', 'gesendet', 'sent', 'жіберілді')], delivered: ['blue', T('доставлено', 'zugestellt', 'delivered', 'жеткізілді')], acked: ['green', T('подтверждено', 'bestätigt', 'acknowledged', 'расталды')], no_ack: ['red', T('нет подтверждения', 'keine Bestätigung', 'no acknowledgement', 'растау жоқ')] };
   function map() {
-    const P = { AST: [330, 95], ALA: [478, 262], KAR: [352, 150], SHY: [330, 288] }, col = { '4g': 'var(--mk-green)', '2g': 'var(--mk-status-yellow)', none: 'var(--mk-red)' };
+    const P = { AST: [330, 95], ALA: [478, 262], KAR: [352, 150], SHY: [330, 288], ATY: [92, 178] }, col = { '4g': 'var(--mk-green)', '2g': 'var(--mk-status-yellow)', none: 'var(--mk-red)' };
     const lines = SEG.filter(s => !s.part || s.dead || s.id === 'KAR-BAL').map(s => { const a = P[s.a], b = P[s.b], off = s.id === 'BAL-ALA' ? 8 : s.id === 'KAR-BAL' ? -8 : 0; return `<line data-seg="${s.id}" x1="${a[0] + off}" y1="${a[1]}" x2="${b[0] + off}" y2="${b[1]}" stroke="${col[s.cls]}" stroke-width="5" stroke-opacity="${s.conf === 'measured' ? 1 : .55}" ${s.conf === 'estimated' ? 'stroke-dasharray="8 5"' : ''}/>`; }).join('');
     const hubs = Object.keys(P).map(k => `<g><circle cx="${P[k][0]}" cy="${P[k][1]}" r="7" fill="#fff" stroke="var(--primary)" stroke-width="3"/><text x="${P[k][0] + 11}" y="${P[k][1] + 4}" class="maplbl">${esc(HUBS[k].city)}</text></g>`).join('');
     const mk = liveLoads().map(l => { const a = P[l.from], b = P[l.to], lv = R.covLevel(l).lvl; return `<circle cx="${a[0] + (b[0] - a[0]) * l.progress}" cy="${a[1] + (b[1] - a[1]) * l.progress}" r="8" fill="${lv >= 2 ? 'var(--mk-red)' : 'var(--primary)'}" stroke="#fff" stroke-width="2"/>`; }).join('');
@@ -3469,14 +3509,16 @@ ${l.status === 'assigned' ? `<button class="da-main" data-act="daStart"${sh.wb ?
     { id: 'LN-3', from: 'ALA', to: 'SHY', wd: [2, 4, 6], dep: '20:00', cutoff: 6, days: 2, veh: ['t2', 't4'], pal: 34, zones: ['chilled', 'pharma', 'ambient'], active: true },
     { id: 'LN-4', from: 'KAR', to: 'ALA', wd: [2, 5], dep: '16:00', cutoff: 6, days: 2, veh: ['t3'], pal: 33, zones: ['frozen', 'chilled'], active: true },
     { id: 'LN-5', from: 'ALA', to: 'AST', wd: [2, 4, 6], dep: '18:00', cutoff: 6, days: 2, veh: ['t1'], pal: 33, zones: ['frozen', 'chilled', 'pharma'], active: true },
+    { id: 'LN-6', from: 'AST', to: 'ATY', wd: [1, 4], dep: '06:00', cutoff: 12, days: 3, veh: ['t1'], pal: 33, zones: ['chilled', 'pharma', 'ambient'], active: true },   // West KZ: Astana → Atyrau cross-dock (Uralsk, Aktau, Aktobe by collection run)
+    { id: 'LN-7', from: 'ATY', to: 'AST', wd: [2, 5], dep: '08:00', cutoff: 12, days: 3, veh: ['t1'], pal: 33, zones: ['chilled', 'pharma', 'ambient'], active: true },
   ];
   S.res.exc = [{ id: 'EX-1', date: R.addDays(R.TODAY, 5), line: 'LN-1', kind: 'cancel', note: T('Праздничный день (Курбан-айт)', 'Feiertag (Kurban Bayram)', 'Public holiday (Kurban Ait)', 'Мереке күні (Құрбан айт)') }];
   S.res.tariff = {};   // pair → zone → ₸/pallet
-  const PAIRS = ['AST-ALA', 'AST-KAR', 'ALA-SHY', 'KAR-ALA', 'AST-SHY', 'KAR-SHY'];
+  const PAIRS = ['AST-ALA', 'AST-KAR', 'ALA-SHY', 'KAR-ALA', 'AST-SHY', 'KAR-SHY', 'AST-ATY', 'KAR-ATY'];
   PAIRS.forEach(p => { const [a, b] = p.split('-'); S.res.tariff[p] = {}; Object.keys(ZONES).forEach(z => { S.res.tariff[p][z] = Math.round(dist(a, b) * ZONES[z].rate * 0.46 / 100) * 100; }); });
   R.tariff = (a, b, z) => { const t = S.res.tariff[a + '-' + b] || S.res.tariff[b + '-' + a]; return t ? t[z] : null; };
-  R.PLACES = { Taldykorgan: 'ALA', Konaev: 'ALA', Kostanay: 'AST', Kokshetau: 'AST', Pavlodar: 'AST', Temirtau: 'KAR', Zhezkazgan: 'KAR', Turkistan: 'SHY', Taraz: 'SHY', Atyrau: 'AST', Aktau: 'SHY' };
-  R.PLACE_NAME = { Taldykorgan: T('Талдыкорган', 'Taldykorgan', 'Taldykorgan', 'Талдықорған'), Konaev: T('Қонаев', 'Konaev', 'Konaev', 'Қонаев'), Kostanay: T('Костанай', 'Kostanai', 'Kostanay', 'Қостанай'), Kokshetau: T('Кокшетау', 'Kokschetau', 'Kokshetau', 'Көкшетау'), Pavlodar: T('Павлодар', 'Pawlodar', 'Pavlodar', 'Павлодар'), Temirtau: T('Темиртау', 'Temirtau', 'Temirtau', 'Теміртау'), Zhezkazgan: T('Жезказган', 'Schesqasghan', 'Zhezkazgan', 'Жезқазған'), Turkistan: T('Туркестан', 'Turkestan', 'Turkistan', 'Түркістан'), Taraz: T('Тараз', 'Taras', 'Taraz', 'Тараз'), Atyrau: T('Атырау', 'Atyrau', 'Atyrau', 'Атырау'), Aktau: T('Актау', 'Aktau', 'Aktau', 'Ақтау') };
+  R.PLACES = { Taldykorgan: 'ALA', Konaev: 'ALA', Kostanay: 'AST', Kokshetau: 'AST', Pavlodar: 'AST', Temirtau: 'KAR', Zhezkazgan: 'KAR', Turkistan: 'SHY', Taraz: 'SHY', Uralsk: 'ATY', Aktau: 'ATY', Aktobe: 'ATY' };
+  R.PLACE_NAME = { Taldykorgan: T('Талдыкорган', 'Taldykorgan', 'Taldykorgan', 'Талдықорған'), Konaev: T('Қонаев', 'Konaev', 'Konaev', 'Қонаев'), Kostanay: T('Костанай', 'Kostanai', 'Kostanay', 'Қостанай'), Kokshetau: T('Кокшетау', 'Kokschetau', 'Kokshetau', 'Көкшетау'), Pavlodar: T('Павлодар', 'Pawlodar', 'Pavlodar', 'Павлодар'), Temirtau: T('Темиртау', 'Temirtau', 'Temirtau', 'Теміртау'), Zhezkazgan: T('Жезказган', 'Schesqasghan', 'Zhezkazgan', 'Жезқазған'), Turkistan: T('Туркестан', 'Turkestan', 'Turkistan', 'Түркістан'), Taraz: T('Тараз', 'Taras', 'Taraz', 'Тараз'), Uralsk: T('Уральск', 'Uralsk', 'Uralsk', 'Орал'), Aktau: T('Актау', 'Aktau', 'Aktau', 'Ақтау'), Aktobe: T('Актобе', 'Aktobe', 'Aktobe', 'Ақтөбе') };
   R.hubOf = p => (HUBS[p] ? p : R.PLACES[p] || null);
   const vehIn = l => l.veh.map(trk).filter(t => t.id);
   /* line capacity of one departure = pallets of the assigned trucks that are in service and released (FR-118) */
@@ -4223,7 +4265,8 @@ ${cats}
     AST: { n: T('Астана', 'Astana', 'Astana', 'Астана'), hub: 'AST', km: 0 }, ALA: { n: T('Алматы', 'Almaty', 'Almaty', 'Алматы'), hub: 'ALA', km: 0 }, KAR: { n: T('Караганда', 'Karaganda', 'Karaganda', 'Қарағанды'), hub: 'KAR', km: 0 }, SHY: { n: T('Шымкент', 'Schymkent', 'Shymkent', 'Шымкент'), hub: 'SHY', km: 0 },
     KST: { n: T('Костанай', 'Kostanai', 'Kostanay', 'Қостанай'), hub: 'AST', km: 700 }, PAV: { n: T('Павлодар', 'Pawlodar', 'Pavlodar', 'Павлодар'), hub: 'AST', km: 450 }, KOK: { n: T('Кокшетау', 'Kökschetau', 'Kokshetau', 'Көкшетау'), hub: 'AST', km: 300 },
     TAL: { n: T('Талдыкорган', 'Taldykorgan', 'Taldykorgan', 'Талдықорған'), hub: 'ALA', km: 270 }, TAR: { n: T('Тараз', 'Taras', 'Taraz', 'Тараз'), hub: 'SHY', km: 190 }, KZO: { n: T('Кызылорда', 'Kysylorda', 'Kyzylorda', 'Қызылорда'), hub: 'SHY', km: 450 },
-    SEM: { n: T('Семей', 'Semei', 'Semey', 'Семей'), hub: 'KAR', km: 800 }, OSK: { n: T('Усть-Каменогорск', 'Öskemen', 'Oskemen', 'Өскемен'), hub: 'KAR', km: 850 }, AKT: { n: T('Актобе', 'Aktobe', 'Aktobe', 'Ақтөбе'), hub: 'AST', km: 1500 },
+    SEM: { n: T('Семей', 'Semei', 'Semey', 'Семей'), hub: 'KAR', km: 800 }, OSK: { n: T('Усть-Каменогорск', 'Öskemen', 'Oskemen', 'Өскемен'), hub: 'KAR', km: 850 }, AKT: { n: T('Актобе', 'Aktobe', 'Aktobe', 'Ақтөбе'), hub: 'ATY', km: 600 },
+    ATY: { n: T('Атырау', 'Atyrau', 'Atyrau', 'Атырау'), hub: 'ATY', km: 0 }, URA: { n: T('Уральск', 'Uralsk', 'Uralsk', 'Орал'), hub: 'ATY', km: 500 }, AKU: { n: T('Актау', 'Aktau', 'Aktau', 'Ақтау'), hub: 'ATY', km: 850 },
   };
   globalThis.locName = id => (LOCS[id] ? LOCS[id].n : String(id));
   const STREETS = { AST: ['Мәңгілік Ел', 'Кабанбай батыра', 'Туран', 'Сарыарка', 'Абая', 'Достык', 'Кенесары', 'Республики'], ALA: ['Абая', 'Аль-Фараби', 'Сатпаева', 'Достык', 'Райымбека', 'Толе би', 'Жандосова', 'Фурманова'], KAR: ['Бухар жырау', 'Ерубаева', 'Алиханова', 'Гоголя', 'Абдирова'], SHY: ['Тауке хана', 'Байтурсынова', 'Кунаева', 'Рыскулова', 'Жибек жолы'] };
@@ -4397,7 +4440,7 @@ ${card(T('Новый прайс-лист', 'Neue Preisliste', 'New price list', 
 ${card(T('Расчёт', 'Kalkulation', 'Calculation', 'Есептеу'), priceTable(p, q))}</div>${C.view ? offerSheet(C.view) : ''}`;
   }
   globalThis.priceTable = (p, q) => { const row = (l, n, b) => (n || b ? `<div class="drow"><span>${esc(l)}</span><span>${b ? '<b>' : ''}${kzt(n)}${b ? '</b>' : ''}</span></div>` : ''); return `<p class="note">${esc(routeText(p.route))} · ${p.km} ${esc(T('км', 'km', 'km', 'км'))} · ${esc(MODE_L[p.route.mode])} · ${esc(T('срок', 'Laufzeit', 'lead time', 'мерзім'))} ${p.route.lead} ${esc(T('раб. дн.', 'AT', 'business days', 'жұмыс күні'))} · ${esc(T('тарифных паллет', 'frachtpflichtige Pal.', 'chargeable pallets', 'тарифтік паллет'))} ${p.ch}</p><div class="dlist">${row(T('Фрахт (тариф линии' + (p.terms ? ', скидка ' + p.terms.disc + ' %' : '') + ')', 'Fracht (Linientarif' + (p.terms ? ', Rabatt ' + p.terms.disc + ' %' : '') + ')', 'Freight (line tariff' + (p.terms ? ', discount ' + p.terms.disc + ' %' : '') + ')', 'Фрахт (желі тарифі' + (p.terms ? ', жеңілдік ' + p.terms.disc + ' %' : '') + ')'), p.freight, true)}${row(T('Топливная надбавка', 'Treibstoffzuschlag', 'Fuel surcharge', 'Отын үстемесі'), p.fuel)}${row(T('Надбавка ADR', 'ADR-Zuschlag', 'ADR surcharge', 'ADR үстемесі'), p.adr)}${row(T('Перегрузка в хабе', 'Umschlag im Hub', 'Hub handling', 'Хабта қайта тиеу'), p.handling)}${row(T('Экспресс', 'Express', 'Express', 'Экспресс'), p.express)}${row(T('Итого без НДС', 'Netto', 'Net', 'ҚҚС-сыз'), p.net)}${row(T('НДС 16 %', 'MwSt. 16 %', 'VAT 16 %', 'ҚҚС 16 %'), p.vat)}${row(T('Страховая премия (без НДС)', 'Versicherungsprämie (ohne MwSt.)', 'Insurance premium (no VAT)', 'Сақтандыру сыйлықақысы (ҚҚС-сыз)'), p.premium)}${row(T('Итого к оплате', 'Gesamt', 'Total', 'Барлығы'), p.gross, true)}</div><p class="note">${esc(fxLine(p.gross))}</p>`; };
-  function offerSheet(o) { const p = priceFor(o), cu = custOf(o.cust); return `<div class="card card-body" id="cm_offer"><div style="display:flex;justify-content:space-between"><div>${H3(T('Коммерческое предложение ', 'Angebot ', 'Offer ', 'Коммерциялық ұсыныс ') + o.id)}<p class="note">Olymp Logistic KZ → ${esc(cu.name)}, ${esc(T('БИН', 'BIN', 'BIN', 'БСН'))} ${esc(cu.bin)} · ${esc(T('выдано', 'ausgestellt', 'issued', 'шығарылды'))} ${fd(o.issued)} · ${esc(T('цена действует до', 'Preis gültig bis', 'price valid until', 'баға жарамды'))} <b>${fd(o.until)}</b></p></div><span class="x" data-act="cmOfView" data-id="">${ic('x', 18)}</span></div><p>${esc(locName(o.from))} → ${esc(locName(o.to))} · ${ZONES[o.zone].label} · ${o.pallets} ${esc(T('пал.', 'Pal.', 'pal.', 'пал.'))} · ${o.kg} ${esc(T('кг', 'kg', 'kg', 'кг'))}</p>${priceTable(p, o)}<p class="note">${esc(T('Образец: не является договором; цена зафиксирована на срок действия, слоты — по наличию на линии.', 'Muster: kein Vertrag; Preis für die Gültigkeit fixiert, Slots nach Verfügbarkeit der Linie.', 'Sample: not a contract; price locked for the validity, slots subject to line availability.', 'Үлгі: шарт емес; баға жарамдылық мерзіміне бекітілген, слоттар желідегі қолжетімділік бойынша.'))}</p></div>`; }
+  function offerSheet(o) { const p = priceFor(o), cu = custOf(o.cust); return `<div class="card card-body" id="cm_offer"><div style="display:flex;justify-content:space-between"><div>${H3(T('Коммерческое предложение ', 'Angebot ', 'Offer ', 'Коммерциялық ұсыныс ') + o.id)}<p class="note">Kökzhol Logistics KZ → ${esc(cu.name)}, ${esc(T('БИН', 'BIN', 'BIN', 'БСН'))} ${esc(cu.bin)} · ${esc(T('выдано', 'ausgestellt', 'issued', 'шығарылды'))} ${fd(o.issued)} · ${esc(T('цена действует до', 'Preis gültig bis', 'price valid until', 'баға жарамды'))} <b>${fd(o.until)}</b></p></div><span class="x" data-act="cmOfView" data-id="">${ic('x', 18)}</span></div><p>${esc(locName(o.from))} → ${esc(locName(o.to))} · ${ZONES[o.zone].label} · ${o.pallets} ${esc(T('пал.', 'Pal.', 'pal.', 'пал.'))} · ${o.kg} ${esc(T('кг', 'kg', 'kg', 'кг'))}</p>${priceTable(p, o)}<p class="note">${esc(T('Образец: не является договором; цена зафиксирована на срок действия, слоты — по наличию на линии.', 'Muster: kein Vertrag; Preis für die Gültigkeit fixiert, Slots nach Verfügbarkeit der Linie.', 'Sample: not a contract; price locked for the validity, slots subject to line availability.', 'Үлгі: шарт емес; баға жарамдылық мерзіміне бекітілген, слоттар желідегі қолжетімділік бойынша.'))}</p></div>`; }
   function contracts() {
     const rows = S.contracts.map(c => `<tr style="cursor:default"><td><b>${c.id}</b><div class="sub">${esc(c.tpl)}</div></td><td>${custLabel(c.cust)}</td><td>${esc(CTKIND[c.kind])}${c.kind === 'framework' ? `<div class="sub">−${c.disc} % · ${c.base} ₸/л</div>` : ''}</td><td>${fd(c.from)} – ${c.to ? fd(c.to) : '∞'}</td><td>${chip(CTST[c.status][0], CTST[c.status][1])}</td><td class="note" title="${c.sha}">${c.sha.slice(0, 12)}…</td><td>${c.signed ? fd(c.signed) + '<div class="sub">' + esc(c.signer) + '</div>' : c.sent ? esc(T('отправлен', 'gesendet', 'sent', 'жіберілді')) + ' ' + fd(c.sent) : '—'}</td><td>${c.status === 'draft' ? `<a class="lnk" data-act="cmCtSend" data-id="${c.id}">${esc(T('Отправить на подпись', 'Zur Unterschrift senden', 'Send for signature', 'Қол қоюға жіберу'))}</a>` : ''}${c.status === 'sent' ? `<a class="lnk" data-act="cmCtSign" data-id="${c.id}">${esc(T('Подписать за клиента (демо ЭЦП)', 'Für den Kunden signieren (Demo-Signatur)', 'Sign for the customer (demo e-sign)', 'Клиент үшін қол қою (демо ЭЦҚ)'))}</a>` : ''}${c.status !== 'void' ? ` · <a class="lnk" data-act="cmCtVoid" data-id="${c.id}">${esc(T('Аннулировать', 'Annullieren', 'Void', 'Жою'))}</a>` : ''} · <a class="lnk" data-act="cmCtView" data-id="${c.id}">${esc(T('Текст', 'Text', 'Text', 'Мәтін'))}</a></td></tr>`).join('');
     const cv = S.contracts.find(c => c.id === C.ctView);
@@ -4518,7 +4561,7 @@ ${card(T('Ручной курс (финансы)', 'Manueller Kurs (Finanzen)', 
     return out;
   };
   /* FR-96/97/155: departures of the destination hub's lines over the next 7 days; capacity 33 pallets minus booked */
-  const LINES = { AST: { days: [0, 1, 2, 3, 4], dep: '20:00' }, ALA: { days: [0, 2, 4], dep: '21:00' }, KAR: { days: [1, 3], dep: '19:00' }, SHY: { days: [0, 3], dep: '18:00' } };
+  const LINES = { AST: { days: [0, 1, 2, 3, 4], dep: '20:00' }, ALA: { days: [0, 2, 4], dep: '21:00' }, KAR: { days: [1, 3], dep: '19:00' }, SHY: { days: [0, 3], dep: '18:00' }, ATY: { days: [1, 4], dep: '06:00' } };
   const addD = (iso, n) => { const d = new Date(iso + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
   const wd = iso => (new Date(iso + 'T00:00:00Z').getUTCDay() + 6) % 7;
   globalThis.slotsFor = (from, to, pallets, kg) => {
@@ -5374,10 +5417,10 @@ render = function () { renderCore(); HELP.afterRender.forEach(f => { try { f(); 
 helpAdd({ key: 'start', group: 'start', visuals: ['flow'],
   title: HQ('Обзор платформы', 'Überblick über die Plattform', 'Platform overview', 'Платформа шолуы'),
   sub: HQ('12 разделов меню, внутри — вкладки', '12 Menüpunkte mit Registerkarten', '12 menu items with tabs inside', 'Мәзірде 12 бөлім, ішінде қойындылар'),
-  purpose: HQ('Olymp Logistic — макет единой платформы холодовой цепи KDL Olymp: заказы, рейсы, температура, документы РК, качество, счета и отчёты в одном окне. Меню слева содержит 12 разделов в порядке движения отправки; каждый раздел состоит из вкладок, в которых живут функции прежних 17 экранов и страниц учёта. Все данные вымышленные, бэкенда нет — правила работают в браузере.',
-    'Olymp Logistic ist das Mock-up der zentralen Kühlketten-Plattform von KDL Olymp: Aufträge, Fahrten, Temperatur, KZ-Dokumente, Qualität, Rechnungen und Berichte in einem Fenster. Das Menü links hat 12 Bereiche in der Reihenfolge, in der eine Sendung läuft; jeder Bereich besteht aus Registerkarten, in denen die Funktionen der früheren 17 Bildschirme und Stammdatenseiten leben. Alle Daten sind fiktiv, es gibt kein Backend — die Regeln laufen im Browser.',
-    'Olymp Logistic is the mock-up of the central cold-chain platform of KDL Olymp: orders, loads, temperature, Kazakh documents, quality, invoices and reports in one window. The menu on the left has 12 sections in the order a shipment flows; each section consists of tabs that hold the functions of the former 17 screens and records pages. All data is fictitious and there is no backend — the rules run in the browser.',
-    'Olymp Logistic — KDL Olymp суық тізбегінің бірыңғай платформасының макеті: тапсырыстар, рейстер, температура, ҚР құжаттары, сапа, шоттар мен есептер бір терезеде. Сол жақтағы мәзірде жөнелтім қозғалысы ретімен 12 бөлім бар; әр бөлім қойындылардан тұрады, оларда бұрынғы 17 экран мен есеп беттерінің функциялары орналасқан. Барлық дерек ойдан шығарылған, бэкенд жоқ — ережелер браузерде жұмыс істейді.'),
+  purpose: HQ('Kökzhol (көкжол) — макет единой платформы холодовой цепи KDL Olymp: заказы, рейсы, температура, документы РК, качество, счета и отчёты в одном окне. Меню слева содержит 12 разделов в порядке движения отправки; каждый раздел состоит из вкладок, в которых живут функции прежних 17 экранов и страниц учёта. Все данные вымышленные, бэкенда нет — правила работают в браузере.',
+    'Kökzhol ist das Mock-up der zentralen Kühlketten-Plattform von KDL Olymp: Aufträge, Fahrten, Temperatur, KZ-Dokumente, Qualität, Rechnungen und Berichte in einem Fenster. Das Menü links hat 12 Bereiche in der Reihenfolge, in der eine Sendung läuft; jeder Bereich besteht aus Registerkarten, in denen die Funktionen der früheren 17 Bildschirme und Stammdatenseiten leben. Alle Daten sind fiktiv, es gibt kein Backend — die Regeln laufen im Browser.',
+    'Kökzhol is the mock-up of the central cold-chain platform of KDL Olymp: orders, loads, temperature, Kazakh documents, quality, invoices and reports in one window. The menu on the left has 12 sections in the order a shipment flows; each section consists of tabs that hold the functions of the former 17 screens and records pages. All data is fictitious and there is no backend — the rules run in the browser.',
+    'Kökzhol (көкжол) — KDL Olymp суық тізбегінің бірыңғай платформасының макеті: тапсырыстар, рейстер, температура, ҚР құжаттары, сапа, шоттар мен есептер бір терезеде. Сол жақтағы мәзірде жөнелтім қозғалысы ретімен 12 бөлім бар; әр бөлім қойындылардан тұрады, оларда бұрынғы 17 экран мен есеп беттерінің функциялары орналасқан. Барлық дерек ойдан шығарылған, бэкенд жоқ — ережелер браузерде жұмыс істейді.'),
   who: HQ('Диспетчеры, склад, качество, финансы, руководство — каждая роль видит свой набор разделов; клиент, партнёр и водитель получают собственную оболочку.', 'Disposition, Lager, Qualität, Finanzen, Leitung — jede Rolle sieht ihre Bereiche; Kunde, Partner und Fahrer erhalten eine eigene Oberfläche.', 'Dispatch, warehouse, quality, finance, management — every role sees its own set of sections; customer, partner and driver get their own shell.', 'Диспетчерлер, қойма, сапа, қаржы, басшылық — әр рөл өз бөлімдерін көреді; клиент, серіктес және жүргізуші жеке қабықша алады.'),
   see: [
     HQ('Обзор · Заказы и рейсы · Диспетчерская доска · Автопарк · Водители · Маршруты и трекинг · Хабы и склады · Подтверждение доставки · Счета и ЭСФ · Отчёты · AI-ассистент · Настройки.', 'Übersicht · Aufträge & Fahrten · Dispositionstafel · Fuhrpark · Fahrer · Routen & Tracking · Hubs & Lager · Lieferbestätigung · Rechnungen & ESF · Berichte · KI-Assistent · Einstellungen.', 'Dashboard · Orders & Loads · Dispatch Board · Fleet · Drivers · Routes & Tracking · Warehouses & Hubs · Proof of Delivery · Billing & Invoices · Reports · AI Ops Assistant · Settings.', 'Шолу · Тапсырыстар мен рейстер · Диспетчерлік тақта · Автопарк · Жүргізушілер · Маршруттар және трекинг · Хабтар мен қоймалар · Жеткізуді растау · Шоттар және ЭШФ · Есептер · AI-көмекші · Баптаулар.'),
@@ -6350,7 +6393,7 @@ helpAdd({ key: 'webhooks', group: 'channels', screen: 'settings', tab: 'integrat
   purpose: HQ('Мастерские, охранные компании и поставщики дорожной информации без собственного API присылают события на POST /api/v1/inbound/<источник>, подписанные общим секретом (HMAC). В макете описано целевое поведение.', 'Werkstätten, Sicherheitsfirmen und Straßeninfo-Anbieter ohne eigene API senden Ereignisse an POST /api/v1/inbound/<Quelle>, mit gemeinsamem Geheimnis (HMAC) signiert. Das Mock-up beschreibt das Zielverhalten.', 'Workshops, security companies and road-info providers without their own API send events to POST /api/v1/inbound/<source>, signed with a shared secret (HMAC). The mock-up describes the target behaviour.', 'Өз API-сі жоқ шеберханалар, күзет компаниялары және жол ақпараты жеткізушілері ортақ құпиямен (HMAC) қол қойылған оқиғаларды POST /api/v1/inbound/<дереккөз> мекенжайына жібереді.'),
   howto: [{ t: HQ('Как подключить партнёра', 'Einen Partner anbinden', 'How to connect a partner', 'Серіктесті қалай қосуға болады'), steps: [
     HQ('Согласуйте имя источника (workshop:PW-03, security:SEC-01, roadinfo) и виды событий; оператор сервера создаёт секрет ≥ 32 байт и передаёт его вне почты.', 'Quellnamen (workshop:PW-03, security:SEC-01, roadinfo) und Ereignisarten abstimmen; der Server-Betreiber erzeugt ein Geheimnis ≥ 32 Bytes und übergibt es außerhalb von E-Mail.', 'Agree the source name (workshop:PW-03, security:SEC-01, roadinfo) and event kinds; the server operator creates a secret ≥ 32 bytes and hands it over outside e-mail.'),
-    HQ('Партнёр отправляет одно JSON-событие (≤ 16 КиБ) с заголовками X-Olymp-Timestamp и X-Olymp-Signature = sha256=HMAC(секрет, "<время>." + тело).', 'Der Partner sendet ein JSON-Ereignis (≤ 16 KiB) mit X-Olymp-Timestamp und X-Olymp-Signature = sha256=HMAC(Geheimnis, "<Zeit>." + Body).', 'The partner sends one JSON event (≤ 16 KiB) with X-Olymp-Timestamp and X-Olymp-Signature = sha256=HMAC(secret, "<time>." + body).')] }],
+    HQ('Партнёр отправляет одно JSON-событие (≤ 16 КиБ) с заголовками X-Kokzhol-Timestamp и X-Kokzhol-Signature = sha256=HMAC(секрет, "<время>." + тело).', 'Der Partner sendet ein JSON-Ereignis (≤ 16 KiB) mit X-Kokzhol-Timestamp und X-Kokzhol-Signature = sha256=HMAC(Geheimnis, "<Zeit>." + Body).', 'The partner sends one JSON event (≤ 16 KiB) with X-Kokzhol-Timestamp and X-Kokzhol-Signature = sha256=HMAC(secret, "<time>." + body).')] }],
   rules: [
     HQ('Ответы: 202 принято · 401 подпись или время (±5 минут) · 404 неизвестный источник · 409 повтор · 413 слишком большое · 422 неверное событие · 429 лимит (120 в минуту).', 'Antworten: 202 angenommen · 401 Signatur oder Zeit (±5 Minuten) · 404 unbekannte Quelle · 409 Wiederholung · 413 zu groß · 422 ungültiges Ereignis · 429 Limit (120 pro Minute).', 'Responses: 202 accepted · 401 signature or time (±5 minutes) · 404 unknown source · 409 replay · 413 too large · 422 invalid event · 429 rate limit (120 per minute).'),
     HQ('В событиях нет персональных данных: только номера ТС, рейса, заявки.', 'In Ereignissen keine Personendaten: nur Fahrzeug-, Fahrt-, Auftragsnummern.', 'No personal data in events: only vehicle, load and request numbers.')],
@@ -6361,7 +6404,7 @@ helpAdd({ key: 'partner-api', group: 'channels', screen: 'settings', tab: 'integ
   purpose: HQ('Те же функции, что и в портале, для ERP клиента или логистической платформы: REST + JSON, ключ Bearer, идемпотентное создание и подписанные webhooks.', 'Dieselben Funktionen wie im Portal für das ERP eines Kunden oder eine Logistikplattform: REST + JSON, Bearer-Schlüssel, idempotentes Anlegen und signierte Webhooks.', 'The same functions as the portal for a customer ERP or a logistics platform: REST + JSON, Bearer key, idempotent create and signed webhooks.', 'Клиент ERP-і немесе логистика платформасы үшін порталдағы сол функциялар: REST + JSON, Bearer кілті, идемпотентті құру және қол қойылған webhook-тар.'),
   see: [
     HQ('GET /destinations · POST /quotes · GET /slots · POST /bookings (external_ref — защита от дублей) · GET /bookings/{номер} · GET /shipments/{номер}.', 'GET /destinations · POST /quotes · GET /slots · POST /bookings (external_ref — Dublettenschutz) · GET /bookings/{Nummer} · GET /shipments/{Nummer}.', 'GET /destinations · POST /quotes · GET /slots · POST /bookings (external_ref — duplicate protection) · GET /bookings/{number} · GET /shipments/{number}.'),
-    HQ('Webhooks: booking.confirmed, booking.rejected, shipment.status_changed, shipment.delivered; подпись X-Olymp-Signature, 8 повторов.', 'Webhooks: booking.confirmed, booking.rejected, shipment.status_changed, shipment.delivered; Signatur X-Olymp-Signature, 8 Wiederholungen.', 'Webhooks: booking.confirmed, booking.rejected, shipment.status_changed, shipment.delivered; signature X-Olymp-Signature, 8 retries.')],
+    HQ('Webhooks: booking.confirmed, booking.rejected, shipment.status_changed, shipment.delivered; подпись X-Kokzhol-Signature, 8 повторов.', 'Webhooks: booking.confirmed, booking.rejected, shipment.status_changed, shipment.delivered; Signatur X-Kokzhol-Signature, 8 Wiederholungen.', 'Webhooks: booking.confirmed, booking.rejected, shipment.status_changed, shipment.delivered; signature X-Kokzhol-Signature, 8 retries.')],
   rules: [HQ('Один ключ — один клиент, scopes, 600 запросов в минуту, ключ хранится только как HMAC, отзыв мгновенный.', 'Ein Schlüssel — ein Kunde, Scopes, 600 Anfragen pro Minute, Speicherung nur als HMAC, Sperre sofort.', 'One key — one customer, scopes, 600 requests per minute, stored only as HMAC, instant revocation.')],
   related: ['settings/integrations', 'portal', 'webhooks'] });
 
@@ -6791,7 +6834,7 @@ helpAdd({ key: 'dispatch/planning', group: 'ops', screen: 'dispatch', tab: 'plan
   helpAdd({ key: 'pprofile', group: 'portals', screen: 'pprofile', portal: true, fr: 'FR-172',
     title: HQ('Партнёрский портал: профиль и GDP', 'Partnerportal: Profil und GDP', 'Partner portal: profile and GDP', 'Серіктес порталы: профиль және GDP'),
     purpose: HQ('Данные компании партнёра, действующая квалификация GDP с сертификатом и сроком, новая заявка на квалификацию и самостоятельная регистрация нового перевозчика с БИН и доказательством GDP. Заявки ждут подтверждения сотрудника в «Заказы → Коммерция → CRM».', 'Firmendaten des Partners, gültige GDP-Qualifikation mit Zertifikat und Frist, neue Einreichung und Selbstregistrierung eines neuen Frachtführers mit BIN und GDP-Nachweis. Einreichungen warten auf die Bestätigung eines Mitarbeiters unter „Aufträge → Vertrieb → CRM“.', 'The partner\'s company data, the current GDP qualification with certificate and validity, a new submission and the self-registration of a new carrier with BIN and GDP proof. Submissions wait for a staff member\'s approval under "Orders → Commercial → CRM".', 'Серіктес компаниясының деректері, сертификаты мен мерзімі бар қолданыстағы GDP біліктілігі, жаңа өтінім және БСН мен GDP дәлелі бар жаңа тасымалдаушының өзін-өзі тіркеуі. Өтінімдер «Тапсырыстар → Коммерция → CRM» бөлімінде қызметкердің растауын күтеді.'),
-    who: HQ('Руководитель партнёра; сотрудник Olymp подтверждает.', 'Leitung des Partners; ein Mitarbeiter von Olymp bestätigt.', 'The partner\'s management; an Olymp staff member approves.', 'Серіктес басшысы; Olymp қызметкері растайды.'),
+    who: HQ('Руководитель партнёра; сотрудник Kökzhol подтверждает.', 'Leitung des Partners; ein Mitarbeiter von Kökzhol bestätigt.', 'The partner\'s management; a Kökzhol staff member approves.', 'Серіктес басшысы; Kökzhol қызметкері растайды.'),
     rules: [HQ('Без подтверждённой квалификации GDP партнёру не передаются фармрейсы (проверка в передаче на вкладке «Партнёры»).', 'Ohne bestätigte GDP-Qualifikation erhält der Partner keine Pharma-Fahrten (Prüfung bei der Übergabe unter „Partner“).', 'Without an approved GDP qualification the partner gets no pharma loads (checked at the handover under "Partners").', 'Расталған GDP біліктілігісіз серіктеске фарма рейстері тапсырылмайды («Серіктестер» қойындысында тапсыру кезінде тексеріледі).')],
     related: ['phandovers', 'orders/commercial'] });
 

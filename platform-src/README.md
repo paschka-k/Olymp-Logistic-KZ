@@ -99,4 +99,11 @@ Output moved to `platform/{index,de,en,kk,tests}.html` (`node platform-src/build
 | `screens/6xx-eco-*.js`, `help/eco-*.js`, `tests/b0` | W5 | Cost model, Reports KPI / I-12 / fines, Baseline data |
 | `help/10…70-*.js`, `tests/c0` | W6 | Help ported from the source platform: start, operations, records, portals, reference, visuals, guided tours; RU/DE/EN full, KK titles + core articles |
 
+## Phase 10 (v6.1): Kökzhol brand, logos, West KZ, discoverability (2026-10-19)
+- Brand: `data-design="kokzhol"` is the default (switch ◐/◑ in the top bar keeps the Olymp design), sidebar lock-up = Shanyrak-Ö mark (`platform/assets/brand/`) + wordmark (көкжол / kökzhol) + claim, favicon, titles.
+- Logos: `platform/assets/manufacturers/*.png` (six manufacturers of the source platform) rendered by `mlogo` / `logoBadge` in `220-ops-ship.js`; `MFRS` in `200-ops-model.js` has `logo` per manufacturer, food producers keep the initials badge.
+- West KZ: hub `ATY` (Atyrau-West cross-dock) in `data.js` (map, distances, hub record, a load), weather (`150-monitor.js`), geo (`300-res-data.js`), coverage (`340-coverage.js`), lines LN-6/LN-7 and places Uralsk / Aktau / Aktobe (`350-lines.js`), portal cities and departures (`500-commercial.js`, `510-portal-customer.js`).
+- Discoverability: labelled role box in the top bar, user name and role follow the switch; sidebar block "Portals and apps" (customer portal, partner portal, driver app, public request, help; "← Platform" inside a role shell).
+- `VERSION` in `roles.js` is bumped on every push (6.1.0).
+
 Merge notes: `helpAdd` merges two articles with the same key (manual 10–70 and a workstream file both describe a tab: group of the first, scalar fields of the later, lists concatenated). `docs/TRACEABILITY.md` maps every LH/FR row to its tab and test group. A booking's `payer` is `null` (the customer) or `{company, role, bin, ref, invoiceTo}` from the portal.

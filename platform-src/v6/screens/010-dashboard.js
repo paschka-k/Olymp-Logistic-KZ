@@ -38,7 +38,7 @@
   });
   SCREENS.dashboard = {
     title: () => navLabel('dashboard'),
-    sub: () => T('Холодовая цепь: Астана · Алматы · Караганда · Шымкент', 'Kühlkette: Astana · Almaty · Karaganda · Schymkent', 'Cold chain: Astana · Almaty · Karaganda · Shymkent', 'Суық тізбек: Астана · Алматы · Қарағанды · Шымкент'),
+    sub: () => T('Холодовая цепь: Астана · Алматы · Караганда · Шымкент · Атырау (Запад)', 'Kühlkette: Astana · Almaty · Karaganda · Schymkent · Atyrau (West)', 'Cold chain: Astana · Almaty · Karaganda · Shymkent · Atyrau (West)', 'Суық тізбек: Астана · Алматы · Қарағанды · Шымкент'),
     actions: () => `<button class="btn primary" data-act="create">${ic('plus')} ${esc(T('Создать рейс', 'Fahrt anlegen', 'Create Load', 'Рейс құру'))}</button>`,
     body: () => {
       const act = S.loads.filter(isActive), breach = act.filter(l => tempState(l) === 'breach').length;

@@ -8,14 +8,16 @@
     { id: 'LN-3', from: 'ALA', to: 'SHY', wd: [2, 4, 6], dep: '20:00', cutoff: 6, days: 2, veh: ['t2', 't4'], pal: 34, zones: ['chilled', 'pharma', 'ambient'], active: true },
     { id: 'LN-4', from: 'KAR', to: 'ALA', wd: [2, 5], dep: '16:00', cutoff: 6, days: 2, veh: ['t3'], pal: 33, zones: ['frozen', 'chilled'], active: true },
     { id: 'LN-5', from: 'ALA', to: 'AST', wd: [2, 4, 6], dep: '18:00', cutoff: 6, days: 2, veh: ['t1'], pal: 33, zones: ['frozen', 'chilled', 'pharma'], active: true },
+    { id: 'LN-6', from: 'AST', to: 'ATY', wd: [1, 4], dep: '06:00', cutoff: 12, days: 3, veh: ['t1'], pal: 33, zones: ['chilled', 'pharma', 'ambient'], active: true },   // West KZ: Astana → Atyrau cross-dock (Uralsk, Aktau, Aktobe by collection run)
+    { id: 'LN-7', from: 'ATY', to: 'AST', wd: [2, 5], dep: '08:00', cutoff: 12, days: 3, veh: ['t1'], pal: 33, zones: ['chilled', 'pharma', 'ambient'], active: true },
   ];
   S.res.exc = [{ id: 'EX-1', date: R.addDays(R.TODAY, 5), line: 'LN-1', kind: 'cancel', note: T('Праздничный день (Курбан-айт)', 'Feiertag (Kurban Bayram)', 'Public holiday (Kurban Ait)', 'Мереке күні (Құрбан айт)') }];
   S.res.tariff = {};   // pair → zone → ₸/pallet
-  const PAIRS = ['AST-ALA', 'AST-KAR', 'ALA-SHY', 'KAR-ALA', 'AST-SHY', 'KAR-SHY'];
+  const PAIRS = ['AST-ALA', 'AST-KAR', 'ALA-SHY', 'KAR-ALA', 'AST-SHY', 'KAR-SHY', 'AST-ATY', 'KAR-ATY'];
   PAIRS.forEach(p => { const [a, b] = p.split('-'); S.res.tariff[p] = {}; Object.keys(ZONES).forEach(z => { S.res.tariff[p][z] = Math.round(dist(a, b) * ZONES[z].rate * 0.46 / 100) * 100; }); });
   R.tariff = (a, b, z) => { const t = S.res.tariff[a + '-' + b] || S.res.tariff[b + '-' + a]; return t ? t[z] : null; };
-  R.PLACES = { Taldykorgan: 'ALA', Konaev: 'ALA', Kostanay: 'AST', Kokshetau: 'AST', Pavlodar: 'AST', Temirtau: 'KAR', Zhezkazgan: 'KAR', Turkistan: 'SHY', Taraz: 'SHY', Atyrau: 'AST', Aktau: 'SHY' };
-  R.PLACE_NAME = { Taldykorgan: T('Талдыкорган', 'Taldykorgan', 'Taldykorgan', 'Талдықорған'), Konaev: T('Қонаев', 'Konaev', 'Konaev', 'Қонаев'), Kostanay: T('Костанай', 'Kostanai', 'Kostanay', 'Қостанай'), Kokshetau: T('Кокшетау', 'Kokschetau', 'Kokshetau', 'Көкшетау'), Pavlodar: T('Павлодар', 'Pawlodar', 'Pavlodar', 'Павлодар'), Temirtau: T('Темиртау', 'Temirtau', 'Temirtau', 'Теміртау'), Zhezkazgan: T('Жезказган', 'Schesqasghan', 'Zhezkazgan', 'Жезқазған'), Turkistan: T('Туркестан', 'Turkestan', 'Turkistan', 'Түркістан'), Taraz: T('Тараз', 'Taras', 'Taraz', 'Тараз'), Atyrau: T('Атырау', 'Atyrau', 'Atyrau', 'Атырау'), Aktau: T('Актау', 'Aktau', 'Aktau', 'Ақтау') };
+  R.PLACES = { Taldykorgan: 'ALA', Konaev: 'ALA', Kostanay: 'AST', Kokshetau: 'AST', Pavlodar: 'AST', Temirtau: 'KAR', Zhezkazgan: 'KAR', Turkistan: 'SHY', Taraz: 'SHY', Uralsk: 'ATY', Aktau: 'ATY', Aktobe: 'ATY' };
+  R.PLACE_NAME = { Taldykorgan: T('Талдыкорган', 'Taldykorgan', 'Taldykorgan', 'Талдықорған'), Konaev: T('Қонаев', 'Konaev', 'Konaev', 'Қонаев'), Kostanay: T('Костанай', 'Kostanai', 'Kostanay', 'Қостанай'), Kokshetau: T('Кокшетау', 'Kokschetau', 'Kokshetau', 'Көкшетау'), Pavlodar: T('Павлодар', 'Pawlodar', 'Pavlodar', 'Павлодар'), Temirtau: T('Темиртау', 'Temirtau', 'Temirtau', 'Теміртау'), Zhezkazgan: T('Жезказган', 'Schesqasghan', 'Zhezkazgan', 'Жезқазған'), Turkistan: T('Туркестан', 'Turkestan', 'Turkistan', 'Түркістан'), Taraz: T('Тараз', 'Taras', 'Taraz', 'Тараз'), Uralsk: T('Уральск', 'Uralsk', 'Uralsk', 'Орал'), Aktau: T('Актау', 'Aktau', 'Aktau', 'Ақтау'), Aktobe: T('Актобе', 'Aktobe', 'Aktobe', 'Ақтөбе') };
   R.hubOf = p => (HUBS[p] ? p : R.PLACES[p] || null);
   const vehIn = l => l.veh.map(trk).filter(t => t.id);
   /* line capacity of one departure = pallets of the assigned trucks that are in service and released (FR-118) */

@@ -13,19 +13,23 @@
   const ssccFromScan = raw => { const s = String(raw).replace(/[^\d]/g, ''); if (s.length === 20 && s.startsWith('00')) return s.slice(2); return s.length === 18 ? s : null; };
 
   /* ---------- goods catalogue: fictitious manufacturers (FR-176 logo badges) and articles per temperature class ---------- */
+  /* Manufacturers of the source platform (screen 04): the six with static logos (platform/assets/manufacturers/<logo>.png, 515 × 380 px,
+     supplied by the product owner) plus two food producers without a logo (initials badge only). */
   const MFRS = {
-    nordpharm: { name: 'Nordpharm AG', co: 'Nordpharm AG, Hamburg', url: 'nordpharm.example', ab: 'NP', col: 1 },
-    helix: { name: 'Helix Diagnostics', co: 'Helix Diagnostics Ltd, Dublin', url: 'helix-dx.example', ab: 'HX', col: 2 },
-    qazmed: { name: 'QazMed Pharma', co: 'ТОО «QazMed Pharma», Астана', url: 'qazmed.example', ab: 'QM', col: 3 },
+    roche: { name: 'Roche Diagnostics', co: 'Roche Diagnostics GmbH, Mannheim', url: 'diagnostics.roche.com', ab: 'RO', col: 1, logo: 'roche' },
+    abbott: { name: 'Abbott', co: 'Abbott Laboratories, Abbott Park', url: 'abbott.com', ab: 'AB', col: 2, logo: 'abbott' },
+    qiagen: { name: 'QIAGEN', co: 'QIAGEN GmbH, Hilden', url: 'qiagen.com', ab: 'QG', col: 3, logo: 'qiagen' },
+    sysmex: { name: 'Sysmex', co: 'Sysmex Europe SE, Norderstedt', url: 'sysmex-europe.com', ab: 'SX', col: 4, logo: 'sysmex' },
+    biomerieux: { name: 'bioMérieux', co: 'bioMérieux SA, Marcy-l\'Étoile', url: 'biomerieux.com', ab: 'BM', col: 5, logo: 'biomerieux' },
+    beckman: { name: 'Beckman Coulter', co: 'Beckman Coulter Inc., Brea', url: 'beckmancoulter.com', ab: 'BC', col: 6, logo: 'beckman-coulter' },
     freshline: { name: 'FreshLine Foods', co: 'ТОО «FreshLine Foods», Алматы', url: 'freshline.example', ab: 'FL', col: 4 },
     polar: { name: 'Polar Fisch GmbH', co: 'Polar Fisch GmbH, Bremerhaven', url: 'polar-fisch.example', ab: 'PF', col: 5 },
-    alatau: { name: 'Alatau Bio', co: 'ТОО «Alatau Bio», Алматы', url: 'alatau-bio.example', ab: 'AB', col: 6 },
   };
   const ART = {
-    pharma: [['RX-1042', T('Вакцина, 10 доз', 'Impfstoff, 10 Dosen', 'Vaccine, 10 doses', 'Вакцина, 10 доза'), 'nordpharm', 5], ['DX-2210', T('Реагент ПЦР, набор', 'PCR-Reagenz, Kit', 'PCR reagent kit', 'ПТР реагенті, жинақ'), 'helix', 3], ['RX-3307', T('Инсулин, картриджи', 'Insulin, Patronen', 'Insulin cartridges', 'Инсулин, картридждер'), 'qazmed', 4]],
+    pharma: [['RX-1042', T('Реагенты иммунохимии, набор', 'Immunchemie-Reagenzien, Kit', 'Immunochemistry reagents, kit', 'Иммунохимия реагенттері, жинақ'), 'roche', 5], ['DX-2210', T('Реагент ПЦР, набор', 'PCR-Reagenz, Kit', 'PCR reagent kit', 'ПТР реагенті, жинақ'), 'qiagen', 3], ['RX-3307', T('Питательные среды, флаконы', 'Nährmedien, Flaschen', 'Culture media, bottles', 'Қоректік орталар, құтылар'), 'biomerieux', 4]],
     chilled: [['FD-501', T('Йогурт 2,5 %, 12×400 г', 'Joghurt 2,5 %, 12×400 g', 'Yoghurt 2.5 %, 12×400 g', 'Йогурт 2,5 %, 12×400 г'), 'freshline', 7], ['FD-517', T('Сыр полутвёрдый', 'Schnittkäse', 'Semi-hard cheese', 'Жартылай қатты ірімшік'), 'freshline', 9]],
     frozen: [['FZ-114', T('Филе лосося, −18 °C', 'Lachsfilet, −18 °C', 'Salmon fillet, −18 °C', 'Лосось филесі, −18 °C'), 'polar', 11], ['FZ-120', T('Мороженое, 24×120 мл', 'Speiseeis, 24×120 ml', 'Ice cream, 24×120 ml', 'Балмұздақ, 24×120 мл'), 'polar', 6]],
-    ambient: [['AB-700', T('Расходники лабораторные', 'Laborverbrauchsmaterial', 'Lab consumables', 'Зертханалық шығын материалдары'), 'alatau', 12], ['AB-712', T('Перчатки нитриловые, 10×100', 'Nitrilhandschuhe, 10×100', 'Nitrile gloves, 10×100', 'Нитрил қолғаптар, 10×100'), 'alatau', 14]],
+    ambient: [['AB-700', T('Расходники гематологии', 'Hämatologie-Verbrauchsmaterial', 'Haematology consumables', 'Гематология шығын материалдары'), 'sysmex', 12], ['AB-712', T('Тест-полоски глюкоза, 10×100', 'Glukose-Teststreifen, 10×100', 'Glucose test strips, 10×100', 'Глюкоза тест-жолақтары, 10×100'), 'abbott', 14], ['AB-730', T('Кюветы и контрольные материалы', 'Küvetten und Kontrollmaterial', 'Cuvettes and control material', 'Кюветалар мен бақылау материалдары'), 'beckman', 10]],
   };
   const BRANCH = n => T('Филиал №', 'Filiale Nr. ', 'Branch no. ', '№') + n;
 

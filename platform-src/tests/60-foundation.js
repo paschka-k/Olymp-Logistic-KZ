@@ -19,6 +19,6 @@
     for (const lang of LANGS) { const gg = await fresh(lang); try { const bad = gg.ev(`HELP.articles.filter(a=>!tx(a.title)||!tx(a.purpose)).map(a=>a.key)`); assert(!bad.length, lang + ' incomplete: ' + bad); if (lang === 'de' || lang === 'en') { const cyr = gg.ev(`HELP.articles.filter(a=>/[А-Яа-яЁё]/.test([tx(a.title),tx(a.sub),tx(a.purpose),tx(a.who),(a.see||[]).map(tx).join(),(a.rules||[]).map(tx).join(),(a.howto||[]).map(h=>tx(h.t)+h.steps.map(tx).join()).join()].join(' '))).map(a=>a.key)`); assert(!cyr.length, lang + ' Cyrillic in: ' + cyr); } } finally { gg.done(); } }
   });
   await group('design switch Olymp / Kökzhol, version block, skip link', 'ru', async (g, ev, w) => {
-    eq(w.document.documentElement.dataset.design, 'olymp'); ev('ACT.setDesign()'); eq(w.document.documentElement.dataset.design, 'kokzhol'); ev('ACT.setDesign()'); eq(w.document.documentElement.dataset.design, 'olymp');
+    eq(w.document.documentElement.dataset.design, 'kokzhol'); ev('ACT.setDesign()'); eq(w.document.documentElement.dataset.design, 'olymp'); ev('ACT.setDesign()'); eq(w.document.documentElement.dataset.design, 'kokzhol');
     assert(new RegExp('v' + ev('VERSION').replace(/\./g, '\\.')).test(w.document.querySelector('.ver').innerText), 'version'); assert(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(w.document.querySelector('.ver').innerText), 'build time'); assert(w.document.querySelector('a.skip') && w.document.getElementById('main-content'), 'skip link target');
   });
