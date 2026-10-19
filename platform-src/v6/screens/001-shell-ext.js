@@ -43,6 +43,8 @@
     const a = norm(id), b = norm(q); if (!b) return 0;
     if (a === b) return 2;
     const da = digits(id), db = digits(q);
+    const lt = s => (String(s).match(/\d+/g) || []).pop(), ta = lt(id), tb = lt(q);
+    if (ta && tb && tb.length >= 3 && +ta === +tb && /[a-z]/i.test(q)) return 2;   // ld-2026-1847 → last number group
     if (db && da && (+da === +db || (db.length >= 4 && da.endsWith(db) && +da.slice(-6) === +db))) return 2;
     if (a.includes(b)) return 1;
     if (db.length >= 3 && da.endsWith(db)) return 1;

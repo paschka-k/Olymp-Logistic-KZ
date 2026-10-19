@@ -154,3 +154,14 @@ Not in W5: capacity plan, 7-day scenarios and target-fleet simulation on Dispatc
 | FR-14 / FR-137 | Roles matrix and role descriptions (11 roles) in Help | Help → "Roles and permissions" (10-start.js) | `help: opens from the top bar … roles matrix` (60-foundation.js) |
 | FR-175 | Links and history — documented as mock-up limitation | Help → "Keyboard, languages, design and links" | — (documentation only) |
 | FR-41 / FR-126 / FR-154 | Express approval described: where to find it, 3 signatures | Help → "Where is express?" (+ diagram `express`) | `help: process diagrams render as SVG …` |
+
+## P6 — Shell parity
+| Requirement | Behaviour in v6 | Where | Test |
+|---|---|---|---|
+| Hub filter (0.3.10 shell) | Segment All / AST / ALA / KAR / SHY / ATY in the top bar, `hubFilter(items, field)` applied in dashboard, orders, dispatch board, fleet, drivers, hubs, receiving, billing | 001-shell-ext.js + one-line edits in 010–100 | `shell: hub filter narrows lists …` (61) |
+| FR-74 / FR-163 global search | Combobox "In current shipments" (PO, PL, article, LOT, SSCC, goods with logo / load / truck / status, archive toggle) + "In the database" (orders, loads, packages, bookings, number variants), ↑ ↓ Enter Esc, scanner opens only an exact hit | 001-shell-ext.js | `shell: search finds lines …` (61) |
+| FR-131 clock, alarms, banner | Clock + "· Astana UTC+5", "N active alarms" button, banner for new level ≥ 2 (3 items, dismiss) | 001-shell-ext.js | `shell: alarm banner …` (61) |
+| FR-133 / FR-134 phone bar, Escape | Bottom bar ≤ 700 px with 4 screens per role; Escape closes diagram, drawer, sidebar | 001-shell-ext.js, app.css | `shell: bottom bar …` (61) |
+| Screen eyebrow, ◇ Diagram | "NN · subtitle" with the 0.3.10 number per tab; popover with HELP.visuals | 001-shell-ext.js | `shell: eyebrow numbers …` (61) |
+| FR-175 deep links | `?load= ?dev= ?fine= ?s=&t=`, document.title; `?track=` / `?request=1` unchanged | 001-shell-ext.js | `shell: deep links …` (61) |
+| Login, /account, demo bar | Demo sign-in password → 2FA 123456 → recovery codes → change ≥ 12 → setRole; My account; Sign out; Reset demo data | 001-shell-ext.js | `shell: demo sign-in …` (61) |
