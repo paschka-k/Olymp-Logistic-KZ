@@ -13,7 +13,7 @@
   globalThis.HUBX = { util, zPct, barCls, hubState, HS, yard, tempAlarm, ZK };
   const tk = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
   const sel = (key, label, opts) => `<label>${esc(label)}:</label><select class="select" data-hf="${key}">${opts.map(o => `<option value="${esc(o[0])}"${F[key] === o[0] ? ' selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
-  const list = () => Object.keys(S.hubs).filter(h => (!F.hub || h === F.hub) && (!F.st || hubState(h) === F.st) && (!F.cap || (F.cap === 'hi' ? util(h).pct >= 80 : F.cap === 'mid' ? util(h).pct >= 50 && util(h).pct < 80 : util(h).pct < 50)));
+  const list = () => hubFilter(Object.keys(S.hubs), h => h).filter(h => (!F.hub || h === F.hub) && (!F.st || hubState(h) === F.st) && (!F.cap || (F.cap === 'hi' ? util(h).pct >= 80 : F.cap === 'mid' ? util(h).pct >= 50 && util(h).pct < 80 : util(h).pct < 50)));
   const pf = v => v.toFixed(1).replace('.', ',') + ' %';
   function card(h) {
     const H = S.hubs[h], u = util(h), st = hubState(h), free = H.ramps.length - H.blocked.length, q = yard(h).length, appt = S.jobs.filter(j => j.hub === h).length;
