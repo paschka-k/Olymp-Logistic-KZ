@@ -285,3 +285,12 @@ Files: `platform-src/v6/screens/611-eco-reports-ext.js`, `600-eco-costmodel.js`,
 | FR-138 | "◇ Diagram" popover shows several figures for one tab (orders/loadw = truck + load) | screens/001-shell-ext.js (DIAG, diagIds) | "[ru/de/en/kk] … Load & weight ◇ Diagram …" |
 | FR-138 | 0.3.9 players (shipflow, expresspath, alarmflow) run on the same kit, no full render every 4 s | help/65-players.js | "help: Schaubilder players …" (d0) |
 | — | All figures, every step, in RU / DE / EN / KK without undefined / NaN; DE / EN without Cyrillic | all of the above | "[de/en] … no Cyrillic" |
+
+## Q2 — UI language consistency
+
+| Ref | What | Where | Test |
+|---|---|---|---|
+| Q2 | Audit: DE / EN show no Cyrillic in visible text or title / placeholder / aria-label / alt — every screen × tab (admin and the driver / customer / partner / dispatcher / finance shells), all load-drawer tabs for every load, the main drawers and the six report drawers; before the fix 208 fragments per language, after 0 | whole platform | "[de/en] language audit: no Cyrillic in any screen, tab or drawer" (62) |
+| Q2 | `nm()` in core.js: people, companies, streets and initials in the UI language — RU / KK keep the Cyrillic source, DE / EN get the romanisation table (Yerlan Seitkali, Askhat Nurgaliyev, Apteka Service LLP, Kazhydromet, IS ESF …) or Kazakh-style transliteration; initials follow the Latin name (ЕС → YS) | data.js, shell users, Settings → Users / Integrations, Orders → Commercial, portals | (62) |
+| Q2 | Alarm, inbox, booking, claim and POD rejection texts as T()-tuples; billing routes via HUBS city names; trip-sheet prefix PL-, unit ₸/l, RTO / ESF / MTPL / VRC labels in DE / EN; place reference data labelled in the UI language | Dashboard → Alarms / Inbox, Orders → Bookings, Billing, Dispatch → Express, Fleet, Settings → Reference data | (62), "inbox: routing … translit on DE/EN" (90) |
+| Q2 | Address check accepts the Cyrillic directory name and its romanisation, so DE / EN address books stay "found in directory" | Orders → Commercial → Customers, Customer portal → Book | "[ru/de/en/kk] names in the UI language: RU / KK keep Cyrillic, DE / EN romanised, address check accepts both" (62), address checks (a0) |

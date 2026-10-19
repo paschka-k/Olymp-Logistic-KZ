@@ -12,9 +12,9 @@
     integ: [
       { k: 'gps', ic: 'route', tint: 'blue', t: T('GPS-трекинг', 'GPS-Tracking', 'GPS tracking', 'GPS-трекинг'), p: 'Wialon (Gurtam)', on: true, m: 2 },
       { k: 'reefer', ic: 'therm', tint: 'green', t: T('Реф-телематика', 'Kühl-Telematik', 'Reefer telematics', 'Реф-телематика'), p: 'Thermo King TracKing / Carrier Lynx', on: true, m: 5 },
-      { k: 'acc', ic: 'receipt', tint: 'yellow', t: T('Бухгалтерия', 'Buchhaltung', 'Accounting', 'Бухгалтерия'), p: '1С:Предприятие', on: false, m: 0 },
-      { k: 'esf', ic: 'file', tint: 'red', t: T('Счета-фактуры', 'Rechnungen', 'Invoicing', 'Шот-фактуралар'), p: 'ИС ЭСФ (esf.gov.kz)', on: true, m: 60 },
-      { k: 'wx', ic: 'alert', tint: 'purple', t: T('Погода', 'Wetter', 'Weather', 'Ауа райы'), p: 'Open-Meteo / Казгидромет', on: true, m: 15 },
+      { k: 'acc', ic: 'receipt', tint: 'yellow', t: T('Бухгалтерия', 'Buchhaltung', 'Accounting', 'Бухгалтерия'), p: T('1С:Предприятие', '1C:Enterprise', '1C:Enterprise', '1С:Кәсіпорын'), on: false, m: 0 },
+      { k: 'esf', ic: 'file', tint: 'red', t: T('Счета-фактуры', 'Rechnungen', 'Invoicing', 'Шот-фактуралар'), p: nm('ИС ЭСФ (esf.gov.kz)'), on: true, m: 60 },
+      { k: 'wx', ic: 'alert', tint: 'purple', t: T('Погода', 'Wetter', 'Weather', 'Ауа райы'), p: nm('Open-Meteo / Казгидромет'), on: true, m: 15 },
       { k: 'fuel', ic: 'truck', tint: 'orange', t: T('Топливные карты', 'Tankkarten', 'Fuel cards', 'Отын карталары'), p: 'Helios / Sinooil', on: false, m: 0 }],
     notify: { rules: {
       temp: { on: true, v: 15 }, door: { on: true, v: 5 }, sensor: { on: true }, setp: { on: true }, delay: { on: true, v: 30 },

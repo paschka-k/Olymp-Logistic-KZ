@@ -5,7 +5,35 @@ const HOOKS = { status: [] };   // screens subscribe here (e.g. hubs create inbo
 const hmm = m => { const x = Math.floor(m + 1e-9); return p2(Math.floor(x / 60) % 24) + ':' + p2(x % 60); };
 const fileFor = l => (l === 'ru' ? 'index.html' : l + '.html');
 const T = (...a) => (a[LI] != null ? a[LI] : a[0]);
-const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+/* proper names (people, companies, places, addresses) in the UI language (Q2): RU / KK keep the Cyrillic source; DE / EN get the
+   NM romanisation or, failing that, a Kazakh-style transliteration. Initials (1–3 capitals) map letter by letter so "ЕС" → "YS". */
+const NM = {
+  'Ерлан Сейтқали': 'Yerlan Seitkali', 'Асхат Нургалиев': 'Askhat Nurgaliyev', 'Дмитрий Орлов': 'Dmitry Orlov', 'Марат Жунусов': 'Marat Zhunusov',
+  'Алишер Бектурганов': 'Alisher Bekturganov', 'Сергей Ким': 'Sergey Kim', 'Нұрлан Омаров': 'Nurlan Omarov', 'Айгерим Сапарова': 'Aigerim Saparova',
+  'Болат Ермеков': 'Bolat Yermekov', 'Дана Жумабаева': 'Dana Zhumabayeva', 'Сара Джонсон': 'Sarah Johnson', 'Айгерим Бекова': 'Aigerim Bekova',
+  'Руслан Ибраев': 'Ruslan Ibrayev', 'Данияр Абенов': 'Daniyar Abenov', 'Бауыржан Кенжебаев': 'Bauyrzhan Kenzhebayev', 'Асель Нуртазина': 'Assel Nurtazina',
+  'Айгерим С.': 'Aigerim S.', 'Елена К.': 'Yelena K.', 'Елена Ким': 'Yelena Kim', 'Ольга П.': 'Olga P.',
+  'Аптека Сервис': 'Apteka Service', 'Фрэш Маркет': 'Fresh Market', 'МедФарм Дистрибьюшн': 'MedPharm Distribution', 'Ледяной Путь Ритейл': 'Ledyanoy Put Retail',
+  'СеверПродукт': 'SeverProdukt', 'МедСнаб Актобе': 'MedSnab Aktobe', 'Транс-Экспедитор': 'Trans-Expeditor', 'Север Карго': 'Sever Cargo', 'Центр Транзит': 'Tsentr Transit',
+  'Жетісу Карго': 'Zhetysu Cargo', 'Алатау Логистик': 'Alatau Logistic', 'Реф Сервис Астана': 'Ref Service Astana', 'Фарм Логистик Юг': 'Pharm Logistic Yug',
+  'СтепьЛогистик': 'StepLogistic', 'ТрансХолод': 'TransKholod', 'Каспий Моторс': 'Caspiy Motors', 'Ертіс Авто': 'Yertis Auto', 'Сарыарка Авто': 'Saryarka Auto',
+  'БиоЛаб Азия': 'BioLab Asia', 'Нур Фуд Дистрибьюшн': 'Nur Food Distribution', 'Казгидромет': 'Kazhydromet', 'ИС ЭСФ': 'IS ESF', 'СК-Фармация': 'SK-Pharmacia',
+  'Филиал Талдыкорган': ['Filiale Taldykorgan', 'Taldykorgan branch'], 'собственный парк': ['eigener Fuhrpark', 'own fleet'],
+};
+const TRL = { а: 'a', ә: 'a', б: 'b', в: 'v', г: 'g', ғ: 'gh', д: 'd', е: 'e', ё: 'yo', ж: 'zh', з: 'z', и: 'i', й: 'y', к: 'k', қ: 'k', л: 'l', м: 'm', н: 'n', ң: 'ng', о: 'o', ө: 'o', п: 'p', р: 'r', с: 's', т: 't', у: 'u', ұ: 'u', ү: 'u', ф: 'f', х: 'kh', һ: 'h', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'shch', ъ: '', ы: 'y', і: 'i', ь: '', э: 'e', ю: 'yu', я: 'ya' };
+const nmLat = s => String(s).replace(/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]/g, (c, i, all) => {
+  const lo = c.toLowerCase(), prev = all[i - 1] || ' ';
+  let r = lo === 'е' && /[\s«"(\-аеёиоуыэюяәөұүі]/i.test(prev) ? 'ye' : TRL[lo];
+  return c === lo ? r : r.charAt(0).toUpperCase() + r.slice(1);
+});
+const nmOne = s => { const h = NM[s]; return h == null ? null : Array.isArray(h) ? h[LI === 1 ? 0 : 1] : h; };
+const nm = s => {
+  if (LI === 0 || LI === 3 || s == null || !/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]/.test(s)) return s;
+  const hit = nmOne(s); if (hit != null) return hit;
+  if (/^[А-ЯЁӘҒҚҢӨҰҮҺІ]{1,3}$/.test(s)) return [...s].map(c => nmLat(c).charAt(0)).join('');   // initials
+  return nmLat(String(s).replace(/ТОО «([^»]+)»/g, (m, x) => (nmOne(x) || x) + ' LLP').replace(/[А-ЯЁӘҒҚҢӨҰҮҺІа-яёәғқңөұүһі][А-ЯЁӘҒҚҢӨҰҮҺІа-яёәғқңөұүһі.\- ]*[А-ЯЁӘҒҚҢӨҰҮҺІа-яёәғқңөұүһі.]/g, m => nmOne(m) || m));
+};
+const esc = s =>String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const kzt = n => Math.round(n).toLocaleString('ru-RU').replace(/ | /g, ' ') + ' ₸';
@@ -72,6 +100,9 @@ const loadOfTruck = id => S.loads.find(l => l.truck === id && isActive(l));
 const loadOfDriver = id => S.loads.find(l => l.driver === id && isActive(l));
 const truckLoc = t => { const l = loadOfTruck(t.id); return l && (l.status === 'in_transit' || l.status === 'problem') ? { city: HUBS[l.from].city + ' → ' + HUBS[l.to].city, sub: T('в пути', 'unterwegs', 'en route', 'жолда') } : { city: HUBS[t.hub].city, sub: HUBS[t.hub].name }; };
 const truckState = t => { const l = loadOfTruck(t.id); if (t.status === 'service') return 'service'; if (t.health === 'red' || (l && tempState(l) === 'breach')) return 'critical'; return t.status === 'busy' ? 'busy' : 'available'; };
+const PER_L = T('₸/л', '₸/l', '₸/l', '₸/л');   // diesel price unit
+const STS_L = T('СТС', 'ZB I', 'VRC', 'СТС');   // vehicle registration certificate
+const RTO_L = T('РТО', 'RTO', 'RTO', 'РТО');   // driving-time label (Q2: not Cyrillic in DE / EN)
 const TS = { available: { c: 'green', l: T('Свободен', 'Frei', 'Available', 'Бос') }, busy: { c: 'yellow', l: T('В рейсе', 'Im Einsatz', 'In use', 'Рейсте') }, service: { c: 'red', l: T('Сервис', 'Service', 'Maintenance', 'Сервис') }, critical: { c: 'red', l: T('Критично', 'Kritisch', 'Critical', 'Сыни') } };
 const rtoDot = d => (d.status === 'rest' || d.rto < 4) ? 'bad' : d.rto < 6 ? 'warn' : 'good';
 const agoTxt = m => m < 60 ? m + ' ' + T('мин назад', 'Min. her', 'min ago', 'мин бұрын') : Math.round(m / 60) + ' ' + T('ч назад', 'Std. her', 'h ago', 'сағ бұрын');
@@ -204,7 +235,7 @@ ${S.role !== 'partner' ? `<a class="side-link" data-act="setRole" data-v="partne
 ${S.role !== 'driver' ? `<a class="side-link" data-act="setRole" data-v="driver">${ic('user', 14)}<span>${esc(T('Приложение водителя', 'Fahrer-App', 'Driver app', 'Жүргізуші қосымшасы'))}</span></a>` : ''}
 <a class="side-link" data-act="go" data-v="request">${ic('file', 14)}<span>${esc(T('Публичная заявка и трекинг', 'Öffentliche Anfrage und Tracking', 'Public request and tracking', 'Жария өтінім және трекинг'))}</span></a>
 ${shellRole ? '' : `<a class="side-link${S.route === 'help' ? ' on' : ''}" data-act="go" data-v="help">${ic('spark', 14)}<span>${esc(T('Справка', 'Hilfe', 'Help', 'Анықтама'))}</span></a>`}</div>`;
-  const USER = { admin: ['Sarah Johnson', 'SJ'], dispatcher: ['Айгерим Сапарова', 'АС'], warehouse: ['Болат Ермеков', 'БЕ'], driver: ['Ерлан Сейтқали', 'ЕС'], auditor: ['Olga Berg', 'OB'], viewer: ['Timur Akhmetov', 'TA'], manager: ['Max Keller', 'MK'], finance: ['Дана Жумабаева', 'ДЖ'], quality: ['Anna Schulz', 'AS'], customer: ['ТОО «Аптека Сервис»', 'АС'], partner: ['ТОО «ТрансХолод»', 'ТХ'] };
+  const USER = { admin: ['Sarah Johnson', 'SJ'], dispatcher: [nm('Айгерим Сапарова'), nm('АС')], warehouse: [nm('Болат Ермеков'), nm('БЕ')], driver: [nm('Ерлан Сейтқали'), nm('ЕС')], auditor: ['Olga Berg', 'OB'], viewer: ['Timur Akhmetov', 'TA'], manager: ['Max Keller', 'MK'], finance: [nm('Дана Жумабаева'), nm('ДЖ')], quality: ['Anna Schulz', 'AS'], customer: [nm('ТОО «Аптека Сервис»'), nm('АС')], partner: [nm('ТОО «ТрансХолод»'), nm('ТХ')] };
   const usr = USER[S.role] || USER.admin;
   return `<div class="app"><aside class="sidebar${S.sideOpen ? ' open' : ''}">${brand}${nav}${tools}${liveBadge()}<div class="langs">${lang}</div>${ver}</aside>
 <main id="main-content"><header class="topbar"><button class="burger" data-act="sideTog" aria-label="Menu" aria-expanded="${S.sideOpen ? 'true' : 'false'}">☰</button><span class="crumb"><a class="lnk" data-act="go" data-v="${homeRoute()}" role="link" tabindex="0">${esc(navLabel(homeRoute()))}</a> › <a class="lnk" data-act="crumb" role="link" tabindex="0"><b>${esc(navLabel(S.route))}</b></a></span>

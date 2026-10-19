@@ -22,7 +22,7 @@
     eq(ev("translit('Қарағанды Астана «Олимп»')"), 'Qaragandy Astana "Olimp"');
     const id = ev("S.inbox.find(m=>m.kind==='road_closure').id"); ev(`inboxOpen('${id}')`); eq(ev('S.route'), 'routes'); const n = ev('S.inbox.length'); ev("inboxAdd({kind:'lead',src:'phone',title:'Новый запрос'})"); eq(ev('S.inbox.length'), n + 1);
     const m = ev("inboxAdd({kind:'telematics_alarm',src:'driver',title:'Дверь',veh:'t5'}).id"); assert(ev("S.alarms.some(a=>a.text==='Дверь')"), 'telematics message raised no alarm');
-    const gg = await fresh('en'); try { gg.ev("go('dashboard');S.tab.dashboard='inbox';render()"); assert(!/[А-Яа-яЁё]/.test(gg.w.document.querySelector('.content').innerText), 'Cyrillic on EN inbox'); assert(gg.w.document.querySelector('.xt'), 'hover original'); } finally { gg.done(); }
+    const gg = await fresh('en'); try { gg.ev("go('dashboard');S.tab.dashboard='inbox';render()"); assert(!/[А-Яа-яЁё]/.test(gg.w.document.querySelector('.content').innerText), 'Cyrillic on EN inbox'); assert(!gg.w.document.querySelector('.xt'), 'seed messages are in the UI language (Q2), no transliteration needed'); gg.ev("inboxAdd({kind:'lead',src:'телефон',title:'Новый клиент из Тараза'});render()"); assert(gg.w.document.querySelector('.xt'), 'hover original of a Cyrillic manual entry'); } finally { gg.done(); }
   });
   await group('bookings: new badge, confirm creates a load, reject/cancel need reasons, shared shape (FR-190)', 'ru', async (g, ev, w) => {
     const n = ev('newBookings()'); assert(n >= 3, 'seed'); eq(ev("NAV_BADGE.orders()"), n); assert(w.document.querySelector('.nav-n'), 'menu badge');

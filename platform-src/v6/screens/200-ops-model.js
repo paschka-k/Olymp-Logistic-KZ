@@ -22,7 +22,7 @@
     sysmex: { name: 'Sysmex', co: 'Sysmex Europe SE, Norderstedt', url: 'sysmex-europe.com', ab: 'SX', col: 4, logo: 'sysmex', cc: 'JP', grp: 2 },
     biomerieux: { name: 'bioMérieux', co: 'bioMérieux SA, Marcy-l\'Étoile', url: 'biomerieux.com', ab: 'BM', col: 5, logo: 'biomerieux', cc: 'FR', grp: 1 },
     beckman: { name: 'Beckman Coulter', co: 'Beckman Coulter Inc., Brea', url: 'beckmancoulter.com', ab: 'BC', col: 6, logo: 'beckman-coulter', cc: 'US', grp: 0 },
-    freshline: { name: 'FreshLine Foods', co: 'ТОО «FreshLine Foods», Алматы', url: 'freshline.example', ab: 'FL', col: 4, logo: 'freshline.svg', cc: 'KZ', grp: 2 },
+    freshline: { name: 'FreshLine Foods', co: nm('ТОО «FreshLine Foods», Алматы'), url: 'freshline.example', ab: 'FL', col: 4, logo: 'freshline.svg', cc: 'KZ', grp: 2 },
     polar: { name: 'Polar Fisch GmbH', co: 'Polar Fisch GmbH, Bremerhaven', url: 'polar-fisch.example', ab: 'PF', col: 5, logo: 'polar-fisch.svg', cc: 'DE', grp: 2 },
     /* registry of the source platform (0.3.9 screen 04 "Производители · 19"): the remaining manufacturers without demo orders */
     bd: { name: 'BD Biosciences', co: 'Becton Dickinson, Franklin Lakes', url: 'bdbiosciences.com', ab: 'BD', col: 1, cc: 'US', grp: 0 },
@@ -36,7 +36,7 @@
     sarstedt: { name: 'Sarstedt', co: 'Sarstedt AG & Co. KG, Nümbrecht', url: 'sarstedt.com', ab: 'SA', col: 3, cc: 'DE', grp: 2 },
     mercator: { name: 'Mercator Medical', co: 'Mercator Medical S.A., Kraków', url: 'mercatormedical.eu', ab: 'MM', col: 4, cc: 'PL', grp: 2 },
     immundiagnostik: { name: 'Immundiagnostik', co: 'Immundiagnostik AG, Bensheim', url: 'immundiagnostik.com', ab: 'ID', col: 5, cc: 'DE', grp: 2 },
-    medsnab: { name: T('ТОО «МедСнаб Актобе» · сторонний груз', 'MedSnab Aktobe LLP · Fremdladung', 'MedSnab Aktobe LLP · third-party cargo', '«МедСнаб Ақтөбе» ЖШС · бөгде жүк'), co: 'ТОО «МедСнаб Актобе»', url: '', ab: 'MS', col: 6, logo: 'medsnab.svg', cc: 'KZ', grp: 3 },
+    medsnab: { name: T('ТОО «МедСнаб Актобе» · сторонний груз', 'MedSnab Aktobe LLP · Fremdladung', 'MedSnab Aktobe LLP · third-party cargo', '«МедСнаб Ақтөбе» ЖШС · бөгде жүк'), co: nm('ТОО «МедСнаб Актобе»'), url: '', ab: 'MS', col: 6, logo: 'medsnab.svg', cc: 'KZ', grp: 3 },
     pharmchain: { name: T('Аптечная сеть · сторонний груз', 'Apothekenkette · Fremdladung', 'Pharmacy chain · third-party cargo', 'Дәріхана желісі · бөгде жүк'), co: '', url: '', ab: 'PH', col: 1, logo: 'pharmchain.svg', cc: 'KZ', grp: 3 },
   };
   /* logo file: bare name = owner-supplied PNG (515 × 380), name with extension = drawn SVG of a fictitious company */
@@ -451,7 +451,7 @@
     add('load', w ? (w.ok || w.override) : (lc ? lc.fits : true), T('Загрузка и вес', 'Beladung und Gewicht', 'Load and weight', 'Тиеу және салмақ'), w ? (w.ok ? T('взвешивание в пределах ТС', 'Verwiegung innerhalb der Grenzen', 'weighing within limits', 'өлшеу шегінде') : w.override ? T('перегруз допущен с обоснованием', 'Überladung mit Begründung freigegeben', 'overload released with a reason', 'артық жүк негіздемемен рұқсат етілді') : T('перегруз по взвешиванию: ', 'Überladung laut Verwiegung: ', 'overload by weighing: ', 'өлшеу бойынша артық жүк: ') + w.excess.map(x => x.code + ' +' + x.excess + ' ' + KG).join(', ')) : lc ? (lc.fits ? T('расчёт: помещается', 'Berechnung: passt', 'calculation: fits', 'есеп: сыяды') : lc.issues[0].text) : T('без взвешивания — проверяется расчёт', 'ohne Verwiegung — Berechnung gilt', 'no weighing — the calculation applies', 'өлшеусіз — есеп қолданылады'), !w && !t);
     add('temp', !!t && t.zones.includes(l.zone), T('Температурный класс', 'Temperaturklasse', 'Temperature class', 'Температура класы'), t ? ZONES[l.zone].label + (t.zones.includes(l.zone) ? ' ✓' : ' ✗ ' + t.model) : '—');
     const lic = d && d.docs.find(x => x.type === 'lic');
-    add('driver', !!d && !!lic && docState(lic.to) !== 'expired' && d.rto >= needRto(l), T('Водитель', 'Fahrer', 'Driver', 'Жүргізуші'), d ? T('права до ', 'Führerschein bis ', 'licence until ', 'куәлік дейін ') + (lic ? fd(lic.to) : '—') + ' · РТО ' + d.rto + ' ' + T('ч', 'h', 'h', 'сағ') : '—');
+    add('driver', !!d && !!lic && docState(lic.to) !== 'expired' && d.rto >= needRto(l), T('Водитель', 'Fahrer', 'Driver', 'Жүргізуші'), d ? T('права до ', 'Führerschein bis ', 'licence until ', 'куәлік дейін ') + (lic ? fd(lic.to) : '—') + ' · ' + RTO_L + ' ' + d.rto + ' ' + T('ч', 'h', 'h', 'сағ') : '—');
     const storm = (S.ops.storm || []).filter(h => h === l.from || h === l.to);
     add('wx', !storm.length, T('Погода и дороги', 'Wetter und Straßen', 'Weather and roads', 'Ауа райы және жолдар'), storm.length ? T('штормовое предупреждение: ', 'Sturmwarnung: ', 'storm warning: ', 'дауыл ескертуі: ') + storm.map(h => HUBS[h].city).join(', ') : T('предупреждений нет', 'keine Warnungen', 'no warnings', 'ескерту жоқ'));
     return c;
