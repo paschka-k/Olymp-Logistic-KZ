@@ -36,10 +36,12 @@ jobs:
             test -s "$f" || { echo "missing $f"; exit 1; }
             grep -q 'inbound' "$f" || { echo "$f has no inbound screen"; exit 1; }
           done
-          for f in platform/index.html platform/de.html platform/en.html platform/kk.html platform/tests.html; do
+          for f in platform/index.html platform/de.html platform/en.html platform/kk.html; do
             test -s "$f" || { echo "missing $f"; exit 1; }
             grep -q 'SCREENS.settings' "$f" || { echo "$f has no settings screen"; exit 1; }
           done
+          test -s platform/tests.html || { echo "missing platform/tests.html"; exit 1; }
+          grep -q '__TESTS' platform/tests.html || { echo "platform/tests.html has no test harness"; exit 1; }
       - name: Commit regenerated HTML
         run: |
           git config user.name  "github-actions[bot]"
