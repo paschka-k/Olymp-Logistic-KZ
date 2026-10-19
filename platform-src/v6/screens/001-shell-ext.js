@@ -30,9 +30,11 @@
   const activeAlarms = () => (S.alarms ? S.alarms.filter(a => a.status !== 'closed').length : alertsCount());
   globalThis.activeAlarms = activeAlarms;
   ACT.alarmsGo = () => { if (tabsOf('dashboard').some(t => t.key === 'alarms')) S.tab.dashboard = 'alarms'; go('dashboard'); };
+  /* hub segment + clock sit in core's ".tb-x" box: inline on wide windows, behind the "⋯" button on narrow ones (Q4); the alarms button always stays */
+  globalThis.shellTopMore = () => `${hubSeg()}<span class="clock" title="${esc(T('Время Казахстана · операционная дата демо', 'Zeit in Kasachstan · Geschäftsdatum der Demo', 'Kazakhstan time · business date of the demo', 'Қазақстан уақыты · демо операциялық күні'))}"><b data-clock>${clockTxt()}</b><small data-bizdate>${esc(bizDate())} · Astana UTC+5</small></span>`;
   globalThis.shellTopExtra = () => {
     const n = activeAlarms();
-    return `${hubSeg()}<span class="clock" title="${esc(T('Время Казахстана · операционная дата демо', 'Zeit in Kasachstan · Geschäftsdatum der Demo', 'Kazakhstan time · business date of the demo', 'Қазақстан уақыты · демо операциялық күні'))}"><b data-clock>${clockTxt()}</b><small data-bizdate>${esc(bizDate())} · Astana UTC+5</small></span><button type="button" class="btn sm alarms-btn ${n ? 'red' : 'grey'}" data-act="alarmsGo" data-alarms="${n}" title="${esc(T('Открыть тревоги', 'Alarme öffnen', 'Open the alarms', 'Дабылдарды ашу'))}">${n} ${esc(T('активных тревог', 'aktive Alarme', 'active alarms', 'белсенді дабыл'))}</button>`;
+    return `<button type="button" class="btn sm alarms-btn ${n ? 'red' : 'grey'}" data-act="alarmsGo" data-alarms="${n}" title="${esc(T('Открыть тревоги', 'Alarme öffnen', 'Open the alarms', 'Дабылдарды ашу'))}">${n}<span class="al-t"> ${esc(T('активных тревог', 'aktive Alarme', 'active alarms', 'белсенді дабыл'))}</span></button>`;
   };
 
   /* ---------- 2. global search combobox: "In current shipments" + "In the database", keyboard, scanner rule ---------- */
@@ -90,10 +92,11 @@
       : `<span class="gs-type">${esc(TYPE[r.type])}</span><span class="gs-main"><b>${esc(r.id)}</b><small>${esc(r.label)}</small></span>`}${r.exact ? '<span class="chip green">=</span>' : ''}</div>`;
     const empty = `<div class="gs-empty">${esc(T('Нет совпадений', 'Keine Treffer', 'No matches', 'Сәйкестік жоқ'))}</div>`;
     const list = open ? `<div class="gs-list" role="listbox" id="gslist"><div class="gs-h"><span>${esc(T('В текущих отправках', 'In aktuellen Sendungen', 'In current shipments', 'Ағымдағы жөнелтімдерде'))} · ${L.length}</span><label class="gs-arch"><input type="checkbox" data-act="gsArch"${S.gs.arch ? ' checked' : ''}> ${esc(T('включая доставленные', 'inkl. zugestellter', 'incl. delivered', 'жеткізілгендерді қоса'))}</label></div>${L.map(row).join('') || empty}<div class="gs-h"><span>${esc(T('В базе: заказы, рейсы, места, брони', 'In der Datenbank: Aufträge, Fahrten, Packstücke, Buchungen', 'In the database: orders, loads, packages, bookings', 'Базада: тапсырыстар, рейстер, орындар, броньдар'))} · ${D.length}</span></div>${D.map((r, i) => row(r, L.length + i)).join('') || empty}<div class="gs-foot">↑ ↓ · Enter · Esc</div></div>` : '';
-    return `<div class="gs"><label class="searchbox">${ic('search', 14)}<input id="gsearch" role="combobox" aria-expanded="${open}" aria-controls="gslist" aria-autocomplete="list" autocomplete="off" placeholder="${esc(S.gs.scan ? T('Скан SSCC (00)… · Enter', 'SSCC-Scan (00)… · Enter', 'SSCC scan (00)… · Enter', 'SSCC сканы (00)… · Enter') : T('Товар, PO, PL, артикул, LOT, SSCC, рейс, бронь…', 'Ware, PO, PL, Artikel, LOT, SSCC, Fahrt, Buchung…', 'Goods, PO, PL, article, LOT, SSCC, load, booking…', 'Тауар, PO, PL, артикул, LOT, SSCC, рейс, брондау…'))}" value="${esc(S.gs.q)}"></label><button type="button" class="btn sm ${S.gs.scan ? 'primary' : 'grey'} scanbtn" data-act="gsScan" aria-pressed="${S.gs.scan}" title="${esc(T('Режим сканера штрихкода GS1-128', 'Barcode-Scannermodus GS1-128', 'GS1-128 barcode scanner mode', 'GS1-128 штрихкод сканері режимі'))}">${esc(S.gs.scan ? T('Сканер · вкл', 'Scanner · an', 'Scanner · on', 'Сканер · қосулы') : T('Сканер', 'Scanner', 'Scanner', 'Сканер'))}</button>${list}</div>`;
+    /* narrow windows (≤ 700 px, Q4): only the magnifier shows; it opens the full-width combobox (".gs.open") */
+    return `<div class="gs${S.gsOpen || S.gs.q ? ' open' : ''}"><button type="button" class="btn grey sm gs-ico" data-act="gsTog" aria-expanded="${!!(S.gsOpen || S.gs.q)}" aria-label="${esc(T('Поиск', 'Suche', 'Search', 'Іздеу'))}">${ic(S.gsOpen ? 'x' : 'search', 16)}</button><label class="searchbox">${ic('search', 14)}<input id="gsearch" role="combobox" aria-expanded="${open}" aria-controls="gslist" aria-autocomplete="list" autocomplete="off" placeholder="${esc(S.gs.scan ? T('Скан SSCC (00)… · Enter', 'SSCC-Scan (00)… · Enter', 'SSCC scan (00)… · Enter', 'SSCC сканы (00)… · Enter') : T('Товар, PO, PL, артикул, LOT, SSCC, рейс, бронь…', 'Ware, PO, PL, Artikel, LOT, SSCC, Fahrt, Buchung…', 'Goods, PO, PL, article, LOT, SSCC, load, booking…', 'Тауар, PO, PL, артикул, LOT, SSCC, рейс, брондау…'))}" value="${esc(S.gs.q)}"></label><button type="button" class="btn sm ${S.gs.scan ? 'primary' : 'grey'} scanbtn" data-act="gsScan" aria-pressed="${S.gs.scan}" title="${esc(T('Режим сканера штрихкода GS1-128', 'Barcode-Scannermodus GS1-128', 'GS1-128 barcode scanner mode', 'GS1-128 штрихкод сканері режимі'))}">${esc(S.gs.scan ? T('Сканер · вкл', 'Scanner · an', 'Scanner · on', 'Сканер · қосулы') : T('Сканер', 'Scanner', 'Scanner', 'Сканер'))}</button>${list}</div>`;
   };
   function gsGo(r, scanned) {
-    S.gs.q = ''; S.gs.idx = 0;
+    S.gs.q = ''; S.gs.idx = 0; S.gsOpen = false;
     if (r.kind === 'line' || r.type === 'order' || r.type === 'package') {
       const l = load(r.load);
       if (S.ops) { if (l && l.status === 'delivered') S.ops.shipArch = true; S.ops.shipLoad = r.load; S.ops.shipSel = r.sscc || null; }
@@ -114,6 +117,7 @@
     gsOpen: d => { const r = gsAll().all[+d.i]; if (r) gsGo(r, false); },
     gsScan: () => { S.gs.scan = !S.gs.scan; render(); const e = $('#gsearch'); if (e) e.focus(); },
     gsArch: () => { S.gs.arch = !S.gs.arch; S.gs.idx = 0; render(); },
+    gsTog: () => { S.gsOpen = !S.gsOpen; if (!S.gsOpen) { S.gs.q = ''; S.gs.idx = 0; } S.tbMore = false; render(); const e = S.gsOpen && $('#gsearch'); if (e) e.focus(); },
   });
 
   /* ---------- 4. keyboard: ↑ ↓ Enter Esc in the search box; Escape closes diagram / drawer / sidebar ---------- */
@@ -122,12 +126,12 @@
       if (e.key === 'ArrowDown') { e.preventDefault(); S.gs.idx = Math.min(S.gs.idx + 1, Math.max(0, gsAll().all.length - 1)); render(); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); S.gs.idx = Math.max(0, S.gs.idx - 1); render(); }
       else if (e.key === 'Enter') { e.preventDefault(); gsEnter(); }
-      else if (e.key === 'Escape') { S.gs.q = ''; S.gs.idx = 0; render(); }
+      else if (e.key === 'Escape') { S.gs.q = ''; S.gs.idx = 0; S.gsOpen = false; render(); }
       return;
     }
     if (e.key !== 'Escape') return;
     if (typeof HELP !== 'undefined' && HELP.tour) return;   // 70-tours.js handles its own Escape
-    if (S.diag) { S.diag = null; render(); } else if (S.drawer) closeDrawer(); else if (S.sideOpen) { S.sideOpen = false; render(); }
+    if (S.diag) { S.diag = null; render(); } else if (S.drawer) closeDrawer(); else if (S.tbMore) { S.tbMore = false; render(); } else if (S.sideOpen) { S.sideOpen = false; render(); }
   });
 
   /* ---------- 4. phone bottom bar: 4 screens per role (0.3.10 BOTTOM map translated to the v6 sections) ---------- */
