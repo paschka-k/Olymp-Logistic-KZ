@@ -11,7 +11,7 @@
   const lastTrip = d => { const l = S.loads.filter(x => x.driver === d.id).sort((a, b) => b.eta.localeCompare(a.eta))[0]; return l ? { l, txt: HUBS[l.from].city + ' → ' + HUBS[l.to].city, sub: isActive(l) ? T('в процессе · ETA ', 'laufend · ETA ', 'in progress · ETA ', 'орындалуда · ETA ') + fdt(l.eta) : T('завершён ', 'abgeschlossen ', 'completed ', 'аяқталды ') + fdt(l.eta).slice(0, 5) } : null; };
   const expired = d => d.docs.filter(x => docState(x.to) === 'expired').length, soon = d => d.docs.filter(x => docState(x.to) === 'soon').length;
   const tk = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
-  const list = () => S.drivers.filter(d => (!F.st || d.status === F.st) && (!F.rto || rto(d) === F.rto) && (!F.hub || d.hub === F.hub) && (!F.rate || d.rating >= +F.rate));
+  const list = () => hubFilter(S.drivers).filter(d => (!F.st || d.status === F.st) && (!F.rto || rto(d) === F.rto) && (!F.hub || d.hub === F.hub) && (!F.rate || d.rating >= +F.rate));
   function table() {
     const body = list().map(d => { const lt = lastTrip(d), t = loadOfDriver(d.id) && trk(loadOfDriver(d.id).truck), bad = expired(d), sn = soon(d);
       return `<tr class="${S.drawer && S.drawer.id === d.id ? 'is-selected' : ''}" data-act="openD" data-id="${d.id}"><td><span class="cell">${avatar(d.ini, 1)}<span><b>${esc(d.name)}</b><div class="sub">${d.code} · ${esc(T('кат.', 'Kl.', 'class', 'сан.'))} ${d.lic} · ${d.exp} ${esc(T('лет стажа', 'J. Erfahrung', 'yrs exp.', 'жыл өтіл'))}</div></span></span></td>

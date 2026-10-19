@@ -6,7 +6,7 @@
   const hdot = t => `<span class="dot ${t.health === 'green' ? 'good' : t.health === 'amber' ? 'warn' : 'bad pulse'}" style="width:16px;height:16px"></span>`;
   const tk = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls === 'blue' ? 'blue' : cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
   const tempTxt = t => { const l = loadOfTruck(t.id); if (!l) return '<span class="faint">—</span>'; const z = ZONES[l.zone]; return `<b>${z.mid > 0 ? '+' : ''}${z.mid} / </b>${tempChip(l)}`; };
-  const rows = () => S.trucks.filter(t => { const st = truckState(t); return (!F.type || t.model.startsWith(F.type)) && (!F.st || st === F.st) && (!F.hub || t.hub === F.hub) && (!F.health || t.health === F.health); });
+  const rows = () => hubFilter(S.trucks).filter(t => { const st = truckState(t); return (!F.type || t.model.startsWith(F.type)) && (!F.st || st === F.st) && (!F.hub || t.hub === F.hub) && (!F.health || t.health === F.health); });
   function table() {
     const body = rows().map(t => { const st = truckState(t), l = loadOfTruck(t.id), d = l && drv(l.driver), loc = truckLoc(t);
       return `<tr class="${S.drawer && S.drawer.id === t.id ? 'is-selected' : ''}" data-act="openT" data-id="${t.id}"><td><b>${esc(t.plate)}</b><div class="sub">${esc(t.make)}</div></td><td>${esc(t.model)}<div class="sub">${t.zones.map(z => ZONES[z].label).join(' · ')}</div></td><td>${chip(TS[st].c, TS[st].l)}</td>
@@ -20,7 +20,7 @@
     sub: () => T('Парк рефрижераторов: статус, температура, документы и ТО', 'Kühlfahrzeugpark: Status, Temperatur, Dokumente und Wartung', 'Reefer fleet: status, temperature, documents and maintenance', 'Рефрижератор паркі: күйі, температура, құжаттар және ТҚ'),
     actions: () => `<button class="btn grey" data-act="impF">${esc(T('Импорт', 'Import', 'Import Fleet Data', 'Импорт'))}</button><button class="btn green" data-act="schedAny">${esc(T('Запланировать ТО', 'Wartung planen', 'Schedule Maintenance', 'ТҚ жоспарлау'))}</button><button class="btn primary" data-act="addT">${ic('plus')} ${esc(T('Добавить ТС', 'Fahrzeug hinzufügen', 'Add Vehicle', 'КҚ қосу'))}</button>`,
     body: () => {
-      const sts = S.trucks.map(truckState), cnt = k => sts.filter(x => x === k).length;
+      const sts = hubFilter(S.trucks).map(truckState), cnt = k => sts.filter(x => x === k).length;
       const alarms = S.loads.filter(l => isActive(l) && tempState(l) === 'breach').length;
       const comp = Math.round(S.trucks.filter(t => t.docs && docState(t.docs.calib) !== 'expired' && docState(t.docs.osago) !== 'expired').length / S.trucks.length * 100);
       return `<div class="kpi-row k5">${tk('blue', 'truck', S.trucks.length, T('Всего ТС', 'Fahrzeuge gesamt', 'Total vehicles', 'КҚ барлығы'))}${tk('green', 'check', cnt('available'), T('Свободно', 'Frei', 'Available', 'Бос'))}${tk('yellow', 'truck', cnt('busy'), T('В рейсе', 'Im Einsatz', 'In use', 'Рейсте'))}${tk('red', 'alert', cnt('service') + cnt('critical'), T('Сервис / тревоги', 'Service / Alarme', 'Maintenance / alarms', 'Сервис / дабыл'))}${tk('purple', 'therm', comp + ' %', T('Соответствие GDP (поверка, ОСАГО)', 'GDP-Konformität (Kalibr., Haftpfl.)', 'GDP compliance (calibration, insurance)', 'GDP сәйкестігі (поверка, сақтандыру)'))}</div>

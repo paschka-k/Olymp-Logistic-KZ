@@ -5,7 +5,7 @@
   const ALL = T('Все', 'Alle', 'All', 'Барлығы');
   const filtered = () => {
     const f = S.f, q = f.q.trim().toLowerCase();
-    return S.loads.filter(l => (!f.status || l.status === f.status) && (!f.cust || l.cust === f.cust) && (!f.zone || l.zone === f.zone) && (!f.pri || l.priority === f.pri) &&
+    return hubFilter(S.loads, hubOfLoad).filter(l => (!f.status || l.status === f.status) && (!f.cust || l.cust === f.cust) && (!f.zone || l.zone === f.zone) && (!f.pri || l.priority === f.pri) &&
       (!q || (l.id + ' ' + cust(l.cust).name + ' ' + HUBS[l.from].city + ' ' + HUBS[l.to].city + ' ' + (l.truck ? trk(l.truck).plate : '') + ' ' + (l.driver ? drv(l.driver).name : '')).toLowerCase().includes(q)));
   };
   function table() {

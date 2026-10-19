@@ -4,7 +4,7 @@
   function map() {
     const pathD = l => KZMAP.hubPath(l.from, l.to).pts.map((q, i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' ');
     const lines = S.loads.filter(l => isActive(l) && l.status !== 'assigned').map(l => `<path d="${pathD(l)}" fill="none" stroke="#173a5e" stroke-opacity=".55" stroke-width="2.5" stroke-dasharray="2 7" stroke-linecap="round"/>`).join('');
-    const mk = S.loads.filter(l => l.status === 'in_transit' || l.status === 'problem').map(l => {
+    const mk = hubFilter(S.loads, hubOfLoad).filter(l => l.status === 'in_transit' || l.status === 'problem').map(l => {
       const [x, y] = KZMAP.along(KZMAP.hubPath(l.from, l.to), l.progress), ts = tempState(l);
       const col = ts === 'breach' ? 'var(--mk-red)' : ts === 'warn' ? 'var(--mk-status-yellow)' : 'var(--mk-green)', t = trk(l.truck);
       return `<g class="mk" data-act="open" data-id="${l.id}" transform="translate(${x},${y}) scale(1.5)"><circle r="14" fill="${col}"/><path d="M-7 -3h9v6h-9zM2 -1h4l3 3v2h-7z" fill="#fff"/><circle cx="10" cy="-10" r="4.5" fill="${ts === 'ok' ? 'var(--mk-status-green)' : ts === 'warn' ? 'var(--mk-status-yellow)' : 'var(--red)'}" stroke="#fff" stroke-width="1.5"/><rect x="-44" y="18" width="88" height="17" rx="6" fill="#fff" stroke="var(--border-input)"/><text x="0" y="30" text-anchor="middle" class="maplbl sm">${esc(t ? t.plate.slice(0, 10) : '')} · ${l.temp > 0 ? '+' : ''}${String(l.temp).replace('.', ',')}°</text></g>`;
@@ -16,7 +16,7 @@
 <div class="statstrip card"><span><b>${S.trucks.length}</b> ${esc(T('ТС всего', 'Fahrzeuge', 'Total vehicles', 'КҚ барлығы'))}</span><span><b class="g">${free}</b> ${esc(T('свободно', 'frei', 'available', 'бос'))}</span><span><b class="b">${act}</b> ${esc(T('активных рейсов', 'aktive Fahrten', 'active loads', 'белсенді рейс'))}</span></div></div></div>`;
   }
   function dispatchList() {
-    const rows = S.loads.filter(l => l.status !== 'delivered').slice(0, 7).map(l => `<div class="drow" data-act="open" data-id="${l.id}"><div><a class="lnk">${l.id}</a><div class="sub">${esc(HUBS[l.from].city)} → ${esc(HUBS[l.to].city)} · ${zoneChip(l.zone)}</div></div><div class="r">${stChip(l.status)}<div class="sub">${l.driver ? esc(drv(l.driver).name) : '—'}</div></div></div>`).join('');
+    const rows = hubFilter(S.loads, hubOfLoad).filter(l => l.status !== 'delivered').slice(0, 7).map(l => `<div class="drow" data-act="open" data-id="${l.id}"><div><a class="lnk">${l.id}</a><div class="sub">${esc(HUBS[l.from].city)} → ${esc(HUBS[l.to].city)} · ${zoneChip(l.zone)}</div></div><div class="r">${stChip(l.status)}<div class="sub">${l.driver ? esc(drv(l.driver).name) : '—'}</div></div></div>`).join('');
     return `<div class="card"><div class="card-head">${esc(T('Рейсы сегодня', 'Fahrten heute', "Today's Dispatch", 'Бүгінгі рейстер'))}</div><div class="dlist">${rows}</div></div>`;
   }
   function alerts() {
@@ -41,7 +41,7 @@
     sub: () => T('Холодовая цепь: Астана · Алматы · Караганда · Шымкент · Атырау (Запад)', 'Kühlkette: Astana · Almaty · Karaganda · Schymkent · Atyrau (West)', 'Cold chain: Astana · Almaty · Karaganda · Shymkent · Atyrau (West)', 'Суық тізбек: Астана · Алматы · Қарағанды · Шымкент'),
     actions: () => `<button class="btn primary" data-act="create">${ic('plus')} ${esc(T('Создать рейс', 'Fahrt anlegen', 'Create Load', 'Рейс құру'))}</button>`,
     body: () => {
-      const act = S.loads.filter(isActive), breach = act.filter(l => tempState(l) === 'breach').length;
+      const act = hubFilter(S.loads, hubOfLoad).filter(isActive), breach = act.filter(l => tempState(l) === 'breach').length;
       const done = S.loads.filter(l => l.status === 'delivered').length;
       const comp = act.length ? Math.round((act.length - breach) / act.length * 100) : 100;
       const rev = S.loads.reduce((s, l) => s + revenue(l), 0) / 1e6;

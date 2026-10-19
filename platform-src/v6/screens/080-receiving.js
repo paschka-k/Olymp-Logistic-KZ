@@ -14,7 +14,7 @@
   const bookedSum = () => S.costs.filter(c => c.ref).reduce((s, c) => s + c.amount, 0);
   const sel = (key, label, opts) => `<label>${esc(label)}:</label><select class="select" data-rff="${key}">${opts.map(o => `<option value="${esc(o[0])}"${S.rf[key] === o[0] ? ' selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
   const tk = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
-  const filt = () => { const f = S.rf, q = f.q.trim().toLowerCase(); return S.jobs.filter(j => (!f.hub || j.hub === f.hub) && (!f.st || String(calc(j, S.clock).st) === f.st) && (!f.flag || j.flags.includes(f.flag)) && (!q || (j.id + ' ' + j.plate + ' ' + j.carrier + ' ' + j.senders.join(' ')).toLowerCase().includes(q))); };
+  const filt = () => { const f = S.rf, q = f.q.trim().toLowerCase(); return hubFilter(S.jobs).filter(j => (!f.hub || j.hub === f.hub) && (!f.st || String(calc(j, S.clock).st) === f.st) && (!f.flag || j.flags.includes(f.flag)) && (!q || (j.id + ' ' + j.plate + ' ' + j.carrier + ' ' + j.senders.join(' ')).toLowerCase().includes(q))); };
   const nf = n => Math.round(n).toLocaleString('ru-RU');
   function body() {
     const all = S.jobs.map(j => calc(j, S.clock)), gate = all.filter(c => c.st === 2).length, done = all.filter(c => c.st === 3).length, accrued = S.jobs.reduce((s, j, i) => s + (j.booked ? 0 : (all[i].st >= 2 ? all[i].amount : 0)), 0);
