@@ -48,14 +48,14 @@
     const pl = w.document.querySelector('.hp[data-player=shipflow]');
     assert(pl, 'shipment player in the start article');
     assert(/1\s*(из|von|of|\/)\s*7/.test(pl.innerText), 'step counter 1 of 7');
-    w.document.querySelector('[data-act=hpStep][data-v="1"]').click();
+    w.document.querySelector('.hp[data-player=shipflow] [data-act=hvStep][data-v="1"]').click();
     eq(+w.document.querySelector('.hp[data-player=shipflow]').dataset.step, 1, 'next advances the step');
     assert(w.document.querySelector('.hp .pl-on'), 'active node highlighted');
-    w.document.querySelector('[data-act=hpTog]').click();
-    assert(ev("S.hp.shipflow.run === true"), 'play resumes after manual stepping paused it');
+    w.document.querySelector('.hp[data-player=shipflow] [data-act=hvTog]').click();
+    assert(ev("S.hv['pl:shipflow'].run === true"), 'play resumes after manual stepping paused it');
     ev("ACT.helpGo({k:'express'})"); assert(w.document.querySelector('.hp[data-player=expresspath] .pl-num'), 'express sketch with numbered call-outs');
     ev("ACT.helpGo({k:'dashboard/alarms'})"); assert(w.document.querySelector('.hp[data-player=alarmflow]'), 'alarm chain player');
-    assert(w.document.querySelector('.hp-all ol li'), 'all-steps list');
+    assert(w.document.querySelector('.hp .hv-all ol li'), 'all-steps list');
   });
   for (const lang of ['de', 'en']) await group('[' + lang + '] players: complete texts, no Cyrillic', lang, async (g, ev) => {
     const bad = ev("Object.entries(HELP.players).filter(([k,p])=>!p.title||p.steps.some(s=>!s.t)).map(([k])=>k)");

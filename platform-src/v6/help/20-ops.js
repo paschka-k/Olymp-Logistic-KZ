@@ -103,7 +103,7 @@ helpAdd({ key: 'orders', group: 'ops', screen: 'orders',
   ],
   fr: 'FR-73, FR-176', related: ['orders/loadw', 'orders/ship', 'orders/docs', 'dispatch', 'portal'] });
 
-helpAdd({ key: 'orders/loadw', group: 'ops', screen: 'orders', tab: 'loadw', visuals: ['load'],
+helpAdd({ key: 'orders/loadw', group: 'ops', screen: 'orders', tab: 'loadw', visuals: ['truck', 'load'],
   title: HELP_NO('03', 'Загрузка и вес', 'Beladung und Gewicht', 'Load and weight', 'Тиеу және салмақ'), sub: HQ('Паллеты, объём, оси, подбор ТС, разбиение на несколько машин', 'Paletten, Volumen, Achsen, Fahrzeugwahl, Aufteilung auf mehrere Fahrzeuge', 'Pallets, volume, axles, truck pick, split over several trucks', 'Паллеттер, көлем, осьтер, КҚ таңдау, бірнеше көлікке бөлу'),
   purpose: HQ('Собрать загрузку рейса из заказов и проверить, что она физически и по правилам помещается: паллето-места по температурным зонам, объём, масса, осевые нагрузки, высота, сверка мест SSCC, FEFO, сторонний и опасный груз. Подбор ТС показывает стоимость рейса для каждого типа и наименьший подходящий; при нехватке мест загрузка разбивается на несколько машин с порядком погрузки.',
     'Die Beladung einer Fahrt aus Aufträgen zusammenstellen und prüfen, ob sie physisch und regelkonform passt: Palettenplätze je Temperaturzone, Volumen, Masse, Achslasten, Höhe, SSCC-Abgleich, FEFO, Fremd- und Gefahrgut. Die Fahrzeugwahl zeigt die Fahrtkosten je Typ und den kleinsten passenden; reichen die Plätze nicht, wird die Beladung mit Ladereihenfolge auf mehrere Fahrzeuge aufgeteilt.',
@@ -318,7 +318,7 @@ helpAdd({ key: 'dispatch/partners', group: 'ops', screen: 'dispatch', tab: 'part
   ],
   fr: 'FR-19 … FR-33, FR-45, FR-121', related: ['pod/quality', 'orders/docs', 'orders/ship', 'partner-portal', 'billing/cost'] });
 
-helpAdd({ key: 'dispatch/express', group: 'ops', screen: 'dispatch', tab: 'express', visuals: ['express'],
+helpAdd({ key: 'dispatch/express', group: 'ops', screen: 'dispatch', tab: 'express', visuals: ['dispatchMock', 'express'],
   title: HQ('Путевые листы и экспресс', 'Fahraufträge & Express', 'Waybills & express', 'Жол парақтары және экспресс'), sub: HQ('Отправка путевого листа водителю, экспресс-согласование тремя функциями, экспресс-KPI', 'Fahrauftrag an den Fahrer senden, Express-Freigabe durch drei Funktionen, Express-KPI', 'Sending the waybill to the driver, express approval by three functions, express KPI', 'Жол парағын жүргізушіге жіберу, үш функцияның экспресс келісімі, экспресс-KPI'),
   purpose: HQ('Путевой лист уходит в приложение водителя один раз для назначенного рейса и переводит его в «погрузку»; повторная отправка невозможна. Экспресс-заявки EX-… ждут трёх подписей (генеральный директор, руководитель аналитики и закупок, руководитель закупок и логистики) до отсечки; значок на вкладке — заявки для вашей функции. Экспресс-KPI: доля, надбавка, время решения.',
     'Der Fahrauftrag geht einmal für eine zugewiesene Fahrt in die Fahrer-App und setzt sie auf „Beladung“; ein zweites Senden ist nicht möglich. Express-Anfragen EX-… warten vor dem Annahmeschluss auf drei Unterschriften (Geschäftsführer, Leitung Analytik & Beschaffung, Leitung Einkauf & Logistik); der Zähler auf der Karte zeigt die Anfragen für Ihre Funktion. Express-KPI: Anteil, Zuschlag, Entscheidungszeit.',
