@@ -767,7 +767,7 @@ Object.assign(ACT, {
 
 /* Roles & permissions (FR-14/137): 11 roles, permission matrix generated from the source platform (role-perms.json),
    screen / tab gating, role shells (driver, customer, partner use their own menu), role switcher. */
-const VERSION = '6.1.0', BUILD = '2026-10-19 06:29';
+const VERSION = '6.1.0', BUILD = '2026-10-19 08:46';
 const ROLES = ['admin', 'dispatcher', 'warehouse', 'driver', 'auditor', 'viewer', 'manager', 'finance', 'quality', 'customer', 'partner'];
 const ROLE_NAME = {
   admin: T('Администратор', 'Administrator', 'Administrator', 'Әкімші'), dispatcher: T('Диспетчер', 'Disponent', 'Dispatcher', 'Диспетчер'), warehouse: T('Склад', 'Lager', 'Warehouse', 'Қойма'),
@@ -2079,7 +2079,7 @@ ${ex && CFG.cur.ai.expl ? `<p class="why"><i>${esc(T('Почему: ТС под�
 <div class="card card-body"><h3 style="margin:0 0 12px;font-size:15px">${esc(T('Реестр калибровки логгеров и датчиков', 'Kalibrierregister Logger und Sensoren', 'Logger & sensor calibration registry', 'Логгерлер мен датчиктер калибрлеу тізілімі'))}</h3><p class="note">${esc(T('Просроченная поверка блокирует назначение ТС на фарма-рейсы (GDP).', 'Abgelaufene Kalibrierung sperrt Fahrzeuge für Pharma-Fahrten (GDP).', 'Expired calibration blocks the truck for pharma loads (GDP).', 'Мерзімі өткен поверка КҚ-ны фарма-рейстерден бұғаттайды (GDP).'))}</p>${calib()}</div>`; };
   const tk2 = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
   addTab('pod', 'quality', T('Отклонения и качество', 'Abweichungen & Qualität', 'Deviations & quality', 'Ауытқулар және сапа'), () => qualityBody(), { badge: () => S.devs.filter(d => !done(d)).length });
-  Object.assign(ACT, {
+  Object.assign(ACT, {
     qDev: d => { F.dev = d.id; render(); },
     qNext: d => { const x = S.devs.find(v => v.id === d.id); x.step++; audit('QA', x.id, STEPS[x.step - 1], ''); render(); },
     qDec: d => { const x = S.devs.find(v => v.id === d.id); x.decision = d.v; x.step = 4; const l = x.load && load(x.load); if (l) l.qa = d.v === 'quarantine' ? 'quarantine' : 'released'; audit('QA', x.id, d.v === 'release' ? 'Release' : 'Quarantine', ''); toast(d.v === 'release' ? T('Товар допущен', 'Ware freigegeben', 'Goods released', 'Тауарға рұқсат') : T('Товар в карантине', 'Ware in Quarantäne', 'Goods quarantined', 'Тауар карантинде')); },
