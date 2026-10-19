@@ -67,6 +67,8 @@
       const o = { id: 'O-' + l.id.slice(-4) + '-' + (k + 1), to: BRANCH(12 + (h + k * 7) % 80), city: HUBS[l.to].city, stop: k + 1, cls: l.zone, pal, kg, m3: Math.round(pal * (1.05 + (h % 5) / 20) * 10) / 10,
         h: tall ? 250 : 120 + (h * (k + 1)) % 60, stack: !tall && (h + k) % 3 !== 0, mfr: art[2], po: 'PO-' + (84000 + (h + k * 13) % 9000), pl: 'PL-' + (3100 + (h * 3 + k) % 800),
         lines: [{ art: art[0], name: art[1], mfr: art[2], lot: 'L' + (260000 + (h * 7 + k * 11) % 9999), exp, qty: pal * art[3] }], places: [] };
+      /* one demo load carries two temperature zones (0.3.9 screen 03: bulkhead between zone 1 and zone 2) */
+      if (l.id.endsWith('1852') && k === n - 1) { const a2 = ART.ambient[0]; o.cls = 'ambient'; o.mfr = a2[2]; o.lines = [{ art: a2[0], name: a2[1], mfr: a2[2], lot: 'L' + (260000 + (h * 7 + k * 11) % 9999), exp, qty: pal * a2[3] }]; }
       for (let p = 0; p < pal; p++) o.places.push({ sscc: ssccMake(serial++), order: o.id, load: l.id, idx: p, scans: [] });
       orders.push(o);
     }

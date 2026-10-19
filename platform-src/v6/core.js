@@ -206,7 +206,7 @@ ${S.role !== 'driver' ? `<a class="side-link" data-act="setRole" data-v="driver"
 ${shellRole ? '' : `<a class="side-link${S.route === 'help' ? ' on' : ''}" data-act="go" data-v="help">${ic('spark', 14)}<span>${esc(T('Справка', 'Hilfe', 'Help', 'Анықтама'))}</span></a>`}</div>`;
   const USER = { admin: ['Sarah Johnson', 'SJ'], dispatcher: ['Айгерим Сапарова', 'АС'], warehouse: ['Болат Ермеков', 'БЕ'], driver: ['Ерлан Сейтқали', 'ЕС'], auditor: ['Olga Berg', 'OB'], viewer: ['Timur Akhmetov', 'TA'], manager: ['Max Keller', 'MK'], finance: ['Дана Жумабаева', 'ДЖ'], quality: ['Anna Schulz', 'AS'], customer: ['ТОО «Аптека Сервис»', 'АС'], partner: ['ТОО «ТрансХолод»', 'ТХ'] };
   const usr = USER[S.role] || USER.admin;
-  return `<div class="app"><aside class="sidebar${S.sideOpen ? ' open' : ''}">${brand}${nav}${tools}<div class="langs">${lang}</div>${ver}</aside>
+  return `<div class="app"><aside class="sidebar${S.sideOpen ? ' open' : ''}">${brand}${nav}${tools}${liveBadge()}<div class="langs">${lang}</div>${ver}</aside>
 <main id="main-content"><header class="topbar"><button class="burger" data-act="sideTog" aria-label="Menu" aria-expanded="${S.sideOpen ? 'true' : 'false'}">☰</button><span class="crumb"><a class="lnk" data-act="go" data-v="${homeRoute()}" role="link" tabindex="0">${esc(navLabel(homeRoute()))}</a> › <a class="lnk" data-act="crumb" role="link" tabindex="0"><b>${esc(navLabel(S.route))}</b></a></span>
 <div class="who"><label class="searchbox">${ic('search', 14)}<input id="gsearch" placeholder="${esc(T('Поиск рейсов, ТС, водителей…', 'Fahrten, Fahrzeuge, Fahrer suchen…', 'Search loads, trucks, drivers…', 'Рейс, КҚ, жүргізуші іздеу…'))}" value="${esc(S.f.q)}"></label>
 <label class="rolebox" title="${esc(T('Переключить роль: меню и права меняются сразу', 'Rolle wechseln: Menü und Rechte ändern sich sofort', 'Switch the role: menu and permissions change at once', 'Рөлді ауыстыру'))}">${ic('user', 14)}<span>${esc(T('Роль', 'Rolle', 'Role', 'Рөл'))}</span><select id="roleSel" class="select" aria-label="Role" style="height:32px">${ROLES.map(r => `<option value="${r}"${r === S.role ? ' selected' : ''}>${esc(ROLE_NAME[r])}</option>`).join('')}</select></label><button class="btn grey sm" data-act="setDesign" title="${S.design === 'kokzhol' ? 'Kökzhol → Olymp' : 'Olymp → Kökzhol'}">${S.design === 'olymp' ? '◐' : '◑'}</button><button class="btn grey sm" data-act="helpHere" aria-label="Help" title="${esc(T('Справка по этому экрану', 'Hilfe zu diesem Bildschirm', 'Help for this screen', 'Осы экран анықтамасы'))}">?</button><span class="bell">${ic('bell', 18)}${alertsCount() ? `<span class="badge-count">${alertsCount()}</span>` : ''}</span>
@@ -224,6 +224,29 @@ function drawerHtml() {
   return `<aside class="drawer open${r.xl ? ' xl' : ''}"><div class="drawer-head"><span>${esc(r.title)}</span><span class="x" data-act="close">${ic('x', 18)}</span></div>${r.html}</aside>`;
 }
 const DRAWERS = {};
+
+/* ---------- live telemetry simulation (port of the 0.3.9 live clock): every 2 s the chamber temperatures drift, moving
+   trucks advance a little and the Live badge updates. Deterministic contexts (the test harness loads the app in iframes)
+   get no automatic tick — liveTick() stays callable. SIMULATION toggles the pause. */
+S.simOn = true; S.liveAt = null;
+const p2c = n => String(n).padStart(2, '0');
+const liveBadge = () => `<div class="live-badge" data-live><button type="button" class="simchip${S.simOn ? '' : ' off'}" data-act="simTog" aria-pressed="${S.simOn ? 'true' : 'false'}" title="${esc(T('Пауза/запуск симуляции телеметрии', 'Telemetrie-Simulation anhalten/starten', 'Pause/start the telemetry simulation', 'Телеметрия симуляциясын тоқтату/қосу'))}">SIMULATION</button><span class="live-note">${esc(T('телеметрия · каждые 2 с', 'Telemetrie · alle 2 s', 'telemetry · every 2 s', 'телеметрия · әр 2 с'))}</span><span class="live-line"><i class="live-dot${S.simOn ? ' on' : ''}"></i>${S.simOn ? 'Live' : esc(T('пауза', 'Pause', 'paused', 'кідіріс'))} · <span data-live-at>${S.liveAt ? p2c(S.liveAt.getHours()) + ':' + p2c(S.liveAt.getMinutes()) + ':' + p2c(S.liveAt.getSeconds()) : '—'}</span></span></div>`;
+let liveSeed = 7;
+const liveRnd = () => (liveSeed = (liveSeed * 1103515245 + 12345) % 2147483648) / 2147483648;
+function liveTick() {
+  S.liveAt = new Date();
+  S.loads.forEach(l => {
+    if (l.status !== 'in_transit' && l.status !== 'problem') return;
+    const z = ZONES[l.zone];
+    l.temp = Math.round(Math.min(z.hi + 3.5, Math.max(z.lo - 3.5, l.temp + (liveRnd() - 0.5) * 0.2)) * 10) / 10;
+    if (l.status === 'in_transit') l.progress = Math.min(0.97, l.progress + 0.0006);
+  });
+  const LIVE = { dashboard: 1, routes: 1, hubs: 1 };
+  if (LIVE[S.route] && !document.hidden && !S.drawer) render();
+  else { const b = $('[data-live-at]'); if (b) b.textContent = p2c(S.liveAt.getHours()) + ':' + p2c(S.liveAt.getMinutes()) + ':' + p2c(S.liveAt.getSeconds()); }
+}
+globalThis.liveTick = liveTick; globalThis.liveBadge = liveBadge;
+if (typeof window !== 'undefined' && !window.frameElement) setInterval(() => { if (S.simOn && !document.hidden) liveTick(); }, 2000);
 
 /* ---------- render + events ---------- */
 function render() {
@@ -248,6 +271,7 @@ document.addEventListener('input', e => {
 Object.assign(ACT, {
   go: d => go(d.v), close: closeDrawer, stab: d => setTab(d.s, d.v),
   crumb: () => go(S.route), sideTog: () => { S.sideOpen = !S.sideOpen; render(); },
+  simTog: () => { S.simOn = !S.simOn; render(); },
   dtab: d => setTab('dispatch', d.v), rtab: d => setTab('routes', d.v), podTab: d => setTab('pod', d.v), bTab: d => setTab('billing', d.v), htab: d => setTab('hubs', d.v),
   open: d => openDrawer({ type: 'load', id: d.id, tab: 'overview' }),
   tab: d => { S.drawer.tab = d.v; render(); },

@@ -166,3 +166,13 @@ html[data-design="kokzhol"] .side-link{color:#c9d8df}html[data-design="kokzhol"]
 @media (prefers-reduced-motion: reduce){.sidebar{transition:none}}
 /* page-level AI summary */
 .aisum-page{margin:0 0 14px;white-space:pre-line}
+/* live telemetry badge (sidebar) */
+.live-badge{margin:12px 4px 2px;padding:9px 10px;border:1px solid rgba(255,255,255,.14);border-radius:10px;font-size:11px;color:rgba(255,255,255,.75);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+[data-design=olymp] .live-badge{border-color:var(--border);color:var(--text-muted)}
+.simchip{background:#e8a02c;color:#241a02;border:0;border-radius:5px;font:700 10px/1 var(--font);letter-spacing:.08em;padding:5px 8px;cursor:pointer}
+.simchip.off{background:#6b7280;color:#fff}
+.live-line{display:inline-flex;align-items:center;gap:6px;flex-basis:100%}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#6b7280;flex:none}
+.live-dot.on{background:#34d399;animation:livepulse 2s ease-in-out infinite}
+@keyframes livepulse{0%,100%{opacity:1}50%{opacity:.35}}
+@media (prefers-reduced-motion: reduce){.live-dot.on{animation:none}}

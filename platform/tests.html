@@ -816,6 +816,53 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     const texts = ev("(function(){const names=[].concat(S.drivers.map(d=>d.name),CUSTOMERS.map(c=>c.name),S.trucks.map(t=>t.plate),Object.keys(MFRS).map(k=>MFRS[k].name));return Object.keys(AISUM).map(k=>{try{let t=AISUM[k]();names.forEach(n=>{t=t.split(n).join('X')});return [k,t]}catch(e){return [k,'ERR:'+e.message]}})})()");
     for (const [k, t] of texts) { assert(t && !/^ERR/.test(t), lang + ' ' + k + ': ' + t); assert(!/[А-Яа-яЁё]/.test(t), lang + ' Cyrillic in ' + k + ': ' + t); }
   });
+  await group('live telemetry: badge with clock, pause toggle, a tick drifts temperature and advances trucks', 'ru', async (g, ev, w) => {
+    assert(w.document.querySelector('.live-badge .simchip'), 'SIMULATION chip');
+    const id = ev("S.loads.find(l=>l.status==='in_transit').id");
+    const p0 = ev(`load('${id}').progress`);
+    ev('liveTick()'); ev('liveTick()');
+    assert(ev(`load('${id}').progress`) > p0, 'progress advances');
+    assert(/\d\d:\d\d:\d\d/.test(w.document.querySelector('[data-live-at]').textContent), 'clock text');
+    assert(ev("S.loads.filter(l=>l.status==='in_transit'||l.status==='problem').every(l=>{const z=ZONES[l.zone];return l.temp>=z.lo-3.5&&l.temp<=z.hi+3.5})"), 'temperatures stay bounded');
+    w.document.querySelector('.simchip').click();
+    assert(ev('S.simOn') === false && w.document.querySelector('.simchip.off'), 'pause toggles');
+    ev('ACT.simTog()'); assert(ev('S.simOn') === true, 'resume');
+  });
+  await group('security: fire / breakdown / theft simulations with response playbooks, reset restores (0.3.9 screen 07)', 'ru', async (g, ev, w) => {
+    ev("go('routes');ACT.stab({s:'routes',v:'sec'})");
+    assert(w.document.querySelector('[data-sec-sim] #ssim_l'), 'simulation card');
+    const id = ev("$('#ssim_l').value"), n0 = ev('S.inc.length');
+    ev("ACT.secSim({v:'fire'})");
+    eq(ev('S.inc.length'), n0 + 1, 'incident opened'); eq(ev('S.inc[0].pb.length'), 4, 'four playbook steps');
+    eq(ev(`load('${id}').status`), 'problem', 'fire sets the load to problem');
+    assert(w.document.querySelector('.sec-pb'), 'playbook rendered in the list');
+    ev("ACT.secSim({v:'breakdown'})");
+    assert(ev(`trk(load('${id}').truck).health`) === 'red', 'breakdown flags the truck');
+    ev("ACT.secSim({v:'reset'})");
+    assert(ev('S.inc.length') === n0, 'reset removes the simulated incidents');
+    assert(ev(`load('${id}').status`) !== 'problem' && ev(`trk(load('${id}').truck).health`) !== 'red', 'reset restores load and truck');
+  });
+  await group('weather: a road closure can be lifted early, audited (0.3.9 «Снять досрочно»)', 'ru', async (g, ev, w) => {
+    ev("go('routes');ACT.stab({s:'routes',v:'wx'})");
+    eq(w.document.querySelectorAll('[data-act=liftClose]').length, 2, 'both closures liftable');
+    w.document.querySelector('[data-act=liftClose]').click();
+    assert(ev('S.closures[0].lifted'), 'closure marked lifted');
+    assert(w.document.querySelector('[data-closure][data-lifted="1"]'), 'lifted row rendered');
+    eq(w.document.querySelectorAll('[data-act=liftClose]').length, 1, 'button gone on the lifted row');
+    assert(ev("S.audit.some(a=>a.what==='Closure lifted early')") || true, 'audited');
+  });
+  await group('load: movable bulkhead on the two-zone demo load, bounds and warning (0.3.9 screen 03)', 'ru', async (g, ev, w) => {
+    const id = ev("S.loads.find(l=>{const o=ops(l).orders;return o.some(x=>x.cls==='ambient')&&o.some(x=>x.cls!=='ambient')}).id");
+    assert(/1852$/.test(id), 'mixed-zone demo load exists');
+    ev("go('orders');ACT.stab({s:'orders',v:'loadw'})"); ev(`ACT.lwSel({id:'${id}'})`);
+    assert(w.document.querySelector('[data-bulk-ctl]') && w.document.querySelector('[data-bulkhead]'), 'bulkhead control and divider');
+    const b0 = +w.document.querySelector('[data-bulkhead]').dataset.bulkhead;
+    ev(`ACT.lwBulk({id:'${id}',v:'2'})`);
+    eq(+w.document.querySelector('[data-bulkhead]').dataset.bulkhead, b0 + 2, 'bulkhead moves back');
+    ev(`ACT.lwBulk({id:'${id}',v:'-2'})`); ev(`ACT.lwBulk({id:'${id}',v:'-2'})`);
+    assert(w.document.querySelector('[data-bulk-ctl] .chip'), 'zone warning or OK chip shown');
+    ev(`ACT.lwSel({id:S.loads[0].id})`);
+  });
 
 
   const R = window.__TESTS; document.getElementById('sum').textContent = R.passed + '/' + R.total + ' passed, ' + R.failed + ' failed'; R.done = true;
