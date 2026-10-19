@@ -37,13 +37,13 @@
   globalThis.FN_L = FN;
   const U = (username, name, role, hub, fn, o) => Object.assign({ username, name, role, hub, fn: fn || [], mfa: true, active: true, locked: false, last: plusH(-Math.round(Math.random() * 0 + 3)), ref: '' }, o);
   S.users = [
-    U('admin', 'Сара Джонсон', 'admin', null, ['ceo', 'head_security'], { last: plusH(-0.2) }),
-    U('dispatcher.ast', 'Айгерим Бекова', 'dispatcher', 'AST', ['head_logistics'], { last: plusH(-1) }), U('dispatcher.ala', 'Руслан Ибраев', 'dispatcher', 'ALA', [], { last: plusH(-26) }), U('dispatcher.kar', 'Олег Смирнов', 'dispatcher', 'KAR', [], { mfa: false, last: plusH(-50) }),
-    U('warehouse.ast', 'Данияр Абенов', 'warehouse', 'AST', [], { last: plusH(-3) }), U('driver.001', 'Ерлан Сейтқали', 'driver', 'KAR', [], { last: plusH(-5) }),
-    U('auditor', 'Марина Ли', 'auditor', null, [], { last: plusH(-200) }), U('viewer', 'Гость', 'viewer', 'ALA', [], { mfa: false, active: false, last: plusH(-900) }),
-    U('manager', 'Бауыржан Кенжебаев', 'manager', null, ['head_analytics', 'head_purchasing'], { last: plusH(-8) }), U('finance', 'Елена Ким', 'finance', null, ['fin_controller'], { last: plusH(-9) }),
-    U('quality', 'Асель Нуртазина', 'quality', 'ALA', ['qa_manager'], { last: plusH(-12), locked: true }), U('security.head', 'Нурбек Жолдасов', 'manager', null, ['head_security'], { last: plusH(-30) }),
-    U('cust.apteka', 'ТОО «Аптека Сервис»', 'customer', null, [], { ref: 'c1', mfa: false, last: plusH(-40) }), U('partner.pl01', 'ТОО «СтепьЛогистик»', 'partner', null, [], { ref: 'PL-01', mfa: false, last: plusH(-70) }),
+    U('admin', nm('Сара Джонсон'), 'admin', null, ['ceo', 'head_security'], { last: plusH(-0.2) }),
+    U('dispatcher.ast', nm('Айгерим Бекова'), 'dispatcher', 'AST', ['head_logistics'], { last: plusH(-1) }), U('dispatcher.ala', nm('Руслан Ибраев'), 'dispatcher', 'ALA', [], { last: plusH(-26) }), U('dispatcher.kar', nm('Олег Смирнов'), 'dispatcher', 'KAR', [], { mfa: false, last: plusH(-50) }),
+    U('warehouse.ast', nm('Данияр Абенов'), 'warehouse', 'AST', [], { last: plusH(-3) }), U('driver.001', nm('Ерлан Сейтқали'), 'driver', 'KAR', [], { last: plusH(-5) }),
+    U('auditor', nm('Марина Ли'), 'auditor', null, [], { last: plusH(-200) }), U('viewer', T('Гость', 'Gast', 'Guest', 'Қонақ'), 'viewer', 'ALA', [], { mfa: false, active: false, last: plusH(-900) }),
+    U('manager', nm('Бауыржан Кенжебаев'), 'manager', null, ['head_analytics', 'head_purchasing'], { last: plusH(-8) }), U('finance', nm('Елена Ким'), 'finance', null, ['fin_controller'], { last: plusH(-9) }),
+    U('quality', nm('Асель Нуртазина'), 'quality', 'ALA', ['qa_manager'], { last: plusH(-12), locked: true }), U('security.head', nm('Нурбек Жолдасов'), 'manager', null, ['head_security'], { last: plusH(-30) }),
+    U('cust.apteka', nm('ТОО «Аптека Сервис»'), 'customer', null, [], { ref: 'c1', mfa: false, last: plusH(-40) }), U('partner.pl01', nm('ТОО «СтепьЛогистик»'), 'partner', null, [], { ref: 'PL-01', mfa: false, last: plusH(-70) }),
   ];
   const userOf = role => S.users.find(u => u.role === role && u.active);
   globalThis.userOf = userOf;
@@ -135,7 +135,7 @@ ${v ? `<div class="card rec-card ${v.ok ? '' : 'lvl3'}">${v.ok ? esc(T('Цепо
     Y('onec', T('1С:Предприятие', '1C:Enterprise', '1C:Enterprise', '1С:Кәсіпорын'), '1C', 'finance', 'no', T('Бухгалтерия, затраты (вне макета)', 'Buchhaltung, Kosten (außerhalb des Mock-ups)', 'Accounting, costs (outside the mock-up)', 'Бухгалтерия'), '', 'contract', 'planned', []),
     Y('partner_api', T('Партнёрский REST API v1 + вебхуки', 'Partner-REST-API v1 + Webhooks', 'Partner REST API v1 + webhooks', 'Серіктес REST API v1'), 'Olymp', 'finance', 'no', T('ERP клиента: слоты, предложения, бронирования, статусы; подписанные вебхуки (LH-P2)', 'ERP des Kunden: Slots, Angebote, Buchungen, Status; signierte Webhooks (LH-P2)', 'Customer ERP: slots, offers, bookings, statuses; signed webhooks (LH-P2)', 'Клиент ERP'), '', 'public', 'configured', []),
   ];
-  S.apiKeys = [{ id: 'k1', name: 'ERP ТОО «МедФарм Дистрибьюшн»', prefix: 'olp_live_3f9a', scopes: ['bookings:read', 'bookings:write', 'tracking:read'], created: '2026-09-01', last: plusH(-2), active: true }, { id: 'k2', name: 'Wialon push', prefix: 'olp_live_b71c', scopes: ['inbox:write'], created: '2026-08-12', last: plusH(-0.1), active: true }, { id: 'k3', name: 'Test (revoked)', prefix: 'olp_test_00aa', scopes: ['tracking:read'], created: '2026-07-01', last: '', active: false }];
+  S.apiKeys = [{ id: 'k1', name: nm('ERP ТОО «МедФарм Дистрибьюшн»'), prefix: 'olp_live_3f9a', scopes: ['bookings:read', 'bookings:write', 'tracking:read'], created: '2026-09-01', last: plusH(-2), active: true }, { id: 'k2', name: 'Wialon push', prefix: 'olp_live_b71c', scopes: ['inbox:write'], created: '2026-08-12', last: plusH(-0.1), active: true }, { id: 'k3', name: 'Test (revoked)', prefix: 'olp_test_00aa', scopes: ['tracking:read'], created: '2026-07-01', last: '', active: false }];
   S.webhooks = [{ id: 'w1', url: 'https://erp.medpharm.example/olymp/hook', events: ['booking.confirmed', 'shipment.status', 'pod.approved'], secret: 'whsec_•••• 7c21', active: true, log: [{ at: plusH(-1), ev: 'shipment.status', code: 200 }, { at: plusH(-5), ev: 'booking.confirmed', code: 200 }] }, { id: 'w2', url: 'https://alarms.secure-kz.example/in', events: ['alarm.level3'], secret: 'whsec_•••• 91af', active: true, log: [{ at: plusH(-20), ev: 'alarm.level3', code: 500 }] }];
   const daysLeft = iso => Math.ceil((new Date(iso + 'T00:00:00+05:00') - NOW) / 864e5);
   const EVENTS = ['booking.confirmed', 'booking.rejected', 'shipment.status', 'pod.approved', 'invoice.issued', 'alarm.level3', 'temperature.excursion'];

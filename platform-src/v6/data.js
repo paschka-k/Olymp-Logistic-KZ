@@ -17,27 +17,27 @@ const ZONES = {
   ambient: { label: '+15…+25 °C', lo: 15,  hi: 25,  mid: 20,  rate: 420 },
 };
 const CUSTOMERS = [
-  { id: 'c1', name: 'ТОО «Аптека Сервис»',        bin: '120340005671', ini: 'АС', av: 1 },
-  { id: 'c2', name: 'ТОО «Фрэш Маркет»',          bin: '110740012345', ini: 'ФМ', av: 5 },
-  { id: 'c3', name: 'ТОО «МедФарм Дистрибьюшн»', bin: '150240008812', ini: 'МД', av: 4 },
-  { id: 'c4', name: 'ТОО «Ледяной Путь Ритейл»',  bin: '130940007790', ini: 'ЛП', av: 2 },
-  { id: 'c5', name: 'ТОО «СеверПродукт»',         bin: '090640003321', ini: 'СП', av: 3 },
+  { id: 'c1', name: nm('ТОО «Аптека Сервис»'),        bin: '120340005671', ini: nm('АС'), av: 1 },
+  { id: 'c2', name: nm('ТОО «Фрэш Маркет»'),          bin: '110740012345', ini: nm('ФМ'), av: 5 },
+  { id: 'c3', name: nm('ТОО «МедФарм Дистрибьюшн»'), bin: '150240008812', ini: nm('МД'), av: 4 },
+  { id: 'c4', name: nm('ТОО «Ледяной Путь Ритейл»'),  bin: '130940007790', ini: nm('ЛП'), av: 2 },
+  { id: 'c5', name: nm('ТОО «СеверПродукт»'),         bin: '090640003321', ini: nm('СП'), av: 3 },
 ];
 const D = (type, to) => ({ type, to });
 const mkDrivers = () => [
-  { id: 'd1', code: 'DRV-001', name: 'Ерлан Сейтқали',     ini: 'ЕС', rto: 8.5, status: 'available', lic: 'CE', exp: 11, rating: 4.9, phone: '+7 701 123 45 67', hub: 'KAR', onDuty: 2.5, week: 41,
+  { id: 'd1', code: 'DRV-001', name: nm('Ерлан Сейтқали'),     ini: nm('ЕС'), rto: 8.5, status: 'available', lic: 'CE', exp: 11, rating: 4.9, phone: '+7 701 123 45 67', hub: 'KAR', onDuty: 2.5, week: 41,
     docs: [D('lic', '2029-05-14'), D('med', '2027-02-03'), D('gdp', '2027-06-01')] },
-  { id: 'd2', code: 'DRV-002', name: 'Асхат Нургалиев',    ini: 'АН', rto: 9,   status: 'available', lic: 'CE', exp: 8,  rating: 4.7, phone: '+7 702 234 56 78', hub: 'ALA', onDuty: 0,   week: 38,
+  { id: 'd2', code: 'DRV-002', name: nm('Асхат Нургалиев'),    ini: nm('АН'), rto: 9,   status: 'available', lic: 'CE', exp: 8,  rating: 4.7, phone: '+7 702 234 56 78', hub: 'ALA', onDuty: 0,   week: 38,
     docs: [D('lic', '2028-09-22'), D('med', '2027-04-18'), D('gdp', '2026-11-02')] },
-  { id: 'd3', code: 'DRV-003', name: 'Дмитрий Орлов',      ini: 'ДО', rto: 3.5, status: 'available', lic: 'C',  exp: 12, rating: 4.8, phone: '+7 705 345 67 89', hub: 'AST', onDuty: 5.5, week: 51,
+  { id: 'd3', code: 'DRV-003', name: nm('Дмитрий Орлов'),      ini: nm('ДО'), rto: 3.5, status: 'available', lic: 'C',  exp: 12, rating: 4.8, phone: '+7 705 345 67 89', hub: 'AST', onDuty: 5.5, week: 51,
     docs: [D('lic', '2027-12-15'), D('med', '2027-08-22'), D('gdp', '2027-03-10')] },
-  { id: 'd4', code: 'DRV-004', name: 'Марат Жунусов',      ini: 'МЖ', rto: 9,   status: 'busy',      lic: 'CE', exp: 6,  rating: 4.6, phone: '+7 707 456 78 90', hub: 'AST', onDuty: 4,   week: 33,
+  { id: 'd4', code: 'DRV-004', name: nm('Марат Жунусов'),      ini: nm('МЖ'), rto: 9,   status: 'busy',      lic: 'CE', exp: 6,  rating: 4.6, phone: '+7 707 456 78 90', hub: 'AST', onDuty: 4,   week: 33,
     docs: [D('lic', '2030-01-30'), D('med', '2027-01-12'), D('gdp', '2027-09-09')] },
-  { id: 'd5', code: 'DRV-005', name: 'Алишер Бектурганов', ini: 'АБ', rto: 6,   status: 'available', lic: 'C',  exp: 9,  rating: 4.9, phone: '+7 708 567 89 01', hub: 'AST', onDuty: 3,   week: 29,
+  { id: 'd5', code: 'DRV-005', name: nm('Алишер Бектурганов'), ini: nm('АБ'), rto: 6,   status: 'available', lic: 'C',  exp: 9,  rating: 4.9, phone: '+7 708 567 89 01', hub: 'AST', onDuty: 3,   week: 29,
     docs: [D('lic', '2028-03-03'), D('med', '2026-10-30'), D('gdp', '2027-05-05')] },
-  { id: 'd6', code: 'DRV-006', name: 'Сергей Ким',         ini: 'СК', rto: 9,   status: 'rest',      lic: 'CE', exp: 15, rating: 4.5, phone: '+7 700 678 90 12', hub: 'SHY', onDuty: 0,   week: 56,
+  { id: 'd6', code: 'DRV-006', name: nm('Сергей Ким'),         ini: nm('СК'), rto: 9,   status: 'rest',      lic: 'CE', exp: 15, rating: 4.5, phone: '+7 700 678 90 12', hub: 'SHY', onDuty: 0,   week: 56,
     docs: [D('lic', '2027-07-07'), D('med', '2027-06-06'), D('gdp', '2027-02-02')] },
-  { id: 'd7', code: 'DRV-007', name: 'Нұрлан Омаров',      ini: 'НО', rto: 9,   status: 'busy',      lic: 'CE', exp: 7,  rating: 4.8, phone: '+7 771 789 01 23', hub: 'AST', onDuty: 6,   week: 44,
+  { id: 'd7', code: 'DRV-007', name: nm('Нұрлан Омаров'),      ini: nm('НО'), rto: 9,   status: 'busy',      lic: 'CE', exp: 7,  rating: 4.8, phone: '+7 771 789 01 23', hub: 'AST', onDuty: 6,   week: 44,
     docs: [D('lic', '2029-11-11'), D('med', '2026-10-05'), D('gdp', '2027-04-04')] },
 ];
 const mkTrucks = () => [
@@ -77,7 +77,7 @@ const mkLoads = () => [
   mkLoad('001842', 'c2', 'SHY', 'AST', 'chilled', 24, 8800, 'low', 'delivered', '2026-10-16T19:00:00+05:00', { driver: 'd2', truck: 't1', pod: 'approved', esf: 'none', progress: 1, podDocs: ['ttn', 'act', 'photo', 'logger'], sig: true }),
   mkLoad('001843', 'c4', 'ALA', 'SHY', 'frozen', 18, 9100, 'medium', 'delivered', '2026-10-16T11:00:00+05:00', { driver: 'd7', truck: 't6', pod: 'approved', esf: 'confirmed', progress: 1, podDocs: ['ttn', 'act', 'photo', 'logger'], sig: true }),
   mkLoad('001844', 'c3', 'KAR', 'SHY', 'pharma', 10, 2500, 'medium', 'delivered', '2026-10-15T14:00:00+05:00', { driver: 'd5', truck: 't2', pod: 'submitted', esf: 'none', progress: 1, podDocs: ['ttn', 'act', 'photo', 'logger'], exc: 30 }),
-  mkLoad('001845', 'c5', 'AST', 'KAR', 'ambient', 20, 7000, 'low', 'delivered', '2026-10-15T09:00:00+05:00', { driver: 'd3', truck: 't4', pod: 'rejected', esf: 'none', progress: 1, podDocs: ['ttn'], rejectWhy: 'Нет акта приёма-передачи и фото груза' }),
+  mkLoad('001845', 'c5', 'AST', 'KAR', 'ambient', 20, 7000, 'low', 'delivered', '2026-10-15T09:00:00+05:00', { driver: 'd3', truck: 't4', pod: 'rejected', esf: 'none', progress: 1, podDocs: ['ttn'], rejectWhy: T('Нет акта приёма-передачи и фото груза', 'Übergabeprotokoll und Frachtfoto fehlen', 'Handover certificate and cargo photo missing', 'Қабылдау-тапсыру актісі мен жүк фотосы жоқ') }),
 ];
 
 S.loads = mkLoads(); S.drivers = mkDrivers(); S.trucks = mkTrucks();
@@ -94,16 +94,16 @@ const mkHubs = () => ({
 const mkJob = (id, hub, zone, o) => Object.assign({ id: 'IN-' + id, hub, zone, carrier: '', plate: '', veh: '', senders: [], plan: true, ramp: null, win: null, pallets: 10, load: null,
   ev: { ci: null, rp: null, st: null, en: null }, chk: { temp: null, logger: false }, delay: null, reason: '', booked: 0, flags: [], log: [] }, o);
 const mkJobs = () => [
-  mkJob('0611', 'AST', 'pharma',  { plate: '075 KGN 02', veh: 'Reefer 20 t', carrier: 'ТОО «Север Карго»',    senders: ['ТОО «МедФарм Дистрибьюшн»'],       win: [900, 930],  ramp: 4, pallets: 14, flags: ['gdp'] }),
-  mkJob('0613', 'AST', 'ambient', { plate: '',           veh: 'Tent 20 t',   carrier: 'ТОО «Центр Транзит»', senders: ['ТОО «СеверПродукт»'],              win: [1020, 1050], plan: false, pallets: 22, flags: ['fix'] }),
-  mkJob('0614', 'AST', 'frozen',  { plate: '630 CTR 09', veh: 'Reefer −20 °C', carrier: 'ТОО «Север Карго»',  senders: ['ТОО «Ледяной Путь Ритейл»'],       win: [840, 870],  ramp: 5, pallets: 26, ev: { ci: 850, rp: null, st: null, en: null }, flags: ['gdp', 'adr'] }),
-  mkJob('0615', 'AST', 'ambient', { plate: '470 JTS 05', veh: 'Tent 20 t',   carrier: 'ТОО «Центр Транзит»', senders: ['ТОО «СеверПродукт»'],              win: [720, 765],  ramp: 1, pallets: 31, ev: { ci: 715, rp: 718, st: 730, en: 760 } }),
-  mkJob('0616', 'AST', 'chilled', { plate: '987 PQR 01', veh: 'Reefer 12 t', carrier: 'ТОО «Север Карго»',    senders: ['ТОО «Фрэш Маркет»'],               win: [790, 820],  ramp: 3, pallets: 18, ev: { ci: 800, rp: 805, st: 815, en: null }, chk: { temp: 3.2, logger: true } }),
-  mkJob('0621', 'ALA', 'pharma',  { plate: '908 KEX 05', veh: 'Reefer 20 t', carrier: 'ТОО «Жетісу Карго»',   senders: ['ТОО «Аптека Сервис»', 'ТОО «МедФарм Дистрибьюшн»'], win: [870, 900],  ramp: 3, pallets: 20, ev: { ci: 860, rp: null, st: null, en: null }, flags: ['gdp', 'block'] }),
-  mkJob('0622', 'ALA', 'ambient', { plate: '321 JKL 02', veh: 'Van 10 t',    carrier: 'ТОО «Жетісу Карго»',   senders: ['Филиал Талдыкорган'],             win: [990, 1020], ramp: 1, pallets: 9 }),
-  mkJob('0623', 'ALA', 'chilled', { plate: '',           veh: 'Reefer 12 t', carrier: 'ТОО «Алатау Логистик»', senders: ['ТОО «Фрэш Маркет»'],             win: [1080, 1110], plan: false, pallets: 16, flags: ['fix'] }),
-  mkJob('0624', 'ALA', 'frozen',  { plate: '135 STU 02', veh: 'Reefer −20 °C', carrier: 'ТОО «Алатау Логистик»', senders: ['ТОО «Ледяной Путь Ритейл»'],    win: [600, 630],  ramp: 4, pallets: 24, ev: { ci: 600, rp: 604, st: 610, en: 730 }, chk: { temp: -19, logger: true }, flags: ['gdp'] }),
-  mkJob('0631', 'KAR', 'chilled', { plate: '987 PQR 01', veh: 'Reefer 12 t', carrier: 'собственный парк',     senders: ['ТОО «Фрэш Маркет»'],               win: [1100, 1130], ramp: 2, pallets: 18, load: 'LD-2026-001848', flags: ['gdp'] }),
+  mkJob('0611', 'AST', 'pharma',  { plate: '075 KGN 02', veh: 'Reefer 20 t', carrier: nm('ТОО «Север Карго»'),    senders: [nm('ТОО «МедФарм Дистрибьюшн»')],       win: [900, 930],  ramp: 4, pallets: 14, flags: ['gdp'] }),
+  mkJob('0613', 'AST', 'ambient', { plate: '',           veh: 'Tent 20 t',   carrier: nm('ТОО «Центр Транзит»'), senders: [nm('ТОО «СеверПродукт»')],              win: [1020, 1050], plan: false, pallets: 22, flags: ['fix'] }),
+  mkJob('0614', 'AST', 'frozen',  { plate: '630 CTR 09', veh: 'Reefer −20 °C', carrier: nm('ТОО «Север Карго»'),  senders: [nm('ТОО «Ледяной Путь Ритейл»')],       win: [840, 870],  ramp: 5, pallets: 26, ev: { ci: 850, rp: null, st: null, en: null }, flags: ['gdp', 'adr'] }),
+  mkJob('0615', 'AST', 'ambient', { plate: '470 JTS 05', veh: 'Tent 20 t',   carrier: nm('ТОО «Центр Транзит»'), senders: [nm('ТОО «СеверПродукт»')],              win: [720, 765],  ramp: 1, pallets: 31, ev: { ci: 715, rp: 718, st: 730, en: 760 } }),
+  mkJob('0616', 'AST', 'chilled', { plate: '987 PQR 01', veh: 'Reefer 12 t', carrier: nm('ТОО «Север Карго»'),    senders: [nm('ТОО «Фрэш Маркет»')],               win: [790, 820],  ramp: 3, pallets: 18, ev: { ci: 800, rp: 805, st: 815, en: null }, chk: { temp: 3.2, logger: true } }),
+  mkJob('0621', 'ALA', 'pharma',  { plate: '908 KEX 05', veh: 'Reefer 20 t', carrier: nm('ТОО «Жетісу Карго»'),   senders: [nm('ТОО «Аптека Сервис»'), nm('ТОО «МедФарм Дистрибьюшн»')], win: [870, 900],  ramp: 3, pallets: 20, ev: { ci: 860, rp: null, st: null, en: null }, flags: ['gdp', 'block'] }),
+  mkJob('0622', 'ALA', 'ambient', { plate: '321 JKL 02', veh: 'Van 10 t',    carrier: nm('ТОО «Жетісу Карго»'),   senders: [nm('Филиал Талдыкорган')],             win: [990, 1020], ramp: 1, pallets: 9 }),
+  mkJob('0623', 'ALA', 'chilled', { plate: '',           veh: 'Reefer 12 t', carrier: nm('ТОО «Алатау Логистик»'), senders: [nm('ТОО «Фрэш Маркет»')],             win: [1080, 1110], plan: false, pallets: 16, flags: ['fix'] }),
+  mkJob('0624', 'ALA', 'frozen',  { plate: '135 STU 02', veh: 'Reefer −20 °C', carrier: nm('ТОО «Алатау Логистик»'), senders: [nm('ТОО «Ледяной Путь Ритейл»')],    win: [600, 630],  ramp: 4, pallets: 24, ev: { ci: 600, rp: 604, st: 610, en: 730 }, chk: { temp: -19, logger: true }, flags: ['gdp'] }),
+  mkJob('0631', 'KAR', 'chilled', { plate: '987 PQR 01', veh: 'Reefer 12 t', carrier: T('собственный парк', 'eigener Fuhrpark', 'own fleet', 'меншікті парк'),     senders: [nm('ТОО «Фрэш Маркет»')],               win: [1100, 1130], ramp: 2, pallets: 18, load: 'LD-2026-001848', flags: ['gdp'] }),
 ];
 S.hubs = mkHubs(); S.jobs = mkJobs();
 S.costs = [

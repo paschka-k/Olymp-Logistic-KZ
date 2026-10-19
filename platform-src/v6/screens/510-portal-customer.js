@@ -48,7 +48,7 @@
     return out;
   };
   /* ---------- form state ---------- */
-  const B0 = () => ({ pickBook: 'A01', pCity: 'AST', pStreet: 'Туран', pHouse: '10', dCity: 'ALA', dStreet: 'Аль-Фараби', dHouse: '77', goods: ['medicines'], zone: 'pharma', pallets: 4, kg: 1600, lines: [], dgOn: false, dg: { un: '', name: '', cls: '', pg: '', lq: false, eq: false, dry: '' }, insured: false, declared: '', payerOn: false, payer: { company: '', bin: '', role: 'forwarder', email: '', ref: '' }, express: false, deliverBy: '', notifyMail: true, notifySms: false, phone: '', email: 'logistics@example.kz', payment: 'prepaid', slot: '', offer: '', remark: '', done: null, msg: '' });
+  const B0 = () => ({ pickBook: 'A01', pCity: 'AST', pStreet: nm('Туран'), pHouse: '10', dCity: 'ALA', dStreet: nm('Аль-Фараби'), dHouse: '77', goods: ['medicines'], zone: 'pharma', pallets: 4, kg: 1600, lines: [], dgOn: false, dg: { un: '', name: '', cls: '', pg: '', lq: false, eq: false, dry: '' }, insured: false, declared: '', payerOn: false, payer: { company: '', bin: '', role: 'forwarder', email: '', ref: '' }, express: false, deliverBy: '', notifyMail: true, notifySms: false, phone: '', email: 'logistics@example.kz', payment: 'prepaid', slot: '', offer: '', remark: '', done: null, msg: '' });
   const B = B0(); globalThis.BK = B;
   const me = () => custOf(S.custId);
   const inp = (k, val, type, extra) => `<input class="inp" id="bk_${k}" data-bk="${k}" type="${type || 'text'}" value="${esc(val == null ? '' : val)}"${extra || ''}>`;
