@@ -4,7 +4,7 @@
     for (const lang of LANGS) { const gg = await fresh(lang); try { const e = gg.ev, ww = gg.w;
       for (const [s, t] of [['dashboard', 'alarms'], ['dashboard', 'inbox'], ['orders', 'bookings'], ['billing', 'insurance'], ['settings', 'ref'], ['settings', 'oncall'], ['settings', 'users'], ['settings', 'audit'], ['settings', 'integ']]) { e(`S.tab['${s}']='${t}';go('${s}')`); assert(ww.document.querySelector('.content').innerText.length > 80, lang + ' empty ' + s + '/' + t); clean(ww, lang + ' ' + s + '/' + t); }
       e("go('changes')"); assert(ww.document.querySelectorAll('.chg-row').length > 0, lang + ' changes rows'); clean(ww, lang + ' changes');
-      if (lang === 'de' || lang === 'en') assert(!/[А-Яа-яЁё]/.test(ww.document.querySelector('.content').innerText.replace(/Sarah|[«»]/g, '')) || true, '');
+      if (lang === 'de' || lang === 'en') { e("S.tab.dashboard='inbox';go('dashboard')"); assert(!/[А-Яа-яЁё]/.test(ww.document.querySelector('.content').innerText), lang + ' Cyrillic in inbox'); }
     } finally { gg.done(); } }
   });
   await group('rec: help articles of W3 exist and DE/EN have no Cyrillic', 'ru', async (g, ev) => { const miss = KEYS.filter(k => !ev(`HELP.articles.some(a=>a.key==='${k}')`)); assert(!miss.length, 'missing help: ' + miss); });
