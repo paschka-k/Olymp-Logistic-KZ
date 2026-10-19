@@ -62,7 +62,15 @@ ${lines.map(x => `<div class="sh-pkg${sel && x.p.sscc === sel.p.sscc ? ' sel' : 
 ${S.ops.zpl ? `<pre class="sh-zpl" data-zpl="1">${esc(L.zpl)}</pre>` : ''}
 <h3 class="lw-h">${esc(T('История сканирования места (Track & Trace)', 'Scanverlauf des Packstücks (Track & Trace)', 'Package scan history (track & trace)', 'Орынды сканерлеу тарихы (Track & Trace)'))}</h3>${ev.map(e => `<div class="sh-ev${e.bad ? ' bad' : e.done ? '' : ' todo'}"><span class="faint">${esc(e.t)}</span><i></i><span>${e.html ? e.text : esc(e.text)}</span></div>`).join('')}</div>`;
     }
-    return head + chips + mfrCard + `<div class="sh-grid" style="margin-top:16px">${pk}${lab}</div>`;
+    return head + chips + mfrCard + `<div class="sh-grid" style="margin-top:16px">${pk}${lab}</div>` + mfrRegistry();
+  }
+  /* full manufacturer registry of the source platform (0.3.9 screen 04): all entries with group chip and places across the demo loads */
+  function mfrRegistry() {
+    const n = {}; S.loads.forEach(l => ops(l).orders.forEach(o => { n[o.mfr] = (n[o.mfr] || 0) + o.places.length; }));
+    const GC = ['blue', 'purple', 'green', 'gray'];
+    const rows = Object.keys(MFRS).map(k => { const m = MFRS[k];
+      return `<div class="sh-mfr" data-mfr-reg="${k}">${mlogo(k, 34)}<span style="flex:1;min-width:0"><b>${esc(m.name)}</b><div class="sub">${esc(m.cc)}${m.url ? ' · ' + esc(m.url) : ''}</div><div class="sub">${chip(GC[m.grp], MFR_G[m.grp])}${n[k] ? ' ' + n[k] + ' ' + esc(T('мест', 'Packst.', 'places', 'орын')) : ''}</div></span></div>`; }).join('');
+    return `<div class="card lw-card" style="margin-top:16px" data-mfr-registry="${Object.keys(MFRS).length}"><h3 class="lw-h" style="margin-top:0">${esc(T('Реестр производителей', 'Herstellerregister', 'Manufacturer registry', 'Өндірушілер тізілімі'))} · ${Object.keys(MFRS).length}</h3><p class="note">${esc(T('Полный каталог источника (экран 04 платформы 0.3.9): группа и число грузовых мест в демо-рейсах.', 'Vollständiger Katalog der Quelle (Bildschirm 04 der Plattform 0.3.9): Gruppe und Packstücke in den Demo-Fahrten.', 'Full catalogue of the source (screen 04 of platform 0.3.9): group and demo-load places.', 'Бастапқы платформаның (0.3.9, 04-экран) толық каталогы.'))}</p><div class="sh-mfrs">${rows}</div></div>`;
   }
   addTab('orders', 'ship', T('Отправки и маркировка', 'Sendungen & Etiketten', 'Shipments & labels', 'Жөнелтулер мен таңбалау'), body, { perm: 'orders:read' });
   const dl = (name, text, mime) => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: mime })); a.download = name; a.click(); };

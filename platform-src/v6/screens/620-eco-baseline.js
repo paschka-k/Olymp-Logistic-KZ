@@ -140,6 +140,12 @@
 ${seg(subs, 'blSub', B.sub)}${{ q: qBody, val: valBody, pv: pvBody, net: netBody, fleet: fleetBody, launch: launchBody }[B.sub]()}`;
   }
   if (!SCREENS.settings.tabs) { const b = SCREENS.settings.body; SCREENS.settings.tabs = [{ key: 'main', label: T('Конфигурация', 'Konfiguration', 'Configuration', 'Конфигурация'), body: b }]; }
-  addTab('settings', 'baseline', T('Исходные данные', 'Basisdaten', 'Baseline data', 'Бастапқы деректер'), body, { badge: () => ecoFr49().open || '' });
+  /* own sidebar section (was Settings → tab "Baseline data"): question catalogue, validation, planned values, network, fleet, launch */
+  SCREENS.baseline = {
+    title: () => navLabel('baseline'),
+    sub: () => T('Fragenkatalog · 150 ответов · валидация, плановые значения, сеть, парк и запуск', 'Fragenkatalog · 150 Antworten · Validierung, Planwerte, Netz, Flotte und Start', 'Question catalogue · 150 answers · validation, planned values, network, fleet and launch', 'Fragenkatalog · 150 жауап · валидация, жоспарлы мәндер, желі, парк және іске қосу'),
+    body,
+  };
+  NAV_BADGE.baseline = () => ecoFr49().open || '';
   globalThis.ECO_WEST = WEST; globalThis.ECO_LEGAL = LEGAL;
 })();

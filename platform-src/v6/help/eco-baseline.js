@@ -1,5 +1,5 @@
 /* W5 help: Settings → Baseline data (LH-O2, FR-35/36/37/38/48/49/174). DE/EN without Cyrillic. */
-helpAdd({ key: 'settings/baseline', group: 'records', screen: 'settings', tab: 'baseline',
+helpAdd({ key: 'baseline', group: 'records', screen: 'baseline', tab: '',
   title: HQ('Исходные данные', 'Basisdaten', 'Baseline data', 'Бастапқы деректер'),
   sub: HQ('Настройки → Исходные данные (экран 17)', 'Einstellungen → Basisdaten (Bildschirm 17)', 'Settings → Baseline data (screen 17)', 'Баптаулар → Бастапқы деректер (17-экран)'),
   purpose: HQ('Заполненный вопросник Fragenkatalog (150 ответов) с валидацией, отклонениями и открытыми пунктами, плановые значения со статусом проверки, 23 города с привязкой к хабам, кольца, целевой парк из 4 ТС, трекер критического пути до первого рейса, пункты юридической и налоговой проверки и решения по холодовой цепи «Запад».',

@@ -1,7 +1,7 @@
   /* ---- navigation: 12 items, every screen / tab / drawer renders in all four languages ---- */
-  for (const lang of LANGS) await group('[' + lang + '] 12 menu items, every screen renders', lang, async (g, ev, w) => {
-    eq(ev('NAV.length'), 12, 'menu items'); eq(w.document.querySelectorAll('.nav-item').length, 12, 'rendered items');
-    const ids = ev('NAV.map(n=>n[0])'); const labels = ev('NAV.map(n=>n[2])'); assert(labels.every(Boolean) && new Set(labels).size === 12, 'labels empty or duplicated');
+  for (const lang of LANGS) await group('[' + lang + '] 13 menu items, every screen renders', lang, async (g, ev, w) => {
+    eq(ev('NAV.length'), 13, 'menu items'); eq(w.document.querySelectorAll('.nav-item').length, 13, 'rendered items');
+    const ids = ev('NAV.map(n=>n[0])'); const labels = ev('NAV.map(n=>n[2])'); assert(labels.every(Boolean) && new Set(labels).size === 13, 'labels empty or duplicated');
     for (const id of ids) { ev(`go('${id}')`); eq(w.document.querySelector('.nav-item.active').dataset.v, id, 'active item'); assert(!w.document.querySelector('.card-body .note') || !/phase|фазе|Phase/.test(w.document.querySelector('main').innerText.slice(0, 400)), id + ' is still a placeholder'); clean(w, id); }
   });
   for (const lang of LANGS) await group('[' + lang + '] tabs and drawers render', lang, async (g, ev, w) => {

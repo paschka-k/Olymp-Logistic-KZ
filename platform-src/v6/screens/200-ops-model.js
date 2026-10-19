@@ -16,15 +16,31 @@
   /* Manufacturers of the source platform (screen 04): the six with static logos (platform/assets/manufacturers/<logo>.png, 515 × 380 px,
      supplied by the product owner) plus two food producers without a logo (initials badge only). */
   const MFRS = {
-    roche: { name: 'Roche Diagnostics', co: 'Roche Diagnostics GmbH, Mannheim', url: 'diagnostics.roche.com', ab: 'RO', col: 1, logo: 'roche' },
-    abbott: { name: 'Abbott', co: 'Abbott Laboratories, Abbott Park', url: 'abbott.com', ab: 'AB', col: 2, logo: 'abbott' },
-    qiagen: { name: 'QIAGEN', co: 'QIAGEN GmbH, Hilden', url: 'qiagen.com', ab: 'QG', col: 3, logo: 'qiagen' },
-    sysmex: { name: 'Sysmex', co: 'Sysmex Europe SE, Norderstedt', url: 'sysmex-europe.com', ab: 'SX', col: 4, logo: 'sysmex' },
-    biomerieux: { name: 'bioMérieux', co: 'bioMérieux SA, Marcy-l\'Étoile', url: 'biomerieux.com', ab: 'BM', col: 5, logo: 'biomerieux' },
-    beckman: { name: 'Beckman Coulter', co: 'Beckman Coulter Inc., Brea', url: 'beckmancoulter.com', ab: 'BC', col: 6, logo: 'beckman-coulter' },
-    freshline: { name: 'FreshLine Foods', co: 'ТОО «FreshLine Foods», Алматы', url: 'freshline.example', ab: 'FL', col: 4 },
-    polar: { name: 'Polar Fisch GmbH', co: 'Polar Fisch GmbH, Bremerhaven', url: 'polar-fisch.example', ab: 'PF', col: 5 },
+    roche: { name: 'Roche Diagnostics', co: 'Roche Diagnostics GmbH, Mannheim', url: 'diagnostics.roche.com', ab: 'RO', col: 1, logo: 'roche', cc: 'CH', grp: 0 },
+    abbott: { name: 'Abbott', co: 'Abbott Laboratories, Abbott Park', url: 'abbott.com', ab: 'AB', col: 2, logo: 'abbott', cc: 'US', grp: 0 },
+    qiagen: { name: 'QIAGEN', co: 'QIAGEN GmbH, Hilden', url: 'qiagen.com', ab: 'QG', col: 3, logo: 'qiagen', cc: 'DE · NL', grp: 0 },
+    sysmex: { name: 'Sysmex', co: 'Sysmex Europe SE, Norderstedt', url: 'sysmex-europe.com', ab: 'SX', col: 4, logo: 'sysmex', cc: 'JP', grp: 2 },
+    biomerieux: { name: 'bioMérieux', co: 'bioMérieux SA, Marcy-l\'Étoile', url: 'biomerieux.com', ab: 'BM', col: 5, logo: 'biomerieux', cc: 'FR', grp: 1 },
+    beckman: { name: 'Beckman Coulter', co: 'Beckman Coulter Inc., Brea', url: 'beckmancoulter.com', ab: 'BC', col: 6, logo: 'beckman-coulter', cc: 'US', grp: 0 },
+    freshline: { name: 'FreshLine Foods', co: 'ТОО «FreshLine Foods», Алматы', url: 'freshline.example', ab: 'FL', col: 4, cc: 'KZ', grp: 2 },
+    polar: { name: 'Polar Fisch GmbH', co: 'Polar Fisch GmbH, Bremerhaven', url: 'polar-fisch.example', ab: 'PF', col: 5, cc: 'DE', grp: 2 },
+    /* registry of the source platform (0.3.9 screen 04 "Производители · 19"): the remaining manufacturers without demo orders */
+    bd: { name: 'BD Biosciences', co: 'Becton Dickinson, Franklin Lakes', url: 'bdbiosciences.com', ab: 'BD', col: 1, cc: 'US', grp: 0 },
+    roxall: { name: 'Roxall Medizin', co: 'Roxall Medizin GmbH, Hamburg', url: 'roxall.de', ab: 'RX', col: 2, cc: 'DE', grp: 0 },
+    gongdong: { name: 'Zhejiang Gongdong Medical', co: 'Zhejiang Gongdong Medical Technology', url: 'en.gongdong.com', ab: 'GD', col: 3, cc: 'CN', grp: 0 },
+    siemens: { name: 'Siemens Healthineers', co: 'Siemens Healthineers AG, Erlangen', url: 'siemens-healthineers.com', ab: 'SH', col: 4, cc: 'DE', grp: 1 },
+    thermofisher: { name: 'Thermo Fisher Scientific', co: 'Thermo Fisher Scientific Inc., Waltham', url: 'thermofisher.com', ab: 'TF', col: 5, cc: 'US', grp: 1 },
+    biorad: { name: 'Bio-Rad Laboratories', co: 'Bio-Rad Laboratories Inc., Hercules', url: 'bio-rad.com', ab: 'BR', col: 6, cc: 'US', grp: 1 },
+    werfen: { name: 'Werfen', co: 'Werfen SA, Barcelona', url: 'werfen.com', ab: 'WF', col: 1, cc: 'ES', grp: 1 },
+    diasorin: { name: 'DiaSorin', co: 'DiaSorin S.p.A., Saluggia', url: 'diasorin.com', ab: 'DS', col: 2, cc: 'IT', grp: 1 },
+    sarstedt: { name: 'Sarstedt', co: 'Sarstedt AG & Co. KG, Nümbrecht', url: 'sarstedt.com', ab: 'SA', col: 3, cc: 'DE', grp: 2 },
+    mercator: { name: 'Mercator Medical', co: 'Mercator Medical S.A., Kraków', url: 'mercatormedical.eu', ab: 'MM', col: 4, cc: 'PL', grp: 2 },
+    immundiagnostik: { name: 'Immundiagnostik', co: 'Immundiagnostik AG, Bensheim', url: 'immundiagnostik.com', ab: 'ID', col: 5, cc: 'DE', grp: 2 },
+    medsnab: { name: T('ТОО «МедСнаб Актобе» · сторонний груз', 'MedSnab Aktobe LLP · Fremdladung', 'MedSnab Aktobe LLP · third-party cargo', '«МедСнаб Ақтөбе» ЖШС · бөгде жүк'), co: 'ТОО «МедСнаб Актобе»', url: '', ab: 'MS', col: 6, cc: 'KZ', grp: 3 },
+    pharmchain: { name: T('Аптечная сеть · сторонний груз', 'Apothekenkette · Fremdladung', 'Pharmacy chain · third-party cargo', 'Дәріхана желісі · бөгде жүк'), co: '', url: '', ab: 'PH', col: 1, cc: 'KZ', grp: 3 },
   };
+  /* registry groups of the source platform; the six logo manufacturers of v6 belong to "added in v5" / "top western IVD" */
+  const MFR_G = [T('добавлен в v5', 'in v5 ergänzt', 'added in v5', 'v5-те қосылды'), T('топ западной IVD', 'Top westliche IVD', 'top western IVD', 'батыс IVD көшбасшысы'), T('в ассортименте', 'im Sortiment', 'in range', 'ассортиментте'), T('сторонний груз', 'Fremdladung', 'third-party cargo', 'бөгде жүк')];
   const ART = {
     pharma: [['RX-1042', T('Реагенты иммунохимии, набор', 'Immunchemie-Reagenzien, Kit', 'Immunochemistry reagents, kit', 'Иммунохимия реагенттері, жинақ'), 'roche', 5], ['DX-2210', T('Реагент ПЦР, набор', 'PCR-Reagenz, Kit', 'PCR reagent kit', 'ПТР реагенті, жинақ'), 'qiagen', 3], ['RX-3307', T('Питательные среды, флаконы', 'Nährmedien, Flaschen', 'Culture media, bottles', 'Қоректік орталар, құтылар'), 'biomerieux', 4]],
     chilled: [['FD-501', T('Йогурт 2,5 %, 12×400 г', 'Joghurt 2,5 %, 12×400 g', 'Yoghurt 2.5 %, 12×400 g', 'Йогурт 2,5 %, 12×400 г'), 'freshline', 7], ['FD-517', T('Сыр полутвёрдый', 'Schnittkäse', 'Semi-hard cheese', 'Жартылай қатты ірімшік'), 'freshline', 9]],
@@ -68,7 +84,7 @@
   }
   if (!(SCREENS.orders.tabs || []).some(t => t.key === 'orders')) { const body0 = SCREENS.orders.body; addTab('orders', 'orders', T('Заказы', 'Aufträge', 'Orders', 'Тапсырыстар'), body0); }   // the base table becomes the first tab once tabs exist
   const ops = l => { if (!l.ops) l.ops = buildOps(l); return l.ops; };
-  globalThis.ops = ops; globalThis.ssccMake = ssccMake; globalThis.ssccValid = ssccValid; globalThis.ssccFromScan = ssccFromScan; globalThis.MFRS = MFRS;
+  globalThis.ops = ops; globalThis.ssccMake = ssccMake; globalThis.ssccValid = ssccValid; globalThis.ssccFromScan = ssccFromScan; globalThis.MFRS = MFRS; globalThis.MFR_G = MFR_G;
   S.loads.forEach(ops);
   const places = l => ops(l).orders.flatMap(o => o.places);
   const findPlace = sscc => { for (const l of S.loads) { const p = places(l).find(x => x.sscc === sscc); if (p) return { l, p, o: ops(l).orders.find(o => o.id === p.order) }; } return null; };

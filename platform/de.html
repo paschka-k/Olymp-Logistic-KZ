@@ -507,6 +507,22 @@ html[data-design="kokzhol"] .side-link{color:#c9d8df}html[data-design="kokzhol"]
 .rolebox .select{border:0;background:transparent;font-weight:600;color:var(--text-strong);max-width:190px}
 .mlogo.img{background:#fff;border:1px solid var(--border);border-radius:6px;padding:3px;box-sizing:border-box}.mlogo.img img,.sh-logo.img img{width:100%;height:100%;object-fit:contain;display:block}
 .sh-logo.img{background:#fff;border:1px solid var(--border);padding:3px;box-sizing:border-box;width:64px;height:47px}
+.kzcity-lbl{font-family:var(--font);font-weight:500;fill:var(--text);paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round} .kzcity-lbl.hub{font-weight:700}
+.kzlegend{display:flex;gap:14px;flex-wrap:wrap;padding:6px 14px 2px;font-size:12px;color:var(--text-2,#5b6675)} .kzlegend i{display:inline-block;width:14px;height:4px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.mapwrap .kzlegend,.mapfull .kzlegend{position:absolute;left:24px;top:22px;flex-direction:column;gap:3px;padding:8px 10px;background:#fff;border:1px solid var(--border);border-radius:var(--r-card)}
+/* help Schaubilder players (port of the 0.3.9 animated help overlays) */
+.hp{margin:14px 0;padding:12px 14px;border:1px solid var(--border);border-radius:var(--r-card);background:var(--surface,#fff)}
+.hp-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.hp-ctl{display:inline-flex;gap:6px;align-items:center}.hp-ctl button{min-width:30px;height:28px;border:1px solid var(--border-input);background:var(--surface,#fff);border-radius:8px;cursor:pointer;font-size:14px;color:var(--text)}
+.hp-txt{margin:8px 0 2px;font-size:13px;min-height:3em}.hp-all summary{cursor:pointer;font-size:12px;color:var(--text-muted)}.hp-all ol{font-size:12px;margin:6px 0 0;padding-left:20px}.hp-all li{margin:3px 0}
+.hv-box.hv-n rect{fill:var(--bg-subtle,#f3f4f6);stroke:var(--border,#d1d5db)}
+.hp .pl-on rect,.hp .pl-on path{stroke-width:2.5;filter:drop-shadow(0 0 3px rgba(37,99,235,.45))}
+@media (prefers-reduced-motion: no-preference){.hp .pl-on rect,.hp .pl-on>path{animation:hp-pulse 1.6s ease-in-out infinite}}
+@keyframes hp-pulse{0%,100%{filter:drop-shadow(0 0 2px rgba(37,99,235,.3))}50%{filter:drop-shadow(0 0 6px rgba(37,99,235,.7))}}
+.hp .hv-ar.pl-go line{stroke:#16a34a;stroke-width:2.4}.hp .hv-ar.pl-go path{fill:#16a34a}
+.hp .pl-nogo{color:#dc2626}.hp .pl-nogo path{stroke:#dc2626}.hp .pl-nogo text{fill:#dc2626;font-size:10px;font-weight:700}
+.hp .pl-num circle{fill:var(--surface,#fff);stroke:var(--primary,#2563eb);stroke-width:2}.hp .pl-num text{fill:var(--primary,#2563eb);font-weight:700;font-size:11px}
+.hp .pl-num.pl-on circle{fill:var(--primary,#2563eb)}.hp .pl-num.pl-on text{fill:#fff}
 
 </style></head><body><a class="skip" href="#main-content">Skip to content</a><div id="root"></div><script>
 /* v6 core: i18n, helpers, icons, store + dispatch rules, shell, drawer, router. */
@@ -676,6 +692,7 @@ const NAV = [
   ['billing', 'receipt', T('Счета и ЭСФ', 'Rechnungen & ESF', 'Billing & Invoices', 'Шоттар және ЭШФ'), 5],
   ['reports', 'chart', T('Отчёты', 'Berichte', 'Reports', 'Есептер'), 6],
   ['ai', 'spark', T('AI-ассистент', 'KI-Assistent', 'AI Ops Assistant', 'AI-көмекші'), 6],
+  ['baseline', 'chart', T('Исходные данные', 'Basisdaten', 'Baseline data', 'Бастапқы деректер'), 6],
   ['settings', 'cog', T('Настройки', 'Einstellungen', 'Settings', 'Баптаулар'), 6],
 ];
 const SCREENS = {};   // id -> { title, sub, actions(), body() | tabs[{key,label,body,badge,perm}] }
@@ -767,7 +784,7 @@ Object.assign(ACT, {
 
 /* Roles & permissions (FR-14/137): 11 roles, permission matrix generated from the source platform (role-perms.json),
    screen / tab gating, role shells (driver, customer, partner use their own menu), role switcher. */
-const VERSION = '6.1.0', BUILD = '2026-10-19 08:46';
+const VERSION = '6.1.0', BUILD = '2026-10-19 10:08';
 const ROLES = ['admin', 'dispatcher', 'warehouse', 'driver', 'auditor', 'viewer', 'manager', 'finance', 'quality', 'customer', 'partner'];
 const ROLE_NAME = {
   admin: T('Администратор', 'Administrator', 'Administrator', 'Әкімші'), dispatcher: T('Диспетчер', 'Disponent', 'Dispatcher', 'Диспетчер'), warehouse: T('Склад', 'Lager', 'Warehouse', 'Қойма'),
@@ -776,7 +793,7 @@ const ROLE_NAME = {
   customer: T('Клиент (портал)', 'Kunde (Portal)', 'Customer (portal)', 'Клиент (портал)'), partner: T('Партнёр (портал)', 'Partner (Portal)', 'Partner (portal)', 'Серіктес (портал)'),
 };
 const ROLE_PERMS = {"admin":["alarms:read","alarms:write","approvals:sign","audit:read","bookings:manage","costs:approve","costs:read","crm:read","crm:write","data:export","documents:sign","drivers:read","drivers:write","fines:write","fleet:read","fleet:write","integrations:admin","orders:read","orders:write","overview:read","partners:write","pii:read","planning:admin","quality:write","temperature:read","temperature:write","trips:override_load","trips:override_release","trips:read","trips:status","trips:write","users:admin"],"dispatcher":["alarms:read","alarms:write","bookings:manage","costs:read","crm:read","crm:write","documents:sign","drivers:read","fleet:read","orders:read","orders:write","overview:read","partners:write","temperature:read","temperature:write","trips:read","trips:status","trips:write"],"warehouse":["alarms:read","fleet:read","orders:read","orders:write","overview:read","quality:write","temperature:read","temperature:write","trips:read","trips:status"],"driver":["alarms:read","driver:app","temperature:write","trips:read","trips:status"],"auditor":["alarms:read","audit:read","costs:read","crm:read","drivers:read","fleet:read","orders:read","overview:read","temperature:read","trips:read"],"viewer":["alarms:read","fleet:read","orders:read","overview:read","temperature:read","trips:read"],"customer":["portal"],"manager":["alarms:read","approvals:sign","costs:approve","costs:read","drivers:read","fleet:read","orders:read","overview:read","temperature:read","trips:override_load","trips:override_release","trips:read"],"finance":["costs:approve","costs:read","drivers:read","fines:write","fleet:read","overview:read","trips:read"],"quality":["alarms:read","fleet:read","orders:read","overview:read","quality:write","temperature:read","trips:read"],"partner":["partner:portal"]};
-const SCREEN_PERM = { dashboard: 'overview:read', orders: 'orders:read', dispatch: 'trips:read', fleet: 'fleet:read', drivers: 'drivers:read', routes: 'trips:read', hubs: 'trips:read', pod: 'trips:read', billing: 'costs:read', reports: 'overview:read', ai: 'overview:read', settings: 'overview:read' };
+const SCREEN_PERM = { dashboard: 'overview:read', orders: 'orders:read', dispatch: 'trips:read', fleet: 'fleet:read', drivers: 'drivers:read', routes: 'trips:read', hubs: 'trips:read', pod: 'trips:read', billing: 'costs:read', reports: 'overview:read', ai: 'overview:read', settings: 'overview:read', baseline: 'costs:read' };
 const SHELL_NAV = { driver: [], customer: [], partner: [] };   // role shells: [id, icon, label, phase] pushed by the driver-app / portal areas
 const ALWAYS = ['help', 'changes', 'track', 'request'];   // track / request: public views (W4)
 const canDo = p => (ROLE_PERMS[S.role] || []).includes(p);
@@ -903,20 +920,80 @@ S.costs = [
   { id: 'C-5', date: '2026-10-15', hub: 'KAR', text: T('Дизельное топливо', 'Diesel', 'Diesel fuel', 'Дизель отыны'), amount: 780000, ref: '', cat: 'fuel' },
 ];
 
+/* Kazakhstan network map (shared by Dashboard / Routes): all cities, trunk roads coloured by mobile-coverage class, real projection.
+   Data = platform 0.3.9 coverage reference (backend/app/v5/reference/coverage.json, effective class of the fleet SIMs). */
+(function () {
+  const W = 1000, KX = W / 42, KY = KX / Math.cos(48 * Math.PI / 180), H = Math.round((55.7 - 40.3) * KY);
+  const proj = (lat, lon) => [(lon - 46) * KX, (55.7 - lat) * KY];
+  const OUTLINE = [[49.0, 46.4], [48.4, 47.4], [47.2, 47.7], [46.6, 48.5], [47.0, 49.2], [46.9, 49.9], [47.6, 50.4], [48.7, 50.6], [49.3, 51.1],
+  [50.6, 51.7], [52.4, 51.6], [54.0, 51.1], [55.6, 50.6], [57.2, 51.1], [58.6, 51.1], [59.9, 50.7], [61.4, 50.8], [61.6, 51.4], [60.1, 51.9], [61.0, 52.4],
+  [60.8, 52.9], [61.7, 53.3], [61.0, 53.9], [62.5, 54.1], [65.0, 54.6], [65.6, 55.0], [68.2, 55.4], [69.2, 55.4], [70.8, 55.2], [71.2, 54.2], [72.9, 54.1],
+  [73.8, 53.7], [75.4, 54.0], [76.6, 54.3], [77.9, 53.3], [78.9, 52.6], [80.1, 51.3], [81.2, 51.0], [82.8, 51.0], [84.2, 50.6], [85.2, 50.1], [86.8, 49.8],
+  [87.3, 49.1], [85.6, 48.4], [85.5, 47.1], [83.0, 47.2], [82.3, 45.6], [79.9, 44.9], [80.4, 44.1], [80.2, 42.2], [79.0, 42.8], [77.0, 42.9], [75.6, 42.8],
+  [74.2, 43.2], [73.4, 42.5], [71.8, 42.8], [70.9, 42.2], [69.9, 41.3], [69.0, 41.0], [68.6, 40.6], [68.0, 41.0], [66.6, 41.2], [66.0, 42.9], [64.9, 43.7],
+  [62.0, 43.5], [61.0, 44.4], [58.6, 45.6], [56.0, 45.0], [56.0, 41.3], [55.4, 41.3], [54.1, 42.3], [52.9, 42.1], [52.4, 42.8], [51.3, 43.2], [50.9, 44.0],
+  [50.3, 44.6], [51.3, 45.3], [52.8, 45.4], [53.1, 46.1], [53.0, 46.9], [51.9, 46.9], [50.3, 46.7]];
+  /* [ru, kk, en, de, lat, lon] */
+  const CITY = [["Астана", "Астана", "Astana", "Astana", 51.1694, 71.4491], ["Караганда", "Қарағанды", "Karaganda", "Karaganda", 49.8047, 73.1094], ["Кокшетау", "Көкшетау", "Kokshetau", "Kokshetau", 53.2833, 69.3833], ["Петропавловск", "Петропавл", "Petropavl", "Petropavl", 54.8667, 69.15], ["Павлодар", "Павлодар", "Pavlodar", "Pavlodar", 52.2873, 76.9674], ["Костанай", "Қостанай", "Kostanay", "Kostanay", 53.2144, 63.6246], ["Актобе", "Ақтөбе", "Aktobe", "Aktobe", 50.2839, 57.167], ["Уральск", "Орал", "Oral", "Oral", 51.2333, 51.3667], ["Атырау", "Атырау", "Atyrau", "Atyrau", 47.1167, 51.8833], ["Актау", "Ақтау", "Aktau", "Aktau", 43.65, 51.16], ["Жезказган", "Жезқазған", "Zhezkazgan", "Zhezkazgan", 47.7833, 67.7667], ["Алматы", "Алматы", "Almaty", "Almaty", 43.2389, 76.8897], ["Талдыкорган", "Талдықорған", "Taldykorgan", "Taldykorgan", 45.0156, 78.3739], ["Тараз", "Тараз", "Taraz", "Taraz", 42.9, 71.3667], ["Шымкент", "Шымкент", "Shymkent", "Shymkent", 42.3417, 69.5901], ["Туркестан", "Түркістан", "Turkistan", "Turkistan", 43.2973, 68.2517], ["Кызылорда", "Қызылорда", "Kyzylorda", "Kyzylorda", 44.8488, 65.4823], ["Семей", "Семей", "Semey", "Semey", 50.4111, 80.2275], ["Усть-Каменогорск", "Өскемен", "Oskemen", "Oskemen", 49.9483, 82.6275], ["Аксу", "Ақсу", "Aksu", "Aksu", 52.0333, 76.9167], ["Хромтау", "Хромтау", "Khromtau", "Khromtau", 50.25, 58.4333], ["Каскелен", "Қаскелең", "Kaskelen", "Kaskelen", 43.2, 76.6167], ["Сарыагаш", "Сарыағаш", "Saryagash", "Saryagash", 41.45, 69.1667]];
+  /* [id, from(ru), to(ru), km, [[fromKm, toKm, class]]] */
+  const SEG = [["AST-KAR", "Астана", "Караганда", 215, [[0, 215, "4g"]]], ["KAR-ALM", "Караганда", "Алматы", 1000, [[0, 110, "4g"], [110, 150, "3g"], [150, 240, "none"], [240, 380, "3g"], [380, 400, "4g"], [400, 560, "2g"], [560, 700, "none"], [700, 850, "2g"], [850, 930, "3g"], [930, 1000, "4g"]]], ["KAR-ZHE", "Караганда", "Жезказган", 540, [[0, 80, "4g"], [80, 200, "3g"], [200, 330, "none"], [330, 460, "2g"], [460, 540, "4g"]]], ["AST-KOK", "Астана", "Кокшетау", 300, [[0, 300, "4g"]]], ["KOK-PET", "Кокшетау", "Петропавловск", 190, [[0, 60, "4g"], [60, 140, "3g"], [140, 190, "4g"]]], ["PET-KOS", "Петропавловск", "Костанай", 400, [[0, 60, "4g"], [60, 180, "3g"], [180, 260, "2g"], [260, 340, "3g"], [340, 400, "4g"]]], ["AST-KOS", "Астана", "Костанай", 700, [[0, 60, "4g"], [60, 230, "3g"], [230, 260, "4g"], [260, 380, "2g"], [380, 400, "3g"], [400, 520, "none"], [520, 620, "2g"], [620, 700, "4g"]]], ["KOS-AKT", "Костанай", "Актобе", 820, [[0, 150, "4g"], [150, 210, "3g"], [210, 390, "none"], [390, 560, "2g"], [560, 700, "3g"], [700, 820, "4g"]]], ["AKT-KHR", "Актобе", "Хромтау", 142, [[0, 60, "4g"], [60, 110, "3g"], [110, 142, "4g"]]], ["KHR-URA", "Хромтау", "Уральск", 570, [[0, 100, "3g"], [100, 200, "2g"], [200, 310, "none"], [310, 450, "2g"], [450, 520, "3g"], [520, 570, "4g"]]], ["URA-ATY", "Уральск", "Атырау", 500, [[0, 60, "4g"], [60, 200, "2g"], [200, 300, "none"], [300, 420, "3g"], [420, 500, "4g"]]], ["ATY-AKU", "Атырау", "Актау", 900, [[0, 50, "4g"], [50, 230, "3g"], [230, 260, "4g"], [260, 380, "2g"], [380, 420, "3g"], [420, 620, "none"], [620, 750, "2g"], [750, 800, "3g"], [800, 900, "4g"]]], ["ALM-KAS", "Алматы", "Каскелен", 30, [[0, 30, "4g"]]], ["KAS-TAR", "Каскелен", "Тараз", 500, [[0, 60, "4g"], [60, 200, "3g"], [200, 260, "4g"], [260, 330, "3g"], [330, 380, "3g"], [380, 500, "4g"]]], ["TAR-SHY", "Тараз", "Шымкент", 180, [[0, 180, "4g"]]], ["SHY-TUR", "Шымкент", "Туркестан", 165, [[0, 165, "4g"]]], ["TUR-KYZ", "Туркестан", "Кызылорда", 280, [[0, 40, "4g"], [40, 150, "3g"], [150, 210, "2g"], [210, 280, "4g"]]], ["SHY-SAR", "Шымкент", "Сарыагаш", 120, [[0, 120, "4g"]]], ["ALM-TAL", "Алматы", "Талдыкорган", 260, [[0, 80, "4g"], [80, 150, "3g"], [150, 200, "3g"], [200, 260, "4g"]]], ["AST-PAV", "Астана", "Павлодар", 440, [[0, 80, "4g"], [80, 180, "3g"], [180, 250, "2g"], [250, 330, "4g"], [330, 440, "4g"]]], ["PAV-AKS", "Павлодар", "Аксу", 50, [[0, 50, "4g"]]], ["AKS-SEM", "Аксу", "Семей", 330, [[0, 60, "3g"], [60, 150, "2g"], [150, 230, "none"], [230, 300, "3g"], [300, 330, "4g"]]], ["SEM-UKA", "Семей", "Усть-Каменогорск", 200, [[0, 70, "4g"], [70, 110, "3g"], [110, 200, "4g"]]]];
+  const CLS = { '4g': '#2e9e5b', '3g': '#9bbf4f', '2g': '#e8a02c', none: '#d0312d' };
+  const cname = c => T(c[0], c[3], c[2], c[1]);
+  const byRu = {}; CITY.forEach(c => { byRu[c[0]] = c; });
+  const xy = ru => proj(byRu[ru][4], byRu[ru][5]);
+  /* hub key -> city (ru) */
+  const HUB_CITY = { AST: 'Астана', ALA: 'Алматы', KAR: 'Караганда', SHY: 'Шымкент', ATY: 'Атырау' };
+  /* shortest road path between two cities over the SEG graph -> {pts:[[x,y]], cum:[km], total} */
+  const adj = {}; SEG.forEach(s => { (adj[s[1]] = adj[s[1]] || []).push([s[2], s[3]]); (adj[s[2]] = adj[s[2]] || []).push([s[1], s[3]]); });
+  const memo = {};
+  function roadPath(a, b) {
+    const key = a + '>' + b; if (memo[key]) return memo[key];
+    const d = { [a]: 0 }, prev = {}, todo = new Set(Object.keys(adj));
+    while (todo.size) { let u = null; todo.forEach(k => { if (d[k] !== undefined && (u === null || d[k] < d[u])) u = k; }); if (u === null || u === b) break; todo.delete(u); (adj[u] || []).forEach(([v, km]) => { if (d[v] === undefined || d[u] + km < d[v]) { d[v] = d[u] + km; prev[v] = u; } }); }
+    const names = [b]; while (names[0] !== a && prev[names[0]]) names.unshift(prev[names[0]]);
+    const pts = names.map(xy), cum = names.map(n => d[n] || 0);
+    return (memo[key] = { pts, cum, total: cum[cum.length - 1] || 1 });
+  }
+  /* point at share p (0…1) of the way along the road path */
+  function along(path, p) {
+    const t = path.total * Math.max(0, Math.min(1, p));
+    for (let i = 1; i < path.pts.length; i++) if (t <= path.cum[i] || i === path.pts.length - 1) { const span = path.cum[i] - path.cum[i - 1] || 1, f = Math.max(0, Math.min(1, (t - path.cum[i - 1]) / span)); return [path.pts[i - 1][0] + (path.pts[i][0] - path.pts[i - 1][0]) * f, path.pts[i - 1][1] + (path.pts[i][1] - path.pts[i - 1][1]) * f]; }
+    return path.pts[0];
+  }
+  const hubPath = (a, b) => roadPath(HUB_CITY[a], HUB_CITY[b]);
+  const hubXY = k => xy(HUB_CITY[k]);
+  /* label offsets (dx, dy, anchor) where cities are close together */
+  const LBL = { 'Каскелен': [-8, 14, 'end'], 'Алматы': [8, 4, 'start'], 'Сарыагаш': [-8, 12, 'end'], 'Шымкент': [8, 10, 'start'], 'Туркестан': [-8, -6, 'end'], 'Аксу': [8, 12, 'start'], 'Павлодар': [8, -4, 'start'],
+    'Хромтау': [8, 12, 'start'], 'Актобе': [-8, -6, 'end'], 'Петропавловск': [8, -2, 'start'], 'Караганда': [10, 18, 'start'], 'Астана': [10, -8, 'start'] };
+  /* static layer: outline + roads + cities. `k` scales strokes/labels for zoomed views; hubs = keys of HUB_CITY drawn as squares */
+  function kzmapBase(k) {
+    k = k || 1;
+    const pts = OUTLINE.map(([lo, la]) => proj(la, lo).map(v => v.toFixed(1)).join(',')).join(' ');
+    const hubs = new Set(Object.values(HUB_CITY));
+    const roads = SEG.map(s => { const a = xy(s[1]), b = xy(s[2]); return s[4].map(st => { const f0 = st[0] / s[3], f1 = st[1] / s[3], bad = st[2] === 'none' || st[2] === '2g';
+      return `<line x1="${(a[0] + (b[0] - a[0]) * f0).toFixed(1)}" y1="${(a[1] + (b[1] - a[1]) * f0).toFixed(1)}" x2="${(a[0] + (b[0] - a[0]) * f1).toFixed(1)}" y2="${(a[1] + (b[1] - a[1]) * f1).toFixed(1)}" stroke="${CLS[st[2]]}" stroke-width="${(bad ? 6 : 4) * k}" stroke-linecap="round"${st[2] === 'none' ? ` stroke-dasharray="${8 * k} ${5 * k}"` : ''}/>`; }).join(''); }).join('');
+    const cities = CITY.map(c => { const [x, y] = proj(c[4], c[5]), l = LBL[c[0]] || [8, -6, 'start'], hub = hubs.has(c[0]);
+      return `<g class="kzcity" data-city="${esc(c[0])}">${hub ? `<rect x="${x - 7 * k}" y="${y - 7 * k}" width="${14 * k}" height="${14 * k}" fill="#173a5e" stroke="#fff" stroke-width="${2 * k}"/>` : `<circle cx="${x}" cy="${y}" r="${4.5 * k}" fill="#fff" stroke="#3a4656" stroke-width="${2 * k}"/>`}<text x="${x + l[0] * k}" y="${y + l[1] * k}" text-anchor="${l[2]}" class="kzcity-lbl${hub ? ' hub' : ''}" style="font-size:${(hub ? 15 : 12.5) * k}px">${esc(cname(c))}</text></g>`; }).join('');
+    return `<polygon points="${pts}" fill="#eef3fa" stroke="#c4cedb" stroke-width="${1.2 * k}" stroke-dasharray="${4 * k} ${3 * k}"/>${roads}${cities}`;
+  }
+  const legend = () => `<div class="kzlegend">${[['4g', '4G'], ['3g', '3G'], ['2g', T('2G: голос/SMS', '2G: Sprache/SMS', '2G: voice/SMS', '2G: дауыс/SMS')], ['none', T('нет сети', 'kein Netz', 'no network', 'байланыс жоқ')]].map(x => `<span><i style="background:${CLS[x[0]]}"></i>${esc(x[1])}</span>`).join('')}</div>`;
+  window.KZMAP = { W, H, proj, base: kzmapBase, hubXY, hubPath, along, legend, CLS };
+})();
+
 /* Dashboard (spec 5.1): 6 KPI, schematic KZ map + dispatch list, alerts + quick actions. */
 (function () {
   const kpi = (cls, ic_, label, val, sub, subCls) => `<div class="kpi-tile"><div><div class="label">${esc(label)}</div><div class="value">${val}</div><div class="delta ${subCls || ''}">${sub}</div></div><div class="icon" style="background:var(--tint-${cls}-100);color:var(--label-${cls})">${ic(ic_, 20)}</div></div>`;
   function map() {
-    const hubs = Object.entries(HUBS).map(([k, h]) => `<g><circle cx="${h.x}" cy="${h.y}" r="7" fill="#fff" stroke="var(--primary)" stroke-width="3"/><text x="${h.x + 12}" y="${h.y + 4}" class="maplbl">${esc(h.city)}</text></g>`).join('');
-    const lines = S.loads.filter(l => isActive(l) && l.status !== 'assigned').map(l => { const a = HUBS[l.from], b = HUBS[l.to]; return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="var(--primary)" stroke-opacity=".35" stroke-width="2" stroke-dasharray="5 4"/>`; }).join('');
+    const pathD = l => KZMAP.hubPath(l.from, l.to).pts.map((q, i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' ');
+    const lines = S.loads.filter(l => isActive(l) && l.status !== 'assigned').map(l => `<path d="${pathD(l)}" fill="none" stroke="#173a5e" stroke-opacity=".55" stroke-width="2.5" stroke-dasharray="2 7" stroke-linecap="round"/>`).join('');
     const mk = S.loads.filter(l => l.status === 'in_transit' || l.status === 'problem').map(l => {
-      const a = HUBS[l.from], b = HUBS[l.to], x = a.x + (b.x - a.x) * l.progress, y = a.y + (b.y - a.y) * l.progress, ts = tempState(l);
+      const [x, y] = KZMAP.along(KZMAP.hubPath(l.from, l.to), l.progress), ts = tempState(l);
       const col = ts === 'breach' ? 'var(--mk-red)' : ts === 'warn' ? 'var(--mk-status-yellow)' : 'var(--mk-green)', t = trk(l.truck);
-      return `<g class="mk" data-act="open" data-id="${l.id}" transform="translate(${x},${y})"><circle r="14" fill="${col}"/><path d="M-7 -3h9v6h-9zM2 -1h4l3 3v2h-7z" fill="#fff"/><circle cx="10" cy="-10" r="4.5" fill="${ts === 'ok' ? 'var(--mk-status-green)' : ts === 'warn' ? 'var(--mk-status-yellow)' : 'var(--red)'}" stroke="#fff" stroke-width="1.5"/><rect x="-44" y="18" width="88" height="17" rx="6" fill="#fff" stroke="var(--border-input)"/><text x="0" y="30" text-anchor="middle" class="maplbl sm">${esc(t ? t.plate.slice(0, 10) : '')} · ${l.temp > 0 ? '+' : ''}${String(l.temp).replace('.', ',')}°</text></g>`;
+      return `<g class="mk" data-act="open" data-id="${l.id}" transform="translate(${x},${y}) scale(1.5)"><circle r="14" fill="${col}"/><path d="M-7 -3h9v6h-9zM2 -1h4l3 3v2h-7z" fill="#fff"/><circle cx="10" cy="-10" r="4.5" fill="${ts === 'ok' ? 'var(--mk-status-green)' : ts === 'warn' ? 'var(--mk-status-yellow)' : 'var(--red)'}" stroke="#fff" stroke-width="1.5"/><rect x="-44" y="18" width="88" height="17" rx="6" fill="#fff" stroke="var(--border-input)"/><text x="0" y="30" text-anchor="middle" class="maplbl sm">${esc(t ? t.plate.slice(0, 10) : '')} · ${l.temp > 0 ? '+' : ''}${String(l.temp).replace('.', ',')}°</text></g>`;
     }).join('');
     const free = S.trucks.filter(t => t.status === 'available').length, act = S.loads.filter(isActive).length;
     return `<div class="card mapcard"><div class="card-head">${esc(T('Живые операции', 'Live-Betrieb', 'Live Operations', 'Тікелей операциялар'))}</div><div class="mapwrap">
-<svg viewBox="0 0 600 340" class="kzmap"><path d="M40 120 L110 70 L230 60 L330 40 L450 60 L560 90 L580 160 L540 230 L560 290 L440 310 L330 318 L230 300 L140 250 L60 200 Z" fill="#eef2f6" stroke="#d7dee7" stroke-width="2"/>${lines}${hubs}${mk}</svg>
+<svg viewBox="0 0 ${KZMAP.W} ${KZMAP.H}" class="kzmap">${KZMAP.base()}${lines}${mk}</svg>${KZMAP.legend()}
 <div class="legend card"><b>${esc(T('Состояние ТС', 'Fahrzeugstatus', 'Vehicle status', 'КҚ күйі'))}</b><div><i style="background:var(--mk-status-green)"></i>${esc(T('В норме', 'In Ordnung', 'On time', 'Қалыпты'))}</div><div><i style="background:var(--mk-status-yellow)"></i>${esc(T('Близко к границе', 'Nahe Grenzwert', 'Near limit', 'Шекке жақын'))}</div><div><i style="background:var(--red)"></i>${esc(T('Темп. тревога', 'Temp.-Alarm', 'Temp. alarm', 'Темп. дабыл'))}</div></div>
 <div class="statstrip card"><span><b>${S.trucks.length}</b> ${esc(T('ТС всего', 'Fahrzeuge', 'Total vehicles', 'КҚ барлығы'))}</span><span><b class="g">${free}</b> ${esc(T('свободно', 'frei', 'available', 'бос'))}</span><span><b class="b">${act}</b> ${esc(T('активных рейсов', 'aktive Fahrten', 'active loads', 'белсенді рейс'))}</span></div></div></div>`;
   }
@@ -1252,13 +1329,14 @@ ${l.status === 'problem' ? `<div class="prob">${ic('alert', 14)} ${esc(T('Тем
   const sel = (key, label, opts) => `<label>${esc(label)}:</label><select class="select" data-rf="${key}">${opts.map(o => `<option value="${esc(o[0])}"${F[key] === o[0] ? ' selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
   const tk = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
   function map() {
-    const W = 600 / zoom, H = 340 / zoom, cx = 330, cy = 180, vb = `${cx - W / 2} ${cy - H / 2} ${W} ${H}`, k = 1 / zoom;
-    const hubs = Object.values(HUBS).map(h => `<g><circle cx="${h.x}" cy="${h.y}" r="${7 * k}" fill="#fff" stroke="var(--primary)" stroke-width="${3 * k}"/><rect x="${h.x + 10 * k}" y="${h.y - 9 * k}" width="${(h.city.length * 7 + 12) * k}" height="${18 * k}" rx="${9 * k}" fill="#fff" stroke="var(--border-input)"/><text x="${h.x + 16 * k}" y="${h.y + 4 * k}" font-size="${12 * k}" class="maplbl" style="font-size:${12 * k}px">${esc(h.city)}</text></g>`).join('');
-    const ls = live(), lines = ls.map(l => { const a = HUBS[l.from], b = HUBS[l.to]; const sel = S.drawer && S.drawer.id === l.id; return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="var(--primary)" stroke-opacity="${sel ? 1 : .35}" stroke-width="${(sel ? 3 : 2) * k}" stroke-dasharray="${5 * k} ${4 * k}"/>`; }).join('');
-    const mk = ls.map(l => { const a = HUBS[l.from], b = HUBS[l.to], x = a.x + (b.x - a.x) * l.progress, y = a.y + (b.y - a.y) * l.progress, rs = rstate(l), t = trk(l.truck), sel = S.drawer && S.drawer.id === l.id, sc = (sel ? 1.3 : 1) * k;
+    const k = 1 / zoom, W = KZMAP.W / zoom, H = KZMAP.H / zoom, cx = KZMAP.W / 2, cy = KZMAP.H / 2, vb = `${cx - W / 2} ${cy - H / 2} ${W} ${H}`;
+    const ls = live();
+    const lines = ls.map(l => { const sel = S.drawer && S.drawer.id === l.id, d = KZMAP.hubPath(l.from, l.to).pts.map((q, i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' ');
+      return `<path d="${d}" fill="none" stroke="#173a5e" stroke-opacity="${sel ? .9 : .45}" stroke-width="${(sel ? 3.5 : 2.5) * k}" stroke-dasharray="${2 * k} ${7 * k}" stroke-linecap="round"/>`; }).join('');
+    const mk = ls.map(l => { const [x, y] = KZMAP.along(KZMAP.hubPath(l.from, l.to), l.progress), rs = rstate(l), t = trk(l.truck), sel = S.drawer && S.drawer.id === l.id, sc = (sel ? 2 : 1.6) * k;
       const col = rs === 'critical' ? 'var(--mk-red)' : rs === 'at_risk' ? 'var(--mk-status-yellow)' : 'var(--mk-green)';
       return `<g class="mk" data-act="openR" data-id="${l.id}" transform="translate(${x},${y}) scale(${sc})">${sel ? '<circle r="22" fill="var(--primary)" fill-opacity=".15"/>' : ''}<circle r="14" fill="${col}"/><path d="M-7 -3h9v6h-9zM2 -1h4l3 3v2h-7z" fill="#fff"/><rect x="-48" y="18" width="96" height="17" rx="6" fill="#fff" stroke="var(--border-input)"/><text x="0" y="30" text-anchor="middle" class="maplbl sm">${esc(t.plate)} · ${l.temp > 0 ? '+' : ''}${String(l.temp).replace('.', ',')}°</text></g>`; }).join('');
-    return `<div class="mapfull"><svg viewBox="${vb}" class="kzmap"><path d="M40 120 L110 70 L230 60 L330 40 L450 60 L560 90 L580 160 L540 230 L560 290 L440 310 L330 318 L230 300 L140 250 L60 200 Z" fill="#eef2f6" stroke="#d7dee7" stroke-width="${2 * k}"/>${lines}${hubs}${mk}</svg><div class="zoom"><button data-act="zoom" data-v="1">+</button><button data-act="zoom" data-v="-1">−</button></div></div>`;
+    return `<div class="mapfull"><svg viewBox="${vb}" class="kzmap">${KZMAP.base(k)}${lines}${mk}</svg>${KZMAP.legend()}<div class="zoom"><button data-act="zoom" data-v="1">+</button><button data-act="zoom" data-v="-1">−</button></div></div>`;
   }
   SCREENS.routes = {
     title: () => navLabel('routes'),
@@ -2239,15 +2317,31 @@ ${S.wreq.map(r => `<div class="tinted-row ${r.st === 'closed' ? 'green' : 'blue'
   /* Manufacturers of the source platform (screen 04): the six with static logos (platform/assets/manufacturers/<logo>.png, 515 × 380 px,
      supplied by the product owner) plus two food producers without a logo (initials badge only). */
   const MFRS = {
-    roche: { name: 'Roche Diagnostics', co: 'Roche Diagnostics GmbH, Mannheim', url: 'diagnostics.roche.com', ab: 'RO', col: 1, logo: 'roche' },
-    abbott: { name: 'Abbott', co: 'Abbott Laboratories, Abbott Park', url: 'abbott.com', ab: 'AB', col: 2, logo: 'abbott' },
-    qiagen: { name: 'QIAGEN', co: 'QIAGEN GmbH, Hilden', url: 'qiagen.com', ab: 'QG', col: 3, logo: 'qiagen' },
-    sysmex: { name: 'Sysmex', co: 'Sysmex Europe SE, Norderstedt', url: 'sysmex-europe.com', ab: 'SX', col: 4, logo: 'sysmex' },
-    biomerieux: { name: 'bioMérieux', co: 'bioMérieux SA, Marcy-l\'Étoile', url: 'biomerieux.com', ab: 'BM', col: 5, logo: 'biomerieux' },
-    beckman: { name: 'Beckman Coulter', co: 'Beckman Coulter Inc., Brea', url: 'beckmancoulter.com', ab: 'BC', col: 6, logo: 'beckman-coulter' },
-    freshline: { name: 'FreshLine Foods', co: 'ТОО «FreshLine Foods», Алматы', url: 'freshline.example', ab: 'FL', col: 4 },
-    polar: { name: 'Polar Fisch GmbH', co: 'Polar Fisch GmbH, Bremerhaven', url: 'polar-fisch.example', ab: 'PF', col: 5 },
+    roche: { name: 'Roche Diagnostics', co: 'Roche Diagnostics GmbH, Mannheim', url: 'diagnostics.roche.com', ab: 'RO', col: 1, logo: 'roche', cc: 'CH', grp: 0 },
+    abbott: { name: 'Abbott', co: 'Abbott Laboratories, Abbott Park', url: 'abbott.com', ab: 'AB', col: 2, logo: 'abbott', cc: 'US', grp: 0 },
+    qiagen: { name: 'QIAGEN', co: 'QIAGEN GmbH, Hilden', url: 'qiagen.com', ab: 'QG', col: 3, logo: 'qiagen', cc: 'DE · NL', grp: 0 },
+    sysmex: { name: 'Sysmex', co: 'Sysmex Europe SE, Norderstedt', url: 'sysmex-europe.com', ab: 'SX', col: 4, logo: 'sysmex', cc: 'JP', grp: 2 },
+    biomerieux: { name: 'bioMérieux', co: 'bioMérieux SA, Marcy-l\'Étoile', url: 'biomerieux.com', ab: 'BM', col: 5, logo: 'biomerieux', cc: 'FR', grp: 1 },
+    beckman: { name: 'Beckman Coulter', co: 'Beckman Coulter Inc., Brea', url: 'beckmancoulter.com', ab: 'BC', col: 6, logo: 'beckman-coulter', cc: 'US', grp: 0 },
+    freshline: { name: 'FreshLine Foods', co: 'ТОО «FreshLine Foods», Алматы', url: 'freshline.example', ab: 'FL', col: 4, cc: 'KZ', grp: 2 },
+    polar: { name: 'Polar Fisch GmbH', co: 'Polar Fisch GmbH, Bremerhaven', url: 'polar-fisch.example', ab: 'PF', col: 5, cc: 'DE', grp: 2 },
+    /* registry of the source platform (0.3.9 screen 04 "Производители · 19"): the remaining manufacturers without demo orders */
+    bd: { name: 'BD Biosciences', co: 'Becton Dickinson, Franklin Lakes', url: 'bdbiosciences.com', ab: 'BD', col: 1, cc: 'US', grp: 0 },
+    roxall: { name: 'Roxall Medizin', co: 'Roxall Medizin GmbH, Hamburg', url: 'roxall.de', ab: 'RX', col: 2, cc: 'DE', grp: 0 },
+    gongdong: { name: 'Zhejiang Gongdong Medical', co: 'Zhejiang Gongdong Medical Technology', url: 'en.gongdong.com', ab: 'GD', col: 3, cc: 'CN', grp: 0 },
+    siemens: { name: 'Siemens Healthineers', co: 'Siemens Healthineers AG, Erlangen', url: 'siemens-healthineers.com', ab: 'SH', col: 4, cc: 'DE', grp: 1 },
+    thermofisher: { name: 'Thermo Fisher Scientific', co: 'Thermo Fisher Scientific Inc., Waltham', url: 'thermofisher.com', ab: 'TF', col: 5, cc: 'US', grp: 1 },
+    biorad: { name: 'Bio-Rad Laboratories', co: 'Bio-Rad Laboratories Inc., Hercules', url: 'bio-rad.com', ab: 'BR', col: 6, cc: 'US', grp: 1 },
+    werfen: { name: 'Werfen', co: 'Werfen SA, Barcelona', url: 'werfen.com', ab: 'WF', col: 1, cc: 'ES', grp: 1 },
+    diasorin: { name: 'DiaSorin', co: 'DiaSorin S.p.A., Saluggia', url: 'diasorin.com', ab: 'DS', col: 2, cc: 'IT', grp: 1 },
+    sarstedt: { name: 'Sarstedt', co: 'Sarstedt AG & Co. KG, Nümbrecht', url: 'sarstedt.com', ab: 'SA', col: 3, cc: 'DE', grp: 2 },
+    mercator: { name: 'Mercator Medical', co: 'Mercator Medical S.A., Kraków', url: 'mercatormedical.eu', ab: 'MM', col: 4, cc: 'PL', grp: 2 },
+    immundiagnostik: { name: 'Immundiagnostik', co: 'Immundiagnostik AG, Bensheim', url: 'immundiagnostik.com', ab: 'ID', col: 5, cc: 'DE', grp: 2 },
+    medsnab: { name: T('ТОО «МедСнаб Актобе» · сторонний груз', 'MedSnab Aktobe LLP · Fremdladung', 'MedSnab Aktobe LLP · third-party cargo', '«МедСнаб Ақтөбе» ЖШС · бөгде жүк'), co: 'ТОО «МедСнаб Актобе»', url: '', ab: 'MS', col: 6, cc: 'KZ', grp: 3 },
+    pharmchain: { name: T('Аптечная сеть · сторонний груз', 'Apothekenkette · Fremdladung', 'Pharmacy chain · third-party cargo', 'Дәріхана желісі · бөгде жүк'), co: '', url: '', ab: 'PH', col: 1, cc: 'KZ', grp: 3 },
   };
+  /* registry groups of the source platform; the six logo manufacturers of v6 belong to "added in v5" / "top western IVD" */
+  const MFR_G = [T('добавлен в v5', 'in v5 ergänzt', 'added in v5', 'v5-те қосылды'), T('топ западной IVD', 'Top westliche IVD', 'top western IVD', 'батыс IVD көшбасшысы'), T('в ассортименте', 'im Sortiment', 'in range', 'ассортиментте'), T('сторонний груз', 'Fremdladung', 'third-party cargo', 'бөгде жүк')];
   const ART = {
     pharma: [['RX-1042', T('Реагенты иммунохимии, набор', 'Immunchemie-Reagenzien, Kit', 'Immunochemistry reagents, kit', 'Иммунохимия реагенттері, жинақ'), 'roche', 5], ['DX-2210', T('Реагент ПЦР, набор', 'PCR-Reagenz, Kit', 'PCR reagent kit', 'ПТР реагенті, жинақ'), 'qiagen', 3], ['RX-3307', T('Питательные среды, флаконы', 'Nährmedien, Flaschen', 'Culture media, bottles', 'Қоректік орталар, құтылар'), 'biomerieux', 4]],
     chilled: [['FD-501', T('Йогурт 2,5 %, 12×400 г', 'Joghurt 2,5 %, 12×400 g', 'Yoghurt 2.5 %, 12×400 g', 'Йогурт 2,5 %, 12×400 г'), 'freshline', 7], ['FD-517', T('Сыр полутвёрдый', 'Schnittkäse', 'Semi-hard cheese', 'Жартылай қатты ірімшік'), 'freshline', 9]],
@@ -2291,7 +2385,7 @@ ${S.wreq.map(r => `<div class="tinted-row ${r.st === 'closed' ? 'green' : 'blue'
   }
   if (!(SCREENS.orders.tabs || []).some(t => t.key === 'orders')) { const body0 = SCREENS.orders.body; addTab('orders', 'orders', T('Заказы', 'Aufträge', 'Orders', 'Тапсырыстар'), body0); }   // the base table becomes the first tab once tabs exist
   const ops = l => { if (!l.ops) l.ops = buildOps(l); return l.ops; };
-  globalThis.ops = ops; globalThis.ssccMake = ssccMake; globalThis.ssccValid = ssccValid; globalThis.ssccFromScan = ssccFromScan; globalThis.MFRS = MFRS;
+  globalThis.ops = ops; globalThis.ssccMake = ssccMake; globalThis.ssccValid = ssccValid; globalThis.ssccFromScan = ssccFromScan; globalThis.MFRS = MFRS; globalThis.MFR_G = MFR_G;
   S.loads.forEach(ops);
   const places = l => ops(l).orders.flatMap(o => o.places);
   const findPlace = sscc => { for (const l of S.loads) { const p = places(l).find(x => x.sscc === sscc); if (p) return { l, p, o: ops(l).orders.find(o => o.id === p.order) }; } return null; };
@@ -2759,7 +2853,15 @@ ${lines.map(x => `<div class="sh-pkg${sel && x.p.sscc === sel.p.sscc ? ' sel' : 
 ${S.ops.zpl ? `<pre class="sh-zpl" data-zpl="1">${esc(L.zpl)}</pre>` : ''}
 <h3 class="lw-h">${esc(T('История сканирования места (Track & Trace)', 'Scanverlauf des Packstücks (Track & Trace)', 'Package scan history (track & trace)', 'Орынды сканерлеу тарихы (Track & Trace)'))}</h3>${ev.map(e => `<div class="sh-ev${e.bad ? ' bad' : e.done ? '' : ' todo'}"><span class="faint">${esc(e.t)}</span><i></i><span>${e.html ? e.text : esc(e.text)}</span></div>`).join('')}</div>`;
     }
-    return head + chips + mfrCard + `<div class="sh-grid" style="margin-top:16px">${pk}${lab}</div>`;
+    return head + chips + mfrCard + `<div class="sh-grid" style="margin-top:16px">${pk}${lab}</div>` + mfrRegistry();
+  }
+  /* full manufacturer registry of the source platform (0.3.9 screen 04): all entries with group chip and places across the demo loads */
+  function mfrRegistry() {
+    const n = {}; S.loads.forEach(l => ops(l).orders.forEach(o => { n[o.mfr] = (n[o.mfr] || 0) + o.places.length; }));
+    const GC = ['blue', 'purple', 'green', 'gray'];
+    const rows = Object.keys(MFRS).map(k => { const m = MFRS[k];
+      return `<div class="sh-mfr" data-mfr-reg="${k}">${mlogo(k, 34)}<span style="flex:1;min-width:0"><b>${esc(m.name)}</b><div class="sub">${esc(m.cc)}${m.url ? ' · ' + esc(m.url) : ''}</div><div class="sub">${chip(GC[m.grp], MFR_G[m.grp])}${n[k] ? ' ' + n[k] + ' ' + esc(T('мест', 'Packst.', 'places', 'орын')) : ''}</div></span></div>`; }).join('');
+    return `<div class="card lw-card" style="margin-top:16px" data-mfr-registry="${Object.keys(MFRS).length}"><h3 class="lw-h" style="margin-top:0">${esc(T('Реестр производителей', 'Herstellerregister', 'Manufacturer registry', 'Өндірушілер тізілімі'))} · ${Object.keys(MFRS).length}</h3><p class="note">${esc(T('Полный каталог источника (экран 04 платформы 0.3.9): группа и число грузовых мест в демо-рейсах.', 'Vollständiger Katalog der Quelle (Bildschirm 04 der Plattform 0.3.9): Gruppe und Packstücke in den Demo-Fahrten.', 'Full catalogue of the source (screen 04 of platform 0.3.9): group and demo-load places.', 'Бастапқы платформаның (0.3.9, 04-экран) толық каталогы.'))}</p><div class="sh-mfrs">${rows}</div></div>`;
   }
   addTab('orders', 'ship', T('Отправки и маркировка', 'Sendungen & Etiketten', 'Shipments & labels', 'Жөнелтулер мен таңбалау'), body, { perm: 'orders:read' });
   const dl = (name, text, mime) => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: mime })); a.download = name; a.click(); };
@@ -5308,7 +5410,13 @@ const ECO_BL = {"BLV":[{"id":"V-01","ref":"P85/P86/F21","lvl":0,"q":false,"area"
 ${seg(subs, 'blSub', B.sub)}${{ q: qBody, val: valBody, pv: pvBody, net: netBody, fleet: fleetBody, launch: launchBody }[B.sub]()}`;
   }
   if (!SCREENS.settings.tabs) { const b = SCREENS.settings.body; SCREENS.settings.tabs = [{ key: 'main', label: T('Конфигурация', 'Konfiguration', 'Configuration', 'Конфигурация'), body: b }]; }
-  addTab('settings', 'baseline', T('Исходные данные', 'Basisdaten', 'Baseline data', 'Бастапқы деректер'), body, { badge: () => ecoFr49().open || '' });
+  /* own sidebar section (was Settings → tab "Baseline data"): question catalogue, validation, planned values, network, fleet, launch */
+  SCREENS.baseline = {
+    title: () => navLabel('baseline'),
+    sub: () => T('Fragenkatalog · 150 ответов · валидация, плановые значения, сеть, парк и запуск', 'Fragenkatalog · 150 Antworten · Validierung, Planwerte, Netz, Flotte und Start', 'Question catalogue · 150 answers · validation, planned values, network, fleet and launch', 'Fragenkatalog · 150 жауап · валидация, жоспарлы мәндер, желі, парк және іске қосу'),
+    body,
+  };
+  NAV_BADGE.baseline = () => ecoFr49().open || '';
   globalThis.ECO_WEST = WEST; globalThis.ECO_LEGAL = LEGAL;
 })();
 
@@ -5583,7 +5691,7 @@ helpAdd({ key: 'express', group: 'start', screen: 'dispatch', tab: 'express', vi
     HQ('Один пользователь подписывает только один слот; слот требует своей бизнес-функции (назначает администратор в Настройки → Пользователи).', 'Ein Benutzer unterschreibt nur einen Slot; ein Slot braucht seine Geschäftsfunktion (vergibt der Administrator unter Einstellungen → Benutzer).', 'One user signs only one slot; a slot needs its business function (assigned by the administrator in Settings → Users).', 'Бір пайдаланушы тек бір слотқа қол қояды; слот өз бизнес-функциясын талап етеді (әкімші Баптаулар → Пайдаланушылар бөлімінде тағайындайды).'),
     HQ('После отсечки (16:00 по Астане, плановое значение) открытая заявка отклоняется системой, клиент получает уведомление.', 'Nach dem Annahmeschluss (16:00 Astana-Zeit, Planwert) lehnt das System eine offene Anfrage ab, der Kunde wird benachrichtigt.', 'After the cut-off (16:00 Astana time, planning value) the system rejects an open request and the customer is notified.', 'Кесу уақытынан кейін (Астана уақытымен 16:00, жоспарлы мән) ашық өтінімді жүйе қабылдамайды, клиентке хабарланады.'),
   ],
-  fr: 'FR-41, FR-126, FR-154', related: ['dispatch/express', 'settings/baseline', 'roles', 'portal/book'] });
+  fr: 'FR-41, FR-126, FR-154', related: ['dispatch/express', 'baseline', 'roles', 'portal/book'] });
 
 helpAdd({ key: 'navigation', group: 'start',
   title: HQ('Клавиатура, языки, дизайн и ссылки', 'Tastatur, Sprachen, Design und Links', 'Keyboard, languages, design and links', 'Пернетақта, тілдер, дизайн және сілтемелер'),
@@ -6176,7 +6284,7 @@ helpAdd({ key: 'billing/cost', group: 'ops', screen: 'billing', tab: 'cost',
     HQ('Если разница между своим рейсом и перевозчиком больше 50 %, нужны две подписи: руководитель логистики подписывает свою роль.', 'Liegt der Unterschied zwischen eigener Fahrt und Frachtführer über 50 %, sind zwei Unterschriften nötig: die Logistikleitung signiert ihre Rolle.', 'If the gap between own trip and carrier is above 50 %, two signatures are needed: the head of logistics signs their role.'),
     HQ('Финансовый контролёр — другой пользователь — подписывает вторую роль; подпись видна с именем и временем.', 'Der Finanzcontroller — ein anderer Benutzer — signiert die zweite Rolle; die Unterschrift zeigt Name und Zeit.', 'The financial controller — a different user — signs the second role; each signature shows name and time.')] }],
   rules: [HQ('Каждую роль подписывают один раз, один пользователь не ставит обе подписи (принцип четырёх глаз); позиции «допущение» нужно подтвердить.', 'Jede Rolle nur einmal; ein Benutzer kann nicht beide Unterschriften leisten (Vier-Augen-Prinzip); Positionen „Annahme“ müssen bestätigt werden.', 'Each role can be signed once; one user cannot give both signatures (four-eyes principle); items marked "assumption" must be confirmed.')],
-  fr: 'FR-46, FR-47, FR-125', related: ['fleet', 'settings/baseline', 'dispatch/partners', 'roles'] });
+  fr: 'FR-46, FR-47, FR-125', related: ['fleet', 'baseline', 'dispatch/partners', 'roles'] });
 
 helpAdd({ key: 'billing/insurance', group: 'ops', screen: 'billing', tab: 'insurance',
   title: HQ('Страхование грузов', 'Transportversicherung', 'Cargo insurance', 'Жүк сақтандыру'), sub: HQ('полис · сертификат на отправку · страховые случаи по отклонениям', 'Police · Zertifikat je Sendung · Schadenfälle aus Abweichungen', 'policy · certificate per shipment · claims from deviations', 'полис · жөнелтімге сертификат · ауытқулар бойынша сақтандыру жағдайлары'),
@@ -6233,7 +6341,7 @@ helpAdd({ key: 'settings/reference', group: 'records', screen: 'settings', tab: 
     HQ('Вкладка «Справочники» → «Параметры затрат», «✎» в строке diesel; новое значение и дата «Действует с».', 'Registerkarte „Stammdaten“ → „Kostenparameter“, „✎“ in der Zeile diesel; neuer Wert und Datum „Gültig ab“.', 'Tab "Reference data" → "Cost parameters", "✎" in the diesel row; new value and the "Valid from" date.'),
     HQ('«Сохранить версию» — прошлые месяцы считаются по старой цене, новые расчёты и топливная надбавка — по новой.', '„Version speichern“ — vergangene Monate rechnen mit dem alten Preis, neue Berechnungen und der Treibstoffzuschlag mit dem neuen.', '"Save version" — past months keep the old price, new quotes and the fuel surcharge use the new one.')] }],
   rules: [HQ('Задним числом не меняется; БИН проверяется по контрольной цифре; записи не удаляются — история остаётся для отчётов и аудита.', 'Keine Rückdatierung; die BIN wird über die Prüfziffer geprüft; Einträge werden nicht gelöscht — der Verlauf bleibt für Berichte und Audit.', 'No back-dating; the BIN is checked by its check digit; entries are never deleted — the history stays for reports and audits.')],
-  fr: 'FR-78, FR-174', related: ['routes/lines', 'billing/cost', 'dispatch/partners', 'settings/baseline'] });
+  fr: 'FR-78, FR-174', related: ['routes/lines', 'billing/cost', 'dispatch/partners', 'baseline'] });
 
 helpAdd({ key: 'settings/oncall', group: 'records', screen: 'settings', tab: 'oncall',
   title: HQ('Дежурства', 'Bereitschaft', 'On-call roster', 'Кезекшілік'), sub: HQ('кто получает эскалации: дежурный, руководитель безопасности, директор', 'wer Eskalationen erhält: Bereitschaft, Leitung Sicherheit, Geschäftsführung', 'who receives escalations: duty officer, head of security, CEO', 'эскалацияны кім алады: кезекші, қауіпсіздік басшысы, директор'),
@@ -6269,7 +6377,7 @@ helpAdd({ key: 'settings/audit', group: 'records', screen: 'settings', tab: 'aud
   rules: [HQ('Исправление — только новой записью; записи не изменяются и не удаляются; раскрытия ПДн фиксируются обязательно.', 'Korrektur nur als neuer Eintrag; Einträge werden nicht geändert oder gelöscht; Offenlegungen von Personendaten werden immer festgehalten.', 'A correction is a new entry only; entries are never changed or deleted; personal-data reveals are always recorded.')],
   related: ['data-protection', 'roles', 'settings'] });
 
-helpAdd({ key: 'settings/baseline', group: 'records', screen: 'settings', tab: 'baseline', visuals: ['express'],
+helpAdd({ key: 'baseline', group: 'records', screen: 'baseline', tab: '', visuals: ['express'],
   title: HELP_NO('17', 'Исходные данные', 'Ausgangsdaten', 'Baseline data', 'Бастапқы деректер'), sub: HQ('опросник 150 ответов, валидация, плановые значения, критический путь, юридические и налоговые пункты', 'Fragenkatalog 150 Antworten, Validierung, Planwerte, kritischer Pfad, Rechts- und Steuerpunkte', 'questionnaire of 150 answers, validation, planned values, critical path, legal / tax items', '150 жауаптық сауалнама, валидация, жоспарлы мәндер, сыни жол, құқықтық және салықтық тармақтар'),
   purpose: HQ('Основа модели: сверка 150 ответов каталога вопросов «Логистика Казахстан» с платформой (находки), сеть и объёмы по 23 городам, плановые значения со статусом проверки, целевой парк и экономика, критический путь до первого рейса R1 и список юридических / налоговых вопросов. Плановые значения нужно подтвердить до запуска.',
     'Grundlage des Modells: Abgleich der 150 Antworten des Fragenkatalogs „Logistik Kasachstan“ mit der Plattform (Befunde), Netz und Mengen für 23 Städte, Planwerte mit Prüfstatus, Zielflotte und Wirtschaftlichkeit, kritischer Pfad bis zur ersten Fahrt R1 und eine Liste rechtlicher / steuerlicher Fragen. Planwerte sind vor dem Start zu bestätigen.',
@@ -6537,6 +6645,125 @@ helpAdd({ key: 'faq', group: 'ref', special: 'faq', portal: true,
   };
 })();
 
+/* Help · animated Schaubilder (port of the 0.3.9 help overlays): a diagram that plays through its steps — ‹ ▶/⏸ › controls,
+   "step n of m", the active node highlighted, the step text under the picture, "all steps" as a list. Auto-advance every 4 s
+   while the help page is open; prefers-reduced-motion starts paused. HELP.players[id] = {title, steps[{t}], svg(i)}; rendered
+   through HELP.visuals['pl:<id>'] so articles attach a player like any visual. */
+(function () {
+  const RM = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  HELP.players = {};
+  const P = () => (S.hp = S.hp || {});
+  const st = id => (P()[id] = P()[id] || { i: 0, run: !RM });
+
+  /* ---------- small SVG kit (uses the hv- classes of 60-visuals) ---------- */
+  const box = (x, y, w, h, l1, l2, on, cls) => `<g class="hv-box hv-${cls || 'a'}${on ? ' pl-on' : ''}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="9"/><text x="${x + w / 2}" y="${y + (l2 ? h / 2 - 3 : h / 2 + 4)}" text-anchor="middle" style="font-weight:600">${esc(l1)}</text>${l2 ? `<text x="${x + w / 2}" y="${y + h / 2 + 13}" text-anchor="middle" style="font-size:10px;opacity:.75">${esc(l2)}</text>` : ''}</g>`;
+  const dia = (cx, cy, rx, ry, l1, on) => `<g class="hv-box hv-b${on ? ' pl-on' : ''}"><path d="M${cx} ${cy - ry} L${cx + rx} ${cy} L${cx} ${cy + ry} L${cx - rx} ${cy} Z" style="stroke-width:1.5"/><text x="${cx}" y="${cy + 4}" text-anchor="middle" style="font-weight:600">${esc(l1)}</text></g>`;
+  const ar = (x1, y1, x2, y2, dash, cls) => { const a = Math.atan2(y2 - y1, x2 - x1), h = 6; return `<g class="${cls || 'hv-ar'}"><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"${dash ? ' stroke-dasharray="5 4"' : ''}/><path d="M${x2} ${y2} L${x2 - h * Math.cos(a - .5)} ${y2 - h * Math.sin(a - .5)} L${x2 - h * Math.cos(a + .5)} ${y2 - h * Math.sin(a + .5)} Z" style="fill:currentColor;stroke:none"/></g>`; };
+
+  /* ---------- player 1: shipment lifecycle (0.3.9 "Sendungsablauf von Anfang bis Ende") ---------- */
+  const SF = [
+    { l: T('Бронирование', 'Buchung', 'Booking', 'Брондау'), s: T('портал · «Бронирования»', 'Portal · „Buchungen“', 'portal · "Bookings"', 'портал · «Брондау»'), t: T('Заявка клиента приходит из портала на стол бронирований (Заказы и рейсы → Бронирования); диспетчер подтверждает её, и появляется заказ.', 'Die Kundenanfrage kommt aus dem Portal auf den Buchungstisch (Aufträge & Fahrten → Buchungen); die Disposition bestätigt sie, und ein Auftrag entsteht.', 'The customer request arrives from the portal at the booking desk (Orders & Loads → Bookings); the dispatcher confirms it and an order is created.', 'Клиент өтінімі порталдан брондау үстеліне келеді; диспетчер растайды және тапсырыс пайда болады.') },
+    { l: T('Планирование', 'Planung', 'Planning', 'Жоспарлау'), s: T('Диспетчерская · Планирование', 'Dispo · Planung', 'Dispatch · Planning', 'Диспетчерлік · Жоспарлау'), t: T('Заказ попадает на рейс линии: ТС, водитель, отправление. Подбор ТС проверяет зоны, вес, объём, оси и ДОПОГ.', 'Der Auftrag kommt auf eine Fahrt der Linie: Fahrzeug, Fahrer, Abfahrt. Die Fahrzeugwahl prüft Zonen, Gewicht, Volumen, Achsen und ADR.', 'The order joins a line trip: vehicle, driver, departure. The truck finder checks zones, weight, volume, axles and ADR.', 'Тапсырыс желі рейсіне қосылады: КҚ, жүргізуші, жөнелту. Таңдау аймақтарды, салмақты, осьтерді тексереді.') },
+    { l: T('Погрузка', 'Beladung', 'Loading', 'Тиеу'), s: T('Загрузка и вес · SSCC', 'Beladung & Gewicht · SSCC', 'Load & weight · SSCC', 'Тиеу және салмақ · SSCC'), t: T('Склад грузит по листу LIFO, сканирует места SSCC, взвешивает ТС; сверка мест и перегруз блокируют выпуск.', 'Das Lager lädt nach LIFO-Liste, scannt SSCC-Packstücke, verwiegt das Fahrzeug; Abgleich und Überladung sperren die Freigabe.', 'The warehouse loads by the LIFO sheet, scans SSCC places and weighs the truck; reconciliation and overload block the release.', 'Қойма LIFO парағымен тиейді, SSCC сканерлейді, КҚ өлшейді; сәйкессіздік шығаруды бұғаттайды.') },
+    { l: T('Выпуск Go/No-Go', 'Freigabe Go/No-Go', 'Go/No-Go release', 'Go/No-Go шығару'), s: T('Документы KZ', 'KZ-Dokumente', 'KZ documents', 'KZ құжаттары'), t: T('Гейт Go/No-Go: документы (ТТН, СНТ), сверка SSCC, взвешивание, водитель и ТС. No-Go возвращает рейс на погрузку.', 'Das Go/No-Go-Gate: Dokumente (TTN, SNT), SSCC-Abgleich, Verwiegung, Fahrer und Fahrzeug. No-Go schickt die Fahrt zurück zur Beladung.', 'The Go/No-Go gate: documents (TTN, SNT), SSCC reconciliation, weighing, driver and vehicle. No-Go sends the trip back to loading.', 'Go/No-Go қақпасы: құжаттар, SSCC, өлшеу, жүргізуші мен КҚ. No-Go рейсті тиеуге қайтарады.') },
+    { l: T('В пути: контроль', 'Unterwegs: Überwachung', 'In transit: monitoring', 'Жолда: бақылау'), s: T('Термо · Погода · Связь', 'Thermo · Wetter · Netz', 'Thermo · Weather · Coverage', 'Термо · Ауа райы · Байланыс'), t: T('Маршруты и трекинг: температура камер, погодные риски, мёртвые зоны связи и SMS-канал OL1, эскалация тревог L1–L3.', 'Routen & Tracking: Kammertemperaturen, Wetterrisiken, Funklöcher mit SMS-Kanal OL1, Alarm-Eskalation L1–L3.', 'Routes & Tracking: chamber temperatures, weather risks, coverage dead zones with the OL1 SMS channel, alarm escalation L1–L3.', 'Маршруттар мен трекинг: температура, ауа райы, байланыс аймақтары, L1–L3 дабыл эскалациясы.') },
+    { l: T('Доставка · ePOD', 'Zustellung · ePOD', 'Delivery · ePOD', 'Жеткізу · ePOD'), s: T('Приложение водителя', 'Fahrer-App', 'Driver app', 'Жүргізуші қосымшасы'), t: T('Водитель сдаёт места по сканам, получает подпись и фото — ePOD уходит в очередь подтверждения доставки.', 'Der Fahrer übergibt die Packstücke per Scan, nimmt Unterschrift und Foto — das ePOD geht in die Bestätigungs-Warteschlange.', 'The driver hands over places by scan, captures signature and photo — the ePOD joins the proof-of-delivery queue.', 'Жүргізуші орындарды сканмен тапсырады, қол мен фото алады — ePOD кезекке түседі.') },
+    { l: T('ЭСФ · счёт', 'ESF · Rechnung', 'ESF · invoice', 'ЭШФ · шот'), s: T('Счета и ЭСФ · Отчёты', 'Rechnungen & ESF · Berichte', 'Billing & ESF · Reports', 'Шоттар мен ЭШФ · Есептер'), t: T('Подтверждённый POD создаёт счёт: ЭСФ выписывается, дебиторка стареет по корзинам, цифры попадают в отчёты и модель затрат.', 'Das bestätigte POD erzeugt die Rechnung: die ESF wird ausgestellt, Forderungen altern in Körben, die Zahlen fließen in Berichte und Kostenmodell.', 'The approved POD creates the invoice: the ESF is issued, receivables age in buckets, the numbers feed reports and the cost model.', 'Расталған POD шот жасайды: ЭШФ жазылады, сандар есептер мен шығын моделіне түседі.') },
+  ];
+  HELP.players.shipflow = {
+    title: T('Путь отправки от начала до конца', 'Sendungsablauf von Anfang bis Ende', 'A shipment from start to finish', 'Жөнелтімнің басынан аяғына дейінгі жолы'),
+    steps: SF.map(x => ({ t: x.t })),
+    svg(i) {
+      const W = 640, bw = 138, bh = 48, y1 = 26, y2 = 120, xs = [10, 176, 342, 0], gx = 540;
+      let g = box(xs[0], y1, bw, bh, SF[0].l, SF[0].s, i === 0) + ar(xs[0] + bw + 2, y1 + bh / 2, xs[1] - 4, y1 + bh / 2, i === 0)
+        + box(xs[1], y1, bw, bh, SF[1].l, SF[1].s, i === 1) + ar(xs[1] + bw + 2, y1 + bh / 2, xs[2] - 4, y1 + bh / 2, i === 1)
+        + box(xs[2], y1, bw, bh, SF[2].l, SF[2].s, i === 2) + ar(xs[2] + bw + 2, y1 + bh / 2, gx - 62, y1 + bh / 2, i === 2)
+        + dia(gx, y1 + bh / 2, 58, 34, 'Go/No-Go', i === 3)
+        + `<g class="pl-nogo"><path d="M${gx - 20} ${y1 - 8} C ${gx - 120} ${-14} ${xs[2] + bw - 20} ${-12} ${xs[2] + 70} ${y1 - 4}" fill="none" stroke-dasharray="5 4"/><path d="M${xs[2] + 70} ${y1 - 4} l8 -5 l-2 8 Z" style="stroke:none;fill:currentColor"/><text x="${gx - 92}" y="2" text-anchor="middle">No-Go</text></g>`
+        + ar(gx, y1 + bh / 2 + 36, gx, y2 - 4, false, i === 3 ? 'hv-ar pl-go' : 'hv-ar')
+        + box(gx - 69, y2, bw, bh, SF[4].l, SF[4].s, i === 4) + ar(gx - 71, y2 + bh / 2, xs[1] + 166 + bw + 4, y2 + bh / 2, i === 4)
+        + box(xs[1] + 166, y2, bw, bh, SF[5].l, SF[5].s, i === 5) + ar(xs[1] + 164, y2 + bh / 2, xs[1] + bw + 4, y2 + bh / 2, i === 5)
+        + box(xs[1] - 70, y2, bw, bh, SF[6].l, SF[6].s, i === 6, 'c');
+      return `<svg viewBox="0 0 ${W} 184" class="hv-svg">${g}</svg>`;
+    },
+  };
+
+  /* ---------- player 2: where express lives (0.3.9 "Wo ist Express", screen sketch with numbered call-outs) ---------- */
+  const EXS = [
+    T('Экспресс живёт на Диспетчерской доске: вкладка «Экспресс» собирает срочные запросы со сроком приёма.', 'Express lebt auf der Dispositionstafel: die Registerkarte „Express“ sammelt eilige Anfragen mit Annahmeschluss.', 'Express lives on the Dispatch Board: the "Express" tab collects urgent requests with a cut-off.', 'Экспресс Диспетчерлік тақтада тұрады: «Экспресс» қойындысы мерзімді өтінімдерді жинайды.'),
+    T('Каждый запрос: маршрут, груз и подписи 0–3 из 3 — руководитель, экономика и диспетчер подтверждают по очереди.', 'Jede Anfrage: Strecke, Ware und Unterschriften 0–3 von 3 — Leitung, Wirtschaft und Disposition bestätigen nacheinander.', 'Each request: route, goods and signatures 0–3 of 3 — manager, economics and dispatch approve in turn.', 'Әр өтінім: маршрут, жүк және 0–3/3 қолдар — басшы, экономика және диспетчер кезекпен растайды.'),
+    T('«К выпуску» ведёт на гейт Go/No-Go: экспресс проходит те же проверки документов, SSCC и взвешивания.', '„Zur Freigabe“ führt zum Go/No-Go-Gate: Express durchläuft dieselben Prüfungen von Dokumenten, SSCC und Verwiegung.', '"To release" leads to the Go/No-Go gate: express passes the same document, SSCC and weighing checks.', '«Шығаруға» Go/No-Go қақпасына апарады: экспресс сол тексерулерден өтеді.'),
+    T('Выпущенный экспресс виден на Обзоре и на карте маршрутов; наценка и сравнение с обычным тарифом — в отчёте «Экспресс × температура».', 'Freigegebener Express erscheint auf der Übersicht und der Routenkarte; Zuschlag und Tarifvergleich im Bericht „Express × Temperatur“.', 'Released express shows on the Dashboard and the route map; the surcharge and tariff comparison live in the "Express × temperature" report.', 'Шығарылған экспресс Шолуда және картада көрінеді; үстеме «Экспресс × температура» есебінде.'),
+  ];
+  HELP.players.expresspath = {
+    title: T('Где живёт экспресс: эскиз экрана', 'Wo ist Express: Bildschirm-Skizze', 'Where express lives: screen sketch', 'Экспресс қайда тұрады: экран эскизі'),
+    steps: EXS.map(t => ({ t })),
+    svg(i) {
+      const row = (y, txt, on) => `<g class="hv-box hv-${on ? 'a' : 'n'}"><rect x="14" y="${y}" width="128" height="22" rx="6"/><text x="22" y="${y + 15}">${esc(txt)}</text></g>`;
+      const n = (x, y, k) => `<g class="pl-num${i === k ? ' pl-on' : ''}"><circle cx="${x}" cy="${y}" r="11"/><text x="${x}" y="${y + 4}" text-anchor="middle">${k + 1}</text></g>`;
+      const card = (y, id, rt, sig, on) => `<g class="hv-box hv-${on ? 'a' : 'n'}"><rect x="170" y="${y}" width="380" height="40" rx="8"/><text x="182" y="${y + 17}" style="font-weight:700">${id}</text><text x="182" y="${y + 32}" style="font-size:10px;opacity:.75">${esc(rt)}</text><text x="408" y="${y + 24}" style="font-size:10px">${esc(sig)}</text></g><g class="hv-box hv-c"><rect x="556" y="${y + 6}" width="72" height="26" rx="7"/><text x="${556 + 36}" y="${y + 23}" text-anchor="middle" style="font-size:10px">${esc(T('К выпуску', 'Zur Freigabe', 'To release', 'Шығаруға'))}</text></g>`;
+      return `<svg viewBox="0 0 650 190" class="hv-svg"><rect x="6" y="6" width="140" height="176" rx="10" style="fill:var(--bg-subtle,#f3f4f6);stroke:var(--border,#e5e7eb)"/>
+${row(16, '01 · ' + navLabel('dashboard'), false)}${row(42, '03 · ' + navLabel('dispatch'), i <= 1)}${row(68, '02 · ' + navLabel('orders'), false)}${row(94, '06 · ' + navLabel('routes'), i === 3)}
+<g class="hv-box hv-e"><rect x="160" y="6" width="484" height="176" rx="10" style="fill:var(--surface,#fff)"/><text x="176" y="30" style="font-weight:700">${esc(T('Экспресс · ждут выпуска (2)', 'Express · warten auf Freigabe (2)', 'Express · waiting for release (2)', 'Экспресс · шығаруды күтуде (2)'))}</text></g>
+${card(44, 'EX-0311', HUBS.ALA.city + ' → ' + HUBS.ATY.city + ' · 18 ' + T('кг', 'kg', 'kg', 'кг') + ' · 2–8 °C', '1 / 3', i === 1)}${card(94, 'EX-0312', HUBS.AST.city + ' → ' + HUBS.SHY.city + ' · 9 ' + T('кг', 'kg', 'kg', 'кг') + ' · 15–25 °C', '0 / 3', false)}
+<text x="176" y="166" style="font-size:10px;opacity:.7">${esc(T('Срок приёма 16:00 · подписи: руководитель · экономика · диспетчер', 'Annahmeschluss 16:00 · Unterschriften: Leitung · Wirtschaft · Dispo', 'Cut-off 16:00 · signatures: manager · economics · dispatch', 'Қабылдау мерзімі 16:00 · қолдар: басшы · экономика · диспетчер'))}</text>
+${n(152, 53, 0)}${n(428, 36, 1)}${n(592, 36, 2)}${n(152, 105, 3)}</svg>`;
+    },
+  };
+
+  /* ---------- player 3: alarm chain sensor → playbook → deviation → CAPA ---------- */
+  const AL = [
+    { l: T('Датчик камеры', 'Kammersensor', 'Chamber sensor', 'Камера датчигі'), t: T('Логгер меряет каждые 2 с; выход из диапазона зоны (например, 2–8 °C) рождает событие.', 'Der Logger misst alle 2 s; das Verlassen des Zonenbereichs (z. B. 2–8 °C) erzeugt ein Ereignis.', 'The logger measures every 2 s; leaving the zone range (e.g. 2–8 °C) raises an event.', 'Логгер әр 2 с өлшейді; аймақтан шығу оқиға тудырады.') },
+    { l: T('Тревога L1–L3', 'Alarm L1–L3', 'Alarm L1–L3', 'Дабыл L1–L3'), t: T('Правила холодовой цепи присваивают уровень; L3 эскалирует по дежурному списку, пока её не примут.', 'Die Kühlketten-Regeln vergeben die Stufe; L3 eskaliert über die Bereitschaftsliste, bis jemand übernimmt.', 'The cold-chain rules assign the level; L3 escalates through the on-call roster until acknowledged.', 'Суық тізбек ережелері деңгей береді; L3 кезекшілер тізімімен эскалацияланады.') },
+    { l: T('Обзор: плейбук', 'Übersicht: Playbook', 'Dashboard: playbook', 'Шолу: плейбук'), t: T('На Обзоре появляется порядок действий: кому звонить, что проверить, когда останавливать рейс.', 'Auf der Übersicht erscheint das Vorgehen: wen anrufen, was prüfen, wann die Fahrt stoppen.', 'The dashboard shows the response steps: whom to call, what to check, when to stop the trip.', 'Шолуда әрекет тәртібі шығады: кімге қоңырау шалу, нені тексеру.') },
+    { l: T('Отклонение QA', 'Abweichung QA', 'QA deviation', 'QA ауытқуы'), t: T('Тревога открывает отклонение в «Отклонения и качество»: шаги расследования 1–4 и решение — допуск или карантин.', 'Der Alarm öffnet eine Abweichung unter „Abweichungen & Qualität“: Untersuchungsschritte 1–4 und Entscheidung — Freigabe oder Quarantäne.', 'The alarm opens a deviation under "Deviations & quality": investigation steps 1–4 and a decision — release or quarantine.', 'Дабыл «Ауытқулар мен сапа» бөлімінде ауытқу ашады: 1–4 қадам және шешім.') },
+    { l: 'CAPA', t: T('Корректирующее действие с ответственным и сроком; просроченная поверка логгера блокирует фарма-рейсы.', 'Korrekturmaßnahme mit Verantwortlichem und Frist; abgelaufene Kalibrierung sperrt Pharma-Fahrten.', 'A corrective action with owner and due date; expired calibration blocks pharma loads.', 'Жауаптысы мен мерзімі бар түзету әрекеті; мерзімі өткен поверка фарма-рейстерді бұғаттайды.') },
+    { l: T('Отчёт и аудит', 'Bericht und Audit', 'Report and audit', 'Есеп және аудит'), t: T('Каждое решение пишется в журнал аудита; соблюдение температуры попадает в отчёты и KPI.', 'Jede Entscheidung landet im Audit-Protokoll; die Temperatur-Compliance fließt in Berichte und KPI.', 'Every decision is written to the audit log; temperature compliance feeds reports and KPIs.', 'Әр шешім аудит журналына жазылады; көрсеткіштер есептерге түседі.') },
+  ];
+  HELP.players.alarmflow = {
+    title: T('Температурная тревога: от датчика до CAPA', 'Temperaturalarm: vom Sensor bis CAPA', 'A temperature alarm: from sensor to CAPA', 'Температура дабылы: датчиктен CAPA-ға дейін'),
+    steps: AL.map(x => ({ t: x.t })),
+    svg(i) {
+      const W = 640, bw = 192, bh = 44, per = 3;
+      let g = '';
+      AL.forEach((s, k) => {
+        const r = Math.floor(k / per), c = k % per, x = 10 + c * (bw + 21), y = 14 + r * (bh + 44);
+        g += box(x, y, bw, bh, s.l, '', i === k, k >= 3 ? 'c' : 'a');
+        if (k < AL.length - 1) g += (c < per - 1) ? ar(x + bw + 2, y + bh / 2, x + bw + 19, y + bh / 2, false) : ar(x + bw / 2, y + bh + 2, 10 + bw / 2, y + bh + 42, false);
+      });
+      return `<svg viewBox="0 0 ${W} 192" class="hv-svg">${g}</svg>`;
+    },
+  };
+
+  /* ---------- rendering + controls ---------- */
+  const UI = { step: T('Шаг', 'Schritt', 'Step', 'Қадам'), of: T('из', 'von', 'of', '/'), all: T('Все шаги', 'Alle Schritte', 'All steps', 'Барлық қадамдар') };
+  function playerHtml(id) {
+    const p = HELP.players[id]; if (!p) return '';
+    const u = st(id), n = p.steps.length, i = Math.min(u.i, n - 1);
+    return `<div class="hp" data-player="${id}" data-step="${i}"><div class="hp-head"><b>${esc(p.title)}</b><span class="hp-ctl"><button type="button" data-act="hpStep" data-id="${id}" data-v="-1" aria-label="${esc(UI.step)} −1">‹</button><button type="button" data-act="hpTog" data-id="${id}" aria-label="play/pause">${u.run ? '⏸' : '▶'}</button><button type="button" data-act="hpStep" data-id="${id}" data-v="1" aria-label="${esc(UI.step)} +1">›</button><span class="note">${esc(UI.step)} ${i + 1} ${esc(UI.of)} ${n}</span></span></div>
+${p.svg(i)}<p class="hp-txt"><b>${i + 1}.</b> ${esc(p.steps[i].t)}</p>
+<details class="hp-all"><summary>${esc(UI.all)} (${n})</summary><ol>${p.steps.map(s => `<li>${esc(s.t)}</li>`).join('')}</ol></details></div>`;
+  }
+  Object.keys(HELP.players).forEach(id => { HELP.visuals['pl:' + id] = () => playerHtml(id); });
+
+  Object.assign(ACT, {
+    hpStep: d => { const u = st(d.id), n = HELP.players[d.id].steps.length; u.i = (u.i + +d.v + n) % n; u.run = false; render(); },
+    hpTog: d => { const u = st(d.id); u.run = !u.run; render(); },
+  });
+  setInterval(() => {
+    if (S.route !== 'help' || !document.querySelector('.hp')) return;
+    let adv = false;
+    document.querySelectorAll('.hp').forEach(el => { const id = el.dataset.player, u = st(id); if (u.run) { u.i = (u.i + 1) % HELP.players[id].steps.length; adv = true; } });
+    if (adv) render();
+  }, 4000);
+
+  /* attach the players to their articles (helpAdd merges the visuals list) */
+  helpAdd({ key: 'start', visuals: ['pl:shipflow'] });
+  helpAdd({ key: 'express', visuals: ['pl:expresspath'] });
+  helpAdd({ key: 'dashboard/alarms', visuals: ['pl:alarmflow'] });
+  helpAdd({ key: 'pod/quality', visuals: ['pl:alarmflow'] });
+})();
+
 /* Help · guided tours (W6, FR-160): step-by-step spotlight on real elements ([data-act], tab pills, cards), RU / DE / EN / KK.
    State HELP.tour = {id, i, moved}; started from the Help article "tours", the "▶" button in the page header or the "Tour" link of an article.
    The tour only navigates and highlights, never clicks or changes data. Keyboard: → / Enter next, ← back, Esc finish; reduced motion respected. */
@@ -6620,7 +6847,7 @@ helpAdd({ key: 'faq', group: 'ref', special: 'faq', portal: true,
 })();
 
 /* W5 help: Settings → Baseline data (LH-O2, FR-35/36/37/38/48/49/174). DE/EN without Cyrillic. */
-helpAdd({ key: 'settings/baseline', group: 'records', screen: 'settings', tab: 'baseline',
+helpAdd({ key: 'baseline', group: 'records', screen: 'baseline', tab: '',
   title: HQ('Исходные данные', 'Basisdaten', 'Baseline data', 'Бастапқы деректер'),
   sub: HQ('Настройки → Исходные данные (экран 17)', 'Einstellungen → Basisdaten (Bildschirm 17)', 'Settings → Baseline data (screen 17)', 'Баптаулар → Бастапқы деректер (17-экран)'),
   purpose: HQ('Заполненный вопросник Fragenkatalog (150 ответов) с валидацией, отклонениями и открытыми пунктами, плановые значения со статусом проверки, 23 города с привязкой к хабам, кольца, целевой парк из 4 ТС, трекер критического пути до первого рейса, пункты юридической и налоговой проверки и решения по холодовой цепи «Запад».',
@@ -6661,7 +6888,7 @@ helpAdd({ key: 'billing/model', group: 'records', screen: 'billing', tab: 'model
   rules: [HQ('Одна и та же персона не может поставить обе подписи (четыре глаза); слот подписи привязан к бизнес-функции и праву approvals:sign / costs:approve.', 'Dieselbe Person kann nicht beide Unterschriften leisten (Vier-Augen); der Unterschriftsslot ist an die Geschäftsfunktion und das Recht approvals:sign / costs:approve gebunden.', 'The same person cannot give both signatures (four eyes); each signature slot is bound to a business function and the approvals:sign / costs:approve permission.', 'Бір адам екі қолды да қоя алмайды; слот бизнес-функцияға және approvals:sign / costs:approve құқығына байланған.'),
     HQ('Изменение цены дизеля делает подписи устаревшими: решение подписывают заново.', 'Eine Änderung des Dieselpreises macht Unterschriften ungültig: die Entscheidung wird neu unterschrieben.', 'Changing the diesel price makes signatures stale: the decision is signed again.', 'Дизель бағасының өзгеруі қолдарды ескіртеді.'),
     HQ('Позиции с пометкой «допущение» не подтверждены ответами Fragenkatalog и должны быть проверены.', 'Positionen mit „Annahme“ sind nicht durch den Fragenkatalog bestätigt und müssen geprüft werden.', 'Items marked “assumption” are not confirmed by the question catalogue and must be verified.', '«Болжам» белгісі бар позицияларды тексеру керек.')],
-  fr: 'FR-47, FR-85, FR-125 · LH-N2', related: ['reports/kpi', 'settings/baseline'] });
+  fr: 'FR-47, FR-85, FR-125 · LH-N2', related: ['reports/kpi', 'baseline'] });
 
 /* W5 help: Reports → KPI, Express × temperature, Fines (LH-O1, I-12, FR-122/123). DE/EN without Cyrillic. */
 helpAdd({ key: 'reports/kpi', group: 'records', screen: 'reports', tab: 'kpi',

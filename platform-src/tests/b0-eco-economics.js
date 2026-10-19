@@ -4,8 +4,8 @@
     for (const t of ['cards', 'kpi', 'cross', 'fines']) { ev(`go('reports');ACT.stab({s:'reports',v:'${t}'})`); clean(w, 'reports/' + t); }
     ev("ACT.ecoFineImport()"); clean(w, 'fines after import');
     ev("go('settings');ACT.stab({s:'settings',v:'main'})"); clean(w, 'settings/main');
-    for (const s of ['q', 'val', 'pv', 'net', 'fleet', 'launch']) { ev(`go('settings');ACT.stab({s:'settings',v:'baseline'});ACT.blSub({v:'${s}'})`); clean(w, 'settings/baseline/' + s); }
-    for (const k of ['billing/model', 'reports/kpi', 'reports/cross', 'reports/fines', 'settings/baseline']) { ev(`go('help');ACT.helpGo({k:'${k}'})`); clean(w, 'help ' + k); }
+    for (const s of ['q', 'val', 'pv', 'net', 'fleet', 'launch']) { ev(`go('baseline');ACT.blSub({v:'${s}'})`); clean(w, 'settings/baseline/' + s); }
+    for (const k of ['billing/model', 'reports/kpi', 'reports/cross', 'reports/fines', 'baseline']) { ev(`go('help');ACT.helpGo({k:'${k}'})`); clean(w, 'help ' + k); }
   });
   await group('cost model: bottom-up categories, cost + 5 %, transfer prices, diesel what-if (FR-47/125)', 'ru', async (g, ev) => {
     const M = ev('ecoCostCalc(340,false)'); assert(M.tot > 0 && M.rows.length === 19, 'rows'); for (const c of ['fuel', 'service', 'detention', 'insurance', 'tax']) assert(M.byCat[c] > 0, 'category ' + c);
@@ -45,12 +45,12 @@
   });
   await group('baseline: 150 questions, FR-49 open until all KDL questions clarified (FR-35/49)', 'ru', async (g, ev, w) => {
     eq(ev('ecoQuestions().length'), 150); const fr = ev('ecoFr49()'); assert(fr.total > 0 && fr.open === fr.total, 'FR-49 not open');
-    ev("go('settings');ACT.stab({s:'settings',v:'baseline'});ACT.blSub({v:'val'})"); for (const v of ev("ECO_BL.BLV.filter(v=>v.q).map(v=>v.id)")) ev(`ACT.blClar({id:'${v}'})`); eq(ev('ecoFr49().open'), 0, 'FR-49 still open');
-    ev("ACT.setRole({v:'viewer'})"); eq(ev("S.route"), 'settings');
+    ev("go('baseline');ACT.blSub({v:'val'})"); for (const v of ev("ECO_BL.BLV.filter(v=>v.q).map(v=>v.id)")) ev(`ACT.blClar({id:'${v}'})`); eq(ev('ecoFr49().open'), 0, 'FR-49 still open');
+    ev("ACT.setRole({v:'viewer'})"); assert(ev("S.route") !== 'baseline', 'viewer must leave the baseline section');
   });
   await group('baseline: 23 cities on two hubs, target fleet 4, legs check, critical path (FR-36/38/48/174)', 'ru', async (g, ev, w) => {
     eq(ev('ECO_BL.BLC.length'), 23); assert(ev("ECO_BL.BLC.every(c=>c.hub==='ast'||c.hub==='alm')"), 'hub'); eq(ev('ECO_BL.BLF.reduce((a,f)=>a+f.qty,0)'), 4, 'target fleet');
-    ev("go('settings');ACT.stab({s:'settings',v:'baseline'});ACT.blSub({v:'net'})"); eq(w.document.querySelectorAll('[data-city]').length, 23); assert(/✓/.test(w.document.querySelector('[data-ring=R1]').innerText), 'R1 legs sum');
+    ev("go('baseline');ACT.blSub({v:'net'})"); eq(w.document.querySelectorAll('[data-city]').length, 23); assert(/✓/.test(w.document.querySelector('[data-ring=R1]').innerText), 'R1 legs sum');
     ev("ACT.blSub({v:'launch'})"); assert(/15\.12\.2026/.test(w.document.querySelector('main').innerText), 'mid-December target'); ev("ACT.blLaunch({i:'1',v:'done'})"); eq(ev('S.eco.bl.launch[1]'), 'done');
     ev("ACT.blLegal({id:'vat16'})"); assert(ev('S.eco.bl.legal.vat16'), 'legal check'); ev("ACT.blWest({id:'cool',v:'1'})"); eq(ev('S.eco.bl.west.cool'), 1);
     ev("ACT.blSub({v:'pv'});ACT.blPv({id:'deduct_cap',v:'checked'})"); eq(ev('S.eco.bl.pv.deduct_cap'), 'checked'); eq(ev('ECO_BL.PV.length'), 26);

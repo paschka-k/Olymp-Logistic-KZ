@@ -9,7 +9,7 @@ const ROLE_NAME = {
   customer: T('Клиент (портал)', 'Kunde (Portal)', 'Customer (portal)', 'Клиент (портал)'), partner: T('Партнёр (портал)', 'Partner (Portal)', 'Partner (portal)', 'Серіктес (портал)'),
 };
 const ROLE_PERMS = @@ROLEPERMS@@;
-const SCREEN_PERM = { dashboard: 'overview:read', orders: 'orders:read', dispatch: 'trips:read', fleet: 'fleet:read', drivers: 'drivers:read', routes: 'trips:read', hubs: 'trips:read', pod: 'trips:read', billing: 'costs:read', reports: 'overview:read', ai: 'overview:read', settings: 'overview:read' };
+const SCREEN_PERM = { dashboard: 'overview:read', orders: 'orders:read', dispatch: 'trips:read', fleet: 'fleet:read', drivers: 'drivers:read', routes: 'trips:read', hubs: 'trips:read', pod: 'trips:read', billing: 'costs:read', reports: 'overview:read', ai: 'overview:read', settings: 'overview:read', baseline: 'costs:read' };
 const SHELL_NAV = { driver: [], customer: [], partner: [] };   // role shells: [id, icon, label, phase] pushed by the driver-app / portal areas
 const ALWAYS = ['help', 'changes', 'track', 'request'];   // track / request: public views (W4)
 const canDo = p => (ROLE_PERMS[S.role] || []).includes(p);

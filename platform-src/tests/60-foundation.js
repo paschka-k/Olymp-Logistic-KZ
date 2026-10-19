@@ -1,6 +1,6 @@
   /* ---- foundation: roles, tabs API, help, design switch, version, skip link ---- */
-  await group('roles: admin sees 12 items, shells for customer / partner / driver, access refused', 'ru', async (g, ev, w) => {
-    eq(ev('ROLES.length'), 11, 'roles'); eq(ev('navItems().length'), 12, 'admin menu');
+  await group('roles: admin sees 13 items, shells for customer / partner / driver, access refused', 'ru', async (g, ev, w) => {
+    eq(ev('ROLES.length'), 11, 'roles'); eq(ev('navItems().length'), 13, 'admin menu');
     for (const r of ['customer', 'partner', 'driver']) { ev(`ACT.setRole({v:'${r}'})`); assert(ev('navItems().every(n=>n[0]==="help"||SHELL_NAV[S.role].some(m=>m[0]===n[0]))'), r + ' menu'); assert(!ev("canSee('billing')"), r + ' must not see billing'); clean(w, 'role ' + r); }
     ev("ACT.setRole({v:'admin'})"); ev("go('billing')"); eq(ev('S.route'), 'billing'); ev("ACT.setRole({v:'customer'})"); ev("go('billing')"); assert(ev('S.route') !== 'billing', 'customer opened billing');
     for (const r of ev('ROLES')) { ev(`ACT.setRole({v:'${r}'})`); assert(ev('navItems().length') >= 1, r + ' has no menu'); assert(ev('canSee(S.route)'), r + ' stays on a forbidden route'); clean(w, 'role ' + r); }

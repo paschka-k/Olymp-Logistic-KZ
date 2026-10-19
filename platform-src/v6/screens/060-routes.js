@@ -8,13 +8,14 @@
   const sel = (key, label, opts) => `<label>${esc(label)}:</label><select class="select" data-rf="${key}">${opts.map(o => `<option value="${esc(o[0])}"${F[key] === o[0] ? ' selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
   const tk = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
   function map() {
-    const W = 600 / zoom, H = 340 / zoom, cx = 330, cy = 180, vb = `${cx - W / 2} ${cy - H / 2} ${W} ${H}`, k = 1 / zoom;
-    const hubs = Object.values(HUBS).map(h => `<g><circle cx="${h.x}" cy="${h.y}" r="${7 * k}" fill="#fff" stroke="var(--primary)" stroke-width="${3 * k}"/><rect x="${h.x + 10 * k}" y="${h.y - 9 * k}" width="${(h.city.length * 7 + 12) * k}" height="${18 * k}" rx="${9 * k}" fill="#fff" stroke="var(--border-input)"/><text x="${h.x + 16 * k}" y="${h.y + 4 * k}" font-size="${12 * k}" class="maplbl" style="font-size:${12 * k}px">${esc(h.city)}</text></g>`).join('');
-    const ls = live(), lines = ls.map(l => { const a = HUBS[l.from], b = HUBS[l.to]; const sel = S.drawer && S.drawer.id === l.id; return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="var(--primary)" stroke-opacity="${sel ? 1 : .35}" stroke-width="${(sel ? 3 : 2) * k}" stroke-dasharray="${5 * k} ${4 * k}"/>`; }).join('');
-    const mk = ls.map(l => { const a = HUBS[l.from], b = HUBS[l.to], x = a.x + (b.x - a.x) * l.progress, y = a.y + (b.y - a.y) * l.progress, rs = rstate(l), t = trk(l.truck), sel = S.drawer && S.drawer.id === l.id, sc = (sel ? 1.3 : 1) * k;
+    const k = 1 / zoom, W = KZMAP.W / zoom, H = KZMAP.H / zoom, cx = KZMAP.W / 2, cy = KZMAP.H / 2, vb = `${cx - W / 2} ${cy - H / 2} ${W} ${H}`;
+    const ls = live();
+    const lines = ls.map(l => { const sel = S.drawer && S.drawer.id === l.id, d = KZMAP.hubPath(l.from, l.to).pts.map((q, i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' ');
+      return `<path d="${d}" fill="none" stroke="#173a5e" stroke-opacity="${sel ? .9 : .45}" stroke-width="${(sel ? 3.5 : 2.5) * k}" stroke-dasharray="${2 * k} ${7 * k}" stroke-linecap="round"/>`; }).join('');
+    const mk = ls.map(l => { const [x, y] = KZMAP.along(KZMAP.hubPath(l.from, l.to), l.progress), rs = rstate(l), t = trk(l.truck), sel = S.drawer && S.drawer.id === l.id, sc = (sel ? 2 : 1.6) * k;
       const col = rs === 'critical' ? 'var(--mk-red)' : rs === 'at_risk' ? 'var(--mk-status-yellow)' : 'var(--mk-green)';
       return `<g class="mk" data-act="openR" data-id="${l.id}" transform="translate(${x},${y}) scale(${sc})">${sel ? '<circle r="22" fill="var(--primary)" fill-opacity=".15"/>' : ''}<circle r="14" fill="${col}"/><path d="M-7 -3h9v6h-9zM2 -1h4l3 3v2h-7z" fill="#fff"/><rect x="-48" y="18" width="96" height="17" rx="6" fill="#fff" stroke="var(--border-input)"/><text x="0" y="30" text-anchor="middle" class="maplbl sm">${esc(t.plate)} · ${l.temp > 0 ? '+' : ''}${String(l.temp).replace('.', ',')}°</text></g>`; }).join('');
-    return `<div class="mapfull"><svg viewBox="${vb}" class="kzmap"><path d="M40 120 L110 70 L230 60 L330 40 L450 60 L560 90 L580 160 L540 230 L560 290 L440 310 L330 318 L230 300 L140 250 L60 200 Z" fill="#eef2f6" stroke="#d7dee7" stroke-width="${2 * k}"/>${lines}${hubs}${mk}</svg><div class="zoom"><button data-act="zoom" data-v="1">+</button><button data-act="zoom" data-v="-1">−</button></div></div>`;
+    return `<div class="mapfull"><svg viewBox="${vb}" class="kzmap">${KZMAP.base(k)}${lines}${mk}</svg>${KZMAP.legend()}<div class="zoom"><button data-act="zoom" data-v="1">+</button><button data-act="zoom" data-v="-1">−</button></div></div>`;
   }
   SCREENS.routes = {
     title: () => navLabel('routes'),

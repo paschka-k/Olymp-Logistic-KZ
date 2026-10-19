@@ -169,7 +169,7 @@ helpAdd({ key: 'express', group: 'start', screen: 'dispatch', tab: 'express', vi
     HQ('Один пользователь подписывает только один слот; слот требует своей бизнес-функции (назначает администратор в Настройки → Пользователи).', 'Ein Benutzer unterschreibt nur einen Slot; ein Slot braucht seine Geschäftsfunktion (vergibt der Administrator unter Einstellungen → Benutzer).', 'One user signs only one slot; a slot needs its business function (assigned by the administrator in Settings → Users).', 'Бір пайдаланушы тек бір слотқа қол қояды; слот өз бизнес-функциясын талап етеді (әкімші Баптаулар → Пайдаланушылар бөлімінде тағайындайды).'),
     HQ('После отсечки (16:00 по Астане, плановое значение) открытая заявка отклоняется системой, клиент получает уведомление.', 'Nach dem Annahmeschluss (16:00 Astana-Zeit, Planwert) lehnt das System eine offene Anfrage ab, der Kunde wird benachrichtigt.', 'After the cut-off (16:00 Astana time, planning value) the system rejects an open request and the customer is notified.', 'Кесу уақытынан кейін (Астана уақытымен 16:00, жоспарлы мән) ашық өтінімді жүйе қабылдамайды, клиентке хабарланады.'),
   ],
-  fr: 'FR-41, FR-126, FR-154', related: ['dispatch/express', 'settings/baseline', 'roles', 'portal/book'] });
+  fr: 'FR-41, FR-126, FR-154', related: ['dispatch/express', 'baseline', 'roles', 'portal/book'] });
 
 helpAdd({ key: 'navigation', group: 'start',
   title: HQ('Клавиатура, языки, дизайн и ссылки', 'Tastatur, Sprachen, Design und Links', 'Keyboard, languages, design and links', 'Пернетақта, тілдер, дизайн және сілтемелер'),

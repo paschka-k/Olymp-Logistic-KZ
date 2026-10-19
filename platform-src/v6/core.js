@@ -165,6 +165,7 @@ const NAV = [
   ['billing', 'receipt', T('Счета и ЭСФ', 'Rechnungen & ESF', 'Billing & Invoices', 'Шоттар және ЭШФ'), 5],
   ['reports', 'chart', T('Отчёты', 'Berichte', 'Reports', 'Есептер'), 6],
   ['ai', 'spark', T('AI-ассистент', 'KI-Assistent', 'AI Ops Assistant', 'AI-көмекші'), 6],
+  ['baseline', 'chart', T('Исходные данные', 'Basisdaten', 'Baseline data', 'Бастапқы деректер'), 6],
   ['settings', 'cog', T('Настройки', 'Einstellungen', 'Settings', 'Баптаулар'), 6],
 ];
 const SCREENS = {};   // id -> { title, sub, actions(), body() | tabs[{key,label,body,badge,perm}] }
