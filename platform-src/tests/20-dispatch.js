@@ -2,7 +2,7 @@
   await group('create load, assign, status chain to delivered', 'ru', async (g, ev) => {
     const id = ev(`createLoad({cust:'c1',from:'AST',to:'KAR',zone:'ambient',pallets:10,priority:'low'}).ok`).slice(8); assert(id, 'load created');
     eq(ev(`assign('LD-2026-${id}','d5','t4')`), null, 'assign'); eq(ev(`load('LD-2026-${id}').status`), 'assigned');
-    for (const s of ['loading', 'in_transit', 'delivered']) { eq(ev(`canMove(load('LD-2026-${id}'),'${s}')`), null, 'canMove ' + s); ev(`setStatus('LD-2026-${id}','${s}')`); }
+    for (const s of ['loading', 'in_transit', 'delivered']) { if (s === 'in_transit') { assert(ev(`canMove(load('LD-2026-${id}'),'in_transit')`), 'in_transit without Go/No-Go release must be refused (FR-91)'); eq(ev(`release('LD-2026-${id}','test: exception release for the status chain')`), null, 'override release'); } eq(ev(`canMove(load('LD-2026-${id}'),'${s}')`), null, 'canMove ' + s); ev(`setStatus('LD-2026-${id}','${s}')`); }
     eq(ev(`load('LD-2026-${id}').pod`), 'pending', 'POD pending'); eq(ev('drv("d5").status'), 'available', 'driver freed');
   });
   await group('invalid transitions and creation are refused', 'ru', async (g, ev) => {
