@@ -866,7 +866,7 @@ Object.assign(ACT, {
 
 /* Roles & permissions (FR-14/137): 11 roles, permission matrix generated from the source platform (role-perms.json),
    screen / tab gating, role shells (driver, customer, partner use their own menu), role switcher. */
-const VERSION = '6.1.0', BUILD = '2026-10-20 01:00';
+const VERSION = '6.1.0', BUILD = '2026-10-20 01:02';
 const ROLES = ['admin', 'dispatcher', 'warehouse', 'driver', 'auditor', 'viewer', 'manager', 'finance', 'quality', 'customer', 'partner'];
 const ROLE_NAME = {
   admin: T('Администратор', 'Administrator', 'Administrator', 'Әкімші'), dispatcher: T('Диспетчер', 'Disponent', 'Dispatcher', 'Диспетчер'), warehouse: T('Склад', 'Lager', 'Warehouse', 'Қойма'),
@@ -1085,7 +1085,7 @@ S.costs = [
   }
   const gsAll = () => { const q = S.gs.q.trim(); if (q.length < 2) return { L: [], D: [], all: [] }; const L = gsLines(q), D = gsDb(q); return { L, D, all: L.concat(D) }; };
   globalThis.gsResults = gsAll;
-  const logo = m => (typeof MFRS !== 'undefined' && MFRS[m] && MFRS[m].logo) ? `<span class="mlogo img gs-logo" title="${esc(MFRS[m].name)}"><img src="assets/manufacturers/${MFRS[m].logo}.png" alt="${esc(MFRS[m].name)}" loading="lazy"></span>` : `<span class="gs-type">${esc(m || '')}</span>`;
+  const logo = m => (typeof MFRS !== 'undefined' && MFRS[m] && MFRS[m].logo) ? `<span class="mlogo img gs-logo" title="${esc(MFRS[m].name)}"><img src="${mfrSrc(m)}" alt="${esc(MFRS[m].name)}" loading="lazy"></span>` : `<span class="gs-type">${esc(m || '')}</span>`;
   const plateOf = id => { const l = load(id); return l && l.truck ? trk(l.truck).plate : '—'; };
   globalThis.shellSearchBox = () => {
     const { L, D } = gsAll(), open = S.gs.q.trim().length >= 2;
@@ -3020,8 +3020,8 @@ ${table()}${coverage()}<div class="grid2 eq">${handover()}<div>${serviceOnRoute(
     sysmex: { name: 'Sysmex', co: 'Sysmex Europe SE, Norderstedt', url: 'sysmex-europe.com', ab: 'SX', col: 4, logo: 'sysmex', cc: 'JP', grp: 2 },
     biomerieux: { name: 'bioMérieux', co: 'bioMérieux SA, Marcy-l\'Étoile', url: 'biomerieux.com', ab: 'BM', col: 5, logo: 'biomerieux', cc: 'FR', grp: 1 },
     beckman: { name: 'Beckman Coulter', co: 'Beckman Coulter Inc., Brea', url: 'beckmancoulter.com', ab: 'BC', col: 6, logo: 'beckman-coulter', cc: 'US', grp: 0 },
-    freshline: { name: 'FreshLine Foods', co: 'ТОО «FreshLine Foods», Алматы', url: 'freshline.example', ab: 'FL', col: 4, cc: 'KZ', grp: 2 },
-    polar: { name: 'Polar Fisch GmbH', co: 'Polar Fisch GmbH, Bremerhaven', url: 'polar-fisch.example', ab: 'PF', col: 5, cc: 'DE', grp: 2 },
+    freshline: { name: 'FreshLine Foods', co: 'ТОО «FreshLine Foods», Алматы', url: 'freshline.example', ab: 'FL', col: 4, logo: 'freshline.svg', cc: 'KZ', grp: 2 },
+    polar: { name: 'Polar Fisch GmbH', co: 'Polar Fisch GmbH, Bremerhaven', url: 'polar-fisch.example', ab: 'PF', col: 5, logo: 'polar-fisch.svg', cc: 'DE', grp: 2 },
     /* registry of the source platform (0.3.9 screen 04 "Производители · 19"): the remaining manufacturers without demo orders */
     bd: { name: 'BD Biosciences', co: 'Becton Dickinson, Franklin Lakes', url: 'bdbiosciences.com', ab: 'BD', col: 1, cc: 'US', grp: 0 },
     roxall: { name: 'Roxall Medizin', co: 'Roxall Medizin GmbH, Hamburg', url: 'roxall.de', ab: 'RX', col: 2, cc: 'DE', grp: 0 },
@@ -3034,9 +3034,11 @@ ${table()}${coverage()}<div class="grid2 eq">${handover()}<div>${serviceOnRoute(
     sarstedt: { name: 'Sarstedt', co: 'Sarstedt AG & Co. KG, Nümbrecht', url: 'sarstedt.com', ab: 'SA', col: 3, cc: 'DE', grp: 2 },
     mercator: { name: 'Mercator Medical', co: 'Mercator Medical S.A., Kraków', url: 'mercatormedical.eu', ab: 'MM', col: 4, cc: 'PL', grp: 2 },
     immundiagnostik: { name: 'Immundiagnostik', co: 'Immundiagnostik AG, Bensheim', url: 'immundiagnostik.com', ab: 'ID', col: 5, cc: 'DE', grp: 2 },
-    medsnab: { name: T('ТОО «МедСнаб Актобе» · сторонний груз', 'MedSnab Aktobe LLP · Fremdladung', 'MedSnab Aktobe LLP · third-party cargo', '«МедСнаб Ақтөбе» ЖШС · бөгде жүк'), co: 'ТОО «МедСнаб Актобе»', url: '', ab: 'MS', col: 6, cc: 'KZ', grp: 3 },
-    pharmchain: { name: T('Аптечная сеть · сторонний груз', 'Apothekenkette · Fremdladung', 'Pharmacy chain · third-party cargo', 'Дәріхана желісі · бөгде жүк'), co: '', url: '', ab: 'PH', col: 1, cc: 'KZ', grp: 3 },
+    medsnab: { name: T('ТОО «МедСнаб Актобе» · сторонний груз', 'MedSnab Aktobe LLP · Fremdladung', 'MedSnab Aktobe LLP · third-party cargo', '«МедСнаб Ақтөбе» ЖШС · бөгде жүк'), co: 'ТОО «МедСнаб Актобе»', url: '', ab: 'MS', col: 6, logo: 'medsnab.svg', cc: 'KZ', grp: 3 },
+    pharmchain: { name: T('Аптечная сеть · сторонний груз', 'Apothekenkette · Fremdladung', 'Pharmacy chain · third-party cargo', 'Дәріхана желісі · бөгде жүк'), co: '', url: '', ab: 'PH', col: 1, logo: 'pharmchain.svg', cc: 'KZ', grp: 3 },
   };
+  /* logo file: bare name = owner-supplied PNG (515 × 380), name with extension = drawn SVG of a fictitious company */
+  globalThis.mfrSrc = m => 'assets/manufacturers/' + (MFRS[m].logo.includes('.') ? MFRS[m].logo : MFRS[m].logo + '.png');
   /* registry groups of the source platform; the six logo manufacturers of v6 belong to "added in v5" / "top western IVD" */
   const MFR_G = [T('добавлен в v5', 'in v5 ergänzt', 'added in v5', 'v5-те қосылды'), T('топ западной IVD', 'Top westliche IVD', 'top western IVD', 'батыс IVD көшбасшысы'), T('в ассортименте', 'im Sortiment', 'in range', 'ассортиментте'), T('сторонний груз', 'Fremdladung', 'third-party cargo', 'бөгде жүк')];
   const ART = {
@@ -3772,9 +3774,9 @@ ${rc.map(r => `<div class="lw-row" style="grid-template-columns:80px minmax(0,1f
 .sh-short{display:inline-block;background:var(--tint-yellow-50);color:#854d0e;border-radius:4px;padding:0 4px;font-size:10px}.sh-in{border:1px solid var(--border-input);border-radius:999px;height:36px;padding:0 12px;font:inherit;width:320px}`;
   document.head.appendChild(css);
   /* logo in a fixed 515:380 box, contain-fit (same visual weight for every logo, no frame); manufacturers without a file keep the initials badge */
-  const mlogo = (m, size) => MFRS[m].logo ? `<span class="mlogo img" style="width:${Math.round(size * 515 / 380)}px;height:${size}px" title="${esc(MFRS[m].name)}"><img src="assets/manufacturers/${MFRS[m].logo}.png" alt="${esc(MFRS[m].name)}" loading="lazy"></span>`
+  const mlogo = (m, size) => MFRS[m].logo ? `<span class="mlogo img" style="width:${Math.round(size * 515 / 380)}px;height:${size}px" title="${esc(MFRS[m].name)}"><img src="${mfrSrc(m)}" alt="${esc(MFRS[m].name)}" loading="lazy"></span>`
     : `<span class="mlogo c${MFRS[m].col}" style="width:${size}px;height:${size}px;font-size:${Math.round(size * 0.38)}px" title="${esc(MFRS[m].name)}">${MFRS[m].ab}</span>`;
-  const logoBadge = m => MFRS[m].logo ? `<span class="sh-logo img" data-mfr-logo="${m}" title="${esc(MFRS[m].name)}"><img src="assets/manufacturers/${MFRS[m].logo}.png" alt="${esc(MFRS[m].name)}" loading="lazy"></span>`
+  const logoBadge = m => MFRS[m].logo ? `<span class="sh-logo img" data-mfr-logo="${m}" title="${esc(MFRS[m].name)}"><img src="${mfrSrc(m)}" alt="${esc(MFRS[m].name)}" loading="lazy"></span>`
     : `<span class="sh-logo" style="background:${['#1d4ed8', '#0f766e', '#7c3aed', '#16a34a', '#0369a1', '#b45309'][MFRS[m].col - 1]}" data-mfr-logo="${m}">${esc(MFRS[m].name.split(' ')[0].toUpperCase())}</span>`;
   const EV = { create: T('место создано, этикетка напечатана', 'Packstück angelegt, Etikett gedruckt', 'place created, label printed', 'орын құрылды, затбелгі басылды'), load: T('погружено в ТС', 'ins Fahrzeug geladen', 'loaded into the truck', 'КҚ-ға тиелді'), depart: T('выезд с хаба', 'Abfahrt vom Hub', 'departed from the hub', 'хабтан шықты'), unload: T('выгружено на хабе', 'am Hub entladen', 'unloaded at the hub', 'хабта түсірілді'), receive: T('принято филиалом (ePOD)', 'von Filiale angenommen (ePOD)', 'received by the branch (ePOD)', 'филиал қабылдады (ePOD)') };
   const visibleLoads = () => S.loads.filter(l => (S.ops.shipArch || l.status !== 'delivered') && (!S.ops.shipFrom || l.eta.slice(0, 10) >= S.ops.shipFrom));

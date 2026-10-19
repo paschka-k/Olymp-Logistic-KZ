@@ -81,7 +81,7 @@
   }
   const gsAll = () => { const q = S.gs.q.trim(); if (q.length < 2) return { L: [], D: [], all: [] }; const L = gsLines(q), D = gsDb(q); return { L, D, all: L.concat(D) }; };
   globalThis.gsResults = gsAll;
-  const logo = m => (typeof MFRS !== 'undefined' && MFRS[m] && MFRS[m].logo) ? `<span class="mlogo img gs-logo" title="${esc(MFRS[m].name)}"><img src="assets/manufacturers/${MFRS[m].logo}.png" alt="${esc(MFRS[m].name)}" loading="lazy"></span>` : `<span class="gs-type">${esc(m || '')}</span>`;
+  const logo = m => (typeof MFRS !== 'undefined' && MFRS[m] && MFRS[m].logo) ? `<span class="mlogo img gs-logo" title="${esc(MFRS[m].name)}"><img src="${mfrSrc(m)}" alt="${esc(MFRS[m].name)}" loading="lazy"></span>` : `<span class="gs-type">${esc(m || '')}</span>`;
   const plateOf = id => { const l = load(id); return l && l.truck ? trk(l.truck).plate : '—'; };
   globalThis.shellSearchBox = () => {
     const { L, D } = gsAll(), open = S.gs.q.trim().length >= 2;
