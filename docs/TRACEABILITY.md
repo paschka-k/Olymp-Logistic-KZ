@@ -272,3 +272,16 @@ Files: `platform-src/v6/screens/611-eco-reports-ext.js`, `600-eco-costmodel.js`,
 | FR-116 | Incoming partner / workshop ESF form (BIN, VAT cap, HO-/SR- link), booked to the ledger, audited | Billing → Cost model → Summary | "costs: incoming partner / workshop ESF…" (b2) |
 | B7 | Insurance idle toggles with idle months and registration recommendation | Billing → Cost model → Insurance, tax, registration | "costs: insurance idle toggles…" (b2) |
 | — | All P5 tabs and help articles render in RU / DE / EN / KK without undefined / NaN | all of the above | "[ru/de/en/kk] P5 …" (b1, b2) |
+
+## Q1 — Animated help diagrams
+
+| FR | What | Where in v6 | Test (c1-help-visuals) |
+|---|---|---|---|
+| FR-138 | Figure kit ported from 0.3.10 kit.tsx: title, ‹ ▶/❚❚ › controls, "Step N of M", live caption, "All steps (N)" list with clickable steps; repaint in place (attribute morph, CSS transitions) | help/60-visuals.js (HELP.fig), app.css "Q1 animated help figures" | "help visuals: stepper next / prev / step list…" |
+| FR-138 | Stepper: one interval per figure id only while it is in the DOM and visible, paused in a hidden tab, prefers-reduced-motion starts paused, cleared when the figure leaves the DOM | help/60-visuals.js (hvSync, HELP.hvTimers) | "[ru/de/en/kk] … timers cleared after closing", "leaving help clears the timers" |
+| FR-138 | Truck finder figure exactly as 0.3.10: matrix 5 candidates × 8 checks, seesaw tilt by centre of gravity, front / rear axle bars red over the limit with +excess tag, recommendation on the last step | Help → Load and weight, Fleet → Registry, ◇ Diagram on Load & weight / Shipping / Billing | "help visuals: truck seesaw — … step 4 …" |
+| FR-138 | Loading instruction figure (v6): orders → zones → weight / axles → split → LIFO order → weighing | Help → Load and weight, ◇ Diagram on Orders / Load & weight | "help visuals: truck seesaw …" (load steps 3 / 4) |
+| FR-138 | Animated ports of flow, split, coldchain, coverage, booking, express, approvals, driver (driverDay), dispatchMock; v6-only gonogo animated (nine gates, No-Go on step 3) | help articles with visuals, ◇ Diagram popover | "[ru/de/en/kk] help visuals: every figure renders every step…" |
+| FR-138 | "◇ Diagram" popover shows several figures for one tab (orders/loadw = truck + load) | screens/001-shell-ext.js (DIAG, diagIds) | "[ru/de/en/kk] … Load & weight ◇ Diagram …" |
+| FR-138 | 0.3.9 players (shipflow, expresspath, alarmflow) run on the same kit, no full render every 4 s | help/65-players.js | "help: Schaubilder players …" (d0) |
+| — | All figures, every step, in RU / DE / EN / KK without undefined / NaN; DE / EN without Cyrillic | all of the above | "[de/en] … no Cyrillic" |

@@ -1,12 +1,9 @@
 /* Help · animated Schaubilder (port of the 0.3.9 help overlays): a diagram that plays through its steps — ‹ ▶/⏸ › controls,
-   "step n of m", the active node highlighted, the step text under the picture, "all steps" as a list. Auto-advance every 4 s
-   while the help page is open; prefers-reduced-motion starts paused. HELP.players[id] = {title, steps[{t}], svg(i)}; rendered
-   through HELP.visuals['pl:<id>'] so articles attach a player like any visual. */
+   "step n of m", the active node highlighted, the step text under the picture, "all steps" as a list. Since Q1 they run on the figure
+   kit of 60-visuals.js (HELP.fig): auto-advance every 4 s only while visible; prefers-reduced-motion starts paused; state S.hv['pl:<id>'].
+   HELP.players[id] = {title, steps[{t}], svg(i)}; rendered through HELP.visuals['pl:<id>'] so articles attach a player like any visual. */
 (function () {
-  const RM = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   HELP.players = {};
-  const P = () => (S.hp = S.hp || {});
-  const st = id => (P()[id] = P()[id] || { i: 0, run: !RM });
 
   /* ---------- small SVG kit (uses the hv- classes of 60-visuals) ---------- */
   const box = (x, y, w, h, l1, l2, on, cls) => `<g class="hv-box hv-${cls || 'a'}${on ? ' pl-on' : ''}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="9"/><text x="${x + w / 2}" y="${y + (l2 ? h / 2 - 3 : h / 2 + 4)}" text-anchor="middle" style="font-weight:600">${esc(l1)}</text>${l2 ? `<text x="${x + w / 2}" y="${y + h / 2 + 13}" text-anchor="middle" style="font-size:10px;opacity:.75">${esc(l2)}</text>` : ''}</g>`;
@@ -88,27 +85,10 @@ ${n(152, 53, 0)}${n(428, 36, 1)}${n(592, 36, 2)}${n(152, 105, 3)}</svg>`;
     },
   };
 
-  /* ---------- rendering + controls ---------- */
-  const UI = { step: T('Шаг', 'Schritt', 'Step', 'Қадам'), of: T('из', 'von', 'of', '/'), all: T('Все шаги', 'Alle Schritte', 'All steps', 'Барлық қадамдар') };
-  function playerHtml(id) {
-    const p = HELP.players[id]; if (!p) return '';
-    const u = st(id), n = p.steps.length, i = Math.min(u.i, n - 1);
-    return `<div class="hp" data-player="${id}" data-step="${i}"><div class="hp-head"><b>${esc(p.title)}</b><span class="hp-ctl"><button type="button" data-act="hpStep" data-id="${id}" data-v="-1" aria-label="${esc(UI.step)} −1">‹</button><button type="button" data-act="hpTog" data-id="${id}" aria-label="play/pause">${u.run ? '⏸' : '▶'}</button><button type="button" data-act="hpStep" data-id="${id}" data-v="1" aria-label="${esc(UI.step)} +1">›</button><span class="note">${esc(UI.step)} ${i + 1} ${esc(UI.of)} ${n}</span></span></div>
-${p.svg(i)}<p class="hp-txt"><b>${i + 1}.</b> ${esc(p.steps[i].t)}</p>
-<details class="hp-all"><summary>${esc(UI.all)} (${n})</summary><ol>${p.steps.map(s => `<li>${esc(s.t)}</li>`).join('')}</ol></details></div>`;
-  }
-  Object.keys(HELP.players).forEach(id => { HELP.visuals['pl:' + id] = () => playerHtml(id); });
-
-  Object.assign(ACT, {
-    hpStep: d => { const u = st(d.id), n = HELP.players[d.id].steps.length; u.i = (u.i + +d.v + n) % n; u.run = false; render(); },
-    hpTog: d => { const u = st(d.id); u.run = !u.run; render(); },
-  });
-  setInterval(() => {
-    if (S.route !== 'help' || !document.querySelector('.hp')) return;
-    let adv = false;
-    document.querySelectorAll('.hp').forEach(el => { const id = el.dataset.player, u = st(id); if (u.run) { u.i = (u.i + 1) % HELP.players[id].steps.length; adv = true; } });
-    if (adv) render();
-  }, 4000);
+  /* ---------- rendering: through the Q1 figure kit of 60-visuals.js (controls, step list, one timer per visible figure, in-place repaint) ---------- */
+  Object.keys(HELP.players).forEach(id => { const p = HELP.players[id]; HELP.fig('pl:' + id, { title: p.title, steps: p.steps.map(s => s.t), svg: i => p.svg(i), ms: 4000, cls: 'hp', attrs: `data-player="${id}"` }); });
+  /* 0.3.9 action names kept as aliases */
+  Object.assign(ACT, { hpStep: d => ACT.hvStep({ id: 'pl:' + d.id, v: d.v }), hpTog: d => ACT.hvTog({ id: 'pl:' + d.id }) });
 
   /* attach the players to their articles (helpAdd merges the visuals list) */
   helpAdd({ key: 'start', visuals: ['pl:shipflow'] });
