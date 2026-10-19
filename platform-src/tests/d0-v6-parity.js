@@ -63,3 +63,33 @@
     const cyr = ev("Object.entries(HELP.players).filter(([k,p])=>/[А-Яа-яЁё]/.test(p.title+p.steps.map(s=>s.t).join(''))).map(([k])=>k)");
     assert(!cyr.length, 'Cyrillic in: ' + cyr);
   });
+  await group('topbar: breadcrumb links navigate, burger toggles the off-canvas sidebar', 'ru', async (g, ev, w) => {
+    ev("go('routes')");
+    assert(w.document.querySelector('.crumb [data-act=go]'), 'home crumb is a link');
+    w.document.querySelector('.crumb [data-act=go]').click(); eq(ev('S.route'), 'dashboard', 'home crumb navigates');
+    ev("go('orders');ACT.open({id:S.loads[0].id})");
+    const c2 = w.document.querySelectorAll('.crumb [data-act=crumb]'); assert(c2.length, 'screen crumb is a link');
+    c2[0].click(); assert(!ev('S.drawer'), 'screen crumb closes the drawer'); eq(ev('S.route'), 'orders', 'stays on the screen');
+    assert(w.document.querySelector('.burger[data-act=sideTog]'), 'burger button exists');
+    w.document.querySelector('.burger').click(); assert(w.document.querySelector('.sidebar.open') && w.document.querySelector('.side-back'), 'sidebar opens with backdrop');
+    w.document.querySelector('.side-back').click(); assert(!w.document.querySelector('.sidebar.open'), 'backdrop closes it');
+    ev('ACT.sideTog()'); ev("go('fleet')"); assert(!w.document.querySelector('.sidebar.open'), 'navigation closes the sidebar');
+  });
+  await group('AI summary: ✦ toggle on every main screen, live numbers and a recommendation', 'ru', async (g, ev, w) => {
+    const keys = ev('Object.keys(AISUM)');
+    assert(keys.length >= 10, 'registry covers the main screens: ' + keys.length);
+    for (const k of ['dashboard', 'dispatch', 'routes', 'billing', 'baseline']) {
+      ev(`go('${k}')`); assert(w.document.querySelector('.ai-sum-btn'), k + ': button missing');
+      w.document.querySelector('.ai-sum-btn').click();
+      const el = w.document.querySelector(`[data-ai-sum="${k}"]`); assert(el, k + ': summary missing');
+      assert(/\d/.test(el.innerText) && /Рекомендация/.test(el.innerText), k + ': no numbers or recommendation');
+      w.document.querySelector('.ai-sum-btn').click(); assert(!w.document.querySelector('[data-ai-sum]'), k + ': does not toggle off');
+      clean(w, 'aisum ' + k);
+    }
+    ev("go('reports')"); assert(!w.document.querySelector('.ai-sum-btn'), 'reports keep their per-card toggles');
+    assert(ev("S.loads.some(l=>l.status==='problem')") ? /LD-/.test((ev("AISUM.dashboard()"))) : true, 'worst load named on the dashboard');
+  });
+  for (const lang of ['de', 'en']) await group('[' + lang + '] AI summary: every screen text complete, no Cyrillic', lang, async (g, ev) => {
+    const texts = ev("(function(){const names=[].concat(S.drivers.map(d=>d.name),CUSTOMERS.map(c=>c.name),S.trucks.map(t=>t.plate),Object.keys(MFRS).map(k=>MFRS[k].name));return Object.keys(AISUM).map(k=>{try{let t=AISUM[k]();names.forEach(n=>{t=t.split(n).join('X')});return [k,t]}catch(e){return [k,'ERR:'+e.message]}})})()");
+    for (const [k, t] of texts) { assert(t && !/^ERR/.test(t), lang + ' ' + k + ': ' + t); assert(!/[А-Яа-яЁё]/.test(t), lang + ' Cyrillic in ' + k + ': ' + t); }
+  });

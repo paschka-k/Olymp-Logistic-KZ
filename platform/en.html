@@ -523,6 +523,19 @@ html[data-design="kokzhol"] .side-link{color:#c9d8df}html[data-design="kokzhol"]
 .hp .pl-nogo{color:#dc2626}.hp .pl-nogo path{stroke:#dc2626}.hp .pl-nogo text{fill:#dc2626;font-size:10px;font-weight:700}
 .hp .pl-num circle{fill:var(--surface,#fff);stroke:var(--primary,#2563eb);stroke-width:2}.hp .pl-num text{fill:var(--primary,#2563eb);font-weight:700;font-size:11px}
 .hp .pl-num.pl-on circle{fill:var(--primary,#2563eb)}.hp .pl-num.pl-on text{fill:#fff}
+/* topbar burger + off-canvas sidebar for narrow windows */
+.burger{display:none;border:1px solid var(--border-input);background:var(--surface,#fff);color:var(--text);border-radius:8px;min-width:36px;height:34px;font-size:15px;cursor:pointer;margin-right:10px;flex:none}
+.crumb .lnk{color:inherit;text-decoration:none;cursor:pointer}.crumb .lnk:hover{text-decoration:underline}
+@media (max-width:960px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:60;width:280px;max-width:85vw;height:100vh;overflow:auto;transform:translateX(-105%);transition:transform .18s ease}
+  .sidebar.open{transform:none;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+  .burger{display:inline-flex;align-items:center;justify-content:center}
+  .side-back{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:55}
+}
+@media (prefers-reduced-motion: reduce){.sidebar{transition:none}}
+/* page-level AI summary */
+.aisum-page{margin:0 0 14px;white-space:pre-line}
 
 </style></head><body><a class="skip" href="#main-content">Skip to content</a><div id="root"></div><script>
 /* v6 core: i18n, helpers, icons, store + dispatch rules, shell, drawer, router. */
@@ -707,7 +720,7 @@ const screenBody = id => { const sc = SCREENS[id]; if (!sc.tabs) return sc.body(
 const navLabel = id => (NAV.find(n => n[0] === id) || [])[2] || ((SCREENS[id] && SCREENS[id].title) ? SCREENS[id].title() : id);
 
 function toast(msg, kind) { S.toast = { msg, kind: kind || 'ok' }; render(); clearTimeout(toast.t); toast.t = setTimeout(() => { S.toast = null; render(); }, 3200); }
-function go(r) { if (!canSee(r)) return toast(T('Нет доступа для роли ', 'Kein Zugriff für Rolle ', 'No access for role ', 'Рөлге қолжетімсіз: ') + ROLE_NAME[S.role], 'err'); S.route = r; S.drawer = null; S.f.page = 1; render(); const m = $('main'); if (m) m.scrollTop = 0; }
+function go(r) { if (!canSee(r)) return toast(T('Нет доступа для роли ', 'Kein Zugriff für Rolle ', 'No access for role ', 'Рөлге қолжетімсіз: ') + ROLE_NAME[S.role], 'err'); S.route = r; S.sideOpen = false; S.drawer = null; S.f.page = 1; render(); const m = $('main'); if (m) m.scrollTop = 0; }
 function openDrawer(d) { S.drawer = d; render(); }
 const closeDrawer = () => { S.drawer = null; render(); };
 const alertsCount = () => S.loads.filter(l => tempState(l) === 'breach' && isActive(l)).length + S.drivers.filter(d => d.rto < 4 && d.status === 'available').length;
@@ -733,13 +746,13 @@ ${S.role !== 'driver' ? `<a class="side-link" data-act="setRole" data-v="driver"
 ${shellRole ? '' : `<a class="side-link${S.route === 'help' ? ' on' : ''}" data-act="go" data-v="help">${ic('spark', 14)}<span>${esc(T('Справка', 'Hilfe', 'Help', 'Анықтама'))}</span></a>`}</div>`;
   const USER = { admin: ['Sarah Johnson', 'SJ'], dispatcher: ['Айгерим Сапарова', 'АС'], warehouse: ['Болат Ермеков', 'БЕ'], driver: ['Ерлан Сейтқали', 'ЕС'], auditor: ['Olga Berg', 'OB'], viewer: ['Timur Akhmetov', 'TA'], manager: ['Max Keller', 'MK'], finance: ['Дана Жумабаева', 'ДЖ'], quality: ['Anna Schulz', 'AS'], customer: ['ТОО «Аптека Сервис»', 'АС'], partner: ['ТОО «ТрансХолод»', 'ТХ'] };
   const usr = USER[S.role] || USER.admin;
-  return `<div class="app"><aside class="sidebar">${brand}${nav}${tools}<div class="langs">${lang}</div>${ver}</aside>
-<main id="main-content"><header class="topbar"><span class="crumb">${esc(navLabel('dashboard'))} › <b>${esc(navLabel(S.route))}</b></span>
+  return `<div class="app"><aside class="sidebar${S.sideOpen ? ' open' : ''}">${brand}${nav}${tools}<div class="langs">${lang}</div>${ver}</aside>
+<main id="main-content"><header class="topbar"><button class="burger" data-act="sideTog" aria-label="Menu" aria-expanded="${S.sideOpen ? 'true' : 'false'}">☰</button><span class="crumb"><a class="lnk" data-act="go" data-v="${homeRoute()}" role="link" tabindex="0">${esc(navLabel(homeRoute()))}</a> › <a class="lnk" data-act="crumb" role="link" tabindex="0"><b>${esc(navLabel(S.route))}</b></a></span>
 <div class="who"><label class="searchbox">${ic('search', 14)}<input id="gsearch" placeholder="${esc(T('Поиск рейсов, ТС, водителей…', 'Fahrten, Fahrzeuge, Fahrer suchen…', 'Search loads, trucks, drivers…', 'Рейс, КҚ, жүргізуші іздеу…'))}" value="${esc(S.f.q)}"></label>
 <label class="rolebox" title="${esc(T('Переключить роль: меню и права меняются сразу', 'Rolle wechseln: Menü und Rechte ändern sich sofort', 'Switch the role: menu and permissions change at once', 'Рөлді ауыстыру'))}">${ic('user', 14)}<span>${esc(T('Роль', 'Rolle', 'Role', 'Рөл'))}</span><select id="roleSel" class="select" aria-label="Role" style="height:32px">${ROLES.map(r => `<option value="${r}"${r === S.role ? ' selected' : ''}>${esc(ROLE_NAME[r])}</option>`).join('')}</select></label><button class="btn grey sm" data-act="setDesign" title="${S.design === 'kokzhol' ? 'Kökzhol → Olymp' : 'Olymp → Kökzhol'}">${S.design === 'olymp' ? '◐' : '◑'}</button><button class="btn grey sm" data-act="helpHere" aria-label="Help" title="${esc(T('Справка по этому экрану', 'Hilfe zu diesem Bildschirm', 'Help for this screen', 'Осы экран анықтамасы'))}">?</button><span class="bell">${ic('bell', 18)}${alertsCount() ? `<span class="badge-count">${alertsCount()}</span>` : ''}</span>
 <div class="usr"><b>${esc(usr[0])}</b><small>${esc(ROLE_NAME[S.role])}</small></div><span class="avatar" style="background:var(--primary)">${esc(usr[1])}</span></div></header>
 <div class="page-head"><div><h1 class="page-title">${esc(title)}</h1>${sc && sc.sub ? `<p class="page-sub">${esc(sc.sub())}</p>` : ''}</div><div class="actions">${sc && sc.actions ? sc.actions() : ''}</div></div>
-<div class="content">${body}</div></main>${drawerHtml()}${S.toast ? `<div class="toast ${S.toast.kind}">${esc(S.toast.msg)}</div>` : ''}</div>`;
+<div class="content">${body}</div></main>${S.sideOpen ? '<div class="side-back" data-act="sideTog"></div>' : ''}${drawerHtml()}${S.toast ? `<div class="toast ${S.toast.kind}">${esc(S.toast.msg)}</div>` : ''}</div>`;
 }
 function placeholder(id) {
   const ph = NAV.find(n => n[0] === id)[3];
@@ -774,6 +787,7 @@ document.addEventListener('input', e => {
 });
 Object.assign(ACT, {
   go: d => go(d.v), close: closeDrawer, stab: d => setTab(d.s, d.v),
+  crumb: () => go(S.route), sideTog: () => { S.sideOpen = !S.sideOpen; render(); },
   dtab: d => setTab('dispatch', d.v), rtab: d => setTab('routes', d.v), podTab: d => setTab('pod', d.v), bTab: d => setTab('billing', d.v), htab: d => setTab('hubs', d.v),
   open: d => openDrawer({ type: 'load', id: d.id, tab: 'overview' }),
   tab: d => { S.drawer.tab = d.v; render(); },
@@ -784,7 +798,7 @@ Object.assign(ACT, {
 
 /* Roles & permissions (FR-14/137): 11 roles, permission matrix generated from the source platform (role-perms.json),
    screen / tab gating, role shells (driver, customer, partner use their own menu), role switcher. */
-const VERSION = '6.1.0', BUILD = '2026-10-19 11:03';
+const VERSION = '6.1.0', BUILD = '2026-10-19 11:04';
 const ROLES = ['admin', 'dispatcher', 'warehouse', 'driver', 'auditor', 'viewer', 'manager', 'finance', 'quality', 'customer', 'partner'];
 const ROLE_NAME = {
   admin: T('Администратор', 'Administrator', 'Administrator', 'Әкімші'), dispatcher: T('Диспетчер', 'Disponent', 'Dispatcher', 'Диспетчер'), warehouse: T('Склад', 'Lager', 'Warehouse', 'Қойма'),
@@ -6844,6 +6858,103 @@ ${p.svg(i)}<p class="hp-txt"><b>${i + 1}.</b> ${esc(p.steps[i].t)}</p>
     else if (e.key === 'ArrowLeft') { ACT.tourBack(); e.preventDefault(); }
     else if (e.key === 'Enter' && e.target.closest && e.target.closest('.tour-pop') && !e.target.closest('button')) { ACT.tourNext(); e.preventDefault(); }
   });
+})();
+
+/* AI summary on every main screen (extends the "Toggle AI Summary" of the report cards): a ✦ button in the page head toggles a short
+   advisory summary computed from the live state — counts, the worst case by name and one recommendation. Advisory only, like the AI
+   assistant (spec 5.11): it never changes data. AISUM[screen] -> text; S.aiSum[screen] keeps the toggle per screen. */
+(function () {
+  const nf = n => Math.round(n).toLocaleString('ru-RU');
+  const rt = l => HUBS[l.from].city + ' → ' + HUBS[l.to].city;
+  const act = () => S.loads.filter(isActive);
+  const probl = () => S.loads.filter(l => l.status === 'problem' || tempState(l) === 'breach');
+  const unassigned = () => S.loads.filter(l => l.status === 'unassigned');
+  const freeT = () => S.trucks.filter(t => t.status === 'available');
+  const openDevs = () => (S.devs || []).filter(d => d.step < 7);
+  const invSt = i => i.paidAt ? 'paid' : new Date(i.due + 'T12:00:00+05:00') < NOW ? 'overdue' : 'pending';
+  const expDocs = d => (d.docs || []).filter(x => (new Date(x.to) - NOW) / 864e5 < 60).length;
+  const rec = t => T('Рекомендация: ', 'Empfehlung: ', 'Recommendation: ', 'Ұсыныс: ') + t;
+
+  const AISUM = {
+    dashboard() {
+      const p = probl(), f = freeT();
+      return T('Сейчас ', 'Aktuell ', 'Right now ', 'Қазір ') + act().length + T(' активных рейсов, из них с проблемой ', ' aktive Fahrten, davon mit Problem ', ' active loads, of which with a problem ', ' белсенді рейс, оның ішінде мәселесі бар ') + p.length
+        + T('; открытых отклонений качества ', '; offene Qualitätsabweichungen ', '; open quality deviations ', '; ашық сапа ауытқулары ') + openDevs().length
+        + T('; свободно ', '; frei ', '; available ', '; бос ') + f.length + ' / ' + S.trucks.length + T(' ТС. ', ' Fahrzeuge. ', ' trucks. ', ' КҚ. ')
+        + (p.length ? rec(p[0].id + ' (' + rt(p[0]) + ') ' + T('вне диапазона — открыть плейбук тревоги и связаться с водителем.', 'außerhalb des Bereichs — Alarm-Playbook öffnen und den Fahrer kontaktieren.', 'is out of range — open the alarm playbook and contact the driver.', 'диапазоннан тыс — дабыл плейбугін ашып, жүргізушімен байланысыңыз.'))
+          : rec(T('отклонений нет, можно выпускать запланированные рейсы.', 'keine Abweichungen, geplante Fahrten können freigegeben werden.', 'no deviations, planned loads can be released.', 'ауытқу жоқ, жоспарлы рейстерді шығаруға болады.')));
+    },
+    orders() {
+      const u = unassigned(), bk = (S.bookings || []).filter(b => b.status === 'new');
+      return T('Заказов без назначения ', 'Aufträge ohne Zuweisung ', 'Unassigned orders ', 'Тағайындалмаған тапсырыстар ') + u.length + T(', в пути ', ', unterwegs ', ', in transit ', ', жолда ') + S.loads.filter(l => l.status === 'in_transit').length
+        + T(', новых заявок с портала ', ', neue Portal-Anfragen ', ', new portal requests ', ', порталдан жаңа өтінімдер ') + bk.length + '. '
+        + (u.length ? rec(T('назначить ', 'zuweisen: ', 'assign ', 'тағайындау: ') + u.map(l => l.id).join(', ') + T(' — свободных ТС: ', ' — freie Fahrzeuge: ', ' — free trucks: ', ' — бос КҚ: ') + freeT().length) : rec(T('все заказы назначены.', 'alle Aufträge sind zugewiesen.', 'every order is assigned.', 'барлық тапсырыс тағайындалған.')));
+    },
+    dispatch() {
+      const u = unassigned(), d = S.drivers.filter(x => x.status === 'available'), f = freeT();
+      return T('К назначению ', 'Zuzuweisen ', 'To assign ', 'Тағайындауға ') + u.length + T('; свободны ', '; frei ', '; available ', '; бос ') + d.length + T(' водителей и ', ' Fahrer und ', ' drivers and ', ' жүргізуші және ') + f.length + T(' ТС. ', ' Fahrzeuge. ', ' trucks. ', ' КҚ. ')
+        + (u.length && d.length && f.length ? rec(T('запустить авто-назначение — совместимые пары есть.', 'Auto-Zuweisung starten — kompatible Paare sind da.', 'run Auto-Assign — compatible pairs exist.', 'авто-тағайындауды іске қосыңыз — үйлесімді жұптар бар.'))
+          : u.length ? rec(T('своих мощностей не хватает — проверить партнёров.', 'eigene Kapazität reicht nicht — Partner prüfen.', 'own capacity is short — check the partners tab.', 'өз қуаты жетпейді — серіктестерді тексеріңіз.'))
+            : rec(T('доска чистая, новых назначений не требуется.', 'die Tafel ist sauber, keine Zuweisungen nötig.', 'the board is clean, nothing to assign.', 'тақта таза, тағайындау қажет емес.')));
+    },
+    routes() {
+      const live = S.loads.filter(l => l.status === 'in_transit' || l.status === 'problem'), crit = live.filter(l => l.status === 'problem' || tempState(l) === 'breach');
+      return T('В движении ', 'Unterwegs ', 'Moving ', 'Жолда ') + live.length + T(' ТС, критичных ', ' Fahrzeuge, kritisch ', ' trucks, critical ', ' КҚ, сыни ') + crit.length + '. '
+        + (crit.length ? rec(crit.map(l => trk(l.truck).plate + ' (' + l.id + ', ' + (l.temp > 0 ? '+' : '') + String(l.temp).replace('.', ',') + ' °C)').join('; ') + T(' — открыть карточку и действовать по плейбуку.', ' — Karte öffnen und nach Playbook handeln.', ' — open the card and follow the playbook.', ' — картаны ашып, плейбук бойынша әрекет етіңіз.'))
+          : rec(T('все рейсы в графике и в температурном диапазоне.', 'alle Fahrten im Zeitplan und im Temperaturbereich.', 'every load is on schedule and in range.', 'барлық рейс кестеде және диапазонда.')));
+    },
+    fleet() {
+      const svc = S.trucks.filter(t => t.status === 'service'), red = S.trucks.filter(t => t.health === 'red');
+      return T('Парк ', 'Flotte ', 'Fleet ', 'Парк ') + S.trucks.length + T(': свободно ', ': frei ', ': available ', ': бос ') + freeT().length + T(', в рейсе ', ', im Einsatz ', ', in use ', ', рейсте ') + S.trucks.filter(t => t.status === 'busy').length + T(', в сервисе ', ', im Service ', ', in maintenance ', ', сервисте ') + svc.length + '. '
+        + (red.length ? rec(T('у ', 'bei ', 'for ', '') + red.map(t => t.plate).join(', ') + T(' красный статус здоровья — запланировать сервис до следующего рейса.', ' roter Zustandsstatus — Service vor der nächsten Fahrt planen.', ' the health status is red — schedule maintenance before the next load.', ' денсаулық күйі қызыл — келесі рейске дейін сервис жоспарлаңыз.'))
+          : rec(T('техника в порядке; держать 1 рефрижератор в резерве под экспресс.', 'Technik in Ordnung; einen Reefer als Express-Reserve halten.', 'equipment is fine; keep one reefer in reserve for express.', 'техника дұрыс; экспреске бір рефрижератор резервте ұстаңыз.')));
+    },
+    drivers() {
+      const av = S.drivers.filter(d => d.status === 'available'), exp = S.drivers.filter(d => expDocs(d)), low = S.drivers.filter(d => d.rto <= 2);
+      return T('Доступно ', 'Verfügbar ', 'Available ', 'Қолжетімді ') + av.length + ' / ' + S.drivers.length + T(' водителей; документы истекают в 60 дней у ', ' Fahrer; Dokumente laufen in 60 Tagen ab bei ', ' drivers; documents expire within 60 days for ', ' жүргізуші; 60 күнде құжаттары бітетіндер: ') + exp.length + '. '
+        + (low.length ? rec(T('у ', 'bei ', 'for ', '') + low.map(d => d.name).join(', ') + T(' остаток времени вождения ≤ 2 ч — не ставить на дальние рейсы.', ' Restlenkzeit ≤ 2 h — nicht auf Fernfahrten einplanen.', ' remaining driving time is ≤ 2 h — do not plan long hauls.', ' жүргізу уақыты ≤ 2 сағ — алыс рейске қоймаңыз.'))
+          : exp.length ? rec(T('продлить документы: ', 'Dokumente verlängern: ', 'renew the documents of ', 'құжаттарды ұзарту: ') + exp.map(d => d.name).join(', ') + '.')
+            : rec(T('ограничений по персоналу нет.', 'keine Personal-Einschränkungen.', 'no staffing constraints.', 'персонал бойынша шектеу жоқ.')));
+    },
+    hubs() {
+      const inb = (S.jobs || []).filter(j => !(j.ev && j.ev.en != null));
+      return T('Хабов ', 'Hubs ', 'Hubs ', 'Хабтар ') + Object.keys(HUBS).length + T(', свободных рефрижераторов ', ', freie Reefer ', ', free reefers ', ', бос рефрижераторлар ') + freeT().filter(t => t.type === 'Reefer').length + T(', открытых приёмок ', ', offene Wareneingänge ', ', open receivings ', ', ашық қабылдаулар ') + inb.length + '. '
+        + rec(T('следить за дверными событиями на рампах и часами простоя (Standgeld).', 'Türereignisse an den Rampen und die Standgeld-Uhr im Blick behalten.', 'watch ramp door events and the detention (Standgeld) clock.', 'рампадағы есік оқиғалары мен тұрып қалу сағатын бақылаңыз.'));
+    },
+    pod() {
+      const q = S.loads.filter(l => l.status === 'delivered' && l.pod && l.pod !== 'none' && l.pod !== 'approved'), dv = openDevs();
+      return T('В очереди POD ', 'In der POD-Warteschlange ', 'In the POD queue ', 'POD кезегінде ') + q.length + T(', открытых отклонений ', ', offene Abweichungen ', ', open deviations ', ', ашық ауытқулар ') + dv.length + '. '
+        + (dv.length ? rec(T('начать с ', 'beginnen mit ', 'start with ', 'бастау: ') + dv.sort((a, b) => b.lvl - a.lvl)[0].id + T(' (наивысший уровень) — решение открывает счёт.', ' (höchste Stufe) — die Entscheidung gibt die Rechnung frei.', ' (highest level) — the decision releases the invoice.', ' (ең жоғары деңгей) — шешім шотты ашады.'))
+          : q.length ? rec(T('подтвердить POD — после одобрения создаются счета.', 'POD bestätigen — nach Freigabe entstehen die Rechnungen.', 'approve the PODs — invoices are created on approval.', 'POD растаңыз — мақұлдаудан кейін шоттар жасалады.'))
+            : rec(T('очередь пуста.', 'die Warteschlange ist leer.', 'the queue is empty.', 'кезек бос.')));
+    },
+    billing() {
+      const inv = S.invoices || [], ov = inv.filter(i => invSt(i) === 'overdue'), dis = inv.filter(i => i.dispute && i.dispute.open);
+      const sum = a => nf(a.reduce((s, i) => s + i.total, 0));
+      return T('Счетов ', 'Rechnungen ', 'Invoices ', 'Шоттар ') + inv.length + T(', просрочено ', ', überfällig ', ', overdue ', ', мерзімі өткен ') + ov.length + ' (' + sum(ov) + ' ₸)' + T(', в споре ', ', im Disput ', ', disputed ', ', дауда ') + dis.length + '. '
+        + (dis.length ? rec(T('сначала закрыть спор по ', 'zuerst den Disput klären zu ', 'resolve the dispute on ', 'алдымен дауды шешу: ') + dis[0].id + T(' — он блокирует отправку и оплату.', ' — er blockiert Versand und Zahlung.', ' — it blocks sending and payment.', ' — ол жіберу мен төлемді бұғаттайды.'))
+          : ov.length ? rec(T('напомнить клиентам по просроченным счетам.', 'Kunden an die überfälligen Rechnungen erinnern.', 'remind the customers about the overdue invoices.', 'мерзімі өткен шоттар туралы еске салыңыз.'))
+            : rec(T('дебиторка под контролем.', 'die Forderungen sind unter Kontrolle.', 'receivables are under control.', 'дебиторлық берешек бақылауда.')));
+    },
+    baseline() {
+      const fr = (typeof ecoFr49 === 'function' ? ecoFr49() : { open: 0, total: 0 });
+      return 'Fragenkatalog: ' + T('открытых вопросов к KDL ', 'offene Fragen an KDL ', 'open questions to KDL ', 'KDL-ге ашық сұрақтар ') + fr.open + ' / ' + fr.total + '. '
+        + (fr.open ? rec(T('уточнить открытые вопросы — FR-49 держит запуск, пока все не закрыты.', 'die offenen Fragen klären — FR-49 hält den Start, bis alle geschlossen sind.', 'clarify the open questions — FR-49 holds the launch until all are closed.', 'ашық сұрақтарды нақтылаңыз — FR-49 іске қосуды ұстап тұр.'))
+          : rec(T('вопросов нет — базовые данные подтверждены.', 'keine Fragen — die Basisdaten sind bestätigt.', 'no questions — the baseline is confirmed.', 'сұрақ жоқ — бастапқы деректер расталды.')));
+    },
+  };
+  globalThis.AISUM = AISUM;
+  S.aiSum = {};
+
+  function decorate() {
+    if (!AISUM[S.route] || !canSee(S.route)) return;
+    const bar = $('.page-head .actions');
+    if (bar && !$('.ai-sum-btn', bar)) bar.insertAdjacentHTML('afterbegin', `<button class="btn ${S.aiSum[S.route] ? 'primary' : 'grey'} sm ai-sum-btn" data-act="aiSum" aria-pressed="${S.aiSum[S.route] ? 'true' : 'false'}">✦ ${esc(T('AI-сводка', 'KI-Zusammenfassung', 'AI Summary', 'AI қорытынды'))}</button>`);
+    const c = $('.content');
+    if (S.aiSum[S.route] && c && !$('.aisum-page', c)) { let t; try { t = AISUM[S.route](); } catch (e) { t = ''; } if (t) c.insertAdjacentHTML('afterbegin', `<div class="aisum aisum-page" data-ai-sum="${S.route}">✦ ${esc(t)}</div>`); }
+  }
+  ACT.aiSum = () => { S.aiSum[S.route] = !S.aiSum[S.route]; render(); };
+  HELP.afterRender.push(decorate);
 })();
 
 /* W5 help: Settings → Baseline data (LH-O2, FR-35/36/37/38/48/49/174). DE/EN without Cyrillic. */
