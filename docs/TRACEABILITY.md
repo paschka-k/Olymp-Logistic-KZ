@@ -207,3 +207,24 @@ Files: `platform-src/v6/screens/010-dashboard.js`, `230-ops-docs.js`, `250-ops-t
 | — | Every new view renders in RU / DE / EN / KK without undefined / NaN, DE / EN without Cyrillic in the new blocks | all of the above | — | "…render in every language…" (74, 75, 76) |
 
 Not in the mock-up: real Kazhydromet / KazAvtoZhol feeds (the stale forecast of Atyrau is a fixed demo value), server-side validation of aborting a trip, real tracking-token expiry.
+
+## P3 — Routes parity
+
+Files: `platform-src/v6/screens/150-monitor.js` (temperature, temperature log, weather, security close form), `340-coverage.js` (FR-111 map, OL1 SMS), `005-kzmap.js` (road data exported, extra Kyzylorda – Zhezkazgan link); help `v6/help/res-routes.js`; tests `tests/83…85`.
+
+| FR | Function in the mock-up | v6 menu → tab | Test (group name starts with) |
+|---|---|---|---|
+| FR-39 / FR-40 | Vehicle chips, readout tiles, 48-reading history (bands 2–8 / 15–25, chambers + outside, legend), status block (unit, door, loggers, set-point); history grows with every `liveTick` | Routes → Temperature | `P3 thermo: chips, readout tiles…`, `P3 thermo: liveTick extends…` (83) |
+| FR-39 | "Open chamber door" timer; over 3 min raises the cold-chain alarm and sets the load to Problem | Routes → Temperature | `P3 thermo: liveTick extends…` (83) |
+| FR-39 / FR-40 / FR-102 | Temperature log: record reading (out of range opens a deviation), sensor → chamber mapping, thermochron CSV upload feeding the thermochron log of `360-thermo-ext.js`, readings table | Routes → Temperature log | `P3 temperature log…` (83) |
+| FR-16 / FR-42 | Weather horizon 3 / 7 days, grid with Atyrau and West cities (Kostanay, Aktobe, Khromtau, Oral, Aktau), city card, sources card | Routes → Weather & risks | `P3 weather: grid has hubs + West cities…` (84) |
+| FR-106 | Stale-forecast warning (> 6 h) and "Refresh" (audited) | Routes → Weather & risks | `P3 weather: stale forecast warning…` (84) |
+| FR-111 | Communications model per stretch on the KZMAP road network: class colours, dashed = estimate / solid = measured, hubs, cities, live vehicles L0–L3, West segments Astana – Kostanay – Aktobe – Khromtau – Oral – Atyrau – Aktau | Routes → Coverage | `P3 coverage: map on the road network…` (85) |
+| FR-111 | Detail aside: class for the fleet and per operator, minutes without data, confidence, sources F1…F8 / EST | Routes → Coverage | `P3 coverage: detail aside…` (85) |
+| FR-111 / FR-109 | Offline windows per trip with ETA confidence, worst stretches, last contact + "Check now", escalation L1–L3 kept, "0+ gap" cell fixed | Routes → Coverage | `P3 coverage: offline windows…` (85), `W2 coverage: escalation…` (82) |
+| FR-110 / FR-111 | OL1 SMS channel: format, received list, instructions WAIT / CALL / CHKT / CONT / STOP / PARK, gateway status and queue, timeout + resend | Routes → Coverage | `P3 coverage: OL1 SMS channel…` (85), `W2 coverage: dispatcher SMS…` (82) |
+| FR-111 | Measured from telematics: gaps per pass, ≥ 3 passes → class proposal, analyst accepts → solid line | Routes → Coverage | `W2 coverage: dead zones…` (82) |
+| FR-105 | Incident close form: resolution category + text ≥ 10 characters, shown on the closed incident and in the audit log | Routes → Security | `P3 security: closing a real incident…` (85) |
+| — | RU / DE / EN / KK render without undefined / NaN, DE / EN without Cyrillic | the tabs above | `P3: … render in 4 languages` (83, 84, 85) |
+
+Not in the mock-up: real Wialon / thermochron files, SMSC.kz gateway, Open-Meteo / Kazhydromet feeds, server-side measured-zone job (documented only).
