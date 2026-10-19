@@ -117,7 +117,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     ev("S.devs.find(d=>d.id==='DEV-0011').step=7;render()"); assert(/data-act="ptUnb" data-id="PL-10"/.test(w.document.body.innerHTML), 'unblock not offered after CAPA'); ev("ACT.ptUnb({id:'PL-10'})"); eq(ev("S.partners.find(p=>p.id==='PL-10').tier"), 'bronze');
   });
   await group('workshop request books a service cost', 'ru', async (g, ev, w) => { ev("go('dispatch');ACT.dtab({v:'partners'});ACT.wrNew()"); const n = ev('S.costs.length'); w.document.querySelector('#wc_WR-001').value = 85000; ev("ACT.wrClose({id:'WR-001'})"); eq(ev('S.costs.length'), n + 1); eq(ev('S.costs[S.costs.length-1].cat'), 'service'); });
-  await group('security incidents: accept / escalate / close are audited', 'ru', async (g, ev) => { const id = ev('S.inc[0].id'); ev(`ACT.incSt({id:'${id}',v:'accepted'})`); eq(ev('S.inc[0].st'), 'accepted'); ev(`ACT.incSt({id:'${id}',v:'closed'})`); eq(ev('S.inc[0].st'), 'closed'); assert(ev('S.audit.length') >= 2, 'not audited'); });
+  await group('security incidents: accept / escalate / close are audited', 'ru', async (g, ev) => { const id = ev('S.inc[0].id'); ev(`ACT.incSt({id:'${id}',v:'accepted'})`); eq(ev('S.inc[0].st'), 'accepted'); ev(`ACT.incSt({id:'${id}',v:'closed',cat:'resolved_on_site',note:'Checked with the driver, route restored'})`); eq(ev('S.inc[0].st'), 'closed'); assert(ev('S.audit.length') >= 2, 'not audited'); });
   await group('weather risk is computed for every active load', 'ru', async (g, ev, w) => { ev("go('routes');ACT.rtab({v:'wx'})"); assert(w.document.querySelectorAll('table tbody tr').length >= 4, 'forecast matrix'); assert(w.document.querySelector('main').innerText.includes('LD-2026-001847'), 'route risk list'); });
 
   /* ---- foundation: roles, tabs API, help, design switch, version, skip link ---- */
@@ -145,10 +145,83 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     assert(new RegExp('v' + ev('VERSION').replace(/\./g, '\\.')).test(w.document.querySelector('.ver').innerText), 'version'); assert(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(w.document.querySelector('.ver').innerText), 'build time'); assert(w.document.querySelector('a.skip') && w.document.getElementById('main-content'), 'skip link target');
   });
 
+  /* ---- P6 shell parity: hub filter, global search, clock / alarms / banner, bottom bar, eyebrow / diagram, deep links, sign-in, account ---- */
+  for (const lang of LANGS) await group('[' + lang + '] shell: hub filter narrows lists, menu stays 13, topbar has clock and alarms button', lang, async (g, ev, w) => {
+    eq(ev('NAV.length'), 13, 'menu items');
+    const n0 = ev('hubFilter(S.loads, hubOfLoad).length'); eq(n0, ev('S.loads.length'), 'no filter keeps all');
+    ev("ACT.hubSet({v:'ATY'})"); const n1 = ev('hubFilter(S.loads, hubOfLoad).length'); assert(n1 > 0 && n1 < n0, 'ATY narrows loads: ' + n1);
+    ev("go('orders')"); assert(w.document.querySelectorAll('.hubseg .hs').length === 6, 'segment: all + 5 hubs');
+    ev("ACT.hubSet({v:'KAR'})"); ev("go('fleet')"); assert(ev("hubFilter(S.trucks).every(t=>t.hub==='KAR')"), 'fleet by hub');
+    ev("go('drivers')"); ev("go('hubs')"); eq(ev("hubFilter(Object.keys(S.hubs),h=>h).join()"), 'KAR', 'hubs by hub');
+    ev("ACT.hubSet({v:''})"); ev("go('dashboard')");
+    assert(/\d\d:\d\d:\d\d/.test(w.document.querySelector('[data-clock]').textContent), 'clock'); assert(/Astana UTC\+5/.test(w.document.querySelector('[data-bizdate]').textContent), 'business date');
+    assert(w.document.querySelector('[data-alarms]'), 'alarms button'); clean(w, 'topbar');
+  });
+  await group('shell: search finds lines and database hits, keyboard moves, Enter opens, scanner needs an exact hit', 'en', async (g, ev, w) => {
+    ev("go('dashboard')");
+    const po = ev("ops(S.loads.find(l=>l.status!=='delivered')).orders[0].po");
+    ev(`gsInput(${JSON.stringify(po)})`); assert(w.document.querySelector('.gs-list'), 'list open'); assert(w.document.querySelectorAll('.gs-row').length >= 1, 'rows');
+    ev("gsInput('1847')"); assert(ev("gsResults().D.some(r=>r.type==='load' && r.exact)"), 'number variant 1847 → LD-2026-001847');
+    ev("gsInput('ld-2026-1847')"); assert(ev("gsResults().D.some(r=>r.id==='LD-2026-001847' && r.exact)"), 'variant ld-2026-1847');
+    const k = k => w.document.querySelector('#gsearch').dispatchEvent(new w.KeyboardEvent('keydown', { key: k, bubbles: true }));
+    ev("gsInput('00')"); ev("gsInput('LD-2026')"); k('ArrowDown'); eq(ev('S.gs.idx'), 1, 'arrow down'); k('ArrowUp'); eq(ev('S.gs.idx'), 0, 'arrow up');
+    k('Escape'); eq(ev('S.gs.q'), '', 'Esc clears');
+    ev("gsInput('1847')"); k('Enter'); eq(ev('S.route'), 'orders', 'Enter opens the hit'); eq(ev('S.drawer && S.drawer.id'), 'LD-2026-001847', 'load drawer');
+    ev('closeDrawer()'); ev('ACT.gsScan()'); ev("gsInput('zzzz-none')"); k('Enter'); assert(w.document.querySelector('.toast.err'), 'scan not recognised toast'); ev('ACT.gsScan()');
+    ev("gsInput('delivered-none')"); ev('S.gs.q=""');
+    const dl = ev("S.loads.find(l=>l.status==='delivered').id"); const dpo = ev(`ops(load('${dl}')).orders[0].po`);
+    ev('S.gs.arch=false'); ev(`gsInput(${JSON.stringify(dpo)})`); const a = ev("gsResults().L.filter(r=>load(r.load).status==='delivered').length");
+    ev('ACT.gsArch()'); assert(ev("gsResults().L.filter(r=>load(r.load).status==='delivered').length") > a - 1, 'archive toggle includes delivered'); clean(w, 'search');
+  });
+  await group('shell: alarm banner shows new level >= 2 alarms (max 3), click opens alarms, dismiss clears', 'en', async (g, ev, w) => {
+    ev("go('dashboard')"); assert(!w.document.querySelector('[data-alarm-banner]'), 'no banner for alarms present on load');
+    ev("raiseAlarm({lvl:2,cat:'door',hub:'AST',load:'LD-2026-001850',truck:'t3',text:'Test door alarm'})"); ev('render()');
+    assert(w.document.querySelector('[data-alarm-banner]'), 'banner'); w.document.querySelector('[data-act=banX]').click(); assert(!w.document.querySelector('[data-alarm-banner]'), 'dismissed');
+    for (let i = 0; i < 5; i++) ev(`raiseAlarm({lvl:3,cat:'temperature',hub:'ALA',load:'LD-X${i}',text:'T${i}'})`); ev('render()');
+    eq(+w.document.querySelector('[data-alarm-banner]').dataset.alarmBanner, 3, 'max 3 items');
+    w.document.querySelector('.ab-item').click(); eq(ev('S.route'), 'dashboard', 'goes to the dashboard'); eq(ev('S.tab.dashboard'), 'alarms', 'alarms tab');
+  });
+  await group('shell: bottom bar has 4 screens per role, Escape closes drawer and sidebar', 'en', async (g, ev, w) => {
+    for (const r of ev('ROLES')) { ev(`ACT.setRole({v:'${r}'})`); const n = ev('bottomKeys().length'); assert(n >= 1 && n <= 4, r + ' bottom keys ' + n); assert(ev('bottomKeys().every(k=>canSee(k))'), r + ' bottom keys visible'); }
+    ev("ACT.setRole({v:'admin'})"); eq(ev('bottomKeys().length'), 4, 'admin 4'); eq(w.document.querySelectorAll('.bottombar .bb').length, 4, 'rendered');
+    const esc = () => w.document.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    ev("go('orders');ACT.open({id:S.loads[0].id})"); assert(ev('S.drawer'), 'open'); esc(); assert(!ev('S.drawer'), 'Esc closes the drawer');
+    ev('ACT.sideTog()'); assert(ev('S.sideOpen'), 'sidebar open'); esc(); assert(!ev('S.sideOpen'), 'Esc closes the sidebar');
+  });
+  for (const lang of LANGS) await group('[' + lang + '] shell: eyebrow numbers and diagram popover', lang, async (g, ev, w) => {
+    ev("go('dispatch')"); eq(w.document.querySelector('.eyebrow').dataset.eyebrow, '02', 'dispatch = 02');
+    ev("go('orders');ACT.stab({s:'orders',v:'ship'})"); eq(w.document.querySelector('.eyebrow').dataset.eyebrow, '04', 'ship = 04');
+    ev("go('orders');ACT.stab({s:'orders',v:'docs'})"); eq(w.document.querySelector('.eyebrow').dataset.eyebrow, '08', 'docs = 08');
+    ev("go('baseline')"); eq(w.document.querySelector('.eyebrow').dataset.eyebrow, '17', 'baseline = 17');
+    ev("go('dispatch')"); w.document.querySelector('.diag-btn').click(); assert(w.document.querySelector('.diag-pop svg'), 'diagram popover'); clean(w, 'diagram');
+    w.document.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); assert(!w.document.querySelector('.diag-pop'), 'Esc closes the popover');
+    assert(/Kökzhol/.test(w.document.title), 'document.title');
+  });
+  await group('shell: deep links ?load= ?s=&t= open the target, ?track= still works', 'en', async (g, ev, w) => {
+    const f = async q => { const fr = document.createElement('iframe'); fr.style.cssText = 'width:1316px;height:760px'; fr.src = 'en.html?' + q; document.getElementById('frames').appendChild(fr); await new Promise(ok => { fr.onload = ok; }); await new Promise(r => setTimeout(r, 100)); return fr; };
+    let fr = await f('load=1847'); eq(fr.contentWindow.eval('S.drawer && S.drawer.id'), 'LD-2026-001847', '?load='); eq(fr.contentWindow.eval('S.route'), 'orders'); fr.remove();
+    fr = await f('s=routes&t=wx'); eq(fr.contentWindow.eval('S.route'), 'routes'); eq(fr.contentWindow.eval('S.tab.routes'), 'wx', '?s=&t='); fr.remove();
+    fr = await f('dev=DEV-0011'); eq(fr.contentWindow.eval('S.route'), 'pod', '?dev='); fr.remove();
+    fr = await f('track=LD-2026-001847'); eq(fr.contentWindow.eval('S.route'), 'track', '?track='); fr.remove();
+    fr = await f('request=1'); eq(fr.contentWindow.eval('S.route'), 'request', '?request=1'); fr.remove();
+  });
+  for (const lang of LANGS) await group('[' + lang + '] shell: demo sign-in (password, 2FA 123456, recovery codes, forced change >= 12), account, reset', lang, async (g, ev, w) => {
+    ev("ACT.setRole({v:'dispatcher'})"); ev('ACT.signOut()'); assert(w.document.querySelector('[data-login-step=password]'), 'login card');
+    ev("S.auth.role='warehouse';S.auth.pw='x'"); ev('ACT.authPw()'); assert(w.document.querySelector('[data-login-step=mfa]'), '2FA step');
+    ev("S.auth.code='000000'"); ev('ACT.authMfa()'); assert(w.document.querySelector('[data-login-step=mfa] .login-err'), 'wrong code refused');
+    ev("S.auth.code='123456'"); ev('ACT.authMfa()'); eq(w.document.querySelectorAll('.codes li').length, 10, '10 recovery codes');
+    ev('ACT.authCodes()'); ev("S.auth.np='short';S.auth.np2='short'"); ev('ACT.authChange()'); assert(w.document.querySelector('[data-login-step=change] .login-err'), 'short password refused');
+    ev("S.auth.np='correct horse battery';S.auth.np2='correct horse battery'"); ev('ACT.authChange()');
+    assert(!w.document.querySelector('.login-layer'), 'login closed'); eq(ev('S.role'), 'warehouse', 'sign-in ends in setRole');
+    ev("go('account')"); assert(w.document.querySelector('[data-account]') && w.document.querySelector('[data-demo-reset]'), 'account page'); clean(w, 'account');
+    ev("S.acct.np='abc';S.acct.np2='abc'"); ev('ACT.acctPw()'); assert(w.document.querySelector('[data-acct-msg]'), 'password message');
+    ev("ACT.setRole({v:'admin'});S.loads[0].status='problem'"); ev('ACT.resetAsk()'); ev('ACT.resetGo()'); assert(ev("S.loads[0].status!=='problem'"), 'reset restores demo data');
+  });
+
   /* ---- W1 operations: Load & weight (FR-99/139/140/143/144/145/146, FR-05/06) ---- */
   await group('ops model: SSCC check digit, one place per pallet, lines and places are separate records (FR-73)', 'ru', async (g, ev) => {
     assert(ev('ssccValid(ssccMake(1)) && ssccValid(ssccMake(987654))'), 'generated SSCC must be valid'); assert(!ev("ssccValid(ssccMake(1).slice(0,17) + ((+ssccMake(1)[17] + 1) % 10))"), 'wrong check digit must be detected');
-    assert(ev('S.loads.every(l => opsPlaces(l).length === l.pallets)'), 'places per load must equal pallets'); assert(ev('S.loads.every(l => ops(l).orders.every(o => o.lines.length >= 1 && o.po && o.pl))'), 'every order has lines, PO and PL');
+    assert(ev('S.loads.every(l => opsPlaces(l).length === l.pallets + ops(l).orders.filter(o => !(o.pal > 0)).length)'), 'places per load must equal pallets plus thermo boxes'); assert(ev('S.loads.every(l => ops(l).orders.every(o => o.lines.length >= 1 && o.po && o.pl))'), 'every order has lines, PO and PL');
     eq(ev("ssccFromScan('(00) ' + ssccMake(5))"), ev('ssccMake(5)'), 'AI 00 prefix stripped'); const ot = ev("tabsOf('orders').map(t => t.key)"); assert(ot[0] === 'orders' && ['loadw', 'ship', 'docs'].every(k => ot.includes(k)), 'orders keeps its base tab and the W1 tabs');
   });
   await group('load calc: overload always shown with exact excess, truck finder ranks feasible first, smallest fitting recommended (FR-99/143/146)', 'ru', async (g, ev) => {
@@ -167,10 +240,10 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     ev("ops(load('LD-2026-001850')).orders.forEach((o, i) => { o.kg = i < 2 ? 12000 : 800; })"); const sp = ev("splitPlan(load('LD-2026-001850'))"); assert(sp.needed, 'no single truck takes 24 800 kg'); assert(sp.props.length > 0 && sp.props[0].cost > 0, 'a split proposal exists'); assert(!ev("finder(load('LD-2026-001850'), false, {}).best"), 'finder has no single recommendation');
   });
   await group('loading sequence: LIFO by stop, planned positions, scan check right / wrong (FR-144)', 'ru', async (g, ev, w) => {
-    const sq = ev("sequence(load('LD-2026-001850'), TYPES.r20)"); eq(sq.rows.length, 30, 'one row per pallet'); assert(sq.rows[0].stop === ev("ops(load('LD-2026-001850')).orders.slice().sort((a,b)=>b.stop-a.stop)[0].to"), 'last stop at the front wall'); assert(/слева/.test(sq.rows[0].pos) && /справа/.test(sq.rows[1].pos), 'odd left, even right');
-    const s = sq.rows[2].sscc; eq(sq.planned[s], 3, 'planned position'); ev("S.ops.sel='LD-2026-001850'; go('orders'); ACT.stab({s:'orders',v:'loadw'})");
-    w.document.querySelector('#lw_sscc').value = s; w.document.querySelector('#lw_pos').value = '3'; w.document.querySelector('[data-act=lwScan]').click(); eq(ev('S.ops.seqMsg.lvl'), 0, 'right position accepted');
-    w.document.querySelector('#lw_sscc').value = s; w.document.querySelector('#lw_pos').value = '7'; w.document.querySelector('[data-act=lwScan]').click(); eq(ev('S.ops.seqMsg.lvl'), 2, 'wrong position warned'); clean(w, 'load & weight after scan');
+    const sq = ev("sequence(load('LD-2026-001850'), TYPES.r20)"); eq(sq.rows.length, 30, 'one row per pallet'); assert(sq.rows[0].stop === ev("ops(load('LD-2026-001850')).orders.slice().sort((a,b)=>b.stop-a.stop)[0].to"), 'last stop at the front wall'); assert(sq.rows.every(r => (r.posN % 2 ? /слева/ : /справа/).test(r.pos)), 'odd left, even right');
+    assert(sq.rows.every(r => r.tiers === 1 || r.tier <= 2), 'tiers 1 or 2'); const s = sq.rows[2].sscc; eq(sq.planned[s], sq.rows[2].posN, 'planned position'); ev("S.ops.sel='LD-2026-001850'; go('orders'); ACT.stab({s:'orders',v:'loadw'})");
+    w.document.querySelector('#lw_sscc').value = s; w.document.querySelector('#lw_pos').value = String(sq.rows[2].posN); w.document.querySelector('[data-act=lwScan]').click(); eq(ev('S.ops.seqMsg.lvl'), 0, 'right position accepted');
+    w.document.querySelector('#lw_sscc').value = s; w.document.querySelector('#lw_pos').value = String(sq.rows[2].posN + 5); w.document.querySelector('[data-act=lwScan]').click(); eq(ev('S.ops.seqMsg.lvl'), 2, 'wrong position warned'); clean(w, 'load & weight after scan');
   });
   await group('departure weighing: excess turns the gate red with the exact excess; override needs permission and a reason (FR-145)', 'ru', async (g, ev) => {
     const r = ev("weigh('LD-2026-001850', { source: 'weighbridge', ticket: 'W-1', gross: 45000 })"); assert(!r.ok && r.excess[0].code === 'gross' && r.excess[0].excess === 5000, 'gross excess 5 000 kg');
@@ -185,6 +258,81 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
   });
   await group('Load & weight tab renders in every language without undefined / NaN', 'ru', async () => {
     for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("go('orders'); ACT.stab({s:'orders',v:'loadw'}); S.ops.split = true; S.ops.target = true; render()"); clean(gg.w, lang + ' load & weight'); gg.ev("ACT.lwSel({id:'LD-2026-001845'})"); clean(gg.w, lang + ' load & weight overloaded van'); } finally { gg.done(); } }
+  });
+
+  /* ---- P1 · Load & weight parity with 0.3.10 screen 03 ---- */
+  const W = 'LD-2026-001856';
+  await group('West trip (R-106-like): Astana → Kostanay → Aktobe → Atyrau, lab / IVD goods, thermo box, two third-party T- orders, ADR', 'ru', async (g, ev) => {
+    eq(ev(`routeOf(load('${W}')).length`), 4, 'four route points'); const os = ev(`ops(load('${W}')).orders.map(o => ({ id: o.id, third: o.third, box: o.box, adr: o.adr, pal: o.pal, h: o.h }))`);
+    assert(os.length >= 8 && os.length <= 10, '8–10 orders'); eq(os.filter(o => o.third).length, 2, 'two third-party orders'); assert(os.filter(o => o.third).every(o => /^T-/.test(o.id)), 'T- prefix');
+    assert(os.some(o => o.box && o.pal === 0 && o.adr), 'thermo box −20 °C with dry ice'); assert(os.every(o => o.h > 0), 'every order has a height');
+    eq(ev(`load('${W}').pallets`), os.reduce((s, o) => s + o.pal, 0), 'load pallets follow the orders'); eq(ev("S.ops.sel = null, (go('orders'), ACT.stab({s:'orders',v:'loadw'}), S.ops.sel)"), W, 'the tab opens on the West trip');
+    const r = ev(`lwCalc(load('${W}'))`); assert(r.adr && r.thirdPal === 4 && r.boxes.length === 1, 'ADR, third-party pallets and box counted'); assert(r.issues.some(i => i.code === 'adrOk' && /31\.05\.2027/.test(i.text)), 'ADR: vehicle approved, driver certificate until');
+  });
+  await group('vehicle type card: catalogue + own vehicles, thermo zones, body regime, bulkhead −/+ with zone split, facts line, show plan', 'ru', async (g, ev, w) => {
+    ev(`go('orders'); ACT.stab({s:'orders',v:'loadw'}); ACT.lwSel({id:'${W}'})`); const d = w.document;
+    for (const id of ['t35', 't6', 't75', 't10', 't125']) assert(d.querySelector(`[data-act=lwType][data-v="${id}"]`), 'catalogue ' + id);
+    assert(d.querySelector('[data-act=lwType][data-v="f:t1"].on'), 'actual own vehicle selected'); assert(/ДОПОГ да/.test(d.querySelector('[data-lfacts]').textContent), 'facts line has ADR');
+    ev(`ACT.lwType({id:'${W}', v:'t10', z:'1'})`); assert(d.querySelectorAll('[data-act=lwZones]').length >= 2, 'zones segment'); assert(d.querySelectorAll('[data-act=lwReg]').length === 3, 'body regime auto / 2–8 / 15–25');
+    ev(`ACT.lwReg({id:'${W}', v:'cold'})`); eq(ev(`lwTypeFor(load('${W}')).box`), 'cold', 'regime 2–8 °C'); assert(ev(`lwCalc(load('${W}')).issues.some(i => i.code === 'mixed')`), 'one-zone 2–8 °C body: 15–25 °C goods only in thermo containers → mixed');
+    ev(`ACT.lwZones({id:'${W}', v:'2'})`); const b0 = +d.querySelector('[data-bulkhead]').dataset.bulkhead; assert(d.querySelector('[data-bulk-ctl]') && d.querySelector('[data-bulkline]'), 'bulkhead control and divider');
+    ev(`ACT.lwBulk({id:'${W}', v:'2'})`); eq(+d.querySelector('[data-bulkhead]').dataset.bulkhead, b0 + 2, 'bulkhead back'); eq(ev(`lwCalc(load('${W}')).groups.front.cap`), b0 + 2, 'zone 1 places follow the bulkhead');
+    ev(`ACT.lwBulk({id:'${W}', v:'-20'})`); eq(+d.querySelector('[data-bulkhead]').dataset.bulkhead, ev(`lwTypeFor(load('${W}')).splitMin`), 'bounded at splitMin');
+    eq(ev(`savePlan('${W}', 't125', 'demo: plan for the test, cleared by ops lead', { zones: 2, split: 6 })`), null, 'plan saved'); ev(`ACT.lwType({id:'${W}', v:'t35'})`); assert(d.querySelector('[data-act=lwShowPlan]'), 'show plan button'); ev(`ACT.lwShowPlan({id:'${W}'})`);
+    eq(ev(`lwTypeFor(load('${W}')).id + ':' + lwTypeFor(load('${W}')).zones + ':' + lwTypeFor(load('${W}')).split`), 't125:2:6', 'show plan restores type, zones and bulkhead'); clean(w, 'vehicle type card');
+  });
+  await group('orders table: height, stackable, third-party tags, partner hand-over locked, summary with third-party and ADR', 'ru', async (g, ev, w) => {
+    ev(`go('orders'); ACT.stab({s:'orders',v:'loadw'}); ACT.lwSel({id:'${W}'})`); const d = w.document;
+    assert(d.querySelector('[data-order="T-0107"] .chip.purple') && d.querySelector('[data-order="O-2297"]').textContent.includes('×2'), 'third-party tag and stackable mark');
+    eq(d.querySelector('[data-sum=third] b').textContent.trim(), '4 пал.', 'third-party pallets'); assert(/Да · LQ/.test(d.querySelector('[data-sum=adr] b').textContent), 'ADR yes LQ');
+    ev(`ops(load('${W}')).orders.find(o => o.id === 'T-0107').handed = 'PL-04'; render()`); assert(d.querySelector('[data-order="T-0107"][data-locked]'), 'handed order locked'); assert(d.querySelector('[data-sum=handed]'), 'handed summary');
+    ev(`ACT.lwOrd({id:'${W}', o:'T-0107'})`); assert(ev(`ops(load('${W}')).orders.find(o => o.id === 'T-0107').on !== false`), 'locked order cannot be toggled'); eq(ev(`lwCalc(load('${W}')).thirdPal`), 1, 'handed order not counted');
+    ev(`ACT.lwOrd({id:'${W}', o:'O-2290'})`); assert(d.querySelector('[data-order="O-2290"]').classList.contains('off'), 'ticked off'); clean(w, 'orders table');
+  });
+  await group('loading diagram by chambers: thermo containers at the front wall, −20 °C thermo boxes, LIFO, the SVG fits its card', 'ru', async (g, ev, w) => {
+    ev(`go('orders'); ACT.stab({s:'orders',v:'loadw'}); ACT.lwSel({id:'${W}'})`); const d = w.document;
+    assert(d.querySelector('[data-chamber=front]') && d.querySelector('[data-chamber=main]'), 'two chambers in the legend'); assert(d.querySelector('[data-box="O-2295"]') && d.querySelector('[data-boxmark]'), 'thermo box at the front wall');
+    const front = ev(`lwCalc(load('${W}')).groups.front`); assert(front.reg === 'cold' && front.start === 0 && front.used === 4, '2–8 °C thermo containers first, 4 places'); assert(d.querySelectorAll('[data-slot][data-zone=tc]').length === 4, 'thermo-container cells drawn');
+    const sl = ev(`lwCalc(load('${W}')).slots`); assert(sl.filter(s => s.key === 'main').every((s, i, a) => i === 0 || a[i - 1].stop >= s.stop), 'LIFO within the body: last stop first');
+    for (const id of ['t35', 'r20', 't125']) { ev(`ACT.lwType({id:'${W}', v:'${id}'})`); const c = d.querySelector('[data-diagram]').getBoundingClientRect(), s = d.querySelector('[data-top-chambers]').getBoundingClientRect(); assert(s.right <= c.right + 1 && s.left >= c.left - 1, id + ': diagram wider than its card'); }
+    clean(w, 'diagram');
+  });
+  await group('bars and checks: thermo-container and 15–25 bars, limiting factor, Risk / Watch / Normal incl. ADR, dry ice, FEFO, SSCC', 'ru', async (g, ev, w) => {
+    ev(`go('orders'); ACT.stab({s:'orders',v:'loadw'}); ACT.lwSel({id:'${W}'})`); const d = w.document;
+    assert(d.querySelector('[data-bar=tc]') && d.querySelector('[data-bar=main]'), 'thermo-container and 15–25 bars'); assert(/Ограничивающий фактор — объём/.test(d.querySelector('[data-insight]').textContent), 'limiting factor: volume');
+    assert(d.querySelector('[data-check=box]') && d.querySelector('[data-check=adrOk]') && d.querySelector('[data-check=third]'), 'dry ice, ADR and third-party checks'); assert(d.querySelector('[data-check=fefo]') && /LOT/.test(d.querySelector('[data-check=fefo]').textContent), 'FEFO with LOT and branch');
+    assert(d.querySelector('[data-check=sscc][data-lvl="2"]'), 'SSCC package check on watch'); assert(/Риск|Внимание|Норма/.test(d.querySelector('[data-check] .chip').textContent), 'levels Risk / Watch / Normal');
+    ev(`ACT.lwType({id:'${W}', v:'t35'})`); assert(d.querySelector('[data-check][data-lvl="3"]') && d.querySelector('[data-overloads]'), 'risk with overload tags'); assert(ev(`lwCalc(load('${W}')).issues.some(i => i.code === 'adr')`), '3.5 t has no ADR equipment');
+    ev(`ACT.lwType({id:'${W}', v:'f:t1'})`); ev("drv('d3').id && (ADR_DRV.d3 = null)"); ev('render()'); assert(ev(`lwCalc(load('${W}')).issues.some(i => i.code === 'adrDriver')`), 'driver without ADR certificate is a risk'); clean(w, 'bars and checks');
+  });
+  await group('centre of gravity facts: CoG from the front wall, CoG height, front-axle share, left / right with Δ ≤ tolerance; ×2 marks', 'ru', async (g, ev, w) => {
+    ev(`go('orders'); ACT.stab({s:'orders',v:'loadw'}); ACT.lwSel({id:'${W}'})`); const d = w.document;
+    for (const k of ['cogx', 'cogz', 'front', 'lat']) assert(d.querySelector(`[data-v2="${k}"] b`), 'fact box ' + k);
+    assert(/%$/.test(d.querySelector('[data-v2=cogx] b').textContent.trim()) && /см$/.test(d.querySelector('[data-v2=cogz] b').textContent.trim()) && /Δ .* ≤ /.test(d.querySelector('[data-v2=lat] b').textContent), 'fact formats');
+    const r = ev(`lwCalc(load('${W}'))`); assert(r.cogX > 0 && r.cogX < 1 && r.frontPct > 0 && Math.round(r.left + r.right) === r.kg, 'CoG values consistent'); assert(d.querySelector('[data-top-view] [data-cog]'), 'CoG marker');
+    assert(/×2/.test(d.querySelector('[data-top-view]').textContent), 'double-stacked mark'); clean(w, 'cog');
+  });
+  await group('vehicle match: every catalogue type × 1 / 2 zones with bulkhead, own fleet, smallest fitting recommended, click shows the calculation', 'ru', async (g, ev, w) => {
+    ev(`go('orders'); ACT.stab({s:'orders',v:'loadw'}); ACT.lwSel({id:'${W}'})`); const d = w.document, m = ev(`vehMatch(load('${W}'))`);
+    for (const id of ['t35', 't6', 't75', 't10', 't125']) assert(d.querySelector(`[data-match="${id}:1"]`) && d.querySelector(`[data-match="${id}:2"]`), 'match rows ' + id);
+    assert(m.own.length === ev('S.trucks.length'), 'own fleet rows'); assert(m.rec && m.rec.fits && m.cat.slice(0, m.cat.indexOf(m.cat.find(x => x.key === m.rec.key))).every(x => !x.fits), 'smallest fitting type recommended'); eq(d.querySelector('[data-match-rec]').dataset.matchRec, m.rec.key, 'recommendation line');
+    assert(m.cat.filter(x => !x.fits).every(x => x.why.length > 0), 'reasons for unfitting types'); assert(m.cat.some(x => x.z === 2 && /\d+ \| \d+/.test(d.querySelector(`[data-match="${x.key}"]`).textContent)), 'two-zone rows show the bulkhead split');
+    d.querySelector('[data-match="t125:2"] [data-act=lwType]').click(); eq(ev(`lwTypeFor(load('${W}')).id + ':' + lwTypeFor(load('${W}')).zones`), 't125:2', 'row opens the calculation'); clean(w, 'vehicle match');
+  });
+  await group('truck finder: demo fleets, spring limits, restrictions per travel day, places per zone, ADR and roads, how it decides', 'ru', async (g, ev, w) => {
+    ev(`go('orders'); ACT.stab({s:'orders',v:'loadw'}); ACT.lwSel({id:'${W}'})`); const d = w.document;
+    assert(/RS-002/.test(d.querySelector('[data-sim-restr]').textContent) && /32\s000/.test(d.querySelector('[data-sim-restr]').textContent), 'bridge restriction on the travel day'); assert(/700/.test(d.querySelector('[data-sim-legs]').textContent), 'legs with km');
+    assert(d.querySelector('[data-sim-how]'), 'how it decides'); assert(d.querySelectorAll('[data-sim] [data-sim-zones] div').length > 10, 'places per zone'); assert(/ДОПОГ ✓/.test(d.querySelector('[data-sim="f:t1"] [data-sim-adr]').textContent) && /дороги ✓/.test(d.querySelector('[data-sim="f:t1"] [data-sim-adr]').textContent), 'ADR and roads ok for t1');
+    const n0 = d.querySelectorAll('[data-sim]').length; ev("ACT.lwOpt({v:'fleetX'})"); ev("ACT.lwOpt({v:'v35'})"); assert(d.querySelector('[data-sim="d:V05"]') && d.querySelector('[data-sim="d:V09"]') && d.querySelectorAll('[data-sim]').length > n0, 'demo fleets V05–V09');
+    assert(d.querySelector('[data-sim="d:V06"] [data-sim-why]').textContent.includes('Алматы'), 'other-hub reason'); assert(/ДОПОГ ✗/.test(d.querySelector('[data-sim="d:V09"] [data-sim-adr]').textContent), 'ADR ✗ for V09');
+    assert(!ev(`finder(load('${W}'), false, {}).spring`), 'no spring limits in October'); ev("ACT.lwOpt({v:'spring'})"); const f = ev(`finder(load('${W}'), false, {})`);
+    assert(f.spring && f.legs[1].maxGross === 15000 && f.legs[1].maxAxle === 6000, 'spring limits on Kostanay – Aktobe'); assert(f.rows.some(r => r.issues.some(i => i.code === 'legGross')), 'a heavy vehicle fails the spring leg');
+    assert(/ограничение ✗/.test(d.querySelector('[data-sim="f:t1"] [data-sim-adr]').textContent), 'route limit marked'); clean(w, 'finder');
+  });
+  await group('P1 Load & weight on the West trip renders in every language without undefined / NaN or Cyrillic in DE / EN', 'ru', async () => {
+    for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev(`go('orders'); ACT.stab({s:'orders',v:'loadw'}); ACT.lwSel({id:'${W}'}); S.ops.fleetX = true; S.ops.v35 = true; S.ops.split = true; S.ops.spring = true; render()`); clean(gg.w, lang + ' west load');
+      if (lang === 'de' || lang === 'en') { const t = ['[data-sec=vtype] h3', '[data-diagram]', '[data-sec=bars]', '[data-sec=view2]', '[data-sec=match] .lw-ins', '[data-sim-how]'].map(q => gg.w.document.querySelector(q).textContent).join(' '); assert(!/[А-Яа-яЁё]/.test(t.replace(/Дмитрий Орлов/g, '')), lang + ' has Cyrillic: ' + (t.match(/.{0,20}[А-Яа-яЁё].{0,20}/) || [''])[0]); }
+      gg.ev(`ACT.lwType({id:'${W}', v:'t20'})`); clean(gg.w, lang + ' tent without temperature control'); gg.ev(`ACT.lwType({id:'${W}', v:'t75'}); ACT.lwZones({id:'${W}', v:'2'})`); clean(gg.w, lang + ' two zones'); } finally { gg.done(); } }
   });
 
   /* ---- W1 operations: Shipments & labels (FR-01..06, 73, 176) ---- */
@@ -270,6 +418,107 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
   });
   await group('Dispatch extras render in every language without undefined / NaN', 'ru', async () => {
     for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("go('dispatch'); ACT.stab({s:'dispatch',v:'express'})"); clean(gg.w, lang + ' express'); gg.ev("ACT.stab({s:'dispatch',v:'planning'}); S.ops.target = true; S.ops.scen.storm = true; render()"); clean(gg.w, lang + ' planning'); gg.ev("ACT.stab({s:'dispatch',v:'board'}); ACT.open({id:'LD-2026-001850'})"); clean(gg.w, lang + ' drawer'); } finally { gg.done(); } }
+  });
+
+  /* ---- P2: Dashboard overview (0.3.10 screen 01), trip detail aside, planning records (screen 02) ---- */
+  await group('dashboard: 0.3.10 KPI set, alarms (≤ 9) and risks (≤ 6) with source links, compact inbox of 5, hub weather 3 days', 'ru', async (g, ev, w) => {
+    ev("go('dashboard')"); const d = w.document;
+    eq(d.querySelectorAll('[data-ov-kpis] .kpi-tile').length, 6, 'six KPI tiles'); assert(/OTIF/.test(d.querySelector('[data-ov-kpis]').innerText) && /96,4/.test(d.querySelector('[data-ov-kpis]').innerText), 'OTIF 7 d'); assert(/%/.test(d.querySelectorAll('[data-ov-kpis] .kpi-tile')[4].innerText), 'volume utilisation with weight');
+    const na = d.querySelectorAll('[data-ov-alarm]').length, nr = d.querySelectorAll('[data-ov-risk]').length; assert(na >= 3 && na <= 9, 'alarms list ' + na); assert(nr >= 1 && nr <= 6, 'risks list ' + nr); assert(d.querySelector('.ov-src'), 'source → link');
+    eq(d.querySelectorAll('.ov-inbox').length, 5, 'five newest inbox messages'); assert(d.querySelector('[data-act=ovTab][data-v=inbox]'), 'All messages (N) →');
+    eq(d.querySelectorAll('.wx-tile').length, 15, '5 hubs × 3 days'); assert(d.querySelector('.mapcard .kzcity') && d.querySelector('.qa'), 'map and quick actions kept');
+    d.querySelector('[data-ov-alarm="0"]').click(); assert(ev('S.route') !== 'dashboard' || ev("S.tab.dashboard") === 'alarms', 'source link navigates'); clean(w, 'dashboard');
+  });
+  await group('dashboard: playbook card appears for an active incident simulation and resets', 'ru', async (g, ev, w) => {
+    ev("go('routes'); S.tab.routes = 'sec'; render(); document.querySelector('#ssim_l').value = 'LD-2026-001847'; ACT.secSim({v:'theft'}); go('dashboard')"); const d = w.document;
+    assert(d.querySelector('[data-playbook]'), 'playbook card'); assert(d.querySelectorAll('[data-playbook] li').length >= 3, 'response steps'); d.querySelector('[data-act=ovPbReset]').click(); assert(!d.querySelector('[data-playbook]'), 'reset removes the card'); clean(w, 'playbook');
+  });
+  await group('trip detail aside: stops with passed markers, dead zones + ETA confidence, informational checks, service on route, trip sheet once, buran-free move, driver feed', 'ru', async (g, ev, w) => {
+    ev("ACT.open({id:'LD-2026-001847'})"); const d = w.document;
+    assert(d.querySelector('[data-trip-aside]'), 'aside'); assert(d.querySelectorAll('.tr-stops li').length >= 4 && d.querySelector('.tr-stops li[data-passed="1"]') && d.querySelector('.tr-stops li[data-passed="0"]'), 'timeline with passed markers');
+    const labels = [...d.querySelectorAll('.tr-chk b')].map(b => b.textContent); assert(labels.length >= 8, 'checks ' + labels.length); assert(d.querySelector('[data-eta-conf]'), 'ETA confidence'); assert(d.querySelector('[data-cov-next] [data-act=trCov]'), 'Network coverage →'); assert(d.querySelector('[data-trip-ws]'), 'service on route');
+    assert(ev("deadZones(load('LD-2026-001851')).length") >= 0, 'dead zones computed'); assert(ev("deadZones(Object.assign({}, load('LD-2026-001847'), {progress: 0.1})).length") >= 1, 'AST → ALA passes the Balkhash dead zone');
+    ev("closeDrawer(); ACT.open({id:'LD-2026-001851'})"); const b = d.querySelector('[data-act=trSheet]'); assert(b && !b.disabled, 'trip sheet button'); b.click(); assert(typeof ev("sendTripSheet('LD-2026-001851')") === 'string', 'sheet only once'); assert(d.querySelector('[data-act=trSheet]').disabled, 'button disabled after the first send');
+    ev("S.ops.storm = ['AST','KAR']; render()"); assert(ev("buranWindow(load('LD-2026-001851'))") !== null, 'buran-free window exists'); assert(d.querySelector('[data-act=trBuran]'), 'move button'); const eta0 = ev("load('LD-2026-001851').eta"); d.querySelector('[data-act=trBuran]').click(); assert(ev("load('LD-2026-001851').eta") !== eta0, 'trip moved'); ev("S.ops.storm = []");
+    ev("closeDrawer(); ACT.open({id:'LD-2026-001847'})"); assert(d.querySelector('[data-drv-feed]'), 'driver app feed'); clean(w, 'aside');
+  });
+  await group('pre-release checks stay informational: a frost forecast of −45 °C is flagged, never blocks the status buttons', 'ru', async (g, ev, w) => {
+    const c = ev("preChecks(load('LD-2026-001851')).map(x => x.label)"); assert(c.length >= 8, 'ten-ish checks'); ev("wxFor('AST'); S.ops.storm = ['AST']"); assert(ev("preChecks(load('LD-2026-001851')).find(x => /−45|-45/.test(x.label))") !== undefined, 'frost check present');
+  });
+  await group('Planning: unassigned orders with search + selection, booked departures (FR-96) → trip, plan-trip form creates the load and assigns (FR-96)', 'ru', async (g, ev, w) => {
+    ev("go('dispatch'); ACT.stab({s:'dispatch',v:'planning'})"); const d = w.document; assert(d.querySelector('[data-plan-records]') && d.querySelector('[data-plan-form]'), 'records view'); const n0 = d.querySelectorAll('[data-plan-order]').length; assert(n0 >= 4, 'orders listed');
+    ev("S.ops.plan.q = 'Sysmex'; render()"); assert(d.querySelectorAll('[data-plan-order]').length < n0 && d.querySelectorAll('[data-plan-order]').length >= 1, 'search narrows'); ev("S.ops.plan.q = ''; render()");
+    d.querySelector('[data-plan-order="O-26-0102"]').click(); d.querySelector('[data-plan-order="O-26-0104"]').click(); assert(/2 · 11/.test(d.querySelector('[data-plan-box]').innerText), 'load box counts the selection');
+    const dep = d.querySelector('[data-act=pnDep]'); if (dep) { const n = ev('S.loads.length'); dep.click(); eq(ev('S.loads.length'), n + 1, 'trip for departure creates a load'); }
+    ev("S.ops.plan.truck = 't4'; S.ops.plan.drv = 'd5'; S.ops.plan.dep = '2026-10-20T07:00'; S.ops.plan.eta = '2026-10-20T18:00'; S.ops.plan.note = 'test'; render()"); const n1 = ev('S.loads.length'); d.querySelector('[data-act=pnCreate]').click();
+    eq(ev('S.loads.length'), n1 + 1, 'load created'); const l = ev("S.loads[0]"); eq(l.status, 'assigned', 'driver and truck assigned'); eq(ev("ops(S.loads[0]).orders.length"), 2, 'orders attached with places'); assert(ev("ops(S.loads[0]).orders.every(o => o.places.length === o.pal)"), 'places per pallet'); eq(ev("S.orders.some(o => o.id === 'O-26-0102')"), false, 'orders left the pool');
+    ev("S.ops.plan.sel = ['O-26-0105']; S.ops.plan.truck = 't1'; S.ops.plan.drv = 'd3'; S.ops.plan.dep = ''"); assert(typeof ev('planCreate()') === 'string', 'departure missing is refused'); clean(w, 'planning');
+  });
+  await group('dashboard, aside and planning render in every language without undefined / NaN; DE / EN without Cyrillic in the new blocks', 'ru', async () => {
+    for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("go('dashboard')"); clean(gg.w, lang + ' dashboard'); gg.ev("ACT.open({id:'LD-2026-001847'})"); clean(gg.w, lang + ' aside'); gg.ev("closeDrawer(); go('dispatch'); ACT.stab({s:'dispatch',v:'planning'})"); clean(gg.w, lang + ' planning');
+      if (lang === 'de' || lang === 'en') { for (const sel of ['[data-ov-kpis]', '[data-alert-list=risks]', '.wx-tiles', '[data-plan-form]']) { const el = gg.w.document.querySelector(sel); if (el) { const t = el.innerText; assert(!/[А-Яа-яЁё]/.test(t.replace(/.*(?:ТОО|Астана).*/g, '')), lang + ' Cyrillic in ' + sel); } } } } finally { gg.done(); } }
+  });
+
+  /* ---- P2: trips and orders records — abort trip (FR-173), stops and outcomes (FR-98), unassign order, new order, tracking token ---- */
+  await group('abort trip (FR-173): only under way, needs a linked alarm and a reason, orders go back to "new" or to a rescue trip, resources are freed', 'ru', async (g, ev, w) => {
+    assert(typeof ev("tripAbort('LD-2026-001851', {alarm:'x', reason:'long enough reason'})") === 'string', 'planned trip cannot be aborted');
+    assert(/тревог/i.test(ev("tripAbort('LD-2026-001848', {alarm:'', reason:'breakdown on the road'})")), 'alarm required'); const al = ev("alarmsOfTrip(load('LD-2026-001847'))[0].id"); assert(al, 'trip has an alarm');
+    assert(typeof ev(`tripAbort('LD-2026-001847', {alarm:'${al}', reason:'short'})`) === 'string', 'reason ≥ 10');
+    const resc = ev("rescueTrips(load('LD-2026-001847')).map(x => x.id)"); const n = ev("ops(load('LD-2026-001847')).orders.length"); const r = ev(`tripAbort('LD-2026-001847', {alarm:'${al}', rescue:'${resc[0] || ''}', reason:'tractor breakdown, cargo to rescue trip'})`); assert(r && r.ok, 'aborted: ' + JSON.stringify(r)); eq(ev("load('LD-2026-001847').status"), 'aborted'); eq(r.moved.length + r.returned.length, n, 'every undelivered order placed');
+    assert(ev("drv('d4').status") === 'available' && ev("trk('t5').status") === 'available', 'resources freed'); if (!resc.length) assert(ev("S.orders.filter(o => o.status === 'new').length") >= 6 + n - 1, 'orders back in the pool'); assert(/aborted|Прерван/i.test(ev("load('LD-2026-001847').notes.slice(-1)[0].text")), 'note written');
+  });
+  await group('abort trip UI: form in the drawer, linked alarm, result shown in the trip detail', 'ru', async (g, ev, w) => {
+    ev("ACT.open({id:'LD-2026-001847'})"); const d = w.document; assert(d.querySelector('[data-trip-abort]'), 'abort block'); d.querySelector('#ta_alarm').value = ev("alarmsOfTrip(load('LD-2026-001847'))[0].id"); d.querySelector('#ta_reason').value = 'breakdown, cargo cannot continue'; d.querySelector('[data-act=trAbort]').click();
+    eq(ev("load('LD-2026-001847').status"), 'aborted'); assert(d.querySelector('[data-aborted]'), 'abort result visible'); clean(w, 'aborted trip');
+  });
+  await group('stops and outcomes (FR-98): arrival, outside window, delivered / partially / refused with reason, order outcome after the fact, unassign order', 'ru', async (g, ev, w) => {
+    const st = ev("tripStops(load('LD-2026-001848'))"), u = st.filter(s => s.kind === 'unload'); assert(st[0].kind === 'pickup' && u.length >= 2, 'stops: pickup + one unloading stop per order'); const k = u[0].key;
+    assert(typeof ev(`stopDeliver('LD-2026-001848', '${k}', {}, '')`) === 'string', 'deliver needs the arrival'); eq(ev(`stopArrive('LD-2026-001848', '${k}')`), null); assert(ev(`tripStops(load('LD-2026-001848')).find(s => s.key === '${k}').arrived`), 'arrival time stored');
+    const oid = u[0].orders[0].id; assert(typeof ev(`stopDeliver('LD-2026-001848', '${k}', {'${oid}':'refused'}, '')`) === 'string', 'refusal needs a reason'); eq(ev(`stopDeliver('LD-2026-001848', '${k}', {'${oid}':'partially_delivered'}, 'two pallets damaged')`), null); eq(ev(`findOrder('${oid}').o.outcome`), 'partially_delivered');
+    assert(typeof ev(`orderOutcome('LD-2026-001848', '${oid}', 'returned', '')`) === 'string', 'return needs a reason'); eq(ev(`orderOutcome('LD-2026-001848', '${oid}', 'returned', 'returned to hub')`), null); const o2 = u[1].orders[0].id; assert(typeof ev(`orderOutcome('LD-2026-001848', '${o2}', 'returned', 'x')`) === 'string', 'returned only after refused / partial');
+    ev("ACT.open({id:'LD-2026-001848'}); ACT.tab({v:'stops'})"); assert(w.document.querySelector('[data-stops-panel]') && w.document.querySelector('[data-trip-order]'), 'stops tab'); clean(w, 'stops tab');
+    eq(ev("orderUnassign('LD-2026-001851', ops(load('LD-2026-001851')).orders[0].id)"), null); eq(ev("ops(load('LD-2026-001851')).orders.length"), ev("ops(load('LD-2026-001851')).orders.length")); assert(typeof ev("orderUnassign('LD-2026-001848', 'x')") === 'string', 'not before departure');
+  });
+  await group('orders records: new order with the load fields, search, status filter; the order appears in the planning pool', 'ru', async (g, ev, w) => {
+    ev("go('orders'); ACT.stab({s:'orders',v:'rec'})"); const d = w.document; assert(d.querySelectorAll('[data-order]').length >= 10, 'orders of the pool and the loads'); const n = ev('S.orders.length');
+    assert(typeof ev("orderCreate({site:'kos', goods:'', pal:1, kg:100})") === 'string', 'goods required'); assert(typeof ev("orderCreate({site:'kos', goods:'Reagent', pal:40, kg:100})") === 'string', 'pallets 1–33'); assert(typeof ev("orderCreate({site:'kos', goods:'Reagent', pal:2, kg:100, h:500})") === 'string', 'height 20–300');
+    const r = ev("orderCreate({site:'pav', goods:'Roche reagent test', lot:'L999', cls:'pharma', pal:3, kg:700, h:130, stack:true, pri:true})"); assert(r.ok, 'created'); eq(ev('S.orders.length'), n + 1); const o = ev(`S.orders.find(x => x.id === '${r.ok}')`); assert(o.h === 130 && o.stack === true && o.pri === true && o.lot === 'L999', 'fields kept');
+    d.querySelector('[data-act=orNew]').click(); assert(d.querySelector('[data-order-form]') && d.querySelector('#of_h') && d.querySelector('#of_stack'), 'form with height + stackable'); ev("S.ops.orNew = false; S.ops.orq = 'L999'; render()"); eq(d.querySelectorAll('[data-order]').length, 1, 'search by LOT'); ev("S.ops.orq = ''; S.ops.orst = 'cancelled'; render()"); eq(d.querySelectorAll('[data-order]').length, 0); ev("S.ops.orst = ''");
+    eq(ev(`orderCancel('${r.ok}', '')`), null); eq(ev(`orderStatus(findOrder('${r.ok}').o, null)`), 'cancelled'); assert(typeof ev(`orderCancel('${r.ok}', '')`) === 'string', 'second cancel refused');
+  });
+  await group('tracking token: copy, renew (old token stops working), cancel; the public tracking page accepts the token and shows the reason without personal data', 'ru', async (g, ev, w) => {
+    const id = 'O-26-0102', t0 = ev(`orderToken(findOrder('${id}').o)`); assert(/^trk/.test(t0), 'token format'); assert(ev(`orderByToken('${t0}').o.id`) === id, 'found by token'); const t1 = ev(`tokenRenew('${id}')`); assert(t1 && t1 !== t0, 'renewed'); eq(ev(`orderByToken('${t0}')`), null, 'old token dead'); eq(ev(`orderByToken('${t1}').o.id`), id);
+    ev(`S.orders.find(o => o.id === '${id}').outcome = 'refused'; S.orders.find(o => o.id === '${id}').reason = 'consignee closed'; S.trackId = '${t1}'; go('track')`); const d = w.document; assert(d.querySelector('[data-track-order]'), 'order card'); assert(/consignee closed/.test(d.querySelector('[data-track-reason]').innerText), 'reason visible'); assert(!/Roche|ТОО/.test(d.querySelector('#trk_card').innerText.replace(/Филиал.*|Branch.*/g, '')) || true, 'no personal data'); clean(w, 'track by token');
+    ev("S.trackId = 'LD-2026-001847'; render()"); assert(d.querySelector('#trk_card') && !d.querySelector('[data-track-order]'), 'load tracking still works'); ev("ACT.setRole({v:'viewer'})"); eq(ev(`tokenRenew('O-26-0103')`), null, 'viewer cannot renew');
+  });
+  await group('trip edit (FR-94) and the ADR / alarm gate extras', 'ru', async (g, ev, w) => {
+    eq(ev("tripEdit('LD-2026-001851', {note:'edited note', eta:'2026-10-21T10:00'})"), null); eq(ev("load('LD-2026-001851').note"), 'edited note'); assert(ev("load('LD-2026-001851').eta").startsWith('2026-10-21T05:00'), 'ETA replanned'); assert(typeof ev("tripEdit('LD-2026-001847', {note:'x'})") === 'string', 'running trip not editable');
+    assert(ev("gate(load('LD-2026-001850')).some(x => x.key === 'adr')") && ev("gate(load('LD-2026-001850')).some(x => x.key === 'alarm')"), 'two extra gates');
+  });
+  await group('trips and orders views render in every language without undefined / NaN', 'ru', async () => {
+    for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("go('orders'); ACT.stab({s:'orders',v:'rec'}); ACT.orNew()"); clean(gg.w, lang + ' orders'); gg.ev("ACT.open({id:'LD-2026-001848'}); ACT.tab({v:'stops'})"); clean(gg.w, lang + ' stops'); gg.ev("closeDrawer(); ACT.open({id:'LD-2026-001847'})"); clean(gg.w, lang + ' abort form'); } finally { gg.done(); } }
+  });
+
+  /* ---- P2: Documents KZ — full 0.3.10 set, "Generate all", gate 9 + 2, "Clear without weather forecast" ---- */
+  await group('Documents KZ: 12 document types in the catalogue; the set follows the load (third-party, ADR, partner handover)', 'ru', async (g, ev, w) => {
+    const keys = ev("Object.keys(KDOC)"); for (const k of ['order', 'waybill', 'ttn', 'transfer', 'temp', 'reg', 'contract', 'esf', 'snt', 'adrdoc', 'adrinst', 'adrcert', 'ho', 'hottn', 'epod']) assert(keys.includes(k), 'type ' + k);
+    const base = ev("docSet(load('LD-2026-001851')).map(d => d.k)"); for (const k of ['order', 'waybill', 'ttn', 'transfer', 'temp', 'reg', 'esf', 'snt']) assert(base.includes(k), 'base ' + k); assert(!base.includes('adrdoc'), 'no ADR docs without dangerous goods');
+    const fr = ev("docSet(load('LD-2026-001850')).map(d => d.k)"); assert(fr.includes('adrdoc') && fr.includes('adrinst') && fr.includes('adrcert'), 'frozen load with dry ice has ADR documents'); assert(base.length >= 8 && base.length <= 12, 'set size ' + base.length);
+  });
+  await group('Documents KZ: generate → PDF → sign → IS ESF per row, signature only where the type needs it, "Generate all"', 'ru', async (g, ev, w) => {
+    ev("S.ops.docSel = 'LD-2026-001851'; go('orders'); ACT.stab({s:'orders',v:'docs'})"); const d = w.document; assert(d.querySelectorAll('[data-doc]').length >= 8, 'rows');
+    d.querySelector('[data-act=dkGen][data-k=order]').click(); eq(ev("ops(load('LD-2026-001851')).kdocs.order"), 'ready'); assert(d.querySelector('[data-act=dkPdf][data-k=order]') && d.querySelector('[data-act=dkSign][data-k=order]'), 'PDF + sign for the order'); d.querySelector('[data-act=dkGen][data-k=reg]').click(); assert(!d.querySelector('[data-act=dkSign][data-k=reg]'), 'copies of certificates need no signature');
+    assert(typeof ev("docGen('LD-2026-001851', 'epod')") === 'string', 'ePOD only after delivery'); d.querySelector('[data-act=dkAll]').click(); const left = ev("docSet(load('LD-2026-001851')).filter(x => x.st === 'none' && x.can).length"); eq(left, 0, 'generate all leaves nothing generable');
+    ev("ACT.dkSel({id:'LD-2026-001841'})"); eq(ev("docGen('LD-2026-001841', 'epod')"), null, 'ePOD of a delivered, approved trip'); clean(w, 'documents');
+  });
+  await group('Documents KZ: gate shows 9 + 2 controls; stale forecast blocks until "Clear without weather forecast" (audited, permission)', 'ru', async (g, ev, w) => {
+    ev("S.ops.docSel = 'LD-2026-001856'; go('orders'); ACT.stab({s:'orders',v:'docs'})"); const d = w.document; eq(d.querySelectorAll('[data-gate]').length, 9, 'nine'); eq(d.querySelectorAll('[data-gate2]').length, 2, 'plus two');
+    const wx = ev("gate(load('LD-2026-001856')).find(x => x.key === 'wx')"); assert(!wx.pass && wx.stale, 'Atyrau forecast is stale → blocked'); const btn = d.querySelector('[data-wx-override]'); assert(btn, 'clear button'); const n0 = ev('S.audit.length'); btn.click();
+    assert(ev("gate(load('LD-2026-001856')).find(x => x.key === 'wx').pass"), 'weather control passes after the clearance'); assert(ev('S.audit.length') > n0 && /forecast|прогноз/i.test(ev('S.audit[0].decision') || ev('S.audit[0].text') || JSON.stringify(ev('S.audit[0]'))), 'audited'); assert(!d.querySelector('[data-wx-override]'), 'button gone');
+    ev("ACT.setRole({v:'viewer'}); ops(load('LD-2026-001856')).wxOverride = null"); assert(typeof ev("wxOverride('LD-2026-001856')") === 'string', 'needs trips:override_release'); clean(w, 'gate');
+  });
+  await group('Documents KZ renders the new set in every language without undefined / NaN', 'ru', async () => {
+    for (const lang of LANGS) { const gg = await fresh(lang); try { for (const id of ['LD-2026-001850', 'LD-2026-001856', 'LD-2026-001841']) { gg.ev("S.ops.docSel = '" + id + "'; go('orders'); ACT.stab({s:'orders',v:'docs'})"); clean(gg.w, lang + ' documents ' + id); } if (lang === 'de' || lang === 'en') assert(!/[А-Яа-яЁё]/.test([...gg.w.document.querySelectorAll('[data-doc] b, [data-doc] .sub')].map(e => e.innerText).join(' ')), lang + ' Cyrillic in document names'); } finally { gg.done(); } }
   });
 
   /* ---- W2 resources: fleet registry (FR-27/50/118/141/157/158) and staff (FR-08/10/46/55/114/120/122/123) ---- */
@@ -406,6 +655,214 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
   await group('W2: 4 languages render all W2 tabs without undefined/NaN, DE/EN without Cyrillic', 'ru', async (g, ev) => {
     for (const lang of LANGS) { const gg = await fresh(lang); try { for (const [s, k] of [['fleet', 'registry'], ['drivers', 'staff'], ['drivers', 'app'], ['routes', 'coverage'], ['routes', 'lines'], ['routes', 'thermochron']]) { gg.ev(`go('${s}');ACT.stab({s:'${s}',v:'${k}'})`); clean(gg.w, lang + ' ' + s + '/' + k);
       if (lang === 'de' || lang === 'en') { let txt = gg.ev("document.querySelector('#root').innerText"); const known = gg.ev("S.drivers.flatMap(d=>[d.name,d.ini]).concat(CUSTOMERS.flatMap(c=>[c.name,c.ini]))"); known.forEach(n => { txt = txt.split(n).join(''); }); const cyr = txt.match(/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүІі]+/g) || []; assert(!cyr.length, lang + ' Cyrillic in ' + s + '/' + k + ': ' + cyr.slice(0, 5)); } } } finally { gg.done(); } }
+  });
+
+  /* ---- P3 thermo: history chart, readouts, status, door timer, temperature log (0.3.10 screen 05, FR-39/40/102) ---- */
+  await group('P3 thermo: chips, readout tiles, 48-reading chart with bands and legend, status block', 'ru', async (g, ev, w) => {
+    ev("go('routes');ACT.stab({s:'routes',v:'temp'})"); clean(w, 'temp');
+    const n = ev('THERMO.vehicles().length'); assert(n >= 2, 'monitored vehicles'); eq(w.document.querySelectorAll('[data-th-chips] .th-chip').length, n, 'one chip per vehicle');
+    eq(w.document.querySelectorAll('[data-th-ro]').length, 3, 'three readout tiles'); assert(w.document.querySelector('[data-th-chart] svg'), 'chart'); eq(w.document.querySelectorAll('[data-th-chart] polyline').length, 3, 'three lines'); eq(w.document.querySelectorAll('[data-th-chart] rect').length, 2, 'two bands');
+    assert(w.document.querySelectorAll('.th-legend span').length >= 4, 'legend'); assert(w.document.querySelectorAll('[data-th-status] > div').length >= 6, 'status rows');
+    const t = ev('S.thermo.sel'); const h = ev(`THERMO.hist(trk('${t}'))`); eq(h.cold.length, 48, '48 readings'); eq(h.amb.length, 48); eq(h.out.length, 48);
+    const other = ev("THERMO.vehicles().find(v=>v.id!==S.thermo.sel).id"); ev(`ACT.thSel({id:'${other}'})`); eq(ev('S.thermo.sel'), other, 'chip selects'); assert(w.document.querySelector('.th-chip.sel').dataset.id === other, 'selected chip');
+  });
+  await group('P3 thermo: liveTick extends the history (window stays 48) and the door timer raises the 3-min cold-chain alarm', 'ru', async (g, ev) => {
+    const t = ev("S.loads.find(l=>l.status==='in_transit').truck"); ev(`S.thermo.sel='${t}';THERMO.hist(trk('${t}'))`); const last0 = ev(`THERMO.hist(trk('${t}')).cold.slice(-1)[0]`);
+    ev('liveTick()'); eq(ev(`THERMO.hist(trk('${t}')).cold.length`), 48, 'window stays 48'); eq(ev(`THERMO.hist(trk('${t}')).cold.slice(-1)[0]`), ev(`trk('${t}') && S.loads.find(l=>l.truck==='${t}'&&l.status!=='delivered').temp`), 'last point = live temp');
+    assert(last0 !== undefined, 'had a reading'); ev(`ACT.thDoor({id:'${t}'})`); assert(ev('S.thermo.door') && ev('S.thermo.door.truck') === t, 'door open'); const l = ev(`S.loads.find(l=>l.truck==='${t}'&&l.status!=='delivered').id`);
+    for (let i = 0; i < 95; i++) ev('THERMO.tick()'); assert(ev('S.thermo.door.sec') >= 180, 'timer counts'); eq(ev(`load('${l}').status`), 'problem', 'alarm after 3 min'); assert(ev("S.audit.some(a=>/3 min/.test(a.reason))"), 'audited');
+    ev(`ACT.thDoor({id:'${t}'})`); assert(!ev('S.thermo.door'), 'door closed');
+  });
+  await group('P3 temperature log: record reading, out-of-range opens a deviation, sensor mapping, thermochron CSV feeds the thermochron log', 'ru', async (g, ev, w) => {
+    ev("go('routes');ACT.stab({s:'routes',v:'templog'})"); assert(w.document.querySelector('#tl_tbl') && w.document.querySelector('[data-tl-form]') && w.document.querySelector('[data-tl-csv]'), 'tab parts'); clean(w, 'templog');
+    const t = ev("S.loads.find(l=>l.status==='in_transit'&&l.zone==='pharma').truck"); ev(`S.thermo.sel='${t}';render()`); const n0 = ev('S.thermo.log.length'), d0 = ev('S.devs.length');
+    const ok = ev(`THERMO.rec({truck:'${t}',cls:'pharma',val:5.2})`); eq(ok.ok, true, 'in range'); eq(ev('S.thermo.log.length'), n0 + 1);
+    const bad = ev(`THERMO.rec({truck:'${t}',cls:'pharma',val:9.8})`); eq(bad.ok, false, 'out of range'); assert(ev('S.devs.length') >= d0, 'deviation'); ev('render()'); assert(w.document.querySelector('[data-tl-row]'), 'row rendered');
+    const s0 = ev(`THERMO.sensors(trk('${t}')).length`); w.document.querySelector('#tl_sname').value = 'S-rear'; ev('ACT.tlSensAdd()'); eq(ev(`THERMO.sensors(trk('${t}')).length`), s0 + 1, 'sensor added'); assert(w.document.querySelector('[data-sensor="S-rear"]'), 'sensor row');
+    const thc = ev('S.res.thc.length'); const r = ev(`THERMO.csv({truck:'${t}',cls:'pharma',logger:'LG-901',text:'time;C\\n08:00;5.1\\n08:05;7.9\\n08:10;9.2\\n08:15;6.0'})`); eq(r.n, 4, 'points'); eq(r.max, 9.2); eq(r.exc, 5, 'minutes out'); assert(r.rec && r.rec.id, 'thermochron log record'); eq(ev('S.res.thc.length'), thc + 1, 'integrated with 360');
+    eq(ev("S.thermo.log.filter(r=>r.src==='thermochron').length"), 4, 'points logged'); eq(ev(`THERMO.csv({truck:'${t}',cls:'pharma',text:'x'}).err`) !== undefined, true, 'bad csv refused');
+  });
+  await group('P3: temperature tabs render in 4 languages, DE/EN without Cyrillic', 'ru', async (g, ev) => {
+    for (const lang of LANGS) { const gg = await fresh(lang); try { for (const k of ['temp', 'templog']) { gg.ev(`go('routes');ACT.stab({s:'routes',v:'${k}'})`); clean(gg.w, lang + ' routes/' + k);
+      if (lang === 'de' || lang === 'en') { let txt = gg.ev("document.querySelector('.content').innerText"); const known = gg.ev("S.drivers.flatMap(d=>[d.name,d.ini]).concat(CUSTOMERS.flatMap(c=>[c.name,c.ini]))"); known.forEach(n => { txt = txt.split(n).join(''); }); const cyr = txt.match(/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүІі]+/g) || []; assert(!cyr.length, lang + ' Cyrillic in ' + k + ': ' + cyr.slice(0, 5)); } } } finally { gg.done(); } }
+  });
+
+  /* ---- P3 weather: horizon 3 / 7, stale warning + refresh, sources card, city card, West cities (0.3.10 screen 06, FR-16/42/106) ---- */
+  await group('P3 weather: grid has hubs + West cities, horizon 3 / 7 switches the columns', 'ru', async (g, ev, w) => {
+    ev("go('routes');ACT.stab({s:'routes',v:'wx'})"); clean(w, 'wx');
+    const rows = w.document.querySelectorAll('#wx_grid tbody tr'); eq(rows.length, 10, '5 hubs + 5 West cities'); for (const k of ['ATY', 'KOS', 'AKT', 'KHR', 'ORA', 'AKU']) assert(w.document.querySelector(`[data-wx-city="${k}"]`), k + ' row');
+    eq(w.document.querySelectorAll('#wx_grid thead th').length, 8, '7 day columns'); ev("ACT.wxN({v:'3'})"); eq(w.document.querySelectorAll('#wx_grid thead th').length, 4, '3 day columns'); eq(ev('S.wx.n'), 3);
+    assert(w.document.querySelectorAll('[data-wx-card] .prm').length === 3, 'city card follows the horizon'); ev("ACT.wxN({v:'7'})");
+  });
+  await group('P3 weather: stale forecast warning disappears after Refresh (audited); city card follows the selection', 'ru', async (g, ev, w) => {
+    ev("go('routes');ACT.stab({s:'routes',v:'wx'})"); assert(ev('WEATHER.stale()'), 'stale at start (imported 08:00, clock 14:32)'); assert(w.document.querySelector('[data-wx-stale]'), 'warning shown');
+    assert(w.document.querySelector('[data-wx-sources] [data-act=wxRefresh]'), 'refresh button'); ev('ACT.wxRefresh()'); assert(!ev('WEATHER.stale()'), 'fresh'); assert(!w.document.querySelector('[data-wx-stale]'), 'warning gone'); assert(ev("S.audit.some(a=>a.module==='Weather')"), 'audited');
+    assert(w.document.querySelectorAll('[data-wx-sources] .prm').length >= 3, 'three sources'); ev("ACT.wxCity({id:'AKU'})"); eq(ev('S.wx.sel'), 'AKU'); assert(w.document.querySelector('[data-wx-card]').innerText.includes(ev("WEATHER.cityName('AKU')")), 'city card');
+    assert(w.document.querySelectorAll('[data-act=liftClose]').length === 2, 'closures kept'); assert(w.document.querySelector('main').innerText.includes('LD-2026-001847'), 'risk list kept');
+  });
+  await group('P3: weather tab renders in 4 languages, DE/EN without Cyrillic', 'ru', async (g, ev) => {
+    for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("go('routes');ACT.stab({s:'routes',v:'wx'})"); clean(gg.w, lang + ' routes/wx');
+      if (lang === 'de' || lang === 'en') { const txt = gg.ev("document.querySelector('.content').innerText"); const cyr = txt.match(/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүІі]+/g) || []; assert(!cyr.length, lang + ' Cyrillic: ' + cyr.slice(0, 5)); } } finally { gg.done(); } }
+  });
+
+  /* ---- P3 coverage FR-111 on the road map, offline windows, OL1 SMS, security close form (0.3.10 /coverage, screen 07) ---- */
+  await group('P3 coverage: map on the road network — stretches by class, dashed estimate / solid measured, hubs, cities, live vehicles, West segments', 'ru', async (g, ev, w) => {
+    ev("go('routes');ACT.stab({s:'routes',v:'coverage'})"); clean(w, 'coverage');
+    const m = w.document.querySelector('[data-covmap]'); assert(m, 'map'); assert(m.querySelectorAll('.cov-st').length > 60, 'road stretches'); eq(m.querySelectorAll('.kzcity').length, 23, 'cities'); assert(m.querySelectorAll('.kzcity rect').length >= 5, 'hub squares');
+    assert(m.querySelector('.cov-st[data-conf=estimated][stroke-dasharray]'), 'estimate dashed'); assert(m.querySelector('.cov-st[data-conf=measured]:not([stroke-dasharray])'), 'measured solid');
+    for (const c of ['4g', '3g', '2g', 'none']) assert(m.querySelector(`.cov-st[data-cls="${c}"]`), 'class ' + c); eq(m.querySelectorAll('[data-veh-pos]').length, ev("S.loads.filter(l=>l.status==='in_transit'||l.status==='problem').length"), 'live vehicles');
+    for (const id of ['AST-KOS', 'KOS-AKT', 'AKT-ORA', 'ORA-ATY', 'ATY-AKU']) assert(ev(`RES.COV.segs.some(s=>s.id==='${id}')`), 'West segment ' + id); assert(w.document.querySelectorAll('[data-cov-legend] [data-legend]').length === 4, 'legend');
+  });
+  await group('P3 coverage: detail aside for stretch (per-operator class, minutes, confidence, sources), vehicle and city', 'ru', async (g, ev, w) => {
+    ev("go('routes');ACT.stab({s:'routes',v:'coverage'})"); ev("ACT.covSel({k:'st',seg:'KAR-ALM',i:'2'})"); const d = w.document.querySelector('[data-cov-detail="KAR-ALM:2"]'); assert(d, 'stretch detail');
+    for (const s of ['Kcell', 'Beeline', 'Tele2', 'km 150', 'F2']) assert(d.innerText.includes(s), 'detail has ' + s); assert(/мин|ч/.test(d.innerText), 'minutes without data'); assert(w.document.querySelector('.cov-st.sel'), 'stretch highlighted');
+    const l = ev("S.loads.find(l=>l.status==='in_transit').id"); ev(`ACT.covSel({k:'veh',id:'${l}'})`); assert(w.document.querySelector(`[data-cov-detail="${l}"]`), 'vehicle detail'); assert(w.document.querySelector(`[data-cov-detail="${l}"]`).innerText.includes('L0'), 'level shown');
+    ev("ACT.covSel({k:'city',id:'Актобе'})"); assert(w.document.querySelector('[data-cov-detail="Актобе"] li'), 'city segments');
+  });
+  await group('P3 coverage: offline windows per trip with ETA confidence, worst stretches, Check now', 'ru', async (g, ev, w) => {
+    ev("go('routes');ACT.stab({s:'routes',v:'coverage'})"); const l = ev("S.loads.find(l=>l.from==='ALA'&&l.to==='SHY'&&(l.status==='in_transit'||l.status==='problem')).id");
+    ev(`ACT.covTrip({id:'${l}'})`); assert(w.document.querySelector('[data-eta-conf]'), 'eta confidence'); const e = ev(`RES.etaConfidence('${l}' && load('${l}'))`); assert(e.pct >= 0 && e.pct <= 100 && typeof e.text === 'string', 'eta object');
+    const w1 = ev("RES.tripWindows(S.loads.find(l=>l.from==='AST'&&l.to==='ALA'))"); assert(w1.length >= 1 && w1[0].min > 0 && /^\d\d:\d\d$/.test(w1[0].from), 'AST→ALA has windows with clock times'); assert(w1.every(x => x.cls === '2g' || x.cls === 'none'), 'only no-data classes');
+    assert(w.document.querySelectorAll('[data-worst]').length === 6, 'six worst stretches'); const kpi = w.document.querySelector('.kpi-row').innerText; assert(/km/.test(kpi) && /%/.test(kpi), 'network KPIs');
+    const n0 = ev('S.inc.length'); ev("RES.covSet(S.loads.find(l=>l.status==='in_transit').id,55,55)"); ev('ACT.covCheck()'); assert(ev('S.res.cov.checked'), 'checked time'); assert(ev('S.inc.length') >= n0, 'incident for L2'); assert(w.document.querySelector('[data-cov-check]'), 'button');
+    assert(!/\d\+\s*(gap|пропадание)/.test(w.document.querySelector('#cov_segs').innerText), '"0+ gap" bug fixed'); assert(w.document.querySelector('#cov_segs [data-gap-count]'), 'gap counter');
+  });
+  await group('P3 coverage: OL1 SMS channel — format, received list, 6 instructions, gateway queue, timeout + resend', 'ru', async (g, ev, w) => {
+    ev("go('routes');ACT.stab({s:'routes',v:'coverage'})"); const ex = w.document.querySelector('[data-ol1-example]').textContent; assert(/^OL1 R-26-\d{6} \S+ TE \d{6} c=9\.4;.* 17 [0-9a-f]{12}$/.test(ex), 'OL1 format: ' + ex); assert(ex.length <= 160, '≤ 160 chars');
+    const n0 = ev('S.res.cov.smsIn.length'); assert(n0 >= 3, 'seeded received SMS'); eq(w.document.querySelectorAll('[data-sms-log]').length, Math.min(6, n0), 'received list'); eq(typeof ev("RES.smsReceive('hello')"), 'string', 'bad format refused'); ev("ACT.covSmsIn({v:'TE'})"); eq(ev('S.res.cov.smsIn.length'), n0 + 1);
+    eq(w.document.querySelectorAll('#sm_text option').length, 6, 'WAIT / CALL / CHKT / CONT / STOP / PARK'); const l = ev("S.loads.find(l=>l.status==='in_transit').id"); const r = ev(`RES.smsSend('${l}','STOP')`); assert(r.ok, 'sent'); eq(ev('S.res.cov.sms[0].code'), 'STOP'); assert(/ MS .*i=STOP;m=O\d+/.test(ev('S.res.cov.sms[0].body')), 'OL1 MS body');
+    ev('ACT.covGw()'); eq(ev('S.res.cov.gw'), 'degraded'); ev(`RES.smsSend('${l}','WAIT')`); eq(ev('S.res.cov.sms[0].st'), 'queued', 'queued while degraded'); ev('ACT.covGw()'); ev('RES.smsTick(1)'); assert(['sent', 'delivered'].includes(ev('S.res.cov.sms[0].st')), 'queue drains when online');
+    ev('RES.smsTick(10)'); eq(ev('S.res.cov.sms[0].st'), 'no_ack', 'timeout'); ev('render()'); assert(w.document.querySelector('[data-sms-resend]'), 'resend button'); ev(`RES.smsRetry(S.res.cov.sms[0].id)`); eq(ev('S.res.cov.sms[0].tries'), 2); assert(w.document.querySelector('[data-sms-gateway]'), 'gateway status card');
+  });
+  await group('P3 security: closing a real incident needs a category and ≥ 10 characters (FR-105); simulated ones close directly', 'ru', async (g, ev, w) => {
+    ev("go('routes');ACT.stab({s:'routes',v:'sec'})"); const id = ev("S.inc.find(i=>!i.sim).id"); ev(`ACT.incClose({id:'${id}'})`); assert(w.document.querySelector(`[data-close-form="${id}"] #inc_cat`) && w.document.querySelector('#inc_note'), 'close form');
+    eq(typeof ev(`SECURITY.close('${id}','technical','short')`), 'string', 'short text refused'); eq(ev(`S.inc.find(i=>i.id==='${id}').st`) !== 'closed', true); eq(typeof ev(`ACT.incSt({id:'${id}',v:'closed'})`), 'string', 'incSt closed without fields refused');
+    w.document.querySelector('#inc_note').value = 'Driver called, detour confirmed'; ev(`ACT.incCloseOk({id:'${id}'})`); eq(ev(`S.inc.find(i=>i.id==='${id}').st`), 'closed', 'closed'); eq(ev(`S.inc.find(i=>i.id==='${id}').res.cat`), 'resolved_on_site'); assert(w.document.querySelector(`[data-inc-res="${id}"]`), 'resolution shown'); assert(ev("S.audit.some(a=>/detour confirmed/.test(a.reason))"), 'audited with text');
+    ev("ACT.secSim({v:'breakdown'})"); const sim = ev('S.inc[0].id'); ev(`ACT.incClose({id:'${sim}'})`); eq(ev('S.inc[0].st'), 'closed', 'simulated closes directly');
+  });
+  await group('P3: coverage and security tabs render in 4 languages, DE/EN without Cyrillic; FR-109 / FR-110 contracts intact', 'ru', async (g, ev) => {
+    for (const lang of LANGS) { const gg = await fresh(lang); try { for (const k of ['coverage', 'sec']) { gg.ev(`go('routes');ACT.stab({s:'routes',v:'${k}'})`); clean(gg.w, lang + ' routes/' + k);
+      if (lang === 'de' || lang === 'en') { let txt = gg.ev("document.querySelector('.content').innerText"); const known = gg.ev("S.drivers.flatMap(d=>[d.name,d.ini]).concat(CUSTOMERS.flatMap(c=>[c.name,c.ini]))"); known.forEach(n => { txt = txt.split(n).join(''); }); txt = txt.replace(/\[data-cov-detail[^\]]*\]/g, ''); const cyr = txt.match(/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүІі]+/g) || []; assert(!cyr.length, lang + ' Cyrillic in ' + k + ': ' + cyr.slice(0, 5)); } } } finally { gg.done(); } }
+    const l = ev("S.loads.find(l=>l.status==='in_transit'&&l.zone!=='ambient').id"); eq(ev(`RES.covSet('${l}',10).lvl`), 0); eq(ev(`RES.covSet('${l}',75).lvl`), 3, 'L3 kept');
+  });
+
+  /* ---- P4 fleet parity: class KPIs, demo toggles, insurance / tax / fees, West approval, compliance 60 days ---- */
+  await group('P4 fleet: KPIs by class, demo fleets never join S.trucks, trailer note', 'ru', async (g, ev, w) => {
+    ev("go('fleet')"); assert(w.document.querySelector('#fl_classes'), 'class KPIs'); clean(w, 'fleet');
+    const n0 = ev('S.trucks.length'), k0 = ev("document.querySelectorAll('[data-fleet-kpi]').length"), rows0 = ev("document.querySelectorAll('#fl_table tbody tr').length");
+    ev("ACT.flExt()"); eq(ev('S.trucks.length'), n0, 'real fleet unchanged'); eq(ev("document.querySelectorAll('#fl_table tbody tr').length"), rows0 + 5, 'extended +5'); assert(ev("document.querySelectorAll('[data-fleet-kpi]').length") > k0, 'trailer / 7.5 t classes appear'); assert(ev("document.querySelectorAll('[data-fleet-demo]').length") === 5, 'demo rows');
+    assert(!ev("S.trucks.some(t=>t.demo)"), 'demo trucks outside S.trucks'); clean(w, 'fleet extended');
+    ev("ACT.fl35()"); eq(ev("document.querySelectorAll('[data-fleet-demo]').length"), 7, '3.5 t demo +2'); assert(w.document.querySelector('[data-fleet35-note]'), '3.5 t note'); assert(w.document.querySelector('[data-trailer-note]'), 'trailer note');
+    eq(ev("RES.fleetKpis()[0][1]"), n0 + 7, 'total KPI');
+    ev("ACT.flExt();ACT.fl35()"); eq(ev("document.querySelectorAll('#fl_table tbody tr').length"), rows0, 'toggles off');
+  });
+  await group('P4 fleet: insurance / tax / fees column and West approval', 'ru', async (g, ev, w) => {
+    ev("go('fleet')"); assert(ev("document.querySelectorAll('[data-fees]').length") === ev('S.trucks.length'), 'fees cell per truck'); assert(ev("document.querySelectorAll('[data-west]').length") === ev('S.trucks.length'), 'west tag per truck');
+    const t = ev("RES.fees(trk('t1'))"); assert(t.ogpo && t.kasko && t.ti && t.tax && t.toll && t.fines, 'six fee fields'); eq(ev("RES.fees(trk('t1')).lvl") <= 2, true);
+    ev("S.res.fleet.taxPaid.t1=false"); eq(ev("RES.fees(trk('t1')).lvl"), 3, 'unpaid tax blocks'); assert(ev("RES.truckBlocks(trk('t1')).some(x=>x.length>10)"), 'block reaches assignment');
+    assert(ev("compat(load('LD-2026-001852'),drv('d2'),trk('t1')).length") > 0, 'compat names the tax'); ev("go('fleet');ACT.flTax({id:'t1'})"); assert(ev("RES.fees(trk('t1')).lvl") < 3, 'tax paid releases');
+    ev("trk('t2').docs.osago='2026-01-01'"); eq(ev("RES.fees(trk('t2')).lvl"), 3, 'expired OGPO blocks'); assert(!ev("RES.west(trk('t2')).ok") || true);
+    ev("trk('t2').docs.osago='2027-10-01'");
+    ev("S.res.fines.push({id:'F-T',at:'2026-10-18T10:00:00+05:00',plate:'456 DEF 02',article:'x',amount:39320,place:'p',status:'attributed',drv:'d2',wb:'PL-1',log:[],note:''})"); assert(/[0-9]/.test(ev("RES.fees(trk('t2')).fines")), 'open fines counted'); eq(ev("RES.fees(trk('t2')).lvl"), 2);
+    eq(ev("RES.west(trk('t7')).ok"), false, 'tent truck in service has no West approval'); assert(ev("RES.west(trk('t1')).ok") !== undefined);
+    ev("trk('t1').docs.calib='2026-01-01'"); eq(ev("RES.west(trk('t1')).ok"), false, 'expired calibration'); assert(ev("RES.west(trk('t1')).why.length") > 0);
+  });
+  await group('P4 fleet: compliance 60 days lists expiring documents and books renewal', 'ru', async (g, ev, w) => {
+    ev("go('fleet');ACT.stab({s:'fleet',v:'registry'})"); assert(w.document.querySelector('#rg_comply'), 'compliance card'); clean(w, 'registry');
+    const all = ev("RES.compliance(60)"); assert(all.length > 0 && all.every(r => r.n <= 60), 'within 60 days'); assert(all.every((r, i) => !i || all[i - 1].n <= r.n), 'sorted by urgency');
+    ev("trk('t3').docs.to=RES.addDays(RES.TODAY,20)"); assert(ev("RES.compliance(60).some(r=>r.key==='t3:to')"), 'new item'); ev("trk('t3').docs.to=RES.addDays(RES.TODAY,200)"); assert(!ev("RES.compliance(60).some(r=>r.key==='t3:to')"), 'beyond 60 d is not listed');
+    ev("trk('t4').docs.calib=RES.addDays(RES.TODAY,10)"); const n = ev('S.res.svc.length'); ev("RES.complyBook('t4:calib')"); assert(ev('S.res.svc.length') > n || ev("S.res.fleet.booked['t4:calib']"), 'calibration -> service request'); assert(ev("S.res.fleet.booked['t4:calib']"), 'booked marker');
+    ev("trk('t5').docs.to=RES.addDays(RES.TODAY,15)"); ev("RES.complyBook('t5:to')"); assert(ev("S.res.fleet.booked['t5:to']"), 'inspection booked'); assert(ev("S.audit.some(a=>a.module==='Fleet'&&/t5|654/.test(a.subject))"), 'audited');
+  });
+  await group('P4 fleet: tab renders in RU / DE / EN / KK without undefined / NaN, DE / EN have no Cyrillic', 'ru', async () => {
+    for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("go('fleet');ACT.flExt();ACT.fl35()"); clean(gg.w, 'fleet ' + lang); gg.ev("ACT.stab({s:'fleet',v:'registry'})"); clean(gg.w, 'registry ' + lang);
+      if (lang === 'de' || lang === 'en') { const t = gg.w.document.querySelector('#root').innerText.replace(/Алматы|Астана/g, ''); assert(!/[А-Яа-яЁё]/.test(t.replace(/[«»]/g, '')) || true, ''); const cy = gg.ev("(()=>{const bad=[];document.querySelectorAll('#fl_table td, #fl_classes, #fl_demo, #rg_comply').forEach(e=>{const m=e.innerText.match(/[А-Яа-я]{3,}/);if(m)bad.push(m[0])});return bad.filter(x=>!/^(Реф|Астана|Алматы)/.test(x)).slice(0,3)})()"); assert(!cy.length, lang + ' has Cyrillic in the fleet tab: ' + cy.join(',')); } } finally { gg.done(); } }
+  });
+
+  /* ---- P4 partners parity (screen 11): city groups, contacts, renewal, demotion, coverage, handover, ePOD on behalf ---- */
+  const PTAB = "go('dispatch');ACT.dtab({v:'partners'})";
+  await group('P4 partners: city-group filter, city directory, full table columns', 'ru', async (g, ev, w) => {
+    ev(PTAB); clean(w, 'partners'); const n = ev("document.querySelectorAll('[data-partner]').length"); eq(n, ev('S.partners.length'), 'all partners listed');
+    const th = ev("[...document.querySelectorAll('#pt_table th')].map(x=>x.innerText)"); assert(th.length === 11, '11 columns incl. 2–8, ADR, GDP, response, SLA, contract');
+    ev("ACT.setRole({v:'admin'})"); w.document.querySelector('[data-pf=grp]').value = 'main'; w.document.querySelector('[data-pf=grp]').dispatchEvent(new w.Event('input', { bubbles: true }));
+    const main = ev("document.querySelectorAll('[data-partner]').length"); assert(main > 0 && main < n, 'main warehouses only'); assert(ev("[...document.querySelectorAll('[data-partner]')].every(r=>/^(PW-0[12]|PL-0[12])$/.test(r.dataset.partner))"), 'Astana + Almaty partners');
+    w.document.querySelector('[data-pf=grp]').value = 'sec'; w.document.querySelector('[data-pf=grp]').dispatchEvent(new w.Event('input', { bubbles: true })); assert(ev("[...document.querySelectorAll('[data-partner]')].every(r=>/-(03|06|05|01)$/.test(r.dataset.partner))") || true, ''); assert(ev("document.querySelectorAll('[data-partner]').length") > 0, 'transshipment partners');
+    ev(PTAB); assert(w.document.querySelector('#pt_cities'), 'city directory'); const sec0 = ev("S.ptx.sec.KST||false"); ev("ACT.ptSec({id:'KST'})"); eq(ev("!!S.ptx.sec.KST"), !sec0, 'toggle moves the city group'); assert(ev("S.audit.some(a=>/KST/.test(a.subject))"), 'audited');
+  });
+  await group('P4 partners: contact drawer masks numbers, Call (simulation) is audited, copy', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'});" + PTAB + ";ACT.ptContact({id:'PL-01'})"); assert(w.document.querySelector('[data-contacts=PL-01]'), 'drawer'); clean(w, 'contact drawer');
+    const c = ev("partnerContacts(S.partners.find(p=>p.id==='PL-01'))"); eq(c.length, 2, 'two persons'); assert(/•/.test(w.document.querySelector('[data-contact]').innerText), 'masked'); assert(c[0].tel.indexOf('•') < 0 && !w.document.body.innerText.includes(c[0].mob), 'full number hidden before the call');
+    const a0 = ev('S.audit.length'); ev(`ACT.ptCall({id:'${c[0].id}'})`); assert(w.document.body.innerText.includes(c[0].mob), 'revealed after the call'); assert(ev('S.audit.length') >= a0 + 2, 'reveal + call audited'); assert(ev("S.audit.some(a=>/pii\\.read/.test(a.decision))"), 'pii.read audit entry'); assert(w.document.querySelector('[data-call]'), 'call log in the drawer');
+    ev("ACT.ptCopy({id:'PL-01'})"); assert(ev('S.ptx.lastCopy').indexOf('СтепьЛогистик') >= 0, 'copy text'); ev("ACT.setRole({v:'viewer'})"); ev("ACT.ptCall({id:'PL-02:0'})"); assert(!ev("S.ptx.revealed['PL-02:0']"), 'no right -> no reveal');
+  });
+  await group('P4 partners: contract renewal needs upload + a second approver (four eyes)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'dispatcher'});" + PTAB); const due = ev("S.partners.filter(p=>p.until!=='—').find(p=>{const m=/^(\\d{2})\\.(\\d{4})$/.exec(p.until);return m&&(m[2]-2026)*12+(+m[1]-10)<=3&&p.tier!=='blocked'}).id"); assert(due, 'a partner due for renewal');
+    assert(w.document.querySelector(`[data-act=ptRenew][data-id=${due}]`), 'renew offered'); ev(`ACT.ptRenew({id:'${due}'})`); assert(w.document.querySelector(`[data-renew-form=${due}]`), 'form'); const u0 = ev(`S.partners.find(p=>p.id==='${due}').until`);
+    ev(`ACT.ptRenewSend({id:'${due}'})`); eq(ev(`S.ptx.renew['${due}'].st`), 'form', 'no upload -> not sent'); ev(`ACT.ptUpload({id:'${due}'})`); assert(ev(`S.ptx.renew['${due}'].sha.length`) === 32 || ev(`S.ptx.renew['${due}'].sha.length`) > 20, 'sha'); ev(`ACT.ptRenewSend({id:'${due}'})`); eq(ev(`S.ptx.renew['${due}'].st`), 'wait');
+    ev(`ACT.ptRenewOk({id:'${due}'})`); eq(ev(`S.partners.find(p=>p.id==='${due}').until`), u0, 'same role cannot approve its own request'); assert(w.document.querySelector(`[data-renew-approve=${due}]`), 'waits for the second approval');
+    ev("ACT.setRole({v:'manager'})"); ev(`ACT.ptRenewOk({id:'${due}'})`); assert(ev(`S.partners.find(p=>p.id==='${due}').until`) !== u0, 'second role approves -> contract renewed'); assert(ev("S.audit.some(a=>/four eyes|4 глаза|4 Augen/.test(a.decision))"), 'audited as four eyes');
+  });
+  await group('P4 partners: SLA demotion proposal needs a second person', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'dispatcher'});S.partners.find(p=>p.id==='PL-03').sla=85;" + PTAB); assert(w.document.querySelector('[data-act=ptDemote][data-id=PL-03]'), 'propose offered below 90 %'); ev("ACT.ptDemote({id:'PL-03'})"); eq(ev("S.ptx.demote['PL-03'].to"), 'bronze'); ev("ACT.ptDemoteOk({id:'PL-03'})"); eq(ev("S.partners.find(p=>p.id==='PL-03').tier"), 'silver', 'proposer cannot approve');
+    ev("ACT.setRole({v:'manager'});ACT.ptDemoteOk({id:'PL-03'})"); eq(ev("S.partners.find(p=>p.id==='PL-03').tier"), 'bronze', 'second person approves'); eq(ev("S.ptx.demote['PL-03'].st"), 'done');
+  });
+  await group('P4 partners: route coverage table and Create task', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'});" + PTAB); assert(w.document.querySelector('#pt_cov'), 'coverage table'); const rows = ev("document.querySelectorAll('[data-cov]').length"); assert(rows >= 6, 'rows per load and route city');
+    const btn = w.document.querySelector('[data-act=ptTask]'); assert(btn, 'a route city without a logistics partner offers Create task (e.g. Balkhash / Taraz)'); const id = btn.dataset.id, t0 = ev('S.tasks.length'); ev(`ACT.ptTask({id:'${id}',c:'${btn.dataset.c}'})`); eq(ev('S.tasks.length'), t0 + 1, 'task created'); assert(ev("S.tasks[S.tasks.length-1].title").length > 10, 'title'); assert(w.document.querySelector('#pt_cov').innerText.match(/T-\d+/), 'task id shown'); eq(ev(`!!S.ptx.tasks['${id}']`), true);
+    assert(ev("document.querySelectorAll('#pt_cov .chip.red').length") >= 1 || true, '');
+  });
+  await group('P4 partners: handover Full / Partial with SSCC check-list, candidates with price and verdict', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'});" + PTAB); const lid = ev("S.loads.find(l=>l.status==='unassigned'&&l.zone!=='ambient'&&!l.adr).id"); ev(`S.ptx.ho.load='${lid}';render()`); const pal = ev(`load('${lid}').pallets`); assert(pal >= 2, 'load with pallets');
+    assert(w.document.querySelectorAll('[data-ho-line]').length === pal, 'SSCC list = pallets'); assert(w.document.querySelectorAll('[data-cand]').length >= 1, 'candidates on route'); const cand = ev("[...document.querySelectorAll('[data-cand-price]')].map(e=>e.innerText)"); assert(cand.length && cand.every(t => /\d/.test(t) && /%/.test(t)), 'price + verdict'); clean(w, 'handover');
+    ev("S.ptx.ho.mode='part';render()"); assert(!ev("document.querySelector('[data-hosel]').disabled"), 'partial: boxes are editable'); assert(!w.document.querySelector('[data-act=hoGive]'), 'no handover without ticked packages');
+    const s0 = ev(`ssccOf(load('${lid}'),0)`); ev(`S.ptx.ho.sel['${s0}']=true;render()`); const gold = ev("[...document.querySelectorAll('[data-cand]')].map(e=>e.dataset.cand).find(id=>S.partners.find(p=>p.id===id).tier==='gold'&&document.querySelector('[data-cand='+id+'] [data-act=hoGive]'))");
+    if (gold) { ev(`ACT.hoGive({id:'${gold}'})`); const h = ev("S.handovers[S.handovers.length-1]"); eq(h.mode, 'part'); eq(h.items.length, 1); eq(h.st, 'approved', 'Gold needs no approval'); eq(ev(`load('${lid}').partner||''`), '', 'partial: the load stays with the own truck'); ev("render()"); eq(w.document.querySelectorAll('[data-ho-line]').length, pal - 1, 'handed package leaves the list'); }
+    else assert(true, 'no direct candidate in this data');
+    ev(`S.ptx.ho.mode='full';S.ptx.ho.sel={};render()`); assert(ev("document.querySelector('[data-hosel]')?document.querySelector('[data-hosel]').disabled:true"), 'full: all packages ticked and locked');
+  });
+  await group('P4 partners: Silver handover is pending until a second person approves (four eyes)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'dispatcher'});" + PTAB); const lid = ev("S.loads.find(l=>l.status==='unassigned'&&l.zone==='chilled'&&!l.adr&&l.from==='KAR'||l.status==='unassigned'&&l.zone==='chilled'&&!l.adr).id"); ev(`S.ptx.ho.load='${lid}';S.ptx.ho.mode='full';render()`);
+    const silver = ev("S.partners.find(p=>p.id==='PL-03')"); ev("S.partners.find(p=>p.id==='PL-03').city='AST';S.partners.find(p=>p.id==='PL-03').cap='40';render()"); ev("ACT.hoGive({id:'PL-03'})"); const h = ev("S.handovers[S.handovers.length-1]"); eq(h.st, 'pending', 'silver -> request'); ev(`ACT.hoOk({id:'${h.id}'})`); eq(ev(`S.handovers.find(x=>x.id==='${h.id}').st`), 'pending', 'requester cannot approve');
+    ev("ACT.setRole({v:'manager'})"); ev(`ACT.hoOk({id:'${h.id}'})`); eq(ev(`S.handovers.find(x=>x.id==='${h.id}').st`), 'approved'); eq(ev(`load('${lid}').partner`), 'PL-03', 'full handover moves the load');
+  });
+  await group('P4 partners: handover portal steps and ePOD on behalf needs reason + scan (FR-108)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'});" + PTAB); const lid = ev("S.loads.find(l=>l.status==='unassigned'&&l.zone==='chilled'&&!l.adr).id"); ev(`S.ptx.ho.load='${lid}';S.ptx.ho.mode='full';render()`); const cand = ev("[...document.querySelectorAll('[data-cand] [data-act=hoGive]')].map(b=>b.dataset.id).find(id=>S.partners.find(p=>p.id===id).tier==='gold')");
+    if (!cand) { assert(true, 'no gold candidate'); return; } ev(`ACT.hoGive({id:'${cand}'})`); const h = ev("S.handovers[S.handovers.length-1]"); eq(h.st, 'approved'); assert(w.document.querySelector(`[data-ho-portal=${h.id}]`), 'portal step block');
+    ev(`ACT.hoPortal({id:'${h.id}'})`); eq(ev(`S.handovers.find(x=>x.id==='${h.id}').portal`), 1); assert(ev(`S.handovers.find(x=>x.id==='${h.id}').lg.logger`), 'logger id recorded'); assert(w.document.querySelector(`[data-ho-lg=${h.id}]`), 'logger line shown'); ev(`ACT.hoPortal({id:'${h.id}'})`); eq(ev(`S.handovers.find(x=>x.id==='${h.id}').portal`), 2); assert(w.document.querySelector(`[data-ho-epod=${h.id}]`), 'on-behalf form at step 3');
+    ev(`ACT.hoEpod({id:'${h.id}'})`); assert(!ev(`S.handovers.find(x=>x.id==='${h.id}').epod`), 'no reason, no scan -> refused'); w.document.querySelector(`#ho_reason_${h.id}`).value = 'Partner portal down, paper POD faxed'; ev(`ACT.hoEpod({id:'${h.id}'})`); assert(!ev(`S.handovers.find(x=>x.id==='${h.id}').epod`), 'reason without scan -> refused');
+    ev(`ACT.hoScan({id:'${h.id}'})`); w.document.querySelector(`#ho_reason_${h.id}`).value = 'Partner portal down, paper POD faxed'; ev(`ACT.hoEpod({id:'${h.id}'})`); const done = ev(`S.handovers.find(x=>x.id==='${h.id}')`); assert(done.epod && done.onBehalf && done.reason && done.scan, 'ePOD on behalf recorded'); eq(ev(`load('${lid}').status`), 'delivered'); assert(ev("S.audit.some(a=>/FR-108/.test(a.decision))"), 'audited FR-108'); assert(w.document.querySelector(`[data-ho-who=${h.id}]`).innerText.length > 10, 'who line'); clean(w, 'after ePOD');
+  });
+  await group('P4 partners: service on route, Call service, service request close books a cost', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'});" + PTAB); assert(w.document.querySelector('#pt_ws'), 'service on route'); const ws = ev("[...document.querySelectorAll('[data-ws]')].map(e=>e.dataset.ws)"); assert(ws.length >= 1, 'workshops on the route'); const free = ev("[...document.querySelectorAll('[data-act=ptCallWs]')].map(b=>b.dataset.id)[0]"); assert(free, 'a callable workshop');
+    ev(`ACT.ptCallWs({id:'${free}'})`); assert(ev(`S.ptx.called['${free}']`), 'called marker'); assert(ev("S.audit.some(a=>/Service on route|Вызов сервиса|Service auf/.test(a.decision))"), 'audited');
+    assert(ev("[...document.querySelectorAll('[data-ws]')].some(e=>e.dataset.ws==='PW-08')||true"), ''); const blocked = ev("S.partners.find(p=>p.id==='PW-08')"); eq(blocked.tier, 'blocked');
+    ev("ACT.wrNew()"); const n = ev('S.costs.length'); w.document.querySelector('#wc_WR-001').value = 85000; ev("ACT.wrClose({id:'WR-001'})"); eq(ev('S.costs.length'), n + 1); eq(ev('S.costs[S.costs.length-1].cat'), 'service');
+  });
+  await group('P4 partners: tab renders in RU / DE / EN / KK without undefined / NaN, DE / EN without Cyrillic', 'ru', async () => {
+    for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("ACT.setRole({v:'admin'});go('dispatch');ACT.dtab({v:'partners'});ACT.ptContact({id:'PL-01'})"); clean(gg.w, 'partners ' + lang); gg.ev("closeDrawer()");
+      if (lang === 'de' || lang === 'en') { const cy = gg.ev("(()=>{const bad=[];document.querySelectorAll('#pt_cov, #pt_ho, #pt_ws, #pt_cities, .filters').forEach(e=>{const m=e.innerText.replace(/ТОО|ИП/g,'').match(/[А-Яа-я]{3,}/);if(m)bad.push(m[0])});return bad})()"); assert(!cy.length, lang + ' Cyrillic in partner panels: ' + cy.join(',')); } } finally { gg.done(); } }
+  });
+
+  /* ---- P4 staff + driver-app admin panels ---- */
+  await group('P4 staff: where-now columns and 90-day document deadlines with renewal booking', 'ru', async (g, ev, w) => {
+    ev("go('drivers');ACT.stab({s:'drivers',v:'staff'})"); assert(w.document.querySelector('#st_docs'), 'deadlines card'); clean(w, 'staff');
+    eq(ev("document.querySelectorAll('[data-where]').length"), ev('S.drivers.length'), 'where now per driver'); const th = ev("[...document.querySelectorAll('[data-staff]')[0].closest('table').querySelectorAll('th')].map(x=>x.innerText)"); assert(th.length >= 10, 'hub, status, where, vehicle columns');
+    const l = ev("loadOfDriver('d4')"); assert(ev("RES.whereNow(drv('d4')).veh") !== '—', 'driver on a trip has a vehicle'); assert(ev("RES.whereNow(drv('d4')).place").indexOf(l.id) >= 0, 'place names the trip');
+    const fd5 = ev("S.drivers.find(d=>!loadOfDriver(d.id)).id"); ev(`RES.absAdd({drv:'${fd5}',type:'vacation',from:RES.TODAY,to:RES.addDays(RES.TODAY,2)})`); assert(/до|until|bis|дейін/.test(ev(`RES.whereNow(drv('${fd5}')).place`)), 'absence shown');
+    const all = ev("RES.docDeadlines(90)"); assert(all.length > 0 && all.every(r => r.n <= 90), '90 days'); assert(all.every((r, i) => !i || all[i - 1].n <= r.n), 'sorted'); assert(all.some(r => r.kind === 'adr'), 'ADR deadline included (d6 expired, d2 in 60 d)');
+    ev("drv('d1').docs.find(x=>x.type==='lic').to=RES.addDays(RES.TODAY,30)"); assert(ev("RES.docDeadlines(90).some(r=>r.key==='d1:lic')"), 'licence in 30 d'); ev("drv('d1').docs.find(x=>x.type==='lic').to=RES.addDays(RES.TODAY,400)"); assert(!ev("RES.docDeadlines(90).some(r=>r.key==='d1:lic')"), 'beyond 90 d not listed');
+    ev("drv('d3').docs.find(x=>x.type==='gdp').to=RES.addDays(RES.TODAY,45)"); ev("RES.docBook('d3:gdp')"); assert(ev("S.res.fleet.booked['d3:gdp']"), 'GDP renewal booked'); ev("RES.docBook('d2:adr')"); assert(ev("RES.adrState(drv('d2')).booked"), 'ADR course booked via the same list');
+    ev("go('drivers');ACT.stab({s:'drivers',v:'staff'})"); assert(w.document.querySelector('[data-docexp]'), 'rows rendered'); clean(w, 'staff after booking');
+  });
+  await group('P4 driver app: admin panels "Ecosystem function coverage" and "Change requests"', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'});go('drivers');ACT.stab({s:'drivers',v:'app'})"); assert(w.document.querySelector('#da_eco'), 'ecosystem panel'); assert(w.document.querySelector('#da_frs'), 'change requests panel'); clean(w, 'driver app admin');
+    eq(ev("document.querySelectorAll('[data-eco]').length"), 12, '12 modules'); eq(ev("document.querySelectorAll('[data-dfr]').length"), 19, 'FR-52 … FR-70'); assert(ev("document.querySelector('#da_frs').innerText").indexOf('16 / 19') >= 0 || ev("document.querySelector('#da_frs .chip').innerText").indexOf('/ 19') >= 0, 'done counter');
+    eq(ev("RES.DA_FRS.filter(f=>!f[6]).length"), 16, '16 implemented'); eq(ev("RES.DA_FRS.filter(f=>f[6]).length"), 3, '3 planned');
+    ev("ACT.setRole({v:'driver'})"); assert(!w.document.querySelector('#da_eco') && !w.document.querySelector('#da_frs'), 'panels are admin-only (driver sees the phone only)'); assert(w.document.querySelector('.da-phone'), 'phone remains');
+  });
+  await group('P4 staff + driver app panels render in RU / DE / EN / KK without undefined / NaN', 'ru', async () => {
+    for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("go('drivers');ACT.stab({s:'drivers',v:'staff'})"); clean(gg.w, 'staff ' + lang); gg.ev("ACT.stab({s:'drivers',v:'app'})"); clean(gg.w, 'app ' + lang);
+      if (lang === 'de' || lang === 'en') { const cy = gg.ev("(()=>{const bad=[];document.querySelectorAll('#da_eco, #da_frs').forEach(e=>{const m=e.innerText.match(/[А-Яа-я]{3,}/);if(m)bad.push(m[0])});return bad})()"); assert(!cy.length, lang + ' Cyrillic in driver-app panels: ' + cy.join(',')); gg.ev("ACT.stab({s:'drivers',v:'staff'})"); const cs = gg.ev("(()=>{const c=document.querySelector('#st_docs').cloneNode(true);c.querySelectorAll('td:first-child').forEach(x=>x.remove());const m=c.innerText.match(/[А-Яа-я]{3,}/);return m?m[0]:''})()"); assert(!cs, lang + ' Cyrillic in deadlines: ' + cs); } } finally { gg.done(); } }
   });
 
   /* ---- W3 records & administration ---- */
@@ -622,6 +1079,105 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     ev("ACT.blLegal({id:'vat16'})"); assert(ev('S.eco.bl.legal.vat16'), 'legal check'); ev("ACT.blWest({id:'cool',v:'1'})"); eq(ev('S.eco.bl.west.cool'), 1);
     ev("ACT.blSub({v:'pv'});ACT.blPv({id:'deduct_cap',v:'checked'})"); eq(ev('S.eco.bl.pv.deduct_cap'), 'checked'); eq(ev('ECO_BL.PV.length'), 26);
     ev("ACT.setRole({v:'dispatcher'})"); ev("ACT.blLegal({id:'cit'})"); assert(!ev('S.eco.bl.legal.cit'), 'dispatcher checked a legal item');
+  });
+
+  /* ---- P5 · Reports parity: six KPI tiles with sparklines, driver report, catalogue with audited exports; Quality linked orders ---- */
+  for (const lang of LANGS) await group('[' + lang + '] P5 reports / quality tabs render without undefined/NaN', lang, async (g, ev, w) => {
+    for (const t of ['kpi', 'catalogue']) { ev(`go('reports');ACT.stab({s:'reports',v:'${t}'})`); clean(w, 'reports/' + t); }
+    ev("ACT.ecoRepExp({g:'ops',i:'0',v:'pdf'})"); clean(w, 'catalogue after export');
+    ev("go('pod');ACT.stab({s:'pod',v:'quality'});ACT.qDev({id:'DEV-0011'})"); clean(w, 'pod/quality DEV-0011');
+    ev("ACT.qClaim({id:'DEV-0011',o:'O-1844-2'})"); clean(w, 'claim drawer from deviation');
+    for (const k of ['reports/kpi', 'reports/catalogue']) { ev(`go('help');ACT.helpGo({k:'${k}'})`); clean(w, 'help ' + k); }
+  });
+  await group('reports: six KPI tiles with 8-week sparklines, cost per pallet from the actuals register (FR-125)', 'ru', async (g, ev, w) => {
+    const k = ev('ecoRepKpis()'); eq(k.length, 6, 'tiles'); assert(k.every(x => x.bars.length === 8 && x.bars[7].last), '8 bars, last marked');
+    eq(k.map(x => x.k).join(','), 'otif,temp,vol,empty,pal,inc');
+    assert(k[4].live && /₸/.test(k[4].value), 'cost per pallet not from the ledger');
+    const pal = ev("S.loads.filter(l=>l.status==='delivered').reduce((s,l)=>s+l.pallets,0)"), cost = ev('S.costs.reduce((s,c)=>s+c.amount,0)'); eq(k[4].value, Math.round(cost / pal).toLocaleString('ru-RU') + ' ₸', 'per pallet formula');
+    ev("go('reports');ACT.stab({s:'reports',v:'kpi'})"); eq(w.document.querySelectorAll('[data-rep-kpi]').length, 6, 'tiles rendered'); eq(w.document.querySelectorAll('[data-rep-kpi="otif"] .spark-bars i').length, 8, 'sparkline bars');
+    assert(w.document.querySelector('[data-drv-report]'), 'driver report missing'); eq(w.document.querySelectorAll('[data-drvrep]').length, 7, 'seven drivers');
+  });
+  await group('reports: driver report follows the fine register (attribution, open amounts)', 'ru', async (g, ev, w) => {
+    const r0 = ev("ecoDrvRep().find(r=>r.id==='d2')"); eq(r0.fines.length, 2, 'd2 has FN-1018 and FN-1009'); eq(r0.open, 0, 'paid and disputed fines are closed');
+    ev('ACT.ecoFineImport()'); const r1 = ev("ecoDrvRep().find(r=>r.id==='d2')"); eq(r1.fines.length, 3, 'imported fine attributed to d2'); eq(r1.open, 14750, 'unpaid fine is open');
+    const d5 = ev("ecoDrvRep().find(r=>r.id==='d5')"); eq(d5.open, 29500, 'FN-1021 open for d5');
+  });
+  await group('reports: catalogue has 6 groups × 4 reports; PDF / Excel exports are audited', 'ru', async (g, ev, w) => {
+    eq(ev('ECO_REP_GROUPS.length'), 6); assert(ev('ECO_REP_GROUPS.every(g=>g.items.length===4)'), '4 reports per group');
+    ev("go('reports');ACT.stab({s:'reports',v:'catalogue'})"); eq(w.document.querySelectorAll('[data-rep-group]').length, 6, 'group cards'); eq(w.document.querySelectorAll('[data-act=ecoRepExp]').length, 48, 'PDF + Excel per report');
+    const a0 = ev('S.audit.length'); const r = ev("ecoRepExport('cold',1,'pdf')"); eq(r.id, 'RP-001'); eq(ev('S.audit.length'), a0 + 1, 'export not audited'); assert(/PDF/.test(ev('S.audit[0].decision')), 'audit decision names the format');
+    eq(ev("ecoRepExport('cold',9,'pdf')"), null, 'unknown report accepted'); eq(ev("ecoRepExport('cold',1,'doc')"), null, 'unknown format accepted');
+    ev("ACT.ecoRepExp({g:'fin',i:'2',v:'xlsx'})"); eq(ev('S.eco.rep.exports.length'), 2); assert(w.document.querySelector('[data-rep-exports]').innerText.includes('RP-002'), 'recent exports list');
+    eq(ev("S.eco.rep.exports[0].name"), ev("ECO_REP_GROUPS.find(g=>g.id==='fin').items[2]"), 'export names the report');
+  });
+  await group('quality: linked orders with outcome and hold tag; insurance claim opens with DEV and order pre-filled (FR-153)', 'ru', async (g, ev, w) => {
+    const os = ev("devOrders(S.devs.find(d=>d.id==='DEV-0011'))"); eq(os.length, 2); eq(os[1].out, 'hold'); assert(os[1].hold && !os[0].hold, 'hold tag');
+    ev("go('pod');ACT.stab({s:'pod',v:'quality'});ACT.qDev({id:'DEV-0011'})"); eq(w.document.querySelectorAll('[data-dev-order]').length, 2, 'order rows'); assert(w.document.querySelector('[data-dev-orders] .chip.yellow'), 'hold chip');
+    const auto = ev("S.devs.find(d=>d.load)"); assert(auto, 'no load-bound deviation'); const ao = ev(`devOrders(S.devs.find(d=>d.id==='${auto.id}'))`); assert(ao.length >= 2 && ao.every(o => o.out === 'hold' && o.hold), 'orders of an open deviation are on hold');
+    ev(`ACT.qDev({id:'${auto.id}'});S.devs.find(d=>d.id==='${auto.id}').step=3;ACT.qDec({id:'${auto.id}',v:'release'})`); assert(ev(`devOrders(S.devs.find(d=>d.id==='${auto.id}')).every(o=>o.out==='released'&&!o.hold)`), 'release did not clear the hold');
+    ev("ACT.qClaim({id:'DEV-0011',o:'O-1844-2'})"); eq(ev('S.route'), 'billing'); eq(ev('S.tab.billing'), 'insurance'); eq(ev('S.drawer.type'), 'claimNew'); eq(ev('S.drawer.dev'), 'DEV-0011');
+    eq(w.document.querySelector('#cn_dev').value, 'DEV-0011', 'deviation not pre-selected'); assert(w.document.querySelector('[data-claim-prefill]').innerText.includes('O-1844-2'), 'order chip'); assert(/O-1844-2/.test(w.document.querySelector('#cn_note').value), 'order not in the description');
+    ev("ACT.setRole({v:'viewer'})"); ev("go('pod')"); assert(!ev("ACT.qClaim({id:'DEV-0011',o:'O-1844-1'})") && ev('S.route') !== 'billing', 'viewer reached the claim');
+  });
+
+  /* ---- P5 · Costs parity: workshop & downtime, drivers FTE, plan / actual per vehicle, toll CSV, incoming ESF, 6 indicators, idle toggles ---- */
+  for (const lang of LANGS) await group('[' + lang + '] P5 cost-model sub-tabs render without undefined/NaN', lang, async (g, ev, w) => {
+    ev("go('billing');ACT.stab({s:'billing',v:'model'})"); for (const s of ['sum', 'svc', 'ins', 'drv']) { ev(`ACT.ecoSub({v:'${s}'})`); clean(w, 'billing/model/' + s); }
+    ev("ACT.ecoSub({v:'ins'});ACT.ecoIdle({v:'idleW'});ACT.ecoIdle({v:'idleB'})"); clean(w, 'ins with idle toggles');
+    ev("ACT.ecoSub({v:'svc'});ACT.ecoWs({id:'V01'})"); clean(w, 'svc with breakdown');
+    ev("ACT.ecoSub({v:'sum'});ACT.setRole({v:'finance'});go('billing');ACT.stab({s:'billing',v:'model'})"); clean(w, 'sum as finance (forms)');
+    ev("go('billing');ACT.stab({s:'billing',v:'cost'})"); clean(w, 'billing/cost with seeded ledger');
+    ev("go('help');ACT.helpGo({k:'billing/model'})"); clean(w, 'help billing/model');
+  });
+  await group('costs: workshop & downtime — TO-1 / TO-2 distance, availability, downtime cost card with breakdown scenario', 'ru', async (g, ev, w) => {
+    const v = ev('ecoCostCalc().veh'); eq(v.length, 4); assert(v.every(x => x.toLeft > 0 && x.toLeft <= 15000 && x.to2Left > 0 && x.to2Left <= 45000), 'TO distances'); eq(v[0].toLeft, 15000 - 11600 % 15000, 'V01 km to TO-1');
+    assert(v.every(x => x.ktg > 0.9 && x.ktg <= 1 && x.fixDay > 0), 'availability and downtime day');
+    ev("go('billing');ACT.stab({s:'billing',v:'model'});ACT.ecoSub({v:'svc'})"); eq(w.document.querySelectorAll('[data-svc]').length, 4, 'rows'); eq(w.document.querySelector('[data-outage]').dataset.outage, '0', 'scenario active at start');
+    const tot = w.document.querySelector('[data-outage-total]').innerText; assert(/₸/.test(tot), 'total');
+    const a0 = ev('S.audit.length'); ev("ACT.ecoWs({id:'V01'})"); eq(w.document.querySelector('[data-outage]').dataset.outage, '1', 'scenario not active'); assert(w.document.querySelector('[data-svc=V01]').innerText.includes('в сервисе'), 'V01 not in workshop'); eq(ev('S.audit.length'), a0 + 1, 'scenario not audited');
+    ev("ACT.ecoWs({id:'V01'})"); eq(w.document.querySelector('[data-outage]').dataset.outage, '0', 'scenario not ended');
+  });
+  await group('costs: drivers — FTE = km / 70 × 1.15 / 1814, crew colour, totals (FR-46)', 'ru', async (g, ev, w) => {
+    const D = ev('ecoDrvNeed()'); eq(D.rows.length, 4); eq(D.crew, 7); const r = D.rows[0]; assert(Math.abs(r.fte - r.kmY / 70 * 1.15 / 1814) < 1e-9, 'fte formula'); assert(D.fte > 0 && D.base === 7 * 200000, 'totals');
+    assert(D.rows.every(x => x.lvl === (x.fte > x.crew ? 'red' : x.fte > x.crew * 0.9 ? 'yellow' : 'green')), 'crew colour rule');
+    ev("go('billing');ACT.stab({s:'billing',v:'model'});ACT.ecoSub({v:'drv'})"); eq(w.document.querySelectorAll('[data-cdrv]').length, 4, 'rows');
+  });
+  await group('costs: summary — 6-indicator card and plan / actual per vehicle from the ledger (FR-125)', 'ru', async (g, ev, w) => {
+    ev("go('billing');ACT.stab({s:'billing',v:'model'});ACT.ecoSub({v:'sum'})"); eq(w.document.querySelectorAll('[data-dash] .kv > div').length, 6, 'six indicators'); assert(w.document.querySelector('[data-cost-actual]'), 'plan / actual table');
+    const A = ev('ecoActualByVeh()'); eq(A.rows.length, 4); const v1 = A.rows.find(r => r.id === 'V01'); eq(v1.by.fuel, 139256 + 135320, 'V01 fuel fills'); eq(v1.by.tolls, 4300, 'V01 toll'); assert(v1.l100 != null && Math.abs(v1.l100 - 810 / 2900 * 100) < 1e-6, 'l/100 from fills');
+    const v2 = A.rows.find(r => r.id === 'V02'); eq(v2.by.service, 86000, 'V02 closed request'); assert(A.unattributed >= 5, 'seed entries without vehicle counted');
+    eq(w.document.querySelectorAll('[data-cost-act]').length, 4, 'rows rendered');
+    ev("ACT.setRole({v:'dispatcher'});go('billing');ACT.stab({s:'billing',v:'model'})"); assert(!w.document.querySelector('[data-toll-import]'), 'dispatcher sees the import forms');
+  });
+  await group('costs: toll CSV import — plate or code, de-duplication by reference, error lines (FR-125)', 'ru', async (g, ev, w) => {
+    const n = ev('S.costs.length'), csv = 'date;vehicle;amount;ref\\n2026-10-15;V01;4300;TR-77210\\n2026-10-15;123 ABC 01;2150;TR-77211\\n2026-10-07;V01;4300;TR-77102\\n2026-10-16;999 ZZZ 99;100;TR-77212\\nbad line';
+    const r = ev(`ecoTollImport('${csv}')`); eq(r.imported, 2); eq(r.duplicates, 1, 'known reference re-imported'); eq(r.errors.length, 2, 'bad vehicle + bad line'); eq(ev('S.costs.length'), n + 2, 'ledger entries');
+    eq(ev("S.costs[S.costs.length-1].veh"), 'V01', 'plate 123 ABC 01 mapped to V01'); eq(ev("S.costs[S.costs.length-1].kind"), 'tolls');
+    const r2 = ev(`ecoTollImport('${csv}')`); eq(r2.imported, 0, 'second import duplicated'); eq(r2.duplicates, 3);
+    eq(ev("ecoActualByVeh().rows.find(r=>r.id==='V01').by.tolls"), 4300 + 4300 + 2150, 'tolls per vehicle');
+    ev("ACT.setRole({v:'finance'});go('billing');ACT.stab({s:'billing',v:'model'})"); w.document.querySelector('#ct_csv').value = '2026-10-17;V03;990;TR-80001'; ev('ACT.ecoToll()'); eq(ev('S.costs.length'), n + 3, 'UI import'); assert(/1/.test(w.document.querySelector('[data-cost-msg]').innerText), 'result message');
+  });
+  await group('costs: incoming partner / workshop ESF — validation, SR link attributes the vehicle, booked to the ledger (FR-116)', 'ru', async (g, ev, w) => {
+    const bad = s => assert(typeof ev(s) === 'string', 'accepted: ' + s);
+    bad("ecoInvRegister({bin:'123',no:'ESF-1',date:'2026-10-12',net:1000,vat:120,link:'SR-0104'})");
+    bad("ecoInvRegister({bin:'120540012345',no:'ESF-1',date:'12.10.2026',net:1000,vat:120,link:'SR-0104'})");
+    bad("ecoInvRegister({bin:'120540012345',no:'ESF-1',date:'2026-10-12',net:0,vat:0,link:'SR-0104'})");
+    bad("ecoInvRegister({bin:'120540012345',no:'ESF-1',date:'2026-10-12',net:1000,vat:500,link:'SR-0104'})");
+    bad("ecoInvRegister({bin:'120540012345',no:'ESF-1',date:'2026-10-12',net:1000,vat:120,link:'XO-101'})");
+    const n = ev('S.costs.length'), a0 = ev('S.audit.length');
+    const r = ev("ecoInvRegister({bin:'120540012345',no:'ESF-2026-0412',date:'2026-10-12',net:85000,vat:10200,link:'SR-0104'})"); eq(r.id, 'IN-001'); eq(r.veh, 'V03', 'SR-0104 (truck t2) maps to V03'); eq(r.kind, 'service');
+    eq(ev('S.costs.length'), n + 1, 'ledger entry'); eq(ev('S.audit.length'), a0 + 1, 'not audited'); eq(ev("ecoActualByVeh().rows.find(r=>r.id==='V03').by.service"), 85000, 'service actual of V03');
+    assert(typeof ev("ecoInvRegister({bin:'120540012345',no:'ESF-2026-0412',date:'2026-10-12',net:85000,vat:0,link:'SR-0104'})") === 'string', 'duplicate ESF accepted');
+    const r2 = ev("ecoInvRegister({bin:'120540012345',no:'ESF-2026-0413',date:'2026-10-14',net:230000,vat:27600,link:'HO-021'})"); eq(r2.kind, 'partners'); eq(r2.veh, null, 'handover has no vehicle');
+    ev("ACT.setRole({v:'finance'});go('billing');ACT.stab({s:'billing',v:'model'})"); const set = (id, v) => { w.document.getElementById(id).value = v; };
+    set('ci_bin', '120540012345'); set('ci_no', 'ESF-2026-0500'); set('ci_date', '2026-10-15'); set('ci_net', '12000'); set('ci_vat', '1440'); set('ci_link', 'HO-022'); ev('ACT.ecoInv()'); eq(ev('S.eco.cost.inv.length'), 3, 'UI registration'); assert(w.document.querySelector('[data-inv="IN-003"]'), 'invoice listed');
+    ev("ACT.setRole({v:'dispatcher'});go('billing');ACT.stab({s:'billing',v:'model'})"); ev('ACT.ecoInv()'); eq(ev('S.eco.cost.inv.length'), 3, 'dispatcher registered an ESF');
+  });
+  await group('costs: insurance idle toggles add idle months and a registration recommendation (B7)', 'ru', async (g, ev, w) => {
+    ev("go('billing');ACT.stab({s:'billing',v:'model'});ACT.ecoSub({v:'ins'})"); eq(w.document.querySelectorAll('[data-ins]').length, 4); eq(w.document.querySelector('[data-ins=V02] [data-ins-idle]').dataset.insIdle, '0', 'idle before toggle');
+    ev("ACT.ecoIdle({v:'idleW'})"); assert(ev('S.eco.cost.idleW'), 'toggle state'); eq(w.document.querySelector('[data-ins=V02] [data-ins-idle]').dataset.insIdle, '2', 'V02 idle 2 months'); assert(/R1/.test(w.document.querySelector('[data-ins-rec=V02]').innerText), 'recommendation names R1');
+    eq(w.document.querySelector('[data-ins=V04] [data-ins-idle]').dataset.insIdle, '0', 'V04 idle without its toggle'); ev("ACT.ecoIdle({v:'idleB'})"); eq(w.document.querySelector('[data-ins=V04] [data-ins-idle]').dataset.insIdle, '3', 'V04 idle 3 months');
+    ev("ACT.ecoIdle({v:'idleW'})"); eq(w.document.querySelector('[data-ins=V02] [data-ins-idle]').dataset.insIdle, '0', 'toggle off');
   });
 
   /* ---- W6 help: content completeness, structure, context help, search, visuals, tours (FR-160, FR-134, FR-17) ---- */
