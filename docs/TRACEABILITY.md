@@ -154,3 +154,21 @@ Not in W5: capacity plan, 7-day scenarios and target-fleet simulation on Dispatc
 | FR-14 / FR-137 | Roles matrix and role descriptions (11 roles) in Help | Help → "Roles and permissions" (10-start.js) | `help: opens from the top bar … roles matrix` (60-foundation.js) |
 | FR-175 | Links and history — documented as mock-up limitation | Help → "Keyboard, languages, design and links" | — (documentation only) |
 | FR-41 / FR-126 / FR-154 | Express approval described: where to find it, 3 signatures | Help → "Where is express?" (+ diagram `express`) | `help: process diagrams render as SVG …` |
+
+## P5 — Reports, Costs, Quality parity
+
+Files: `platform-src/v6/screens/611-eco-reports-ext.js`, `600-eco-costmodel.js`, `140-quality.js`, `430-rec-insurance.js` (claim prefill); help `eco-reports.js`, `eco-costs.js`; tests `platform-src/tests/b1-eco-reports-ext.js`, `b2-eco-costs-ext.js`.
+
+| FR / LH | Function in the mock-up | v6 menu → tab | Test (group name, file) |
+|---|---|---|---|
+| FR-64, FR-125 | Six KPI tiles with 8-week sparklines (OTIF, temperature compliance, volume utilisation, empty running, cost per pallet from the actuals register, incidents / 100 trips) | Reports → KPI | "reports: six KPI tiles with 8-week sparklines…" (b1) |
+| FR-07, FR-64 | Driver report 30 days, fines and open amounts follow the fine register | Reports → KPI | "reports: driver report follows the fine register" (b1) |
+| FR-64 | Report catalogue 6 groups × 4, PDF / Excel demo exports, every export audited (RP-nnn) | Reports → Catalogue | "reports: catalogue has 6 groups × 4 reports…" (b1) |
+| FR-11, 25, 40, 153 | Linked orders with outcome and hold tag on the deviation card; insurance claim opens with DEV and order prefilled | Proof of Delivery → Deviations & quality; Billing → Insurance | "quality: linked orders with outcome and hold tag…" (b1) |
+| LH-N2 | Workshop & downtime: km to TO-1 / TO-2, availability, downtime day, trip replacement, unplanned-downtime card with breakdown scenario | Billing → Cost model → Workshop & downtime | "costs: workshop & downtime…" (b2) |
+| FR-46 | Drivers: FTE requirement per vehicle, crew colour, totals | Billing → Cost model → Drivers | "costs: drivers — FTE…" (b2) |
+| FR-125 | Plan / actual per vehicle · month from the ledger, 6-indicator management card | Billing → Cost model → Summary | "costs: summary — 6-indicator card…" (b2) |
+| FR-125 | Toll statement CSV import, de-duplicated by reference, error lines | Billing → Cost model → Summary | "costs: toll CSV import…" (b2) |
+| FR-116 | Incoming partner / workshop ESF form (BIN, VAT cap, HO-/SR- link), booked to the ledger, audited | Billing → Cost model → Summary | "costs: incoming partner / workshop ESF…" (b2) |
+| B7 | Insurance idle toggles with idle months and registration recommendation | Billing → Cost model → Insurance, tax, registration | "costs: insurance idle toggles…" (b2) |
+| — | All P5 tabs and help articles render in RU / DE / EN / KK without undefined / NaN | all of the above | "[ru/de/en/kk] P5 …" (b1, b2) |
