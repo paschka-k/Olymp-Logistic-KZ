@@ -1,0 +1,40 @@
+  /* ---- P3 coverage FR-111 on the road map, offline windows, OL1 SMS, security close form (0.3.10 /coverage, screen 07) ---- */
+  await group('P3 coverage: map on the road network — stretches by class, dashed estimate / solid measured, hubs, cities, live vehicles, West segments', 'ru', async (g, ev, w) => {
+    ev("go('routes');ACT.stab({s:'routes',v:'coverage'})"); clean(w, 'coverage');
+    const m = w.document.querySelector('[data-covmap]'); assert(m, 'map'); assert(m.querySelectorAll('.cov-st').length > 60, 'road stretches'); eq(m.querySelectorAll('.kzcity').length, 23, 'cities'); assert(m.querySelectorAll('.kzcity rect').length >= 5, 'hub squares');
+    assert(m.querySelector('.cov-st[data-conf=estimated][stroke-dasharray]'), 'estimate dashed'); assert(m.querySelector('.cov-st[data-conf=measured]:not([stroke-dasharray])'), 'measured solid');
+    for (const c of ['4g', '3g', '2g', 'none']) assert(m.querySelector(`.cov-st[data-cls="${c}"]`), 'class ' + c); eq(m.querySelectorAll('[data-veh-pos]').length, ev("S.loads.filter(l=>l.status==='in_transit'||l.status==='problem').length"), 'live vehicles');
+    for (const id of ['AST-KOS', 'KOS-AKT', 'AKT-ORA', 'ORA-ATY', 'ATY-AKU']) assert(ev(`RES.COV.segs.some(s=>s.id==='${id}')`), 'West segment ' + id); assert(w.document.querySelectorAll('[data-cov-legend] [data-legend]').length === 4, 'legend');
+  });
+  await group('P3 coverage: detail aside for stretch (per-operator class, minutes, confidence, sources), vehicle and city', 'ru', async (g, ev, w) => {
+    ev("go('routes');ACT.stab({s:'routes',v:'coverage'})"); ev("ACT.covSel({k:'st',seg:'KAR-ALM',i:'2'})"); const d = w.document.querySelector('[data-cov-detail="KAR-ALM:2"]'); assert(d, 'stretch detail');
+    for (const s of ['Kcell', 'Beeline', 'Tele2', 'km 150', 'F2']) assert(d.innerText.includes(s), 'detail has ' + s); assert(/мин|ч/.test(d.innerText), 'minutes without data'); assert(w.document.querySelector('.cov-st.sel'), 'stretch highlighted');
+    const l = ev("S.loads.find(l=>l.status==='in_transit').id"); ev(`ACT.covSel({k:'veh',id:'${l}'})`); assert(w.document.querySelector(`[data-cov-detail="${l}"]`), 'vehicle detail'); assert(w.document.querySelector(`[data-cov-detail="${l}"]`).innerText.includes('L0'), 'level shown');
+    ev("ACT.covSel({k:'city',id:'Актобе'})"); assert(w.document.querySelector('[data-cov-detail="Актобе"] li'), 'city segments');
+  });
+  await group('P3 coverage: offline windows per trip with ETA confidence, worst stretches, Check now', 'ru', async (g, ev, w) => {
+    ev("go('routes');ACT.stab({s:'routes',v:'coverage'})"); const l = ev("S.loads.find(l=>l.from==='ALA'&&l.to==='SHY'&&(l.status==='in_transit'||l.status==='problem')).id");
+    ev(`ACT.covTrip({id:'${l}'})`); assert(w.document.querySelector('[data-eta-conf]'), 'eta confidence'); const e = ev(`RES.etaConfidence('${l}' && load('${l}'))`); assert(e.pct >= 0 && e.pct <= 100 && typeof e.text === 'string', 'eta object');
+    const w1 = ev("RES.tripWindows(S.loads.find(l=>l.from==='AST'&&l.to==='ALA'))"); assert(w1.length >= 1 && w1[0].min > 0 && /^\d\d:\d\d$/.test(w1[0].from), 'AST→ALA has windows with clock times'); assert(w1.every(x => x.cls === '2g' || x.cls === 'none'), 'only no-data classes');
+    assert(w.document.querySelectorAll('[data-worst]').length === 6, 'six worst stretches'); const kpi = w.document.querySelector('.kpi-row').innerText; assert(/km/.test(kpi) && /%/.test(kpi), 'network KPIs');
+    const n0 = ev('S.inc.length'); ev("RES.covSet(S.loads.find(l=>l.status==='in_transit').id,55,55)"); ev('ACT.covCheck()'); assert(ev('S.res.cov.checked'), 'checked time'); assert(ev('S.inc.length') >= n0, 'incident for L2'); assert(w.document.querySelector('[data-cov-check]'), 'button');
+    assert(!/\d\+\s*(gap|пропадание)/.test(w.document.querySelector('#cov_segs').innerText), '"0+ gap" bug fixed'); assert(w.document.querySelector('#cov_segs [data-gap-count]'), 'gap counter');
+  });
+  await group('P3 coverage: OL1 SMS channel — format, received list, 6 instructions, gateway queue, timeout + resend', 'ru', async (g, ev, w) => {
+    ev("go('routes');ACT.stab({s:'routes',v:'coverage'})"); const ex = w.document.querySelector('[data-ol1-example]').textContent; assert(/^OL1 R-26-\d{6} \S+ TE \d{6} c=9\.4;.* 17 [0-9a-f]{12}$/.test(ex), 'OL1 format: ' + ex); assert(ex.length <= 160, '≤ 160 chars');
+    const n0 = ev('S.res.cov.smsIn.length'); assert(n0 >= 3, 'seeded received SMS'); eq(w.document.querySelectorAll('[data-sms-log]').length, Math.min(6, n0), 'received list'); eq(typeof ev("RES.smsReceive('hello')"), 'string', 'bad format refused'); ev("ACT.covSmsIn({v:'TE'})"); eq(ev('S.res.cov.smsIn.length'), n0 + 1);
+    eq(w.document.querySelectorAll('#sm_text option').length, 6, 'WAIT / CALL / CHKT / CONT / STOP / PARK'); const l = ev("S.loads.find(l=>l.status==='in_transit').id"); const r = ev(`RES.smsSend('${l}','STOP')`); assert(r.ok, 'sent'); eq(ev('S.res.cov.sms[0].code'), 'STOP'); assert(/ MS .*i=STOP;m=O\d+/.test(ev('S.res.cov.sms[0].body')), 'OL1 MS body');
+    ev('ACT.covGw()'); eq(ev('S.res.cov.gw'), 'degraded'); ev(`RES.smsSend('${l}','WAIT')`); eq(ev('S.res.cov.sms[0].st'), 'queued', 'queued while degraded'); ev('ACT.covGw()'); ev('RES.smsTick(1)'); assert(['sent', 'delivered'].includes(ev('S.res.cov.sms[0].st')), 'queue drains when online');
+    ev('RES.smsTick(10)'); eq(ev('S.res.cov.sms[0].st'), 'no_ack', 'timeout'); ev('render()'); assert(w.document.querySelector('[data-sms-resend]'), 'resend button'); ev(`RES.smsRetry(S.res.cov.sms[0].id)`); eq(ev('S.res.cov.sms[0].tries'), 2); assert(w.document.querySelector('[data-sms-gateway]'), 'gateway status card');
+  });
+  await group('P3 security: closing a real incident needs a category and ≥ 10 characters (FR-105); simulated ones close directly', 'ru', async (g, ev, w) => {
+    ev("go('routes');ACT.stab({s:'routes',v:'sec'})"); const id = ev("S.inc.find(i=>!i.sim).id"); ev(`ACT.incClose({id:'${id}'})`); assert(w.document.querySelector(`[data-close-form="${id}"] #inc_cat`) && w.document.querySelector('#inc_note'), 'close form');
+    eq(typeof ev(`SECURITY.close('${id}','technical','short')`), 'string', 'short text refused'); eq(ev(`S.inc.find(i=>i.id==='${id}').st`) !== 'closed', true); eq(typeof ev(`ACT.incSt({id:'${id}',v:'closed'})`), 'string', 'incSt closed without fields refused');
+    w.document.querySelector('#inc_note').value = 'Driver called, detour confirmed'; ev(`ACT.incCloseOk({id:'${id}'})`); eq(ev(`S.inc.find(i=>i.id==='${id}').st`), 'closed', 'closed'); eq(ev(`S.inc.find(i=>i.id==='${id}').res.cat`), 'resolved_on_site'); assert(w.document.querySelector(`[data-inc-res="${id}"]`), 'resolution shown'); assert(ev("S.audit.some(a=>/detour confirmed/.test(a.reason))"), 'audited with text');
+    ev("ACT.secSim({v:'breakdown'})"); const sim = ev('S.inc[0].id'); ev(`ACT.incClose({id:'${sim}'})`); eq(ev('S.inc[0].st'), 'closed', 'simulated closes directly');
+  });
+  await group('P3: coverage and security tabs render in 4 languages, DE/EN without Cyrillic; FR-109 / FR-110 contracts intact', 'ru', async (g, ev) => {
+    for (const lang of LANGS) { const gg = await fresh(lang); try { for (const k of ['coverage', 'sec']) { gg.ev(`go('routes');ACT.stab({s:'routes',v:'${k}'})`); clean(gg.w, lang + ' routes/' + k);
+      if (lang === 'de' || lang === 'en') { let txt = gg.ev("document.querySelector('.content').innerText"); const known = gg.ev("S.drivers.flatMap(d=>[d.name,d.ini]).concat(CUSTOMERS.flatMap(c=>[c.name,c.ini]))"); known.forEach(n => { txt = txt.split(n).join(''); }); txt = txt.replace(/\[data-cov-detail[^\]]*\]/g, ''); const cyr = txt.match(/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүІі]+/g) || []; assert(!cyr.length, lang + ' Cyrillic in ' + k + ': ' + cyr.slice(0, 5)); } } } finally { gg.done(); } }
+    const l = ev("S.loads.find(l=>l.status==='in_transit'&&l.zone!=='ambient').id"); eq(ev(`RES.covSet('${l}',10).lvl`), 0); eq(ev(`RES.covSet('${l}',75).lvl`), 3, 'L3 kept');
+  });
