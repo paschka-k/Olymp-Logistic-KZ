@@ -228,3 +228,29 @@ Files: `platform-src/v6/screens/150-monitor.js` (temperature, temperature log, w
 | — | RU / DE / EN / KK render without undefined / NaN, DE / EN without Cyrillic | the tabs above | `P3: … render in 4 languages` (83, 84, 85) |
 
 Not in the mock-up: real Wialon / thermochron files, SMSC.kz gateway, Open-Meteo / Kazhydromet feeds, server-side measured-zone job (documented only).
+
+## P4 — Fleet, Staff, Partners parity
+
+Source: platform 0.3.10 screens 10, 11, 12, 13 (`Fleet.tsx`, `Partners.tsx`, `Staff.tsx`, `Driver.tsx`, `ContactModal.tsx`). Code: `305-res-fleet-ext.js` (class, cooling, demo fleets, fees, West, compliance, deadlines), `040-fleet.js`, `310-fleet-registry.js`, `320-staff.js`, `160-partners.js` (state `S.ptx`, shared `S.partners` / `S.handovers` with the partner portal 520), `330-driver-app.js`; help `v6/help/res-fleet-partners.js`.
+
+| FR / 0.3.10 item | Function | v6 menu → tab | Code | Test (group name starts with) |
+|---|---|---|---|---|
+| Screen 10 / FR-38 | KPIs by model class and cooling (`mkTrucks` trucks get class / cooling), "extended fleet +5" and "3.5 t demo" toggles; demo trucks never join `S.trucks`, trips, thermo status or costs | Fleet → Fleet | 305 `truckClass/fleetKpis/demoTrucks`, 040 | `P4 fleet: KPIs by class, demo fleets never join S.trucks` (86) |
+| Screen 10 | Insurance / taxes / fees column: OGPO, KASKO, inspection, tax, tolls, fines + level "OK … blocks release"; level 3 blocks assignment | Fleet → Fleet | 305 `fees/taxPay`, `truckBlocks` hook | `P4 fleet: insurance / tax / fees column and West approval` (86) |
+| Screen 10 | West approval tag (Atyrau ring) and trailer note | Fleet → Fleet | 305 `west`, 040 | same (86) |
+| Screen 10 | Compliance 60 days: calibration, inspection, OGPO, cargo insurance, KASKO; calibration books a service request | Fleet → Registry | 305 `compliance/complyBook`, 310 | `P4 fleet: compliance 60 days` (86) |
+| Screen 11 | City-group filter (main / transshipment / route), full table columns (2–8, ADR, GDP, response, SLA, contract), city directory with transshipment toggle | Dispatch Board → Partners | 160 `list/table/coverage` | `P4 partners: city-group filter, city directory` (87) |
+| Screen 11 / FR-82 | Contact drawer with masked numbers, "Call (simulation)" reveals the number (audited `pii.read`) and logs the call, copy contacts | Dispatch Board → Partners | 160 `DRAWERS.pcontact`, `ptCall`, `ptCopy` | `P4 partners: contact drawer` (87) |
+| Screen 11 / FR-121 | Renew contract: upload (SHA-256) + policy date, approval by a second role (four eyes; admin override audited) | Dispatch Board → Partners | 160 `ptRenew…ptRenewOk` | `P4 partners: contract renewal` (87) |
+| Screen 11 / FR-121 | Propose demotion at SLA < 90 % with approval by a second role | Dispatch Board → Partners | 160 `ptDemote/ptDemoteOk` | `P4 partners: SLA demotion` (87) |
+| Screen 11 | Route coverage by partners and reefer service per route city + "Create task" (task in Commercial → Tasks) | Dispatch Board → Partners | 160 `coverage`, `ptTask` | `P4 partners: route coverage` (87) |
+| Screen 11 / FR-21 | Handover Full / Partial with SSCC check-list; candidates with price per pallet, own-trip comparison and verdict, insurance limit; Gold direct, Silver / Bronze request | Dispatch Board → Partners | 160 `handover`, `hoGive`, `hoCheck` | `P4 partners: handover Full / Partial`, `P4 partners: Silver handover` (87) |
+| Screen 11 / FR-117 | Handovers with the partner-portal steps (accept with logger / °C / seal, scan, ePOD); out-of-range temperature opens a deviation | Dispatch Board → Partners | 160 `handovers`, `hoPortal` | `P4 partners: handover portal steps and ePOD on behalf` (87) |
+| Screen 11 / FR-108 | ePOD on behalf of the partner: reason ≥ 10 characters and scan required, audited | Dispatch Board → Partners | 160 `hoScan/hoEpod` | same (87) |
+| Screen 11 | Service on route + "Call service" (service request for the own truck), service requests close with the actual cost | Dispatch Board → Partners | 160 `serviceOnRoute`, `ptCallWs`, `wrClose` | `P4 partners: service on route` (87) |
+| Screen 12 | "Where now" / hub / vehicle columns per driver | Drivers → Staff | 305 `whereNow`, 320 | `P4 staff: where-now columns and 90-day document deadlines` (88) |
+| Screen 12 / FR-10 | Document deadlines 90 days: licence, medical certificate, GDP, ADR with renewal booking | Drivers → Staff | 305 `docDeadlines/docBook`, 320 | same (88) |
+| Screen 13 | Admin panels "Ecosystem function coverage" (12 modules) and "Change requests" FR-52…70 (done / plan v6), hidden in the driver shell | Drivers → Driver app | 330 `ecoPanel/frPanel` | `P4 driver app: admin panels` (88) |
+| Convention | All P4 tabs render in RU / DE / EN / KK without undefined / NaN; DE / EN without Cyrillic (partner names transliterated) | all of the above | 160, 305, 320, 330 | `P4 fleet / partners / staff + driver app panels render in RU / DE / EN / KK` (86–88) |
+
+Not in the mock-up: server-side contract file storage and real PII reveal endpoint (the SHA-256 and the masked numbers are simulated), real GDP decision flow (stays in Commercial → CRM).
