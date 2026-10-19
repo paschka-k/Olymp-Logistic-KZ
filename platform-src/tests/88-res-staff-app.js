@@ -1,0 +1,21 @@
+  /* ---- P4 staff + driver-app admin panels ---- */
+  await group('P4 staff: where-now columns and 90-day document deadlines with renewal booking', 'ru', async (g, ev, w) => {
+    ev("go('drivers');ACT.stab({s:'drivers',v:'staff'})"); assert(w.document.querySelector('#st_docs'), 'deadlines card'); clean(w, 'staff');
+    eq(ev("document.querySelectorAll('[data-where]').length"), ev('S.drivers.length'), 'where now per driver'); const th = ev("[...document.querySelectorAll('[data-staff]')[0].closest('table').querySelectorAll('th')].map(x=>x.innerText)"); assert(th.length >= 10, 'hub, status, where, vehicle columns');
+    const l = ev("loadOfDriver('d4')"); assert(ev("RES.whereNow(drv('d4')).veh") !== '—', 'driver on a trip has a vehicle'); assert(ev("RES.whereNow(drv('d4')).place").indexOf(l.id) >= 0, 'place names the trip');
+    const fd5 = ev("S.drivers.find(d=>!loadOfDriver(d.id)).id"); ev(`RES.absAdd({drv:'${fd5}',type:'vacation',from:RES.TODAY,to:RES.addDays(RES.TODAY,2)})`); assert(/до|until|bis|дейін/.test(ev(`RES.whereNow(drv('${fd5}')).place`)), 'absence shown');
+    const all = ev("RES.docDeadlines(90)"); assert(all.length > 0 && all.every(r => r.n <= 90), '90 days'); assert(all.every((r, i) => !i || all[i - 1].n <= r.n), 'sorted'); assert(all.some(r => r.kind === 'adr'), 'ADR deadline included (d6 expired, d2 in 60 d)');
+    ev("drv('d1').docs.find(x=>x.type==='lic').to=RES.addDays(RES.TODAY,30)"); assert(ev("RES.docDeadlines(90).some(r=>r.key==='d1:lic')"), 'licence in 30 d'); ev("drv('d1').docs.find(x=>x.type==='lic').to=RES.addDays(RES.TODAY,400)"); assert(!ev("RES.docDeadlines(90).some(r=>r.key==='d1:lic')"), 'beyond 90 d not listed');
+    ev("drv('d3').docs.find(x=>x.type==='gdp').to=RES.addDays(RES.TODAY,45)"); ev("RES.docBook('d3:gdp')"); assert(ev("S.res.fleet.booked['d3:gdp']"), 'GDP renewal booked'); ev("RES.docBook('d2:adr')"); assert(ev("RES.adrState(drv('d2')).booked"), 'ADR course booked via the same list');
+    ev("go('drivers');ACT.stab({s:'drivers',v:'staff'})"); assert(w.document.querySelector('[data-docexp]'), 'rows rendered'); clean(w, 'staff after booking');
+  });
+  await group('P4 driver app: admin panels "Ecosystem function coverage" and "Change requests"', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'});go('drivers');ACT.stab({s:'drivers',v:'app'})"); assert(w.document.querySelector('#da_eco'), 'ecosystem panel'); assert(w.document.querySelector('#da_frs'), 'change requests panel'); clean(w, 'driver app admin');
+    eq(ev("document.querySelectorAll('[data-eco]').length"), 12, '12 modules'); eq(ev("document.querySelectorAll('[data-dfr]').length"), 19, 'FR-52 … FR-70'); assert(ev("document.querySelector('#da_frs').innerText").indexOf('16 / 19') >= 0 || ev("document.querySelector('#da_frs .chip').innerText").indexOf('/ 19') >= 0, 'done counter');
+    eq(ev("RES.DA_FRS.filter(f=>!f[6]).length"), 16, '16 implemented'); eq(ev("RES.DA_FRS.filter(f=>f[6]).length"), 3, '3 planned');
+    ev("ACT.setRole({v:'driver'})"); assert(!w.document.querySelector('#da_eco') && !w.document.querySelector('#da_frs'), 'panels are admin-only (driver sees the phone only)'); assert(w.document.querySelector('.da-phone'), 'phone remains');
+  });
+  await group('P4 staff + driver app panels render in RU / DE / EN / KK without undefined / NaN', 'ru', async () => {
+    for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("go('drivers');ACT.stab({s:'drivers',v:'staff'})"); clean(gg.w, 'staff ' + lang); gg.ev("ACT.stab({s:'drivers',v:'app'})"); clean(gg.w, 'app ' + lang);
+      if (lang === 'de' || lang === 'en') { const cy = gg.ev("(()=>{const bad=[];document.querySelectorAll('#da_eco, #da_frs').forEach(e=>{const m=e.innerText.match(/[А-Яа-я]{3,}/);if(m)bad.push(m[0])});return bad})()"); assert(!cy.length, lang + ' Cyrillic in driver-app panels: ' + cy.join(',')); gg.ev("ACT.stab({s:'drivers',v:'staff'})"); const cs = gg.ev("(()=>{const c=document.querySelector('#st_docs').cloneNode(true);c.querySelectorAll('td:first-child').forEach(x=>x.remove());const m=c.innerText.match(/[А-Яа-я]{3,}/);return m?m[0]:''})()"); assert(!cs, lang + ' Cyrillic in deadlines: ' + cs); } } finally { gg.done(); } }
+  });
