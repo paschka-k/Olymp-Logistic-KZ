@@ -86,3 +86,17 @@ Chain (spec section 3, decision Q3): load delivered -> POD pending -> upload/sub
 
 ## Phase 8 (v6): tests and CI
 `tests-v6.html` (29 tests) runs v6 in hidden iframes; same `window.__TESTS` contract as `tests.html`, so `node tools/run-ui-tests.cjs http://localhost:8080/tests-v6.html` runs it. `ui-tests.yml` builds v6 and runs both suites; `build-platform.yml` regenerates v5.3 and v6.
+
+## Phase 9 (v6): integration of the source platform (W1–W6, 2026-10-19)
+Output moved to `platform/{index,de,en,kk,tests}.html` (`node platform-src/build-v6.mjs`); the old online demo lives in `platform/legacy/`. `build-v6.mjs` bundles every `v6/screens/NNN-*.js` and `v6/help/*.js` in file-name order, so a workstream adds a screen or tab by dropping a numbered file (`addTab(screen, key, title, body, {perm, badge})`, see `core.js`) and a help article by `helpAdd({key: 'screen/tab', …})`.
+
+| Files | Workstream | Content |
+|---|---|---|
+| `screens/2xx-ops-*.js`, `help/ops-operations.js`, `tests/7x` | W1 | Orders: Load & weight, Shipments & labels, Documents KZ; Dispatch: Go/No-Go release, double-booking block, replanning, Waybills & express, Planning extras |
+| `screens/3xx-res-*.js`, `help/res-resources.js`, `tests/8x` | W2 | Fleet registry, Staff, Driver app (phone view), Coverage, Lines & tariffs, Thermochrons & loggers |
+| `screens/4xx-rec-*.js`, `help/rec-records.js`, `tests/90` | W3 | Dashboard Alarms + Inbox, Bookings (owner of `S.bookings`), Insurance, Reference data, On-call, Users, Audit, Integrations catalogue, Changes page |
+| `screens/5xx-*.js`, `help/por-portals.js`, `tests/a0` | W4 | Commercial tab (offers, price lists, contracts, CRM), customer portal, partner portal, public request form + tracking |
+| `screens/6xx-eco-*.js`, `help/eco-*.js`, `tests/b0` | W5 | Cost model, Reports KPI / I-12 / fines, Baseline data |
+| `help/10…70-*.js`, `tests/c0` | W6 | Help ported from the source platform: start, operations, records, portals, reference, visuals, guided tours; RU/DE/EN full, KK titles + core articles |
+
+Merge notes: `helpAdd` merges two articles with the same key (manual 10–70 and a workstream file both describe a tab: group of the first, scalar fields of the later, lists concatenated). `docs/TRACEABILITY.md` maps every LH/FR row to its tab and test group. A booking's `payer` is `null` (the customer) or `{company, role, bin, ref, invoiceTo}` from the portal.

@@ -101,9 +101,9 @@ helpAdd({ key: 'orders', group: 'ops', screen: 'orders',
     HQ('Отменить можно только новый или запланированный заказ (право orders:write); в пути отмена невозможна.', 'Stornieren nur bei neuen oder geplanten Aufträgen (Recht orders:write); unterwegs ist keine Stornierung möglich.', 'Only new or planned orders can be cancelled (orders:write); no cancellation in transit.', 'Тек жаңа немесе жоспарланған тапсырысты жоюға болады (orders:write құқығы); жолда жою мүмкін емес.'),
     HQ('Пункты отправления и назначения не могут совпадать; паллет — от 1 до 33.', 'Start und Ziel dürfen nicht gleich sein; Paletten 1 bis 33.', 'Origin and destination may not be the same; pallets 1 to 33.', 'Жөнелту және межелі пункттер бірдей болмауы керек; паллет — 1-ден 33-ке дейін.'),
   ],
-  fr: 'FR-73, FR-176', related: ['orders/load', 'orders/ship', 'orders/docs', 'dispatch', 'portal'] });
+  fr: 'FR-73, FR-176', related: ['orders/loadw', 'orders/ship', 'orders/docs', 'dispatch', 'portal'] });
 
-helpAdd({ key: 'orders/load', group: 'ops', screen: 'orders', tab: 'load', visuals: ['load'],
+helpAdd({ key: 'orders/loadw', group: 'ops', screen: 'orders', tab: 'loadw', visuals: ['load'],
   title: HELP_NO('03', 'Загрузка и вес', 'Beladung und Gewicht', 'Load and weight', 'Тиеу және салмақ'), sub: HQ('Паллеты, объём, оси, подбор ТС, разбиение на несколько машин', 'Paletten, Volumen, Achsen, Fahrzeugwahl, Aufteilung auf mehrere Fahrzeuge', 'Pallets, volume, axles, truck pick, split over several trucks', 'Паллеттер, көлем, осьтер, КҚ таңдау, бірнеше көлікке бөлу'),
   purpose: HQ('Собрать загрузку рейса из заказов и проверить, что она физически и по правилам помещается: паллето-места по температурным зонам, объём, масса, осевые нагрузки, высота, сверка мест SSCC, FEFO, сторонний и опасный груз. Подбор ТС показывает стоимость рейса для каждого типа и наименьший подходящий; при нехватке мест загрузка разбивается на несколько машин с порядком погрузки.',
     'Die Beladung einer Fahrt aus Aufträgen zusammenstellen und prüfen, ob sie physisch und regelkonform passt: Palettenplätze je Temperaturzone, Volumen, Masse, Achslasten, Höhe, SSCC-Abgleich, FEFO, Fremd- und Gefahrgut. Die Fahrzeugwahl zeigt die Fahrtkosten je Typ und den kleinsten passenden; reichen die Plätze nicht, wird die Beladung mit Ladereihenfolge auf mehrere Fahrzeuge aufgeteilt.',
@@ -161,7 +161,7 @@ helpAdd({ key: 'orders/ship', group: 'ops', screen: 'orders', tab: 'ship',
     HQ('Контрольная цифра SSCC проверяется по GS1; срок годности ≤ 3 месяцев помечается как короткий (FEFO).', 'Die SSCC-Prüfziffer wird nach GS1 geprüft; Restlaufzeit ≤ 3 Monate gilt als kurz (FEFO).', 'The SSCC check digit is validated per GS1; expiry ≤ 3 months is marked short (FEFO).'),
     HQ('История места строится из статуса рейса, отправки путевого листа, досканирования, передач партнёрам и ePOD.', 'Der Verlauf entsteht aus Fahrtstatus, Fahrauftragsversand, Nachscan, Partnerübergaben und ePOD.', 'The history is built from load status, trip-sheet sending, rescans, partner hand-overs and ePOD.'),
   ],
-  fr: 'FR-01 … FR-06, FR-73, FR-176', related: ['orders/load', 'dispatch/partners', 'pod'] });
+  fr: 'FR-01 … FR-06, FR-73, FR-176', related: ['orders/loadw', 'dispatch/partners', 'pod'] });
 
 helpAdd({ key: 'orders/docs', group: 'ops', screen: 'orders', tab: 'docs', visuals: ['gonogo'],
   title: HELP_NO('08', 'Документы РК и выпуск рейса', 'KZ-Dokumente und Fahrtfreigabe', 'Documents KZ and trip release', 'ҚР құжаттары және рейсті шығару'), sub: HQ('ТТН, ЭСФ, СНТ, путевой лист, ЭЦП, Go / No-Go', 'TTN, ESF, SNT, Fahrauftrag, EDS, Go / No-Go', 'TTN, ESF, SNT, waybill, e-signature, Go / No-Go', 'ТТН, ЭШФ, СНТ, жол парағы, ЭЦҚ, Go / No-Go'),
@@ -189,7 +189,7 @@ helpAdd({ key: 'orders/docs', group: 'ops', screen: 'orders', tab: 'docs', visua
     HQ('Подпись, отправка и выпуск — право documents:sign; выпущенный рейс нельзя выпустить повторно; выезд без действующего выпуска — только руководитель с причиной и записью в аудит (trips:override_release).', 'Signatur, Versand und Freigabe — Recht documents:sign; eine freigegebene Fahrt lässt sich nicht erneut freigeben; Abfahrt ohne gültige Freigabe nur durch die Leitung mit Begründung und Audit-Eintrag (trips:override_release).', 'Signing, sending and release need documents:sign; a released trip cannot be released again; departure without a valid release only by a supervisor with a reason and an audit entry (trips:override_release).'),
     HQ('Перечень форм — рабочая версия; формы и обязательность проверить с юристом и налоговым консультантом РК; сроки ЕСУТД — в статье «Сроки».', 'Formularliste ist eine Arbeitsversion; Formulare und Pflicht mit Jurist und Steuerberater in Kasachstan prüfen; ESUTD-Fristen im Artikel „Fristen“.', 'The form list is a working version; forms and obligations must be checked with a Kazakh lawyer and tax adviser; ESUTD deadlines are in the "Deadlines" article.'),
   ],
-  fr: 'FR-11, FR-12, FR-91, FR-92, FR-116', related: ['dispatch', 'orders/load', 'billing', 'deadlines', 'int-systems'] });
+  fr: 'FR-11, FR-12, FR-91, FR-92, FR-116', related: ['dispatch', 'orders/loadw', 'billing', 'deadlines', 'int-systems'] });
 
 helpAdd({ key: 'orders/bookings', group: 'ops', screen: 'orders', tab: 'bookings', visuals: ['booking'],
   title: HQ('Бронирования клиентов', 'Kundenbuchungen', 'Customer bookings', 'Клиент брондаулары'), sub: HQ('Подтвердить, отклонить или отменить заявку', 'Buchung bestätigen, ablehnen oder stornieren', 'Confirm, reject or cancel a booking', 'Өтінімді растау, қабылдамау немесе жою'),
@@ -269,7 +269,7 @@ helpAdd({ key: 'dispatch', group: 'ops', screen: 'dispatch', tab: 'board', visua
     HQ('Пропускать статусы нельзя; «назначен» требует водителя и ТС; из «проблемы» рейс возвращается в «в пути» после нормализации температуры.', 'Status lassen sich nicht überspringen; „zugewiesen“ braucht Fahrer und Fahrzeug; aus „Problem“ kehrt die Fahrt nach Normalisierung der Temperatur in „unterwegs“ zurück.', 'Statuses cannot be skipped; "assigned" needs a driver and a truck; from "problem" the load returns to "in transit" once the temperature is back to normal.', 'Күйлерді өткізіп жіберуге болмайды; «тағайындалған» жүргізуші мен КҚ-ны талап етеді; «мәселеден» рейс температура қалыпқа келгенде «жолда» күйіне қайтады.'),
     HQ('Проверки перед выпуском на доске информационные; блокирующий выпуск Go / No-Go — на вкладке «Документы РК» раздела «Заказы и рейсы».', 'Die Prüfungen auf der Tafel sind informativ; die sperrende Go/No-Go-Freigabe ist auf „KZ-Dokumente“ im Bereich „Aufträge & Fahrten“.', 'Checks on the board are informational; the blocking Go / No-Go release is on the "Documents KZ" tab of "Orders & Loads".', 'Тақтадағы тексерулер ақпараттық; бұғаттайтын Go / No-Go шығаруы — «Тапсырыстар мен рейстер» бөлімінің «ҚР құжаттары» қойындысында.'),
   ],
-  fr: 'FR-43, FR-44, FR-51, FR-91, FR-93, FR-94', related: ['orders/load', 'orders/docs', 'dispatch/planning', 'dispatch/partners', 'dispatch/express'] });
+  fr: 'FR-43, FR-44, FR-51, FR-91, FR-93, FR-94', related: ['orders/loadw', 'orders/docs', 'dispatch/planning', 'dispatch/partners', 'dispatch/express'] });
 
 helpAdd({ key: 'dispatch/planning', group: 'ops', screen: 'dispatch', tab: 'planning',
   title: HELP_NO('14', 'Планирование мощности', 'Kapazitätsplanung', 'Capacity planning', 'Қуат жоспарлау'), sub: HQ('Спрос и ёмкость по зонам, 7 дней, сценарии, рабочий календарь РК', 'Bedarf und Kapazität je Zone, 7 Tage, Szenarien, Arbeitskalender KZ', 'Demand vs capacity by zone, 7 days, scenarios, KZ working calendar', 'Аймақтар бойынша сұраныс пен сыйымдылық, 7 күн, сценарийлер, ҚР жұмыс күнтізбесі'),

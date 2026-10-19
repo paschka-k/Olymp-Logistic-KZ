@@ -66,3 +66,6 @@ The 12 menu items stay. Source screens `01–17` and the records/admin pages lan
 
 ## 6 Out of scope for the mock-up (documented only)
 Real Wialon/tachograph, 1C interface, WhatsApp/Telegram (open legal question FR-188), real e-signature (NCALayer) and ESF/ESUTD calls, PostgreSQL/Alembic, HMAC audit chain, backups, pen-test. They appear as UI states with demo behaviour and as Settings → Integrations entries.
+
+## 7 Status (2026-10-19)
+W1–W6 built in parallel worktrees from the foundation commit and merged into `main` with `--no-ff` (W1 `118c2e7`, W2 `535953d`, W3 `47fa028`, W4 `b8ecfa4`, W5 `4e2b4cd`, W6 `e5017ab`). The only textual conflict was `docs/TRACEABILITY.md` (one section per workstream, concatenated). Post-merge fixes: `helpAdd` merges duplicate article keys (manual vs. workstream), help key `orders/load` → `orders/loadw` (the real tab key), `dispatch/release` → `dispatch-release` (an article, not a tab), booking `payer` unified (W3 seed ↔ W4 portal object), the W1 orders-tab assertion and the W6 screen check accept tabs and role-shell screens added by other workstreams. `platform/tests.html`: 136 groups, 0 failed in RU/DE/EN/KK. W7 (CI run, README) follows with the push.

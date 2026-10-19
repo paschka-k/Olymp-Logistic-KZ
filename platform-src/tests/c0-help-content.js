@@ -27,7 +27,7 @@
   }
   await group('help: keys are unique; screen, tab and related keys all resolve; every article is reachable from a group', 'ru', async (g, ev) => {
     const dup = ev(`HELP.articles.map(function(a){return a.key}).filter(function(k,i,a){return a.indexOf(k)!==i})`); assert(!dup.length, 'duplicate keys ' + dup);
-    const badScr = ev(`HELP.articles.filter(function(a){return a.screen&&!NAV.some(function(n){return n[0]===a.screen})}).map(function(a){return a.key+':'+a.screen})`); assert(!badScr.length, 'screen not in NAV: ' + badScr);
+    const badScr = ev(`HELP.articles.filter(function(a){return a.screen&&!SCREENS[a.screen]&&!NAV.some(function(n){return n[0]===a.screen})}).map(function(a){return a.key+':'+a.screen})`); assert(!badScr.length, 'screen not in NAV or SCREENS (role shells): ' + badScr);
     const badRel = ev(`[].concat.apply([],HELP.articles.map(function(a){return (a.related||[]).filter(function(k){return !helpArt(k)}).map(function(k){return a.key+'→'+k})}))`); assert(!badRel.length, 'related missing: ' + badRel);
     const badVis = ev(`[].concat.apply([],HELP.articles.map(function(a){return (a.visuals||[]).filter(function(v){return !HELP.visuals[v]}).map(function(v){return a.key+':'+v})}))`); assert(!badVis.length, 'visual missing: ' + badVis);
     const badGrp = ev(`HELP.articles.filter(function(a){return !HELP.groups.some(function(gr){return gr.key===a.group})}).map(function(a){return a.key})`); assert(!badGrp.length, 'unknown group ' + badGrp);
@@ -45,7 +45,7 @@
   }
   await group('help: KK shows the marker on untranslated bodies and none on translated ones', 'kk', async (g, ev, w) => {
     ev("go('help')"); ev("ACT.helpGo({k:'start'})"); assert(!w.document.querySelector('.kk-fallback'), 'marker on a translated article');
-    ev("ACT.helpGo({k:'dispatch/planning'})"); assert(w.document.querySelector('.kk-fallback'), 'no marker on an untranslated article');
+    ev("ACT.helpGo({k:'dispatch/partners'})"); assert(w.document.querySelector('.kk-fallback'), 'no marker on an untranslated article');
   });
   await group('context help: "?" opens the article of the current screen / tab and falls back to the screen', 'ru', async (g, ev, w) => {
     ev("go('dashboard')"); w.document.querySelector('[data-act=helpHere]').click(); eq(ev('S.route'), 'help'); eq(ev('S.help.key'), 'dashboard');
@@ -55,7 +55,7 @@
     ev("S.tab.pod='quality';go('pod')"); eq(ev('helpKeyFor()'), 'pod/quality'); ev("S.tab.pod='queue'"); eq(ev('helpKeyFor()'), 'pod');
     ev("S.tab.billing='cost';go('billing')"); eq(ev('helpKeyFor()'), 'billing/cost');
     for (const s of ev('NAV.map(function(n){return n[0]})')) { ev(`go(${JSON.stringify(s)})`); assert(ev('!!helpArt(helpKeyFor())&&helpKeyFor()!=="start"'), 'screen ' + s + ' has no help article'); }
-    ev("go('orders')"); const q = w.document.querySelector('.page-head .help-q[data-act=helpHere]'); assert(q && /Справка/.test(q.title), 'header ? link with article title'); ev("S.tab.orders='load'"); ev('ACT.helpHere()'); eq(ev('S.help.key'), 'orders/load');
+    ev("go('orders')"); const q = w.document.querySelector('.page-head .help-q[data-act=helpHere]'); assert(q && /Справка/.test(q.title), 'header ? link with article title'); ev("S.tab.orders='loadw'"); ev('ACT.helpHere()'); eq(ev('S.help.key'), 'orders/loadw');
     ev("ACT.helpOpen({s:'dispatch',t:'planning'})"); eq(ev('S.route'), 'dispatch'); eq(ev('S.tab.dispatch'), 'planning');
     ev("ACT.setRole({v:'customer'})"); ev("go('help')"); assert(ev("HELP.articles.filter(function(a){return !a.screen||canSee(a.screen)||a.portal}).length")>=8, 'portal help list'); clean(w, 'help as customer');
   });

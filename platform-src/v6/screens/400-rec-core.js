@@ -55,11 +55,11 @@
 </style>`);
 
   /* ---------- shared store: customer bookings (W3 owns the array, the Bookings tab and the seed; W4 pushes from the portal) ---------- */
-  const NEWB = (n, o) => Object.assign({ id: 'BK-26-' + String(n).padStart(6, '0'), cust: 'c1', from: 'AST', to: 'ALA', zone: 'pharma', pallets: 6, kg: 1800, express: false, insured: false, value: 0, payer: 'customer', status: 'new', created: '2026-10-18T09:12:00+05:00', note: '', load: null, hist: [] }, o);
+  const NEWB = (n, o) => Object.assign({ id: 'BK-26-' + String(n).padStart(6, '0'), cust: 'c1', from: 'AST', to: 'ALA', zone: 'pharma', pallets: 6, kg: 1800, express: false, insured: false, value: 0, payer: null, status: 'new', created: '2026-10-18T09:12:00+05:00', note: '', load: null, hist: [] }, o);
   S.bookings = [
     NEWB(1, { cust: 'c3', from: 'ALA', to: 'AST', zone: 'pharma', pallets: 10, kg: 2900, express: true, insured: true, value: 48000000, created: '2026-10-18T13:48:00+05:00', note: 'Вакцины, термоконтейнеры, нужна подача к 07:00' }),
     NEWB(2, { cust: 'c2', from: 'SHY', to: 'ALA', zone: 'chilled', pallets: 20, kg: 7600, created: '2026-10-18T12:05:00+05:00', note: 'Молочная продукция, забор со склада Темирлановское шоссе' }),
-    NEWB(3, { cust: 'c4', from: 'KAR', to: 'AST', zone: 'frozen', pallets: 14, kg: 6900, insured: true, value: 9500000, payer: 'agent', created: '2026-10-18T10:30:00+05:00' }),
+    NEWB(3, { cust: 'c4', from: 'KAR', to: 'AST', zone: 'frozen', pallets: 14, kg: 6900, insured: true, value: 9500000, payer: { company: 'ТОО «Транс-Экспедитор»', role: 'agent', bin: '', ref: 'TE-4471', invoiceTo: 'payer' }, created: '2026-10-18T10:30:00+05:00' }),
     NEWB(4, { cust: 'c1', from: 'AST', to: 'KAR', zone: 'pharma', pallets: 4, kg: 1100, express: true, insured: true, value: 12000000, status: 'confirmed', load: 'LD-2026-001855', created: '2026-10-17T16:20:00+05:00', hist: [{ at: '2026-10-17T16:41:00+05:00', st: 'confirmed', who: 'dispatcher' }] }),
     NEWB(5, { cust: 'c5', from: 'AST', to: 'SHY', zone: 'ambient', pallets: 33, kg: 12800, status: 'rejected', created: '2026-10-16T11:00:00+05:00', note: 'Нужен 2-й автопоезд', hist: [{ at: '2026-10-16T11:30:00+05:00', st: 'rejected', who: 'dispatcher', why: 'Нет свободной тентованной фуры на дату' }] }),
   ];

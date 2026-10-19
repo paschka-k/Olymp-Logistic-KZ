@@ -2,7 +2,7 @@
   await group('ops model: SSCC check digit, one place per pallet, lines and places are separate records (FR-73)', 'ru', async (g, ev) => {
     assert(ev('ssccValid(ssccMake(1)) && ssccValid(ssccMake(987654))'), 'generated SSCC must be valid'); assert(!ev("ssccValid(ssccMake(1).slice(0,17) + ((+ssccMake(1)[17] + 1) % 10))"), 'wrong check digit must be detected');
     assert(ev('S.loads.every(l => opsPlaces(l).length === l.pallets)'), 'places per load must equal pallets'); assert(ev('S.loads.every(l => ops(l).orders.every(o => o.lines.length >= 1 && o.po && o.pl))'), 'every order has lines, PO and PL');
-    eq(ev("ssccFromScan('(00) ' + ssccMake(5))"), ev('ssccMake(5)'), 'AI 00 prefix stripped'); assert(ev("tabsOf('orders').map(t => t.key).join()") === 'orders,loadw,ship,docs', 'orders keeps its base tab');
+    eq(ev("ssccFromScan('(00) ' + ssccMake(5))"), ev('ssccMake(5)'), 'AI 00 prefix stripped'); const ot = ev("tabsOf('orders').map(t => t.key)"); assert(ot[0] === 'orders' && ['loadw', 'ship', 'docs'].every(k => ot.includes(k)), 'orders keeps its base tab and the W1 tabs');
   });
   await group('load calc: overload always shown with exact excess, truck finder ranks feasible first, smallest fitting recommended (FR-99/143/146)', 'ru', async (g, ev) => {
     const r = ev("loadCalc(ops(load('LD-2026-001845')).orders, TYPES.v10)"); assert(!r.fits && r.issues.some(i => i.code === 'pal') && r.issues.some(i => i.code === 'kg'), 'van 10 t must be overloaded by pallets and weight');

@@ -5,7 +5,16 @@
    "?" button of the top bar (ACT.helpHere) opens the article of the current screen / tab; a tab without its own article falls back to the screen. */
 const HELP = { groups: [], articles: [], glossary: [], faq: [], deadlines: [], visuals: {}, tours: [] };
 const helpGroup = (key, title) => HELP.groups.push({ key, title });
-const helpAdd = a => { HELP.articles.push(a); return a; };
+/* helpAdd merges a second article with the same key (the ported manual 10-70 and a workstream file both describe a tab):
+   the group of the first stays, scalar fields of the later (workstream) article win, list fields are concatenated. */
+const helpAdd = a => {
+  const i = HELP.articles.findIndex(x => x.key === a.key);
+  if (i < 0) { HELP.articles.push(a); return a; }
+  const p = HELP.articles[i], m = Object.assign({}, p, a, { group: p.group });
+  for (const f of ['see', 'howto', 'rules']) if (p[f] && a[f]) m[f] = p[f].concat(a[f]);
+  for (const f of ['related', 'visuals']) if (p[f] || a[f]) m[f] = Array.from(new Set((p[f] || []).concat(a[f] || []).filter(k => k !== a.key)));
+  HELP.articles[i] = m; return m;
+};
 const tx = v => (Array.isArray(v) ? (v[LI] != null && v[LI] !== '' ? v[LI] : v[0]) : v == null ? '' : v);   // T-quads are arrays only in help data
 const HQ = (...a) => a;   // helper to write a text quad in help data: HQ(ru, de, en, kk)
 helpGroup('start', T('Начало работы', 'Erste Schritte', 'Getting started', 'Жұмысты бастау'));
