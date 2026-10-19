@@ -309,3 +309,15 @@ Files: `platform-src/v6/screens/003-notes.js` (all texts, `howNote(key)` → `<p
 | Temperature, Weather, Security, Coverage, Thermochrons | twolevel, sim, wxrisk, escal, covSchem, thChron | Routes & Tracking → Temperature / Weather & risks / Security / Coverage / Thermochrons & loggers | 150, 340, 360 | "notes: all 26 ported 0.3.10 notes render in place · RU / DE / EN / KK" (c2) |
 | Quality, Cost model, Reports, Reference data | capa, costExcl, fineLink, mdVerified | Proof of Delivery → Deviations & quality; Billing → Cost model; Reports → Fines; Settings → Reference data | 140, 600, 610, 440 | "notes: all 26 ported 0.3.10 notes render in place · RU / DE / EN / KK" (c2) |
 | Convention | every NOTES key has RU / DE / EN / KK, DE / EN without Cyrillic, and every key is placed and checked | all of the above | 003 | "notes: every key in NOTES has RU / DE / EN / KK text…" (c2) |
+
+## Q4 — Narrow-window layout
+
+| Requirement | Implementation | Where | Test (63-narrow.js) |
+|---|---|---|---|
+| FR-133 | Top bar ≤ 1100 px: breadcrumb one line with ellipsis, hidden ≤ 700 px; user name hidden; only the search box shrinks, every other item keeps its size | core.js header, app.css "Q4" block | "narrow 768 px: burger … breadcrumb one line" |
+| FR-133, FR-163 | Search ≤ 700 px collapses to a magnifier (`.gs-ico`, `ACT.gsTog`) that opens the full-width combobox with scanner toggle; Esc / second click closes and clears | 001-shell-ext.js `shellSearchBox`, app.css | "narrow 375 px: … search and "⋯" overflow" |
+| FR-133 | Hub filter + clock (≤ 900 px) and role + theme toggle (≤ 1100 px) move behind "⋯" (`.tb-x`, `ACT.tbMore`, hook `shellTopMore`); Esc closes; alarms button always stays (label shortened to the count ≤ 700 px) | core.js, 001-shell-ext.js, app.css | "narrow 375 / 768 px: … '⋯' shows hub filter, clock, role" |
+| FR-133 | Page header wraps: title on its own line, sub-text below, actions as a row of one-line buttons; ≤ 700 px the header is not sticky; ≤ 600 px smaller title and buttons | app.css | "[ru/de/en/kk] narrow 375 / 768 px … titles and header buttons stay whole" |
+| FR-133 | No sideways page scroll: grid children shrink (`min-width:0`), stacked grids use `minmax(0,1fr)` (grid2, sh/lw/dk grids, set-body, driver-app frame), hub cards 2 → 1 columns, integrations 2 → 1, KPI rows 2 columns ≤ 900 px and 1 ≤ 420 px, wide tables scroll inside `.card-body` / `.tcard`, pill tabs wrap | app.css | "[ru/de/en/kk] narrow 375 / 768 px: every screen, tab and load-drawer tab fits" |
+| FR-133 | Drawers full-width ≤ 700 px and above the phone bottom bar | app.css | same, "drawer is full-width on a phone" |
+| FR-133 | Burger opens / closes the off-canvas menu (backdrop click, menu item) at 375 and 768 px; desktop 1316 px keeps search, hub filter, clock, role inline | core.js (unchanged burger), app.css | "narrow … burger opens and closes the menu", "wide 1316 px …" |
