@@ -110,3 +110,36 @@ await group('S4 FR-201: screen exports keep their file names and content shape',
   assert(/^fleet-register-\d{4}-\d\d-\d\d\.csv$/.test(last().name), 'fleet register name');
   assert(ev('S.res.lastCsv').startsWith('﻿'), 'fleet register keeps its BOM');
 });
+
+/* FR-199 · keyed string tables per language (v6/strings/<lang>/*.json, LT() in v6/base/05-strings.js) */
+await group('S4 FR-199: string tables have the same keys in all four languages, DE / EN without Cyrillic, shell sources use LT()', 'ru', async () => {
+  const tab = async l => JSON.parse(await g4Src('../platform-src/v6/strings/' + l + '/shell.json'));
+  const t = { ru: await tab('ru'), de: await tab('de'), en: await tab('en'), kk: await tab('kk') };
+  const keys = Object.keys(t.ru);
+  assert(keys.length >= 200, 'shell table has ' + keys.length + ' keys');
+  for (const l of ['de', 'en', 'kk']) eq(Object.keys(t[l]).join('|'), keys.join('|'), l + ' keys = ru keys, same order');
+  for (const l of ['de', 'en']) for (const k of keys) assert(!/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]/.test(t[l][k]), l + ' key ' + k + ' contains Cyrillic');
+  for (const f of ['core.js', 'roles.js', 'screens/001-shell-ext.js', 'screens/002-a11y.js']) {
+    const src = await g4Src('../platform-src/v6/' + f);
+    const m = src.match(/[^\w.]T\(\s*['"`][^)]{0,40}/);
+    assert(!m, f + ' still has an inline T() tuple: ' + (m && m[0]));
+  }
+});
+for (const lang of LANGS)
+  await group('[' + lang + '] S4 FR-199: LT() resolves keys, fills {0} placeholders, and no menu / shell text is missing', lang, async (g, ev, w) => {
+    eq(ev("LT('core.assigned')"), ev('ST.assigned.l'), 'ST label comes from the table');
+    eq(ev("LT('no.such.key')"), '⟦no.such.key⟧', 'missing key is visible');
+    eq(ev('LT_MISS.pop()'), 'no.such.key', 'and counted');
+    ev("STRINGS['t.p'] = 'a {1} b {0}'");
+    eq(ev("LT('t.p', 'X', 'Y')"), 'a Y b X', 'placeholders');
+    for (const role of ['admin', 'driver', 'customer', 'partner']) {
+      ev("ACT.setRole({v:'" + role + "'})");
+      for (const id of ev('navItems().map(n=>n[0])')) {
+        ev("go('" + id + "')");
+        clean(w, role + ' ' + id);
+      }
+    }
+    ev('S.kbd = true; render(); S.kbd = false; render()');
+    eq(ev('LT_MISS.join()'), '', 'no missing string keys');
+    if (lang === 'de' || lang === 'en') assert(!/[А-Яа-яЁё]/.test(w.document.querySelector('#root').innerText), 'no Cyrillic in the shell');
+  });

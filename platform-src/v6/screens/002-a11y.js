@@ -18,7 +18,7 @@
   globalThis.a11yReducedMotion = () => !!S.a11y.rm;
 
   /* ---------- FR-219: chart as table / text ---------- */
-  const TBL = () => T('Таблица данных', 'Datentabelle', 'Data table', 'Деректер кестесі');
+  const TBL = () => LT('a11y.data_table');
   /* chartAlt(caption, head[], rows[][]) -> <details data-chart-alt> with a real table; the first cell of a row is its header */
   globalThis.chartAlt = (caption, head, rows) => `<details class="chart-alt" data-chart-alt><summary>${esc(TBL())}</summary><table class="table chart-tbl"><caption>${esc(caption)}</caption><thead><tr>${head.map(h => `<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((c, i) => (i ? `<td>${esc(c)}</td>` : `<th scope="row">${esc(c)}</th>`)).join('')}</tr>`).join('')}</tbody></table></details>`;
   /* chartTxt(text) -> one line of text that says what a sparkline shows (screen readers and high contrast read it) */
@@ -26,24 +26,24 @@
 
   /* ---------- FR-215: keyboard-shortcut list (also holds the FR-219 display switches) ---------- */
   const KEYS = () => [
-    [['?'], T('Открыть этот список', 'Diese Liste öffnen', 'Open this list', 'Осы тізімді ашу')],
-    [['/'], T('Перейти в поиск', 'Zur Suche springen', 'Jump to search', 'Іздеуге өту')],
-    [['Esc'], T('Закрыть окно, карточку или меню; фокус вернётся к кнопке, которая их открыла', 'Fenster, Karte oder Menü schließen; der Fokus kehrt zum auslösenden Element zurück', 'Close a dialog, card or menu; focus returns to the control that opened it', 'Терезені, карточканы немесе мәзірді жабу; фокус ашқан батырмаға оралады')],
-    [['Tab', 'Shift+Tab'], T('Следующий / предыдущий элемент; в открытой карточке фокус остаётся внутри', 'Nächstes / vorheriges Element; in einer offenen Karte bleibt der Fokus darin', 'Next / previous control; inside an open card focus stays in the card', 'Келесі / алдыңғы элемент; ашық карточкада фокус ішінде қалады')],
-    [['Enter', T('Пробел', 'Leertaste', 'Space', 'Бос орын')], T('Нажать ссылку, вкладку, строку таблицы', 'Link, Reiter oder Tabellenzeile auslösen', 'Activate a link, tab or table row', 'Сілтемені, қойындыны, кесте жолын басу')],
-    [['Alt+1…9'], T('Пункт меню 1–9', 'Menüpunkt 1–9', 'Menu item 1–9', 'Мәзір тармағы 1–9')],
-    [['[', ']'], T('Предыдущая / следующая вкладка экрана', 'Vorheriger / nächster Reiter', 'Previous / next tab of the screen', 'Экранның алдыңғы / келесі қойындысы')],
-    [['Alt+Shift+C'], T('Высокий контраст вкл./выкл.', 'Hoher Kontrast an/aus', 'High contrast on/off', 'Жоғары контраст қосу/өшіру')],
-    [['Alt+Shift+M'], T('Меньше анимации вкл./выкл.', 'Weniger Bewegung an/aus', 'Reduced motion on/off', 'Аз анимация қосу/өшіру')],
+    [['?'], LT('a11y.open_this_list')],
+    [['/'], LT('a11y.jump_to_search')],
+    [['Esc'], LT('a11y.close_a_dialog_card_or_menu_focus_re')],
+    [['Tab', 'Shift+Tab'], LT('a11y.next_previous_control_inside_an_open')],
+    [['Enter', LT('a11y.space')], LT('a11y.activate_a_link_tab_or_table_row')],
+    [['Alt+1…9'], LT('a11y.menu_item_1_9')],
+    [['[', ']'], LT('a11y.previous_next_tab_of_the_screen')],
+    [['Alt+Shift+C'], LT('a11y.high_contrast_on_off')],
+    [['Alt+Shift+M'], LT('a11y.reduced_motion_on_off')],
   ];
   globalThis.A11Y_KEYS = KEYS;
-  const kbdLabel = () => T('Клавиатура и отображение', 'Tastatur und Darstellung', 'Keyboard and display', 'Пернетақта және көрініс');
+  const kbdLabel = () => LT('a11y.keyboard_and_display');
   globalThis.a11ySideLink = () => `<a class="side-link" data-act="kbdOpen" role="button" tabindex="0" aria-haspopup="dialog" aria-keyshortcuts="Shift+?">${ic('cog', 14)}<span>${esc(kbdLabel())}</span></a>`;
   const opt = (id, act, on, label, hint) => `<label class="a11y-opt" for="${id}"><input type="checkbox" id="${id}" data-act="${act}"${on ? ' checked' : ''}><span><b>${esc(label)}</b><small>${esc(hint)}</small></span></label>`;
-  globalThis.a11yOverlay = () => !S.kbd ? '' : `<div class="a11y-back" data-act="kbdClose"></div><div class="a11y-dlg" role="dialog" aria-modal="true" aria-labelledby="a11y-h" tabindex="-1" data-a11y-dlg><div class="drawer-head"><h2 id="a11y-h">${esc(kbdLabel())}</h2><button type="button" class="x" data-act="kbdClose" aria-label="${esc(T('Закрыть', 'Schließen', 'Close', 'Жабу'))}">${ic('x', 18)}</button></div>
-<div class="a11y-body"><h3>${esc(T('Сочетания клавиш', 'Tastenkürzel', 'Keyboard shortcuts', 'Пернелер тіркесімі'))}</h3><table class="table kbd-tbl" data-kbd-list><thead><tr><th scope="col">${esc(T('Клавиши', 'Tasten', 'Keys', 'Пернелер'))}</th><th scope="col">${esc(T('Действие', 'Aktion', 'Action', 'Әрекет'))}</th></tr></thead><tbody>${KEYS().map(k => `<tr><td>${k[0].map(x => `<kbd>${esc(x)}</kbd>`).join(' ')}</td><td>${esc(k[1])}</td></tr>`).join('')}</tbody></table>
-<h3>${esc(T('Отображение', 'Darstellung', 'Display', 'Көрініс'))}</h3>${opt('a11y_hc', 'a11yHc', S.a11y.hc, T('Высокий контраст', 'Hoher Kontrast', 'High contrast', 'Жоғары контраст'), T('Тёмный текст, чёткие рамки, подчёркнутые ссылки, толстая рамка фокуса', 'Dunkler Text, klare Rahmen, unterstrichene Links, kräftiger Fokusrahmen', 'Dark text, clear borders, underlined links, thick focus ring', 'Қою мәтін, анық жиектер, асты сызылған сілтемелер, қалың фокус жиегі'))}${opt('a11y_rm', 'a11yRm', S.a11y.rm, T('Меньше анимации', 'Weniger Bewegung', 'Reduced motion', 'Аз анимация'), T('Без переходов, пульсации и автозапуска схем; по умолчанию как в системе', 'Ohne Übergänge, Pulsieren und automatisch laufende Diagramme; Standard wie im System', 'No transitions, pulsing or auto-playing diagrams; follows the system setting by default', 'Өтусіз, бүлкілсіз, сызбалар өздігінен жүрмейді; әдепкіде жүйедегідей'))}
-<p class="note">${esc(T('Каждый график можно открыть как таблицу: кнопка «Таблица данных» под графиком.', 'Jedes Diagramm gibt es auch als Tabelle: „Datentabelle“ unter dem Diagramm.', 'Every chart is also available as a table: "Data table" below the chart.', 'Әр графикті кесте ретінде ашуға болады: графиктің астындағы «Деректер кестесі».'))}</p></div></div>`;
+  globalThis.a11yOverlay = () => !S.kbd ? '' : `<div class="a11y-back" data-act="kbdClose"></div><div class="a11y-dlg" role="dialog" aria-modal="true" aria-labelledby="a11y-h" tabindex="-1" data-a11y-dlg><div class="drawer-head"><h2 id="a11y-h">${esc(kbdLabel())}</h2><button type="button" class="x" data-act="kbdClose" aria-label="${esc(LT('a11y.close'))}">${ic('x', 18)}</button></div>
+<div class="a11y-body"><h3>${esc(LT('a11y.keyboard_shortcuts'))}</h3><table class="table kbd-tbl" data-kbd-list><thead><tr><th scope="col">${esc(LT('a11y.keys'))}</th><th scope="col">${esc(LT('a11y.action'))}</th></tr></thead><tbody>${KEYS().map(k => `<tr><td>${k[0].map(x => `<kbd>${esc(x)}</kbd>`).join(' ')}</td><td>${esc(k[1])}</td></tr>`).join('')}</tbody></table>
+<h3>${esc(LT('a11y.display'))}</h3>${opt('a11y_hc', 'a11yHc', S.a11y.hc, LT('a11y.high_contrast'), LT('a11y.dark_text_clear_borders_underlined_l'))}${opt('a11y_rm', 'a11yRm', S.a11y.rm, LT('a11y.reduced_motion'), LT('a11y.no_transitions_pulsing_or_auto_playi'))}
+<p class="note">${esc(LT('a11y.every_chart_is_also_available_as_a_t'))}</p></div></div>`;
   const setPref = (k, v) => { S.a11y[k] = v; savePrefs(); applyPrefs(); render(); };
   Object.assign(ACT, {
     kbdOpen: () => { S.kbd = true; S.tbMore = false; render(); },
@@ -87,7 +87,7 @@
     if (!n) n = txt(el.getAttribute('placeholder'));
     if (!n && el.tagName === 'SELECT' && el.options.length) n = txt(el.options[0].textContent);
     if (!n) { const row = el.closest('tr,.tinted-row,.cfg-row,.row,li'); if (row) n = txt(row.textContent).slice(0, 80); }
-    return (n || T('Поле', 'Feld', 'Field', 'Өріс')).replace(/[:：]\s*$/, '').slice(0, 90);
+    return (n || LT('a11y.field')).replace(/[:：]\s*$/, '').slice(0, 90);
   };
   const NATIVE = /^(A|BUTTON|INPUT|SELECT|TEXTAREA|SUMMARY|OPTION|LABEL)$/;
   function a11yPass() {
@@ -98,7 +98,7 @@
       el.setAttribute('aria-label', nameFor(el));
     });
     /* 2. toggles (role=switch / checkbox) without text: name from their row */
-    $$('[role=switch],[role=checkbox]', root).forEach(el => { if (!txt(el.textContent) && !el.hasAttribute('aria-label') && !el.hasAttribute('aria-labelledby')) { const row = el.closest('tr,.cfg-row,.row,label,li,div'); el.setAttribute('aria-label', txt(row ? row.textContent : '').slice(0, 90) || T('Переключатель', 'Schalter', 'Switch', 'Ауыстырғыш')); } });
+    $$('[role=switch],[role=checkbox]', root).forEach(el => { if (!txt(el.textContent) && !el.hasAttribute('aria-label') && !el.hasAttribute('aria-labelledby')) { const row = el.closest('tr,.cfg-row,.row,label,li,div'); el.setAttribute('aria-label', txt(row ? row.textContent : '').slice(0, 90) || LT('a11y.switch')); } });
     /* 3. every data-act control is reachable with Tab; plain spans / divs act as buttons (Enter / Space: help/00-framework.js) */
     $$('[data-act]', root).forEach(el => {
       if (NATIVE.test(el.tagName) || el.hasAttribute('tabindex') || el.matches('.side-back,.a11y-back,.login-layer,.diag-back') || el.closest('[aria-hidden="true"]')) return;
@@ -116,10 +116,10 @@
       if (!/(auto|scroll)/.test(ox + oy)) continue;
       if (el.querySelector(FOC)) continue;
       el.setAttribute('tabindex', '0');
-      if (!el.hasAttribute('role')) { const h = el.querySelector('h2,h3,h4,caption,th') || (el.parentElement && el.parentElement.querySelector('h2,h3,h4')); el.setAttribute('role', 'region'); el.setAttribute('aria-label', txt(h ? h.textContent : '').slice(0, 80) || T('Прокручиваемая область', 'Scrollbarer Bereich', 'Scrollable area', 'Айналдырылатын аймақ')); }
+      if (!el.hasAttribute('role')) { const h = el.querySelector('h2,h3,h4,caption,th') || (el.parentElement && el.parentElement.querySelector('h2,h3,h4')); el.setAttribute('role', 'region'); el.setAttribute('aria-label', txt(h ? h.textContent : '').slice(0, 80) || LT('a11y.scrollable_area')); }
     }
     /* 6. charts: an svg with role=img needs a name (axe svg-img-alt) */
-    $$('svg[role=img]:not([aria-label]):not([aria-labelledby])', root).forEach(el => { const t = el.querySelector('title'); if (!t) el.setAttribute('aria-label', T('График', 'Diagramm', 'Chart', 'График')); });
+    $$('svg[role=img]:not([aria-label]):not([aria-labelledby])', root).forEach(el => { const t = el.querySelector('title'); if (!t) el.setAttribute('aria-label', LT('a11y.chart')); });
   }
   globalThis.a11yPass = a11yPass;
 
