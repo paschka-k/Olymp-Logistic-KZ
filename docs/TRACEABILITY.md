@@ -321,3 +321,18 @@ Files: `platform-src/v6/screens/003-notes.js` (all texts, `howNote(key)` → `<p
 | FR-133 | No sideways page scroll: grid children shrink (`min-width:0`), stacked grids use `minmax(0,1fr)` (grid2, sh/lw/dk grids, set-body, driver-app frame), hub cards 2 → 1 columns, integrations 2 → 1, KPI rows 2 columns ≤ 900 px and 1 ≤ 420 px, wide tables scroll inside `.card-body` / `.tcard`, pill tabs wrap | app.css | "[ru/de/en/kk] narrow 375 / 768 px: every screen, tab and load-drawer tab fits" |
 | FR-133 | Drawers full-width ≤ 700 px and above the phone bottom bar | app.css | same, "drawer is full-width on a phone" |
 | FR-133 | Burger opens / closes the off-canvas menu (backdrop click, menu item) at 375 and 768 px; desktop 1316 px keeps search, hub filter, clock, role inline | core.js (unchanged burger), app.css | "narrow … burger opens and closes the menu", "wide 1316 px …" |
+
+## R4 — SLA, winter rules, express overlap, views
+
+| Requirement | Implementation | Where | Test (e4-rules-sla.js) |
+|---|---|---|---|
+| I-13, I-14 (rule change) | Versioned rule sets `RULES.sets.winter` / `sla` with valid-from date and history; `ruleSave` → pending, `ruleDecide` needs approvals:sign and another role (four eyes); range and tier-order checks; audit module "Rules" | Settings → Rules · SLA & winter (`710-rules-winter.js`) | "rules: every change is a version with four eyes …" |
+| I-14 | Tier by forecast minimum of origin / destination hub (−30 / −40 °C): pre-conditioning, door limit, heating window, surcharge; cold-snap scenario; pre-conditioning confirmation (before departure, audited) | Dispatch Board → Winter rules (`710-rules-winter.js`) | "I-14 winter rules: tier by forecast …" |
+| I-14 | Go/No-Go release check "Winter rules" while a tier applies, red until confirmed | `gate()` wrapper in `710-rules-winter.js` | same |
+| I-14 | Winter surcharge in `bookingPrice()` (net, VAT, total) and as a separate line in the commercial offer | `710-rules-winter.js`, one row in `420-rec-bookings.js` | same |
+| I-13 | Monthly SLA measurement for KDL Olymp: OTIF, temperature compliance, ETA window, document lead time; Jul–Sep closed, October from the loads; freeze | Reports → SLA · KDL Olymp (`720-sla.js`) | "I-13 SLA: monthly measurement, penalty per point with caps …" |
+| I-13 | Penalty in ₸ = shortfall points × rate, per-KPI cap, overall cap (share of monthly revenue); dispute flag (held), waiver with four eyes, "penalty stands"; CSV | Reports → SLA · KDL Olymp | same |
+| I-13 | Penalty lines on the customer statement (disputed / waived shown struck through, cap line, VAT); post once per frozen month, audited | Billing & Invoices → SLA statement (`720-sla.js`) | same |
+| I-12 | Overlap express × temperature by week / route / customer: overlap %, planned vs secured saving, share against 78 %, moved; CSV | Reports → Express × temperature, new section (`730-express-overlap.js`) | "I-12 overlap: groups by week / route / customer add up …" |
+| I-8 | Shared list helper `lvWrap`: filter row under the headers, saved views (column + screen filters, presets, localStorage), reset, CSV of filtered rows over all pages; audited | Loads, Orders · records, Fleet, Drivers, Partners, Invoices (`700-list-views.js`) | "I-8 lists: column filter narrows rows, CSV walks every page …" |
+| Help, notes, languages | Help articles settings/rules, dispatch/winter, reports/sla, billing/sla, lists-views, merge into reports/cross; notes r4Rules, r4Winter, r4Sla, r4SlaStmt, r4Overlap | `help/r4-rules-sla.js`, `003-notes.js` | "[ru/de/en/kk] R4: … render without undefined / NaN …", c2-notes |
