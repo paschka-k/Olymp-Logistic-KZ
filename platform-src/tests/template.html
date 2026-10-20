@@ -15,6 +15,12 @@ async function fresh(lang) {
   const f = document.createElement('iframe'); f.style.cssText = 'width:1316px;height:760px'; f.src = file(lang); document.getElementById('frames').appendChild(f);
   await new Promise((ok, no) => { f.onload = ok; f.onerror = no; setTimeout(() => no(new Error('iframe timeout')), 20000); });
   const w = f.contentWindow; w.__errs = []; w.addEventListener('error', e => w.__errs.push(e.message));
+  /* exports must not reach the browser: a click on <a download> and window.open() are recorded in w.__downloads instead of
+     opening a save dialog or a blob: window (the desktop browser pane asked "Save as" for every CSV the suite exported) */
+  w.__downloads = [];
+  const aClick = w.HTMLAnchorElement.prototype.click;
+  w.HTMLAnchorElement.prototype.click = function () { if (this.hasAttribute('download') || /^blob:/.test(this.href)) { w.__downloads.push({ name: this.getAttribute('download') || '', href: this.href }); return; } return aClick.call(this); };
+  w.open = (url, target) => { w.__downloads.push({ name: '', href: String(url || ''), target: target || '' }); return null; };
   return { w, ev: c => w.eval(c), done: () => f.remove() };
 }
 async function group(name, lang, fn) { let g; try { g = await fresh(lang || 'ru'); } catch (e) { return log(name, 'cannot load: ' + e.message); } try { await fn(g, g.ev, g.w); log(name); } catch (e) { log(name, e.message); } finally { g.done(); } }
