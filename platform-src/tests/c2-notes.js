@@ -11,6 +11,9 @@
     ['twolevel', Q3_TAB('routes', 'temp')], ['sim', Q3_TAB('routes', 'temp')], ['wxrisk', Q3_TAB('routes', 'wx')], ['escal', Q3_TAB('routes', 'sec')],
     ['covSchem', Q3_TAB('routes', 'coverage')], ['thChron', Q3_TAB('routes', 'thermochron')],
     ['capa', Q3_TAB('pod', 'quality')], ['costExcl', Q3_TAB('billing', 'model')], ['fineLink', Q3_TAB('reports', 'fines')], ['mdVerified', Q3_TAB('settings', 'ref')],
+    /* R5 notes (I-11, I-17, I-18, I-24, I-27, I-28) */
+    ['recNet', Q3_TAB('orders', 'recipients')], ['backhaul', Q3_TAB('dispatch', 'backhaul')], ['kgdOnline', Q3_TAB('orders', 'commercial') + ";ACT.cmSec({v:'customers'})"],
+    ['pinMdm', Q3_TAB('drivers', 'daadmin')], ['hoScan', Q3_TAB('dispatch', 'partners')], ['msgGate', Q3_TAB('settings', 'notify')],
   ];
   const Q3_CYR = /[Ѐ-ӿ]/;
   await group('notes: every key in NOTES has RU / DE / EN / KK text, DE and EN without Cyrillic, and is placed on a screen', 'ru', async (g, ev) => {
