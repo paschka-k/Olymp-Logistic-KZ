@@ -377,9 +377,9 @@
     eq(w.document.querySelector('[data-logo="ROC"]').dataset.logoSrc, 'standard'); eq(w.document.querySelector('[data-logo="NIP"]').dataset.logoSrc, 'none'); assert(/none \(initials only\)/.test(w.document.querySelector('[data-logo="NIP"]').innerText));
     assert(w.document.querySelector('[data-rf-logo="ROC"]').accept === 'image/png,image/webp', 'file input');
     eq(ev("refLogo('ROC',{type:'image/jpeg',size:1000,dataUrl:'data:image/jpeg;base64,AA'})"), 'PNG or WebP only.'); eq(ev("refLogo('ROC',{type:'image/png',size:400*1024,dataUrl:'data:image/png;base64,AA'})"), 'File larger than 300 KB.');
-    const png = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='; const r = ev(`refLogo('ROC',{type:'image/png',size:68,dataUrl:'${png}'})`); eq(r.status, 'active'); eq(ev("mfrSrc('roche')"), png, 'label helper prefers the upload'); eq(ev("mfrSrc('abbott')"), 'assets/manufacturers/abbott.png', 'others standard');
+    const png = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='; const r = ev(`refLogo('ROC',{type:'image/png',size:68,dataUrl:'${png}'})`); eq(r.status, 'active'); eq(ev("mfrSrc('roche')"), png, 'label helper prefers the upload'); assert(/^assets\/manufacturers\/abbott\.(png|webp)$/.test(ev("mfrSrc('abbott')")), 'others standard');
     ev('render()'); assert(/uploaded · v2/.test(w.document.querySelector('[data-logo="ROC"]').innerText), 'source uploaded · v2'); assert(w.document.querySelector('[data-logo="ROC"] [data-act="rfLogoDel"]'), 'remove button');
-    ev("ACT.rfLogoDel({key:'ROC'})"); eq(ev("mfrSrc('roche')"), 'assets/manufacturers/roche.png', 'removed'); eq(ev("refFind('manufacturer','ROC').version"), 3);
+    ev("ACT.rfLogoDel({key:'ROC'})"); assert(/^assets\/manufacturers\/roche\.(png|webp)$/.test(ev("mfrSrc('roche')")), 'removed'); eq(ev("refFind('manufacturer','ROC').version"), 3);
     ev("ACT.setRole({v:'dispatcher'})"); assert(typeof ev(`refLogo('ROC',{type:'image/png',size:68,dataUrl:'${png}'})`) === 'string', 'dispatcher uploads');
   });
   await group('R2 users: approval-slot wizard — not to yourself, only FN roles, assign to manager (U3)', 'en', async (g, ev, w) => {

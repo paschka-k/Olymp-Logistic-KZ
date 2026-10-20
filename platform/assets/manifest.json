@@ -1,0 +1,138 @@
+{
+ "version": "6.2.1",
+ "budget": {
+  "_": "FR-196 weight budget per page, checked by build-v6.mjs (exit code 1 when exceeded) and by the delivery tests. Lower page_kb when FR-191 (per-language build) lands.",
+  "page_kb": 4400,
+  "tests_kb": 700,
+  "assets_kb": 40,
+  "asset_file_kb": 12
+ },
+ "pages": {
+  "index.html": 3877429,
+  "de.html": 3766665,
+  "en.html": 3748839,
+  "kk.html": 3877429,
+  "tests.html": 483623
+ },
+ "assets_bytes": 15176,
+ "assets": [
+  {
+   "path": "assets/brand/kokzhol-favicon.svg",
+   "bytes": 470
+  },
+  {
+   "path": "assets/brand/kokzhol-mark-on-ink.svg",
+   "bytes": 413
+  },
+  {
+   "path": "assets/brand/kokzhol-mark-white.svg",
+   "bytes": 413
+  },
+  {
+   "path": "assets/brand/kokzhol-mark.svg",
+   "bytes": 413
+  },
+  {
+   "path": "assets/manufacturers/abbott.png",
+   "bytes": 3086
+  },
+  {
+   "path": "assets/manufacturers/abbott.webp",
+   "bytes": 1258
+  },
+  {
+   "path": "assets/manufacturers/beckman-coulter.png",
+   "bytes": 5529
+  },
+  {
+   "path": "assets/manufacturers/beckman-coulter.webp",
+   "bytes": 1770
+  },
+  {
+   "path": "assets/manufacturers/biomerieux.png",
+   "bytes": 4400
+  },
+  {
+   "path": "assets/manufacturers/biomerieux.webp",
+   "bytes": 1724
+  },
+  {
+   "path": "assets/manufacturers/freshline.svg",
+   "bytes": 529
+  },
+  {
+   "path": "assets/manufacturers/medsnab.svg",
+   "bytes": 485
+  },
+  {
+   "path": "assets/manufacturers/pharmchain.svg",
+   "bytes": 463
+  },
+  {
+   "path": "assets/manufacturers/polar-fisch.svg",
+   "bytes": 580
+  },
+  {
+   "path": "assets/manufacturers/qiagen.png",
+   "bytes": 8601
+  },
+  {
+   "path": "assets/manufacturers/qiagen.webp",
+   "bytes": 3194
+  },
+  {
+   "path": "assets/manufacturers/roche.png",
+   "bytes": 4847
+  },
+  {
+   "path": "assets/manufacturers/roche.webp",
+   "bytes": 1714
+  },
+  {
+   "path": "assets/manufacturers/sysmex.png",
+   "bytes": 4871
+  },
+  {
+   "path": "assets/manufacturers/sysmex.webp",
+   "bytes": 1750
+  }
+ ],
+ "webp": [
+  {
+   "png": "assets/manufacturers/abbott.png",
+   "webp": "assets/manufacturers/abbott.webp",
+   "png_bytes": 3086,
+   "webp_bytes": 1258
+  },
+  {
+   "png": "assets/manufacturers/beckman-coulter.png",
+   "webp": "assets/manufacturers/beckman-coulter.webp",
+   "png_bytes": 5529,
+   "webp_bytes": 1770
+  },
+  {
+   "png": "assets/manufacturers/biomerieux.png",
+   "webp": "assets/manufacturers/biomerieux.webp",
+   "png_bytes": 4400,
+   "webp_bytes": 1724
+  },
+  {
+   "png": "assets/manufacturers/qiagen.png",
+   "webp": "assets/manufacturers/qiagen.webp",
+   "png_bytes": 8601,
+   "webp_bytes": 3194
+  },
+  {
+   "png": "assets/manufacturers/roche.png",
+   "webp": "assets/manufacturers/roche.webp",
+   "png_bytes": 4847,
+   "webp_bytes": 1714
+  },
+  {
+   "png": "assets/manufacturers/sysmex.png",
+   "webp": "assets/manufacturers/sysmex.webp",
+   "png_bytes": 4871,
+   "webp_bytes": 1750
+  }
+ ]
+}
