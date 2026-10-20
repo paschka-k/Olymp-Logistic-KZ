@@ -23,7 +23,8 @@ async function fresh(lang) {
   w.open = (url, target) => { w.__downloads.push({ name: '', href: String(url || ''), target: target || '' }); return null; };
   return { w, ev: c => w.eval(c), done: () => f.remove() };
 }
-async function group(name, lang, fn) { let g; try { g = await fresh(lang || 'ru'); } catch (e) { return log(name, 'cannot load: ' + e.message); } try { await fn(g, g.ev, g.w); log(name); } catch (e) { log(name, e.message); } finally { g.done(); } }
+async function group(name, lang, fn) { const t0 = performance.now(); try { await group1(name, lang, fn); } finally { (window.__TESTS.times = window.__TESTS.times || []).push([name, Math.round(performance.now() - t0)]); } }
+async function group1(name, lang, fn) { let g; try { g = await fresh(lang || 'ru'); } catch (e) { return log(name, 'cannot load: ' + e.message); } try { await fn(g, g.ev, g.w); log(name); } catch (e) { log(name, e.message); } finally { g.done(); } }
 const clean = (w, where) => { const t = w.document.querySelector('#root').innerText; const m = t.match(/.{0,20}(undefined|NaN|\[object|\bnull\b).{0,20}/); assert(!m, where + ' contains "' + (m && m[0]) + '"'); assert(!w.__errs.length, where + ' threw: ' + w.__errs[0]); };
 
 (async () => {
