@@ -34,3 +34,6 @@ for (const lang of langs) {
 const suites = list('tests', '.js').map(f => rd('tests', f)).join('\n');
 writeFileSync(join(outDir, 'tests.html'), rd('tests', 'template.html').replace('/*@@SUITES@@*/', () => suites));
 console.log(`tests: ${list('tests', '.js').length} suites -> ${join(outDir, 'tests.html')}`);
+// FR-218: axe-core (MPL-2.0) is a test-only file next to tests.html; the product pages never load it
+mkdirSync(join(outDir, 'test-vendor'), { recursive: true });
+for (const f of list('tests/vendor', '')) writeFileSync(join(outDir, 'test-vendor', f), rd('tests', 'vendor', f));

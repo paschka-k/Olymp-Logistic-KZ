@@ -52,7 +52,7 @@
     const ok = canSee(c.s.screen) && !(c.s.tab && !tabsOf(c.s.screen).some(t => t.key === c.s.tab));
     const el = ok ? c.s.sel.map(s => { try { return $(s); } catch (_) { return null; } }).find(Boolean) : null;
     const last = c.i === c.t.steps.length - 1, id = 'tourh';
-    const reduced = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reduced = typeof a11yReducedMotion === 'function' ? a11yReducedMotion() : typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
     let hi = '', pos = 'top:80px;left:' + Math.max(8, innerWidth / 2 - 180) + 'px';
     if (el) {
       el.scrollIntoView({ block: 'center', behavior: 'auto' });
