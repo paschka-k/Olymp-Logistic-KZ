@@ -81,6 +81,7 @@
   const VIA = { 'AST-ALA': ['KAR', 'BAL'], 'AST-KAR': [], 'AST-SHY': ['KAR', 'KZO'], 'ALA-KAR': ['BAL'], 'ALA-SHY': ['TAR'], 'KAR-SHY': ['KZO'], 'AST-ATY': ['KOS', 'AKT'], 'KAR-ATY': ['AST', 'KOS', 'AKT'], 'ALA-ATY': ['KZO', 'AKT'], 'SHY-ATY': ['KZO', 'AKT'] };
   const VNAME = { KAR: T('Караганда', 'Karaganda', 'Karaganda', 'Қарағанды'), BAL: T('Балхаш', 'Balchasch', 'Balkhash', 'Балқаш'), KZO: T('Кызылорда', 'Kysylorda', 'Kyzylorda', 'Қызылорда'), TAR: T('Тараз', 'Taras', 'Taraz', 'Тараз'), KOS: T('Костанай', 'Kostanai', 'Kostanay', 'Қостанай'), AKT: T('Актобе', 'Aktobe', 'Aktobe', 'Ақтөбе'), AST: T('Астана', 'Astana', 'Astana', 'Астана') };
   const viaOf = l => (VIA[l.from + '-' + l.to] || (VIA[l.to + '-' + l.from] || []).slice().reverse());
+  globalThis.viaOf = viaOf;   // R1: route cities for the inbox road / weather messages (265-mirror-roads.js)
   function tripStops(l) {
     const o = ops(l), total = dist(l.from, l.to), via = viaOf(l), st = o.stops || (o.stops = {});
     const list = [{ key: 'p', kind: 'pickup', name: HUBS[l.from].name, km: 0 }];
