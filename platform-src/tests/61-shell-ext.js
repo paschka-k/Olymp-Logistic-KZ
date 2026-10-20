@@ -64,7 +64,7 @@
     ev("S.auth.code='000000'"); ev('ACT.authMfa()'); assert(w.document.querySelector('[data-login-step=mfa] .login-err'), 'wrong code refused');
     ev("S.auth.code='123456'"); ev('ACT.authMfa()'); eq(w.document.querySelectorAll('.codes li').length, 10, '10 recovery codes');
     ev('ACT.authCodes()'); ev("S.auth.np='short';S.auth.np2='short'"); ev('ACT.authChange()'); assert(w.document.querySelector('[data-login-step=change] .login-err'), 'short password refused');
-    ev("S.auth.np='correct horse battery';S.auth.np2='correct horse battery'"); ev('ACT.authChange()');
+    ev("S.auth.cur='x';S.auth.np='correct horse battery';S.auth.np2='correct horse battery'"); ev('ACT.authChange()');   /* R1: 0.3.9 asks the current password */
     assert(!w.document.querySelector('.login-layer'), 'login closed'); eq(ev('S.role'), 'warehouse', 'sign-in ends in setRole');
     ev("go('account')"); assert(w.document.querySelector('[data-account]') && w.document.querySelector('[data-demo-reset]'), 'account page'); clean(w, 'account');
     ev("S.acct.np='abc';S.acct.np2='abc'"); ev('ACT.acctPw()'); assert(w.document.querySelector('[data-acct-msg]'), 'password message');

@@ -7,7 +7,7 @@
     assert(ev("drv('d4').status") === 'available' && ev("trk('t5').status") === 'available', 'resources freed'); if (!resc.length) assert(ev("S.orders.filter(o => o.status === 'new').length") >= 6 + n - 1, 'orders back in the pool'); assert(/aborted|Прерван/i.test(ev("load('LD-2026-001847').notes.slice(-1)[0].text")), 'note written');
   });
   await group('abort trip UI: form in the drawer, linked alarm, result shown in the trip detail', 'ru', async (g, ev, w) => {
-    ev("ACT.open({id:'LD-2026-001847'})"); const d = w.document; assert(d.querySelector('[data-trip-abort]'), 'abort block'); d.querySelector('#ta_alarm').value = ev("alarmsOfTrip(load('LD-2026-001847'))[0].id"); d.querySelector('#ta_reason').value = 'breakdown, cargo cannot continue'; d.querySelector('[data-act=trAbort]').click();
+    ev("ACT.open({id:'LD-2026-001847'})"); const d = w.document; assert(d.querySelector('[data-trip-abort]'), 'abort block'); d.querySelector('#ta_alarm').value = ev("alarmsOfTrip(load('LD-2026-001847'))[0].id"); d.querySelector('#ta_reason').value = 'breakdown, cargo cannot continue'; d.querySelector('#ta_reason').dispatchEvent(new w.Event('input', { bubbles: true })); assert(!d.querySelector('[data-act=trAbort]').disabled, 'submit enabled once valid'); d.querySelector('[data-act=trAbort]').click();
     eq(ev("load('LD-2026-001847').status"), 'aborted'); assert(d.querySelector('[data-aborted]'), 'abort result visible'); clean(w, 'aborted trip');
   });
   await group('stops and outcomes (FR-98): arrival, outside window, delivered / partially / refused with reason, order outcome after the fact, unassign order', 'ru', async (g, ev, w) => {

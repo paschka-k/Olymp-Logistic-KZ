@@ -203,4 +203,14 @@ Texts are RU / DE / EN (KK from `i18nKk*.ts` where present, otherwise translated
 
 ## 5 Result after R1
 
-Filled in at the end of the stream (counts per state after porting, test file `platform-src/tests/e1-mirror-ops.js`, traceability `docs/TRACEABILITY.md` → "## R1 — Mirror 0.3.9 operations").
+| | Count |
+|---|---|
+| Functions audited | 160 |
+| Already present in v6.2.1 | 91 |
+| Ported by R1 (47 cut down + 15 missing) | 62 |
+| Left open | 1 (C8, driver app → coverage contact monitor; file of stream R5) |
+| Not applicable | 6 (D18, G14, T14, T9t, T14t, W10 — backend / production / drawer layout; see the tables) |
+
+Deviations from 0.3.9 kept on purpose: the inbox fine form offers the five fine types of Reports → Fines (0.3.9: eight offences); any password signs in (no failed sign-in text in the demo); truck t4 is the demo vehicle without a reefer unit (passive tiles, seal "not fitted"); planned trips count their offline windows from ETA − route time at 70 km/h (loads have no departure field unless Edit trip sets one); gate control "Driver qualified" merges the former medical-check control (as in 0.3.9), the 8-hour and after-departure rules apply once FR-114 is in force.
+
+Tests: `platform-src/tests/e1-mirror-ops.js`, `e1-mirror-ops-a.js`, `e1-mirror-ops-b.js`, `e1-mirror-ops-c.js` (39 groups, RU / DE / EN / KK). Existing tests adjusted to 0.3.9 behaviour: 61 (current password on the forced change), 72 (gate key `driver`, full document set before release), 73 (replan field = new departure), 75 (abort submit enabled only when valid). Traceability: `docs/TRACEABILITY.md` → "R1 — Mirror 0.3.9 operations".
