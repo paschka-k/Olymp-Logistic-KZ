@@ -9,7 +9,7 @@
   /* R2 · S8 / S11: assign / book / medical / absences need drivers:write (admin), fines fines:write (admin, finance); other drivers:read roles read only */
   const DW = () => canDo('drivers:write'), FNW = () => canDo('fines:write');
   const h = x => LF.dec(Math.round(x * 10) / 10) + ' ' + LF.unit('h');
-  const tk = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
+  const tk = KIT.kpi;
   const bar = (v, max, cls) => `<div class="progress ${cls || ''}" style="width:90px;display:inline-block;vertical-align:middle"><i style="width:${Math.min(100, Math.round(v / max * 100))}%"></i></div>`;
   const LV = { 0: 'green', 2: 'yellow', 3: 'red' };
   const where = d => { const l = loadOfDriver(d.id); if (l && (l.status === 'in_transit' || l.status === 'problem')) return HUBS[l.from].city + ' → ' + HUBS[l.to].city + ' · ' + Math.round(l.progress * 100) + ' %'; if (l) return HUBS[l.from].name + ' · ' + ST[l.status].l; const a = R.absence(d, R.TODAY); if (a) return R.ABS[a.type].l + ' ' + T('до', 'bis', 'until', 'дейін') + ' ' + fd(a.to); return HUBS[d.hub].name; };
@@ -25,7 +25,7 @@
 <td>${ad.has ? `${fd(ad.to)} ${ad.state !== 'valid' ? chip(ADRC[ad.state][0], ADRC[ad.state][1]) : ''}${ad.state !== 'valid' && !ad.booked && DW() ? `<div><button class="btn sm grey" data-act="stAdr" data-id="${d.id}">${esc(T('Записать на курс', 'Kurs buchen', 'Book course', 'Курсқа жазу'))}</button></div>` : ad.booked ? `<div class="sub">${esc(T('курс', 'Kurs', 'course', 'курс'))} ${fd(ad.booked)}</div>` : ''}` : '<span class="faint">—</span>'}</td>
 <td class="sub">${esc(d.res.tacho)}</td><td>${d.res.year} <div class="sub">${esc(T('остаток', 'Rest', 'left', 'қалды'))} ${ds.yearLeft} / 1 814</div></td>
 <td><button class="btn sm grey" data-act="openD" data-id="${d.id}">${esc(T('Профиль', 'Profil', 'Profile', 'Профиль'))}</button></td></tr>`; }).join('');
-    return `<div class="card tcard"><table class="table"><thead><tr>${th.map(x => `<th>${esc(x)}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+    return `${KIT.table(th, rows, { empty: false })}`;
   }
   function urgent() {
     const u = R.urgent(F.hub, { adr: F.adr, heavy: F.heavy, zone: F.zone, hrs: 6 }), loads = S.loads.filter(l => l.status === 'unassigned' && l.from === F.hub);

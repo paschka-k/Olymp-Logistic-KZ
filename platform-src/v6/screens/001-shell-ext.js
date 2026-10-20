@@ -196,7 +196,7 @@
   const qrSvg = r => { const n = 21, key = otpKey(r).replace(/ /g, ''); let h = 5; for (const c of key) h = (h * 31 + c.charCodeAt(0)) % 2147483647; const fin = (x, y) => [[0, 0], [n - 7, 0], [0, n - 7]].some(([a, b]) => x >= a && x < a + 7 && y >= b && y < b + 7); const on = (x, y) => { const [a, b] = [[0, 0], [n - 7, 0], [0, n - 7]].find(([a, b]) => x >= a && x < a + 7 && y >= b && y < b + 7); const dx = x - a, dy = y - b; return dx === 0 || dx === 6 || dy === 0 || dy === 6 || (dx >= 2 && dx <= 4 && dy >= 2 && dy <= 4); }; let px = ''; for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { h = (h * 1103515245 + 12345) % 2147483648; if (fin(x, y) ? on(x, y) : (h >> 7) % 2) px += `<rect x="${x}" y="${y}" width="1" height="1"/>`; } return `<svg viewBox="-1 -1 23 23" width="200" height="200" role="img" aria-label="QR" style="background:#fff;fill:#111;display:block;margin:8px auto">${px}</svg>`; };
   const mkCodes = seed => { let h = 7; for (const c of seed) h = (h * 31 + c.charCodeAt(0)) % 100003; return Array.from({ length: 10 }, (_, i) => { h = (h * 1103515245 + 12345 + i) % 2147483648; const s = h.toString(36).toUpperCase().padStart(8, 'X').slice(-8); return s.slice(0, 4) + '-' + s.slice(4); }); };
   const sessEnd = () => fdt(new Date(NOW.getTime() + 12 * 3600e3));
-  const fld = (id, label, type, val, hint) => `<label class="fl">${esc(label)}<input class="inp" id="${id}" data-au="${id.slice(3)}" type="${type}" value="${esc(val || '')}" autocomplete="off"${hint ? ` placeholder="${esc(hint)}"` : ''}></label>`;
+  const fld = KIT.field;
   const loginLayer = () => {
     if (!S.auth.on) return '';
     const A = S.auth, cyr = LANG === 'ru' || LANG === 'kk', err = A.err ? `<p class="login-err" role="alert">${esc(A.err)}</p>` : '';
@@ -235,7 +235,7 @@
     toast(LT('shell.demo_data_reset_2'));
   }
   globalThis.demoReset = demoReset;
-  const kv = (k, v) => `<div><small>${esc(k)}</small><b>${v}</b></div>`;
+  const kv = KIT.kv;
   SCREENS.account = {
     title: () => LT('shell.my_account'),
     sub: () => LT('shell.username_role_2fa_session_password_c'),

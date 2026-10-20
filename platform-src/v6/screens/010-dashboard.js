@@ -9,7 +9,7 @@
 .ov-pb{border-left:4px solid var(--label-red);background:var(--tint-red-50);border-radius:var(--r-btn);padding:12px 16px;margin-bottom:10px}.ov-pb ol{margin:6px 0 0;padding-left:20px;font-size:13px}.ov-pb .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--label-red)}
 .ov-inbox{display:grid;grid-template-columns:84px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 6px;border-bottom:1px solid var(--border);font-size:13px}`;
   document.head.appendChild(css);
-  const kpi = (cls, ic_, label, val, sub, subCls) => `<div class="kpi-tile"><div><div class="label">${esc(label)}</div><div class="value">${val}</div><div class="delta ${subCls || ''}">${sub}</div></div><div class="icon" style="background:var(--tint-${cls}-100);color:var(--label-${cls})">${ic(ic_, 20)}</div></div>`;
+  const kpi = KIT.kpiDelta;
   const dec = s => LF.dec(s);
   function map() {
     const pathD = l => KZMAP.hubPath(l.from, l.to).pts.map((q, i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' ');

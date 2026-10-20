@@ -176,3 +176,47 @@ for (const lang of ['ru', 'de', 'en'])
   await group('[' + lang + '] S4 FR-220: ?kkreview=1 changes nothing outside Kazakh', lang + '?kkreview=1', async (g, ev) => {
     assert(!/\[MT\]/.test(ev("LT('routes.no_routes_match')")), 'no [MT] marker');
   });
+
+/* FR-200 · shared UI kit KIT (v6/base/30-kit.js) */
+await group('S4 FR-200: KIT builds the six components and escapes its inputs', 'en', async (g, ev, w) => {
+  const html = ev(
+    `KIT.kpi('blue','truck','12','Vehicles <b>') + '|' + KIT.kv('A&B','<i>1</i>') + '|' + KIT.chip('green','x<y') + '|' + KIT.table(['H1','H&2'], '', {empty:'none', cols:2}) + '|' + KIT.table(['H'], '<tr><td>r</td></tr>', {id:'t1', attrs:'data-z', empty:false}) + '|' + KIT.field('au_name','Name','text','v"1','hint')`,
+  );
+  const box = w.document.createElement('div');
+  box.innerHTML = html.split('|').join('<hr>');
+  eq(box.querySelectorAll('.kpi-tile.tint.blue .value')[0].textContent, '12', 'kpi value');
+  eq(box.querySelector('.kpi-tile .label').textContent, 'Vehicles <b>', 'kpi label escaped');
+  eq(box.querySelector('small').textContent, 'A&B', 'kv key escaped');
+  eq(box.querySelector('.chip.green').textContent, 'x<y', 'chip text escaped');
+  const t = box.querySelectorAll('table.table');
+  eq(t[0].querySelectorAll('th').length, 2, 'head cells');
+  eq(t[0].querySelector('td.empty').textContent, 'none', 'empty row');
+  eq(t[0].querySelector('td.empty').colSpan, 2, 'colspan');
+  eq(t[1].id, 't1', 'table id');
+  assert(t[1].hasAttribute('data-z'), 'raw attribute');
+  eq(t[1].querySelectorAll('tbody tr').length, 1, 'rows, empty:false adds no empty row');
+  eq(box.querySelector('input#au_name').value, 'v"1', 'field value');
+  eq(box.querySelector('input#au_name').getAttribute('placeholder'), 'hint', 'field hint');
+  eq(ev("KIT.table(['H'], '').includes('" + ev('LT("kit.empty")') + "')"), true, 'default empty text comes from the kit table');
+});
+await group('S4 FR-200: filter select and drawer frame come from the kit and behave as before', 'ru', async (g, ev, w) => {
+  ev("go('orders')");
+  const sel = w.document.querySelector('select[data-f="status"]');
+  assert(sel && sel.options.length >= 6, 'orders status filter rendered by KIT.filterSelect');
+  sel.value = 'delivered';
+  sel.dispatchEvent(new w.Event('input', { bubbles: true }));
+  eq(ev('S.f.status'), 'delivered', 'filter writes to the state object');
+  ev("S.f.status=''; openDrawer({type:'load', id:S.loads[0].id, tab:'overview'})");
+  const d = w.document.querySelector('aside.drawer[role=dialog][aria-modal=true]');
+  assert(d && d.querySelector('#drawer-title') && d.querySelector('button.x[data-act=close]'), 'drawer frame');
+  eq(d.getAttribute('aria-labelledby'), 'drawer-title', 'labelled');
+});
+await group('S4 FR-200: screens use the kit instead of private copies', 'ru', async () => {
+  const src = await g4Src('index.html');
+  const calls = (src.match(/KIT\.table\(/g) || []).length;
+  assert(calls >= 28, 'KIT.table call sites: ' + calls);
+  assert((src.match(/const tk = \(/g) || []).length <= 1, 'private KPI tile copies left: ' + (src.match(/const tk = \(/g) || []).length);
+  assert((src.match(/const kv = \(/g) || []).length <= 4, 'private kv copies left');
+  assert((src.match(/const sel = \(/g) || []).length <= 5, 'private filter-select copies left');
+  assert((src.match(/class="kpi-tile tint \$\{cls\}"/g) || []).length <= 5, 'KPI tile markup outside KIT');
+});

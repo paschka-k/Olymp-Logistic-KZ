@@ -92,7 +92,7 @@
     return { m, lines, net, penalties: p.payable, held: p.held, total, vat: Math.round(total * 0.12), posted: p.posted };
   };
   const STC = { ok: ['green', T('в норме', 'erfüllt', 'met', 'орындалды')], due: ['red', T('к удержанию', 'fällig', 'due', 'ұсталады')], disputed: ['yellow', T('спор', 'strittig', 'disputed', 'дау')], waived: ['gray', T('снята', 'erlassen', 'waived', 'алынды')] };
-  const tile = (cls, ico, val, label, sub) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div>${sub ? `<div class="delta">${esc(sub)}</div>` : ''}</div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
+  const tile = KIT.kpiSub;
   const monthSel = () => `<label class="fl" style="margin:0;min-width:160px">${esc(T('Месяц', 'Monat', 'Month', 'Ай'))}<select class="select" id="sla_m" data-slam="1">${MONTHS.map(m => `<option value="${m}"${m === SL.month ? ' selected' : ''}>${esc(mLabel(m))}${m === CUR ? ' · ' + esc(T('текущий', 'laufend', 'current', 'ағымдағы')) : ''}</option>`).join('')}</select></label>`;
   function reportBody() {
     const d = R().data, p = slaPenalty(SL.month), w = canDo('costs:approve') || canDo('approvals:sign');

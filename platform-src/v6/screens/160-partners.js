@@ -58,7 +58,7 @@
   const canW = () => canDo('partners:write');
   const noW = () => (canW() ? false : (toast(T('Нужно право partners:write', 'Recht partners:write nötig', 'Needs partners:write', 'partners:write құқығы қажет'), 'err'), true));
   const sel = (k, lab, o) => `<label>${esc(lab)}:</label><select class="select" data-pf="${k}">${o.map(x => `<option value="${esc(x[0])}"${F[k] === x[0] ? ' selected' : ''}>${esc(x[1])}</option>`).join('')}</select>`;
-  const tk = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
+  const tk = KIT.kpi;
   const H3 = t => `<h3 style="margin:0 0 8px;font-size:15px">${esc(t)}</h3>`;
   const nfk = n => LF.int(n) + ' ₸';
   const sscc = (l, i) => (globalThis.ssccOf ? ssccOf(l, i) : '00' + '4870' + l.id.replace(/\D/g, '').padStart(9, '0').slice(-9) + String(i + 1).padStart(4, '0') + '0');

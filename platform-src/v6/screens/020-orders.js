@@ -1,7 +1,7 @@
 /* Orders & Loads (spec 5.2): filters, table 8/page, 6-tab drawer, create form. */
 (function () {
   const PER = 8;
-  const sel = (key, label, opts) => `<label>${esc(label)}:</label><select class="select" data-f="${key}">${opts.map(o => `<option value="${esc(o[0])}"${S.f[key] === o[0] ? ' selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
+  const sel = KIT.filterSelect('data-f', () => S.f);
   const ALL = T('Все', 'Alle', 'All', 'Барлығы');
   /* R1 · mirror 0.3.9: planned departure of a load (ETA − km / 65 km/h, or the departure set in Edit trip), shared with the trip detail */
   const depOf = l => l.dep || new Date(Date.parse(l.eta) - dist(l.from, l.to) / 65 * 3600e3).toISOString();
@@ -54,7 +54,7 @@
     return { ex, svg: `<svg viewBox="0 0 285 84" class="spark"><rect x="0" y="${Y(z.hi)}" width="285" height="${Y(z.lo) - Y(z.hi)}" fill="var(--temp-ok-bg)"/><polyline points="${p}" fill="none" stroke="var(--chart-blue)" stroke-width="2"/></svg>` };
   }
   globalThis.sparkOf = spark;
-  const kv = (k, v) => `<div><small>${esc(k)}</small><b>${v}</b></div>`;
+  const kv = KIT.kv;
   DRAWERS.load = d => {
     const l = load(d.id), c = cust(l.cust), tab = d.tab, dd = l.driver && drv(l.driver), tt = l.truck && trk(l.truck), pr = [['overview', T('Обзор', 'Übersicht', 'Overview', 'Шолу')], ['stops', T('Остановки', 'Stopps', 'Stops', 'Аялдамалар')], ['docs', T('Документы', 'Dokumente', 'Docs', 'Құжаттар')], ['notes', T('Заметки', 'Notizen', 'Notes', 'Жазбалар')], ['billing', T('Счёт', 'Abrechnung', 'Billing', 'Шот')], ['temp', T('Температура', 'Temperatur', 'Temperature', 'Температура')]];
     const tabs = `<div class="drawer-tabs">${pr.map(p => `<span class="tab${tab === p[0] ? ' active' : ''}" data-act="tab" data-v="${p[0]}">${esc(p[1])}</span>`).join('')}</div>`;
@@ -63,10 +63,10 @@
       let asg;
       if (l.status === 'unassigned') {
         const ds = S.drivers.filter(x => x.status === 'available'), ts = S.trucks.filter(x => x.status === 'available');
-        asg = `<div class="drawer-section"><h4>${esc(T('Назначение', 'Zuweisung', 'Assignment', 'Тағайындау'))}</h4><label class="fl">${esc(T('Водитель', 'Fahrer', 'Driver', 'Жүргізуші'))}<select class="select" id="as_d"><option value="">—</option>${ds.map(x => `<option value="${x.id}">${esc(x.name)} · ${RTO_L} ${x.rto} ${esc(LF.unit('h'))}</option>`).join('')}</select></label>
+        asg = `${KIT.sectionHead(T('Назначение', 'Zuweisung', 'Assignment', 'Тағайындау'))}<label class="fl">${esc(T('Водитель', 'Fahrer', 'Driver', 'Жүргізуші'))}<select class="select" id="as_d"><option value="">—</option>${ds.map(x => `<option value="${x.id}">${esc(x.name)} · ${RTO_L} ${x.rto} ${esc(LF.unit('h'))}</option>`).join('')}</select></label>
 <label class="fl">${esc(T('Транспорт', 'Fahrzeug', 'Truck', 'Көлік'))}<select class="select" id="as_t"><option value="">—</option>${ts.map(x => `<option value="${x.id}">${esc(x.plate)} · ${esc(x.model)} · ${x.cap} ${esc(T('пал.', 'Pal.', 'pal.', 'пал.'))}</option>`).join('')}</select></label>
 <button class="btn primary block" data-act="doAssign" data-id="${l.id}">${esc(T('Назначить', 'Zuweisen', 'Assign', 'Тағайындау'))}</button><p class="note">${esc(T('Требуется ТС с подходящей температурной зоной и водитель с достаточным временем вождения (РТО ≥ ', 'Benötigt: passende Temperaturzone und ausreichende Lenkzeit (RTO ≥ ', 'Needs a truck for the temperature zone and a driver with enough driving time (RTO ≥ ', 'Температура аймағына сай КҚ және жеткілікті жүргізу уақыты (РТО ≥ '))}${needRto(l)} ${esc(T('ч)', 'h)', 'h)', 'сағ)'))}</p></div>`;
-      } else asg = !dd || !tt ? '' : `<div class="drawer-section"><h4>${esc(T('Назначение', 'Zuweisung', 'Assignment', 'Тағайындау'))}</h4><div class="kv">${kv(T('Водитель', 'Fahrer', 'Driver', 'Жүргізуші'), esc(dd.name))}${kv(T('Транспорт', 'Fahrzeug', 'Truck', 'Көлік'), esc(tt.plate))}${kv(T('Тип', 'Typ', 'Type', 'Түрі'), esc(tt.model))}${kv(RTO_L, LF.dec(dd.rto) + ' ' + LF.unit('h'))}</div></div>`;
+      } else asg = !dd || !tt ? '' : `${KIT.sectionHead(T('Назначение', 'Zuweisung', 'Assignment', 'Тағайындау'))}<div class="kv">${kv(T('Водитель', 'Fahrer', 'Driver', 'Жүргізуші'), esc(dd.name))}${kv(T('Транспорт', 'Fahrzeug', 'Truck', 'Көлік'), esc(tt.plate))}${kv(T('Тип', 'Typ', 'Type', 'Түрі'), esc(tt.model))}${kv(RTO_L, LF.dec(dd.rto) + ' ' + LF.unit('h'))}</div></div>`;
       const nx = NEXT[l.status], canSt = canDo('trips:status'), cancelable = ['unassigned', 'assigned', 'loading'].includes(l.status);
       /* T5 back to planning (loading → assigned, crew kept, release withdrawn), T6 cancel trip with a reason (≥ 3 characters) */
       const back = l.status === 'loading' ? `<button class="btn grey" data-act="trPlanBack" data-id="${l.id}" title="${esc(T('Погрузка → Назначен: экипаж остаётся, выпуск отзывается', 'Beladung → Zugewiesen: Besatzung bleibt, Freigabe wird zurückgezogen', 'Loading → Assigned: the crew stays, the release is withdrawn', 'Тиеу → Тағайындалған: экипаж қалады, шығару кері қайтарылады'))}">${esc(T('Планирование', 'Planung', 'Planning', 'Жоспарлау'))}</button>` : '';

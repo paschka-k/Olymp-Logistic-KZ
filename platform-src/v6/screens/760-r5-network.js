@@ -8,7 +8,7 @@
   Object.assign(Q, { rq: '', rcity: '', rlab: '', rpage: 1, nrq: '', nrcp: '', kgd: {}, legs: [], bids: [], nextBid: 1 });
   const H3 = t => `<h3 style="margin:0 0 8px;font-size:15px">${esc(t)}</h3>`;
   const card = (t, body, id) => `<div class="card card-body"${id ? ` id="${id}"` : ''}>${H3(t)}${body}</div>`;
-  const tk = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
+  const tk = KIT.kpi;
   const AUD = (m, s, d, r) => { if (typeof audit === 'function') audit(m, s, d, (r ? r + ' · ' : '') + ROLE_NAME[S.role]); };
   const clock = () => (globalThis.RES && RES.clock ? RES.clock() : fdt(NOW).slice(-5));
   globalThis.R5 = globalThis.R5 || {};

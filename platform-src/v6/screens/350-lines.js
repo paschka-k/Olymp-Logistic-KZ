@@ -69,7 +69,7 @@
     return { ok: true, legs, hubVia, days: wdays, price, hubs: path };
   };
   S.res.lineQ = { from: 'Taldykorgan', to: 'SHY', zone: 'pharma', out: null };
-  const tk = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
+  const tk = KIT.kpi;
   const pname = k => HUBS[k] ? HUBS[k].city : (R.PLACE_NAME[k] || k);
   function body() {
     const adm = canDo('planning:admin'), ask = S.res.lnAsk, dep = R.departures(14), q = S.res.lineQ, out = R.route(q.from, q.to, q.zone), places = Object.keys(HUBS).concat(Object.keys(R.PLACES));

@@ -76,7 +76,7 @@ const ESF = {
   issued:    { c: 'blue',   l: LT('core.esf_issued') },
   confirmed: { c: 'green',  l: LT('core.esf_confirmed') },
 };
-const chip = (c, t) => `<span class="chip ${c}">${esc(t)}</span>`;
+const chip = KIT.chip;   // FR-200: the shared UI kit (v6/base/30-kit.js)
 const stChip = s => chip(ST[s].c, ST[s].l);
 const zoneChip = z => `<span class="chip zone-${z}">${ZONES[z].label}</span>`;
 const fd = LF.date;
@@ -250,8 +250,7 @@ function placeholder(id) {
 function drawerHtml() {
   const d = S.drawer; if (!d) return '';
   const r = DRAWERS[d.type](d);
-  /* FR-215: the drawer is a labelled modal dialog (focus trap, Esc and focus return in screens/002-a11y.js); the close control is a real button */
-  return `<aside class="drawer open${r.xl ? ' xl' : ''}" role="dialog" aria-modal="true" aria-labelledby="drawer-title" tabindex="-1"><div class="drawer-head"><span id="drawer-title">${esc(r.title)}</span><button type="button" class="x" data-act="close" aria-label="${esc(LT('core.close'))}">${ic('x', 18)}</button></div>${r.html}</aside>`;
+  return KIT.drawer(r);   // FR-215 markup (labelled modal dialog, close button) lives in the UI kit
 }
 const DRAWERS = {};
 

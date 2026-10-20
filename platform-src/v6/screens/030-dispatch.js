@@ -1,7 +1,7 @@
 /* Dispatch Board (spec 5.3) + Planning tab (decision Q4): kanban, Auto-Assign, drag & drop with status rules. */
 (function () {
   const ALL = T('Все', 'Alle', 'All', 'Барлығы');
-  const sel = (key, label, opts) => `<label>${esc(label)}:</label><select class="select" data-f="${key}">${opts.map(o => `<option value="${esc(o[0])}"${S.f[key] === o[0] ? ' selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
+  const sel = KIT.filterSelect('data-f', () => S.f);
   const DRV = { available: T('Свободен', 'Frei', 'Available', 'Бос'), busy: T('В рейсе', 'Im Einsatz', 'On trip', 'Рейсте'), rest: T('Отдых', 'Ruhe', 'Resting', 'Демалыс') };
   /* R1 · 0.3.9 engine/tripRows: issue tag on the trip card — road (inbox message on the route), weather (3-day hub forecast) or load check, level ≥ 2, level = max; road first when it leads */
   function issueTag(l) {

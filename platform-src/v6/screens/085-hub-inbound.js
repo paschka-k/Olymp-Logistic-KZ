@@ -9,8 +9,8 @@
   const MIN = () => T('мин', 'min', 'min', 'мин');
   const ALL = T('Все', 'Alle', 'All', 'Барлығы');
   const nf = n => LF.int(n);
-  const kv = (k, v) => `<div><small>${esc(k)}</small><b>${v}</b></div>`;
-  const tk = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
+  const kv = KIT.kv;
+  const tk = KIT.kpi;
   const aud = (subj, dec, why) => { if (typeof audit === 'function') audit('Hub inbound', subj, dec, why || ''); };
   const J = id => S.jobs.find(x => x.id === id);
   const log = (j, text) => j.log.unshift({ t: hmm(S.clock), text });
@@ -188,7 +188,7 @@
     if (st) out.push(chip(st.clean ? 'green' : 'yellow', 'SSCC ' + st.ok + '/' + st.exp));
     if (!j.plate) out.push(chip('gray', T('номер позже', 'Kennz. folgt', 'plate to follow', 'нөмір кейін')));
     return out.join(' '); };
-  const sel = (key, label, opts) => `<label>${esc(label)}:</label><select class="select" data-ibf="${key}">${opts.map(o => `<option value="${esc(o[0])}"${IB.f[key] === o[0] ? ' selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
+  const sel = KIT.filterSelect('data-ibf', () => IB.f);
   function inboundBody() {
     ensure(); const ls = list(), hs = hubFilter(Object.keys(S.hubs), h => h), act = hubFilter(S.jobs).filter(j => j.ev.en == null);
     const atGate = act.filter(j => j.ev.ci != null).length, over = act.filter(j => calc(j).over > 0).length, exp = act.filter(j => j.ev.ci == null).length, hi = act.filter(j => ibx(j).pri === 'high').length;
@@ -201,7 +201,7 @@
     return `<div class="kpi-row k4">${tk('blue', 'truck', exp, T('Ожидается', 'Erwartet', 'Expected', 'Күтілуде'))}${tk('yellow', 'warehouse', atGate, T('На воротах / рампе', 'Am Tor / an der Rampe', 'At gate / dock', 'Қақпада / рампада'))}${tk('red', 'alert', over, T('Простой сверх нормы', 'Standzeit überschritten', 'Dwell overrun', 'Нормадан артық тұру'))}${tk('purple', 'spark', hi, T('Высокий приоритет', 'Hohe Priorität', 'High priority', 'Жоғары басымдық'))}</div>
 <div class="filters">${sel('hub', T('Хаб', 'Hub', 'Hub', 'Хаб'), [['', ALL], ...hs.map(h => [h, HUBS[h].city])])}${sel('dir', T('Направление', 'Richtung', 'Direction', 'Бағыт'), [['', ALL], ...Object.keys(DIRS).map(k => [k, DIRS[k]])])}${sel('pri', T('Приоритет', 'Priorität', 'Priority', 'Басымдық'), [['', ALL], ...PRI_K.map(k => [k, PRI[k].l])])}${sel('st', T('Статус', 'Status', 'Status', 'Күйі'), [['', ALL], ...[0, 1, 2, 3].map(k => [String(k), RECV_IST[k].l])])}<button class="clear-all" data-act="ibClr">× ${esc(T('Сбросить', 'Zurücksetzen', 'Clear', 'Тазалау'))}</button><span style="margin-left:auto" class="actbar"><span class="note">${esc(T('Время хаба: ', 'Hubzeit: ', 'Hub time: ', 'Хаб уақыты: '))}<b>${hmm(S.clock)}</b></span><button class="btn grey sm" data-act="tick">+15 ${esc(MIN())}</button></span></div>
 ${howNote('ibDwell')}
-<div class="card tcard"><table class="table" data-ib-list><thead><tr>${th.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows || `<tr><td colspan="8" class="empty">${esc(T('Нет входящих по фильтрам', 'Keine Eingänge für die Filter', 'No inbound vehicles match', 'Сүзгі бойынша кіріс жоқ'))}</td></tr>`}</tbody></table></div>`;
+${KIT.table(th, rows, { cols: 8, empty: T('Нет входящих по фильтрам', 'Keine Eingänge für die Filter', 'No inbound vehicles match', 'Сүзгі бойынша кіріс жоқ'), attrs: 'data-ib-list' })}`;
   }
 
   /* ---------- I-4 slot board ---------- */
@@ -248,12 +248,12 @@ ${howNote('ibSlot')}
     const th = [T('Забор', 'Abholung', 'Pickup', 'Алу'), T('Экспедитор / ТС', 'Spediteur / Fahrzeug', 'Forwarder / vehicle', 'Экспедитор / КҚ'), T('Пункты забора', 'Abholstellen', 'Pickup points', 'Алу пункттері'), T('Итого', 'Summe', 'Total', 'Барлығы'), T('Хаб / ожидаемая приёмка', 'Hub / erwarteter Eingang', 'Hub / expected inbound', 'Хаб / күтілетін қабылдау'), T('Статус', 'Status', 'Status', 'Күйі'), ''];
     return `<div class="filters"><span class="note">${esc(T('Забор у отправителей до хаба (Vorlauf): каждый забор создаёт ожидаемую приёмку в списке входящих.', 'Abholung bei den Absendern bis zum Hub (Vorlauf): jede Abholung erzeugt einen erwarteten Eingang in der Eingangsliste.', 'Pickup at the senders up to the hub (pre-carriage): every pickup creates an expected inbound in the inbound list.', 'Жөнелтушілерден хабқа дейін алу: әр алу кіріс тізімінде күтілетін қабылдау жасайды.'))}</span><button class="btn primary" style="margin-left:auto" data-act="ibPreNew">${ic('plus')} ${esc(T('Новый забор', 'Neue Abholung', 'New pickup', 'Жаңа алу'))}</button></div>
 ${howNote('ibPre')}
-<div class="card tcard"><table class="table" data-ib-prelist><thead><tr>${th.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows || `<tr><td colspan="7" class="empty">${esc(T('Заборов нет', 'Keine Abholungen', 'No pickups', 'Алу жоқ'))}</td></tr>`}</tbody></table></div>`;
+${KIT.table(th, rows, { cols: 7, empty: T('Заборов нет', 'Keine Abholungen', 'No pickups', 'Алу жоқ'), attrs: 'data-ib-prelist' })}`;
   }
   DRAWERS.ibPre = () => ({ title: T('Новый забор (Vorlauf)', 'Neue Abholung (Vorlauf)', 'New pickup (pre-carriage)', 'Жаңа алу'), html: `<div class="drawer-section"><div class="two"><label class="fl">${esc(T('Дата забора', 'Abholdatum', 'Pickup date', 'Алу күні'))}<input type="date" class="select" id="ibp_date" value="2026-10-21"></label><label class="fl">${esc(T('Экспедитор', 'Spediteur', 'Forwarder', 'Экспедитор'))}<select class="select" id="ibp_fwd">${FWD.map(f => `<option>${esc(f)}</option>`).join('')}</select></label></div>
 <div class="two"><label class="fl">${esc(T('Номер ТС (пусто = позже)', 'Kennzeichen (leer = folgt)', 'Plate (empty = to follow)', 'КҚ нөмірі (бос = кейін)'))}<input class="select" id="ibp_plate" value=""></label><label class="fl">${esc(T('Хаб назначения', 'Ziel-Hub', 'Destination hub', 'Межелі хаб'))}<select class="select" id="ibp_hub">${Object.keys(S.hubs).map(h => `<option value="${h}">${esc(HUBS[h].city)}</option>`).join('')}</select></label></div>
 <label class="fl">${esc(T('Зона', 'Zone', 'Zone', 'Аймақ'))}<select class="select" id="ibp_zone">${Object.keys(ZONES).map(z => `<option value="${z}">${esc(ZONES[z].label)}</option>`).join('')}</select></label></div>
-<div class="drawer-section"><h4>${esc(T('Пункты забора: кг / м³ / мест', 'Abholstellen: kg / m³ / Stück', 'Pickup points: kg / m³ / pieces', 'Алу пункттері: кг / м³ / орын'))}</h4>${[0, 1, 2].map(i => `<div style="display:grid;grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr));gap:6px;margin-bottom:6px"><input class="select" id="ibp_n${i}" placeholder="${esc(T('Отправитель ', 'Absender ', 'Sender ', 'Жөнелтуші ') + (i + 1))}"><input class="select" id="ibp_kg${i}" type="number" min="0" placeholder="kg"><input class="select" id="ibp_m3${i}" type="number" min="0" step="0.1" placeholder="m³"><input class="select" id="ibp_pcs${i}" type="number" min="0" placeholder="${esc(T('мест', 'Stk.', 'pcs', 'орын'))}"></div>`).join('')}
+${KIT.sectionHead(T('Пункты забора: кг / м³ / мест', 'Abholstellen: kg / m³ / Stück', 'Pickup points: kg / m³ / pieces', 'Алу пункттері: кг / м³ / орын'))}${[0, 1, 2].map(i => `<div style="display:grid;grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr));gap:6px;margin-bottom:6px"><input class="select" id="ibp_n${i}" placeholder="${esc(T('Отправитель ', 'Absender ', 'Sender ', 'Жөнелтуші ') + (i + 1))}"><input class="select" id="ibp_kg${i}" type="number" min="0" placeholder="kg"><input class="select" id="ibp_m3${i}" type="number" min="0" step="0.1" placeholder="m³"><input class="select" id="ibp_pcs${i}" type="number" min="0" placeholder="${esc(T('мест', 'Stk.', 'pcs', 'орын'))}"></div>`).join('')}
 <p class="note" id="ibp_err" style="color:var(--chip-red-fg)"></p><div class="actbar"><button class="btn primary" data-act="ibPreSave">${esc(T('Создать забор и ожидаемую приёмку', 'Abholung und erwarteten Eingang anlegen', 'Create pickup and expected inbound', 'Алу мен күтілетін қабылдауды жасау'))}</button></div></div>` });
 
   /* ---------- I-6 demurrage tab ---------- */
@@ -272,9 +272,9 @@ ${howNote('ibPre')}
     return `<div class="kpi-row k4">${tk('yellow', 'receipt', nf(sum('accruing') + sum('ready')) + ' ₸', T('Начисляется / к оформлению', 'Aufgelaufen / zu buchen', 'Accruing / to book', 'Есептелуде / ресімдеуге'))}${tk('purple', 'user', nf(sum('wait')) + ' ₸', T('Ждёт 2-й подписи', 'Wartet auf 2. Freigabe', 'Awaiting 2nd signature', '2-ші қолды күтуде'))}${tk('green', 'chart', nf(lines.reduce((s, c) => s + c.amount, 0)) + ' ₸', T('В затратах', 'In Kosten', 'Booked to costs', 'Шығыста'))}${tk('blue', 'up', nf(rco) + ' ₸', T('К перевыставлению', 'Weiterzubelasten', 'To re-charge', 'Қайта қоюға'))}</div>
 <div class="filters"><span class="note">${esc(T('Тариф: ', 'Satz: ', 'Rate: ', 'Тариф: '))}${nf(RECV.rate)} ₸ / ${RECV.step} ${esc(MIN())} · ${esc(T('бесплатно ', 'frei ', 'free ', 'тегін '))}${RECV.free} ${esc(MIN())} (Settings)</span><a class="lnk" style="margin-left:auto" data-act="ibCosts">${esc(T('Счета → Затраты', 'Rechnungen → Kosten', 'Billing → Costs', 'Шоттар → Шығыс'))}</a></div>
 ${howNote('ibDem')}
-<div class="card tcard"><table class="table" data-ib-demlist><thead><tr>${th.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows || `<tr><td colspan="7" class="empty">${esc(T('Простоев сверх нормы нет', 'Keine Standzeitüberschreitung', 'No dwell overrun', 'Нормадан артық тұру жоқ'))}</td></tr>`}</tbody></table></div>
+${KIT.table(th, rows, { cols: 7, empty: T('Простоев сверх нормы нет', 'Keine Standzeitüberschreitung', 'No dwell overrun', 'Нормадан артық тұру жоқ'), attrs: 'data-ib-demlist' })}
 <h3 style="margin:16px 0 8px;font-size:15px">${esc(T('Строки Standgeld в затратах', 'Standgeld-Zeilen in den Kosten', 'Demurrage lines in costs', 'Шығыстағы Standgeld жолдары'))}</h3>
-<div class="card tcard"><table class="table" data-ib-rclist><thead><tr>${th2.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rl || `<tr><td colspan="6" class="empty">—</td></tr>`}</tbody></table></div>`;
+${KIT.table(th2, rl, { cols: 6, empty: '—', attrs: 'data-ib-rclist' })}`;
   }
 
   /* ---------- I-7 gate check drawer ---------- */

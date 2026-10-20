@@ -1,7 +1,7 @@
 /* Routes & Tracking tabs (legacy screens 04 Thermostatus, 05 Weather, 06 Security -> spec 2.2): Map | Temperature | Weather | Security.
    Temperature alarms open a QA deviation (quality.js); security incidents and weather risks are computed from live loads, drivers and documents. */
 (function () {
-  const tk = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
+  const tk = KIT.kpi;
   const dec = s => LF.dec(s);
   /* P3 styles (thermo history, weather grid, coverage map + aside) — kept here so app.css stays with the shell workstream */
   document.head.insertAdjacentHTML('beforeend', `<style>
