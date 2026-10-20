@@ -321,3 +321,18 @@ Files: `platform-src/v6/screens/003-notes.js` (all texts, `howNote(key)` → `<p
 | FR-133 | No sideways page scroll: grid children shrink (`min-width:0`), stacked grids use `minmax(0,1fr)` (grid2, sh/lw/dk grids, set-body, driver-app frame), hub cards 2 → 1 columns, integrations 2 → 1, KPI rows 2 columns ≤ 900 px and 1 ≤ 420 px, wide tables scroll inside `.card-body` / `.tcard`, pill tabs wrap | app.css | "[ru/de/en/kk] narrow 375 / 768 px: every screen, tab and load-drawer tab fits" |
 | FR-133 | Drawers full-width ≤ 700 px and above the phone bottom bar | app.css | same, "drawer is full-width on a phone" |
 | FR-133 | Burger opens / closes the off-canvas menu (backdrop click, menu item) at 375 and 768 px; desktop 1316 px keeps search, hub filter, clock, role inline | core.js (unchanged burger), app.css | "narrow … burger opens and closes the menu", "wide 1316 px …" |
+
+## R3 — Hub inbound (I-1…I-7)
+
+Files: `platform-src/v6/screens/085-hub-inbound.js` (new), hooks in `080-receiving.js` (`recvCalc`, `RECV_IST`, gate-check button), help `platform-src/v6/help/hub-inbound.js`, notes `ibDwell` / `ibSlot` / `ibPre` / `ibDem` / `ibGate` in `003-notes.js` (rows added to `c2-notes.js`); map `docs/IDEAS-R3.md`; test `platform-src/tests/e3-hub-inbound.js`.
+
+| Idea | Feature | v6 menu → tab | Screen file | Test (group name, file) |
+|---|---|---|---|---|
+| I-1 | Inbound list per hub: vehicle, direction, job / load, priority, slot, status chips; filters hub / direction / priority / status + global hub filter | Hubs → Inbound list | 085 | "I-1 inbound list: every arriving vehicle …" (e3) |
+| I-2 | Senders / unloading points as numbered chips, hover text, colour by status (incl. SSCC shortage per sender) | Hubs → Inbound list | 085 | "I-2 senders as numbered chips …" (e3) |
+| I-3 | Pre-carriage pickup (date, forwarder, plate to follow, kg / m³ / pieces per point) creates an expected inbound job | Hubs → Pre-carriage | 085 | "I-3 pre-carriage …" (e3) |
+| I-4 | 30-min gate slots per hub, fixed appointments refused, overlap / blocked / zone conflicts, booking from the inbound list and grid | Hubs → Gate slots | 085 | "I-4 gate slots …" (e3) |
+| I-5 | Overdue dwell red, hover with period, minutes, delay yes / no | Hubs → Inbound list | 085 | "I-5 overdue dwell red with hover …" (e3) |
+| I-6 | Demurrage auto ₸ from overrun, four eyes (trips:status + costs:approve), line in Costs, re-charge open / invoiced / paid / waived with reason | Hubs → Demurrage; Billing → Costs | 085 | "I-6 demurrage …" (e3) |
+| I-7 | Gate check: actual temperature, logger take-over, SSCC reconciliation (ops SSCC model read-only) | Hubs → Receiving → job card → Gate check | 080, 085 | "I-7 gate check …" (e3) |
+| all | Four tabs + three drawers render in RU / DE / EN / KK, DE / EN without Cyrillic, help articles and "?" context | Hubs | 085, help/hub-inbound.js | "[ru/de/en/kk] hub inbound: four tabs and three drawers render …" (e3); "notes: all … render in place" (c2) |
