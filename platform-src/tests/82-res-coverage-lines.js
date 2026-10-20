@@ -20,7 +20,7 @@
     ev("go('routes');ACT.stab({s:'routes',v:'lines'})"); assert(w.document.querySelector('[data-route-out]'), 'route shown'); clean(w, 'lines');
   });
   await group('W2 lines: exceptions cancel departures, vehicles drive capacity, tariffs editable (FR-96/97/118)', 'ru', async (g, ev) => {
-    const d0 = ev("RES.departures(14).filter(d=>d.cancelled).length"); eq(d0, 1, 'seeded holiday'); const dep = ev("RES.departures(14).find(d=>!d.cancelled&&d.line.id==='LN-2')"); ev(`ACT.lnExc({id:'LN-2',d:'${dep.iso}'})`); eq(ev("RES.departures(14).filter(d=>d.cancelled).length"), 2);
+    const d0 = ev("RES.departures(14).filter(d=>d.cancelled).length"); eq(d0, 1, 'seeded holiday'); const dep = ev("RES.departures(14).find(d=>!d.cancelled&&d.line.id==='LN-2')"); ev(`ACT.lnExc({id:'LN-2',d:'${dep.iso}',note:'Holiday'})`); eq(ev("RES.departures(14).filter(d=>d.cancelled).length"), 2);
     const cap = ev("RES.lineCap(S.res.lines[0])"); ev("RES.svcCreate({truck:'t1',kind:'repair',etaH:10,cost:1})"); assert(ev("RES.lineCap(S.res.lines[0])") < cap, 'capacity falls with service'); ev("S.res.lines[0].veh=[]"); eq(ev("RES.lineCap(S.res.lines[0])"), 0);
     ev("S.res.tariff['AST-ALA'].chilled=999"); eq(ev("RES.tariff('ALA','AST','chilled')"), 999, 'tariff both directions');
   });

@@ -19,11 +19,11 @@
     assert(w.document.querySelector(`[data-act=ptRenew][data-id=${due}]`), 'renew offered'); ev(`ACT.ptRenew({id:'${due}'})`); assert(w.document.querySelector(`[data-renew-form=${due}]`), 'form'); const u0 = ev(`S.partners.find(p=>p.id==='${due}').until`);
     ev(`ACT.ptRenewSend({id:'${due}'})`); eq(ev(`S.ptx.renew['${due}'].st`), 'form', 'no upload -> not sent'); ev(`ACT.ptUpload({id:'${due}'})`); assert(ev(`S.ptx.renew['${due}'].sha.length`) === 32 || ev(`S.ptx.renew['${due}'].sha.length`) > 20, 'sha'); ev(`ACT.ptRenewSend({id:'${due}'})`); eq(ev(`S.ptx.renew['${due}'].st`), 'wait');
     ev(`ACT.ptRenewOk({id:'${due}'})`); eq(ev(`S.partners.find(p=>p.id==='${due}').until`), u0, 'same role cannot approve its own request'); assert(w.document.querySelector(`[data-renew-approve=${due}]`), 'waits for the second approval');
-    ev("ACT.setRole({v:'manager'})"); ev(`ACT.ptRenewOk({id:'${due}'})`); assert(ev(`S.partners.find(p=>p.id==='${due}').until`) !== u0, 'second role approves -> contract renewed'); assert(ev("S.audit.some(a=>/four eyes|4 глаза|4 Augen/.test(a.decision))"), 'audited as four eyes');
+    ev("ACT.setRole({v:'admin'})"); ev(`ACT.ptRenewOk({id:'${due}'})`); assert(ev(`S.partners.find(p=>p.id==='${due}').until`) !== u0, 'second role approves -> contract renewed'); assert(ev("S.audit.some(a=>/four eyes|4 глаза|4 Augen/.test(a.decision))"), 'audited as four eyes');
   });
   await group('P4 partners: SLA demotion proposal needs a second person', 'ru', async (g, ev, w) => {
     ev("ACT.setRole({v:'dispatcher'});S.partners.find(p=>p.id==='PL-03').sla=85;" + PTAB); assert(w.document.querySelector('[data-act=ptDemote][data-id=PL-03]'), 'propose offered below 90 %'); ev("ACT.ptDemote({id:'PL-03'})"); eq(ev("S.ptx.demote['PL-03'].to"), 'bronze'); ev("ACT.ptDemoteOk({id:'PL-03'})"); eq(ev("S.partners.find(p=>p.id==='PL-03').tier"), 'silver', 'proposer cannot approve');
-    ev("ACT.setRole({v:'manager'});ACT.ptDemoteOk({id:'PL-03'})"); eq(ev("S.partners.find(p=>p.id==='PL-03').tier"), 'bronze', 'second person approves'); eq(ev("S.ptx.demote['PL-03'].st"), 'done');
+    ev("ACT.setRole({v:'admin'});ACT.ptDemoteOk({id:'PL-03'})"); eq(ev("S.partners.find(p=>p.id==='PL-03').tier"), 'bronze', 'second person approves'); eq(ev("S.ptx.demote['PL-03'].st"), 'done');
   });
   await group('P4 partners: route coverage table and Create task', 'ru', async (g, ev, w) => {
     ev("ACT.setRole({v:'admin'});" + PTAB); assert(w.document.querySelector('#pt_cov'), 'coverage table'); const rows = ev("document.querySelectorAll('[data-cov]').length"); assert(rows >= 6, 'rows per load and route city');
@@ -42,7 +42,7 @@
   await group('P4 partners: Silver handover is pending until a second person approves (four eyes)', 'ru', async (g, ev, w) => {
     ev("ACT.setRole({v:'dispatcher'});" + PTAB); const lid = ev("S.loads.find(l=>l.status==='unassigned'&&l.zone==='chilled'&&!l.adr&&l.from==='KAR'||l.status==='unassigned'&&l.zone==='chilled'&&!l.adr).id"); ev(`S.ptx.ho.load='${lid}';S.ptx.ho.mode='full';render()`);
     const silver = ev("S.partners.find(p=>p.id==='PL-03')"); ev("S.partners.find(p=>p.id==='PL-03').city='AST';S.partners.find(p=>p.id==='PL-03').cap='40';render()"); ev("ACT.hoGive({id:'PL-03'})"); const h = ev("S.handovers[S.handovers.length-1]"); eq(h.st, 'pending', 'silver -> request'); ev(`ACT.hoOk({id:'${h.id}'})`); eq(ev(`S.handovers.find(x=>x.id==='${h.id}').st`), 'pending', 'requester cannot approve');
-    ev("ACT.setRole({v:'manager'})"); ev(`ACT.hoOk({id:'${h.id}'})`); eq(ev(`S.handovers.find(x=>x.id==='${h.id}').st`), 'approved'); eq(ev(`load('${lid}').partner`), 'PL-03', 'full handover moves the load');
+    ev("ACT.setRole({v:'admin'})"); ev(`ACT.hoOk({id:'${h.id}'})`); eq(ev(`S.handovers.find(x=>x.id==='${h.id}').st`), 'approved'); eq(ev(`load('${lid}').partner`), 'PL-03', 'full handover moves the load');
   });
   await group('P4 partners: handover portal steps and ePOD on behalf needs reason + scan (FR-108)', 'ru', async (g, ev, w) => {
     ev("ACT.setRole({v:'admin'});" + PTAB); const lid = ev("S.loads.find(l=>l.status==='unassigned'&&l.zone==='chilled'&&!l.adr).id"); ev(`S.ptx.ho.load='${lid}';S.ptx.ho.mode='full';render()`); const cand = ev("[...document.querySelectorAll('[data-cand] [data-act=hoGive]')].map(b=>b.dataset.id).find(id=>S.partners.find(p=>p.id===id).tier==='gold')");
