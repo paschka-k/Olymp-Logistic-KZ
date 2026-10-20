@@ -382,11 +382,11 @@ main{overflow:auto;height:100vh;position:relative}
 .cell{display:flex;align-items:center;gap:10px} .sub{font-size:12px;color:var(--text-faint);margin-top:2px}.faint{color:var(--text-faint)}.note{font-size:12px;color:var(--text-muted)}
 .lnk{color:var(--link);font-weight:600;cursor:pointer}
 .page-head{display:flex;justify-content:space-between;align-items:center;gap:16px}
-.kpi-row.k6{grid-template-columns:repeat(auto-fit,minmax(185px,1fr))} .kpi-tile .value{font-size:26px}.kpi-tile .label{font-size:13px;color:var(--text-muted)}.kpi-tile .delta{font-size:12px;color:var(--text-muted);margin-top:2px}.kpi-tile .delta.pos{color:#2a9d52}.kpi-tile .delta.neg{color:var(--label-red)}
+.kpi-row.k6{grid-template-columns:repeat(auto-fit,minmax(185px,1fr))} .kpi-tile .value{font-size:26px}.kpi-tile .label{font-size:13px;color:var(--text-muted)}.kpi-tile .delta{font-size:12px;color:var(--text-muted);margin-top:2px}.kpi-tile .delta.pos{color:var(--ok-text)}.kpi-tile .delta.neg{color:var(--label-red)}
 .grid2{display:grid;grid-template-columns:2fr 1fr;gap:var(--gap)} .grid2.eq{grid-template-columns:1fr 1fr}
 .mapwrap{position:relative;padding:12px} .kzmap{width:100%;height:auto;display:block;background:#f6fbf7;border-radius:var(--r-card)} .mk{cursor:pointer} .maplbl{font:600 12px var(--font);fill:var(--text)} .maplbl.sm{font-size:10px}
 .legend{position:absolute;top:24px;right:24px;padding:10px 12px;font-size:12px;box-shadow:var(--sh-pop)} .legend div{display:flex;align-items:center;gap:6px;margin-top:4px} .legend i{width:8px;height:8px;border-radius:50%;display:block}
-.statstrip{position:absolute;left:24px;bottom:24px;padding:8px 14px;display:flex;gap:16px;font-size:12px;box-shadow:var(--sh-pop)} .statstrip b{font-size:15px}.statstrip .g{color:#2a9d52}.statstrip .b{color:var(--primary)}
+.statstrip{position:absolute;left:24px;bottom:24px;padding:8px 14px;display:flex;gap:16px;font-size:12px;box-shadow:var(--sh-pop)} .statstrip b{font-size:15px}.statstrip .g{color:var(--ok-text)}.statstrip .b{color:var(--primary)}
 .dlist{padding:4px 12px 12px} .drow{display:flex;justify-content:space-between;gap:8px;padding:10px 8px;border-bottom:1px solid var(--border);cursor:pointer} .drow:hover{background:var(--bg-hover)} .drow .r{text-align:right}
 .alert-card{margin-bottom:10px;cursor:pointer} .al-red{background:var(--alert-red-bg);color:var(--alert-red-fg)} .al-orange{background:var(--alert-orange-bg);color:var(--alert-orange-fg)} .al-blue{background:var(--alert-blue-bg);color:var(--alert-blue-fg)} .al-yellow{background:var(--alert-yellow-bg);color:var(--alert-yellow-fg)}
 .qa{display:grid;grid-template-columns:1fr 1fr;gap:16px} .qa .btn{justify-content:center;height:55px}
@@ -435,11 +435,11 @@ label.drop-zone{display:block;cursor:pointer} .dzrow td{padding:6px 14px!importa
 .report-card .chart{background:none;height:auto;margin:8px 0} .chart svg{width:100%;height:auto;display:block}
 .report-card .kpi3 b{font-size:17px;line-height:1.2} .report-card .kpi3 small{display:block;margin-top:2px}
 .report-card .ra{display:flex;justify-content:space-between;align-items:center;margin-top:12px} .ra .ex{display:flex;gap:6px}
-.xchip{border:0;border-radius:6px;height:28px;min-width:36px;color:#fff;font-weight:600;font-size:11px;cursor:pointer} .xchip.pdf{background:#dc3048}.xchip.csv{background:#30d860}.xchip.xls{background:#30d860}
+.xchip{border:0;border-radius:6px;height:28px;min-width:36px;color:#fff;font-weight:600;font-size:11px;cursor:pointer} .xchip.pdf{background:#c8243c}.xchip.csv{background:#047857}.xchip.xls{background:#047857}
 .aisum{margin-top:8px;padding:10px 12px;background:var(--tint-blue-50);border-radius:var(--r-btn);font-size:12px;color:var(--text-muted)}
 .center-link{text-align:center;margin-top:6px;font-size:12px}
 .pt .tip{display:none} .pt:hover .tip{display:block} .pt circle{cursor:pointer}
-.tone-g{color:#2a9d52}.tone-b{color:var(--primary)}.tone-k{color:#111827}.tone-r{color:var(--label-red)}.tone-a{color:#b7791f}
+.tone-g{color:var(--ok-text)}.tone-b{color:var(--primary)}.tone-k{color:#111827}.tone-r{color:var(--label-red)}.tone-a{color:#8a5a0b}
 .kpi4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px} .kpi4>div{background:var(--tint-blue-50);border-radius:var(--r-btn);padding:12px;text-align:center} .kpi4 b{display:block;font-size:20px} .kpi4 small{color:var(--text-muted);font-size:11px}
 .ai-banner{position:sticky;top:calc(var(--topbar-h) + 72px);z-index:9;margin:-8px 0 0;padding:8px 16px;font-size:12px;border-radius:var(--r-btn)}
 .ai-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
@@ -450,7 +450,7 @@ label.drop-zone{display:block;cursor:pointer} .dzrow td{padding:6px 14px!importa
 .rec{border:1px solid var(--border);border-radius:var(--r-btn);padding:14px;margin-bottom:12px} .rec .t{display:flex;justify-content:space-between;gap:8px;align-items:flex-start} .rec .t b{font-size:14px} .rec .why{font-size:12px;color:var(--text-muted);margin:6px 0 0} .rec .amt{font-weight:700;white-space:nowrap}
 .rec .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px} .rec.done{opacity:.55} .rec.risk-card{margin-bottom:12px}
 .rec.risk-card .t{align-items:center}
-.btn.amber{background:#dcb814;color:#fff}.btn.dismiss{background:#6c707c;color:#fff}
+.btn.amber{background:#9a6a00;color:#fff}.btn.dismiss{background:#6c707c;color:#fff}
 .audit{margin-top:4px} .audit table{width:100%}
 .set-card .card-head{display:flex;align-items:center;gap:12px;padding:18px 24px} .set-card .card-head h3{margin:0;font-size:15px} .set-card .card-head small{color:var(--text-muted)}
 .set-body{padding:0 24px 24px;display:grid;grid-template-columns:1fr 1fr;gap:24px} .set-body.c3{grid-template-columns:1fr}
@@ -691,6 +691,40 @@ html[data-design="kokzhol"] .side-link{color:#c9d8df}html[data-design="kokzhol"]
 .table tr.lv-f td{padding-top:0;padding-bottom:8px;background:transparent}
 .table .lv-in{width:100%;min-width:56px;height:26px;border:1px solid var(--border);border-radius:6px;padding:0 6px;font:inherit;font-size:12px;background:var(--bg-surface);color:var(--text)}
 @media (max-width:700px){.lv-bar .lv-name{max-width:none;flex:1 1 140px}.lv-bar .lv-n{margin-left:0;width:100%}}
+/* S3 accessibility (FR-215 / FR-218 / FR-219, screens/002-a11y.js) — contrast tokens (WCAG 2.2 AA, 4.5 : 1 for small text on white
+   and on the pastel tints), focus ring, keyboard dialog, chart tables, high-contrast theme, reduced motion */
+html[data-design]{--text-faint:#5f6b7a;--ok-text:#15803d;--btn-blue:#2563eb;--btn-green:#047857;--btn-red:#c8243c;--btn-orange:#b93d0b;--av-3:#b5461b;--av-5:#13735e;--av-7:#17803d;--chart-axis:#4b5563}
+html[data-design="olymp"]{--primary:#2563eb;--primary-hover:#1d4ed8;--red:#c8243c;--text-muted:#4b5563}
+.help-nav a.on{color:var(--primary-hover)}
+#root input[type=checkbox],#root input[type=radio]{width:18px;height:18px;vertical-align:-3px}   /* WCAG 2.5.8 target size */
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px} .drawer:focus,.a11y-dlg:focus,main:focus{outline:none}
+.btn.primary.idle{background:var(--bg-subtle);color:var(--text-muted);box-shadow:inset 0 0 0 1px var(--border-input)}
+.drawer-head .x,.a11y-dlg .x{background:none;border:0;padding:4px;border-radius:6px;display:inline-flex;cursor:pointer;color:var(--text-muted)} .drawer-head .x:hover,.a11y-dlg .x:hover{background:var(--bg-subtle)}
+.a11y-back{position:fixed;inset:0;z-index:88;background:rgba(15,23,33,.38)}
+.a11y-dlg{position:fixed;z-index:89;top:6vh;left:50%;transform:translateX(-50%);width:min(640px,calc(100vw - 32px));max-height:88vh;overflow:auto;background:var(--bg-card,#fff);border-radius:var(--r-card,8px);box-shadow:var(--sh-pop,0 10px 30px rgba(0,0,0,.2))}
+.a11y-dlg h2{margin:0;font-size:16px} .a11y-body{padding:8px 24px 20px} .a11y-body h3{font-size:14px;margin:16px 0 8px}
+.kbd-tbl td{padding:6px 8px;vertical-align:top} .kbd-tbl tbody tr{cursor:default;height:auto}
+kbd{display:inline-block;min-width:1.6em;padding:1px 6px;border:1px solid var(--border-input);border-bottom-width:2px;border-radius:5px;background:var(--bg-subtle);font:600 12px/1.5 ui-monospace,Consolas,monospace;text-align:center;color:var(--text-strong)}
+.a11y-opt{display:flex;gap:10px;align-items:flex-start;padding:8px 0;cursor:pointer} .a11y-opt input{margin-top:3px;width:18px;height:18px} .a11y-opt small{display:block;color:var(--text-muted);font-size:12px}
+.chart-alt{margin-top:6px;font-size:12px} .chart-alt summary{cursor:pointer;color:var(--link,var(--primary));width:max-content} .chart-alt .table{margin-top:6px;font-size:12px} .chart-alt caption{text-align:left;font-weight:600;padding:4px 0;color:var(--text-strong)} .chart-alt tbody tr{cursor:default;height:auto} .chart-alt th,.chart-alt td{padding:4px 8px}
+.chart-txt{display:block;font-size:11px;color:var(--text-muted);margin-top:4px} html:not([data-contrast="high"]) .chart-txt.quiet{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* high contrast (FR-219): black text, strong borders, underlined links, 3 px focus ring; OS "more contrast" switches it on by default */
+html[data-contrast="high"]{--text-strong:#000;--text-muted:#1f2937;--text-faint:#374151;--border:#4b5563;--border-input:#111827;--bg-page:#fff;--chart-grid:#6b7280;--bg-hover:#e5e7eb}
+html[data-contrast="high"][data-design="olymp"]{--primary:#1e3a8a;--primary-hover:#1e40af;--btn-blue:#1e3a8a;--btn-green:#065f46;--link:#1e3a8a}
+html[data-contrast="high"][data-design="kokzhol"]{--primary:#08434d;--primary-hover:#06343c;--btn-blue:#1e3a8a;--btn-green:#065f46;--link:#08434d}
+html[data-contrast="high"] .card,html[data-contrast="high"] .kpi-tile,html[data-contrast="high"] .select,html[data-contrast="high"] .btn.grey{border:1px solid #4b5563}
+html[data-contrast="high"] .chip{box-shadow:inset 0 0 0 1px currentColor} html[data-contrast="high"] .sub,html[data-contrast="high"] .faint,html[data-contrast="high"] .note{color:#1f2937}
+html[data-contrast="high"] #root a:not(.btn):not(.nav-item):not(.side-link):not(.bb),html[data-contrast="high"] .lnk{text-decoration:underline}
+html[data-contrast="high"] :focus-visible{outline:3px solid #000;outline-offset:2px;box-shadow:0 0 0 5px #fde047}
+html[data-contrast="high"][data-design="kokzhol"] .sidebar :focus-visible{outline-color:#fde047}
+/* reduced motion (FR-219): no transitions, pulsing or smooth scrolling; the OS setting is the default */
+html[data-motion="reduce"] *,html[data-motion="reduce"] *::before,html[data-motion="reduce"] *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+@media (prefers-reduced-motion: reduce){html:not([data-motion="full"]) *,html:not([data-motion="full"]) *::before,html:not([data-motion="full"]) *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media print{.a11y-back,.a11y-dlg,.chart-alt summary{display:none}.chart-alt[open] .table,.chart-alt .table{display:table}}
+html[data-design="kokzhol"] .sidebar .ver{color:#9fb6c2} .hs{min-width:24px;min-height:24px}
+/* a long crumb link ran under the hub filter (axe target-size, WCAG 2.5.8): the crumb is a flex row, the current page ellipsises */
+.crumb{min-width:0;white-space:nowrap;overflow:hidden} @media (min-width:701px){.crumb{display:flex;align-items:center;gap:4px}} .crumb .lnk{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:0 1 auto} .crumb .lnk:first-child{flex:none}
 
 </style></head><body><a class="skip" href="#main-content">Skip to content</a><div id="root"></div><script>
 /* v6 core: i18n, helpers, icons, store + dispatch rules, shell, drawer, router. */
@@ -929,17 +963,17 @@ ${S.role !== 'customer' ? `<a class="side-link" data-act="setRole" data-v="custo
 ${S.role !== 'partner' ? `<a class="side-link" data-act="setRole" data-v="partner">${ic('route', 14)}<span>${esc(T('Портал партнёра', 'Partnerportal', 'Partner portal', 'Серіктес порталы'))}</span></a>` : ''}
 ${S.role !== 'driver' ? `<a class="side-link" data-act="setRole" data-v="driver">${ic('user', 14)}<span>${esc(T('Приложение водителя', 'Fahrer-App', 'Driver app', 'Жүргізуші қосымшасы'))}</span></a>` : ''}
 <a class="side-link" data-act="go" data-v="request">${ic('file', 14)}<span>${esc(T('Публичная заявка и трекинг', 'Öffentliche Anfrage und Tracking', 'Public request and tracking', 'Жария өтінім және трекинг'))}</span></a>
-${shellRole ? '' : `<a class="side-link${S.route === 'help' ? ' on' : ''}" data-act="go" data-v="help">${ic('spark', 14)}<span>${esc(T('Справка', 'Hilfe', 'Help', 'Анықтама'))}</span></a>`}</div>`;
+${shellRole ? '' : `<a class="side-link${S.route === 'help' ? ' on' : ''}" data-act="go" data-v="help">${ic('spark', 14)}<span>${esc(T('Справка', 'Hilfe', 'Help', 'Анықтама'))}</span></a>`}${typeof a11ySideLink === 'function' ? a11ySideLink() : ''}</div>`;
   const USER = { admin: ['Sarah Johnson', 'SJ'], dispatcher: [nm('Айгерим Сапарова'), nm('АС')], warehouse: [nm('Болат Ермеков'), nm('БЕ')], driver: [nm('Ерлан Сейтқали'), nm('ЕС')], auditor: ['Olga Berg', 'OB'], viewer: ['Timur Akhmetov', 'TA'], manager: ['Max Keller', 'MK'], finance: [nm('Дана Жумабаева'), nm('ДЖ')], quality: ['Anna Schulz', 'AS'], customer: [nm('ТОО «Аптека Сервис»'), nm('АС')], partner: [nm('ТОО «ТрансХолод»'), nm('ТХ')] };
   const usr = USER[S.role] || USER.admin;
-  return `<div class="app"><aside class="sidebar${S.sideOpen ? ' open' : ''}">${brand}${nav}${tools}${typeof shellSideExtra === 'function' ? shellSideExtra() : ''}${liveBadge()}<div class="langs">${lang}</div>${ver}</aside>
+  return `<div class="app"><aside class="sidebar${S.sideOpen ? ' open' : ''}" role="navigation" aria-label="${esc(T('Главное меню', 'Hauptmenü', 'Main menu', 'Басты мәзір'))}">${brand}${nav}${tools}${typeof shellSideExtra === 'function' ? shellSideExtra() : ''}${liveBadge()}<div class="langs">${lang}</div>${ver}</aside>
 <main id="main-content"><header class="topbar"><button class="burger" data-act="sideTog" aria-label="Menu" aria-expanded="${S.sideOpen ? 'true' : 'false'}">☰</button><span class="crumb"><a class="lnk" data-act="go" data-v="${homeRoute()}" role="link" tabindex="0">${esc(navLabel(homeRoute()))}</a> › <a class="lnk" data-act="crumb" role="link" tabindex="0"><b>${esc(navLabel(S.route))}</b></a></span>
 <div class="who">${typeof shellSearchBox === 'function' ? shellSearchBox() : `<label class="searchbox">${ic('search', 14)}<input id="gsearch" placeholder="${esc(T('Поиск рейсов, ТС, водителей…', 'Fahrten, Fahrzeuge, Fahrer suchen…', 'Search loads, trucks, drivers…', 'Рейс, КҚ, жүргізуші іздеу…'))}" value="${esc(S.f.q)}"></label>`}${typeof shellTopExtra === 'function' ? shellTopExtra() : ''}
 <button type="button" class="btn grey sm tb-morebtn" data-act="tbMore" aria-expanded="${S.tbMore ? 'true' : 'false'}" aria-label="${esc(T('Ещё: хаб, время, роль, тема', 'Mehr: Hub, Uhrzeit, Rolle, Design', 'More: hub, time, role, theme', 'Тағы: хаб, уақыт, рөл, тақырып'))}">⋯</button><div class="tb-x${S.tbMore ? ' open' : ''}">${typeof shellTopMore === 'function' ? shellTopMore() : ''}
 <label class="rolebox" title="${esc(T('Переключить роль: меню и права меняются сразу', 'Rolle wechseln: Menü und Rechte ändern sich sofort', 'Switch the role: menu and permissions change at once', 'Рөлді ауыстыру'))}">${ic('user', 14)}<span>${esc(T('Роль', 'Rolle', 'Role', 'Рөл'))}</span><select id="roleSel" class="select" aria-label="Role" style="height:32px">${ROLES.map(r => `<option value="${r}"${r === S.role ? ' selected' : ''}>${esc(ROLE_NAME[r])}</option>`).join('')}</select></label><button class="btn grey sm design-btn" data-act="setDesign" title="${S.design === 'kokzhol' ? 'Kökzhol → Olymp' : 'Olymp → Kökzhol'}">${S.design === 'olymp' ? '◐' : '◑'}</button></div><button class="btn grey sm help-top" data-act="helpHere" aria-label="Help" title="${esc(T('Справка по этому экрану', 'Hilfe zu diesem Bildschirm', 'Help for this screen', 'Осы экран анықтамасы'))}">?</button><span class="bell">${ic('bell', 18)}${alertsCount() ? `<span class="badge-count">${alertsCount()}</span>` : ''}</span>
 <div class="usr" data-act="go" data-v="account" role="link" tabindex="0" title="${esc(T('Мой аккаунт', 'Mein Konto', 'My account', 'Менің аккаунтым'))}"><b>${esc(usr[0])}</b><small>${esc(ROLE_NAME[S.role])}</small></div><span class="avatar" style="background:var(--primary)">${esc(usr[1])}</span></div></header>
 <div class="page-head"><div>${typeof shellEyebrow === 'function' ? shellEyebrow() : ''}<h1 class="page-title">${esc(title)}</h1>${sc && sc.sub ? `<p class="page-sub">${esc(sc.sub())}</p>` : ''}</div><div class="actions">${sc && sc.actions ? sc.actions() : ''}</div></div>
-<div class="content">${body}</div></main>${S.sideOpen ? '<div class="side-back" data-act="sideTog"></div>' : ''}${typeof shellOverlays === 'function' ? shellOverlays() : ''}${drawerHtml()}${S.toast ? `<div class="toast ${S.toast.kind}">${esc(S.toast.msg)}</div>` : ''}</div>`;
+<div class="content">${body}</div></main>${S.sideOpen ? '<div class="side-back" data-act="sideTog"></div>' : ''}${typeof shellOverlays === 'function' ? shellOverlays() : ''}${drawerHtml()}${typeof a11yOverlay === 'function' ? a11yOverlay() : ''}${S.toast ? `<div class="toast ${S.toast.kind}" role="status">${esc(S.toast.msg)}</div>` : ''}</div>`;
 }
 function placeholder(id) {
   const ph = NAV.find(n => n[0] === id)[3];
@@ -948,7 +982,8 @@ function placeholder(id) {
 function drawerHtml() {
   const d = S.drawer; if (!d) return '';
   const r = DRAWERS[d.type](d);
-  return `<aside class="drawer open${r.xl ? ' xl' : ''}"><div class="drawer-head"><span>${esc(r.title)}</span><span class="x" data-act="close">${ic('x', 18)}</span></div>${r.html}</aside>`;
+  /* FR-215: the drawer is a labelled modal dialog (focus trap, Esc and focus return in screens/002-a11y.js); the close control is a real button */
+  return `<aside class="drawer open${r.xl ? ' xl' : ''}" role="dialog" aria-modal="true" aria-labelledby="drawer-title" tabindex="-1"><div class="drawer-head"><span id="drawer-title">${esc(r.title)}</span><button type="button" class="x" data-act="close" aria-label="${esc(T('Закрыть', 'Schließen', 'Close', 'Жабу'))}">${ic('x', 18)}</button></div>${r.html}</aside>`;
 }
 const DRAWERS = {};
 
@@ -1010,7 +1045,7 @@ Object.assign(ACT, {
 
 /* Roles & permissions (FR-14/137): 11 roles, permission matrix generated from the source platform (role-perms.json),
    screen / tab gating, role shells (driver, customer, partner use their own menu), role switcher. */
-const VERSION = '6.2.1', BUILD = '2026-10-20 21:20';
+const VERSION = '6.2.1', BUILD = '2026-10-20 21:27';
 const ROLES = ['admin', 'dispatcher', 'warehouse', 'driver', 'auditor', 'viewer', 'manager', 'finance', 'quality', 'customer', 'partner'];
 const ROLE_NAME = {
   admin: T('Администратор', 'Administrator', 'Administrator', 'Әкімші'), dispatcher: T('Диспетчер', 'Disponent', 'Dispatcher', 'Диспетчер'), warehouse: T('Склад', 'Lager', 'Warehouse', 'Қойма'),
@@ -1283,7 +1318,7 @@ S.costs = [
     }
     if (e.key !== 'Escape') return;
     if (typeof HELP !== 'undefined' && HELP.tour) return;   // 70-tours.js handles its own Escape
-    if (S.diag) { S.diag = null; render(); } else if (S.drawer) closeDrawer(); else if (S.tbMore) { S.tbMore = false; render(); } else if (S.sideOpen) { S.sideOpen = false; render(); }
+    if (S.kbd) { S.kbd = false; render(); } else if (S.diag) { S.diag = null; render(); } else if (S.drawer) closeDrawer(); else if (S.tbMore) { S.tbMore = false; render(); } else if (S.sideOpen) { S.sideOpen = false; render(); }
   });
 
   /* ---------- 4. phone bottom bar: 4 screens per role (0.3.10 BOTTOM map translated to the v6 sections) ---------- */
@@ -1428,6 +1463,169 @@ S.costs = [
   }
   const render0 = render;
   render = function () { bannerSync(); render0(); shellAfter(); };
+})();
+
+/* S3 accessibility (docs/OPTIMISATION-FR.md, section E):
+   FR-215 keyboard and focus: drawers and dialogs trap Tab, Esc closes them (001-shell-ext.js), focus returns to the trigger,
+          every data-act control is reachable with Tab, "?" opens the keyboard-shortcut list.
+   FR-218 WCAG 2.2 AA: after every render the a11y pass gives unlabeled fields a name, scrollable regions a tab stop and toggles a
+          name; tests/f0-a11y.js runs axe-core on every screen (axe is a test-only file, never in the product pages).
+   FR-219 high contrast + reduced motion (html[data-contrast] / html[data-motion], OS preference by default, CSS in app.css) and
+          chartAlt(): every chart also as a data table or text. */
+(function () {
+  /* ---------- preferences: OS default, own choice kept in localStorage (not inside test iframes, which must stay isolated) ---------- */
+  const KEY = 'kz-a11y', store = typeof window !== 'undefined' && !window.frameElement;
+  const mq = q => { try { return !!(window.matchMedia && window.matchMedia(q).matches); } catch (_) { return false; } };
+  let saved = {}; if (store) { try { saved = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (_) { saved = {}; } }
+  S.a11y = { hc: saved.hc != null ? !!saved.hc : mq('(prefers-contrast: more)'), rm: saved.rm != null ? !!saved.rm : mq('(prefers-reduced-motion: reduce)') };
+  S.kbd = false;
+  const applyPrefs = () => { const h = document.documentElement; h.dataset.contrast = S.a11y.hc ? 'high' : 'normal'; h.dataset.motion = S.a11y.rm ? 'reduce' : 'full'; };
+  const savePrefs = () => { if (store) { try { localStorage.setItem(KEY, JSON.stringify({ hc: S.a11y.hc, rm: S.a11y.rm })); } catch (_) { /* private mode */ } } };
+  applyPrefs();
+  globalThis.a11yReducedMotion = () => !!S.a11y.rm;
+
+  /* ---------- FR-219: chart as table / text ---------- */
+  const TBL = () => T('Таблица данных', 'Datentabelle', 'Data table', 'Деректер кестесі');
+  /* chartAlt(caption, head[], rows[][]) -> <details data-chart-alt> with a real table; the first cell of a row is its header */
+  globalThis.chartAlt = (caption, head, rows) => `<details class="chart-alt" data-chart-alt><summary>${esc(TBL())}</summary><table class="table chart-tbl"><caption>${esc(caption)}</caption><thead><tr>${head.map(h => `<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((c, i) => (i ? `<td>${esc(c)}</td>` : `<th scope="row">${esc(c)}</th>`)).join('')}</tr>`).join('')}</tbody></table></details>`;
+  /* chartTxt(text) -> one line of text that says what a sparkline shows (screen readers and high contrast read it) */
+  globalThis.chartTxt = (txt, quiet) => `<span class="chart-txt${quiet ? ' quiet' : ''}" data-chart-alt>${esc(txt)}</span>`;   // quiet: for screen readers, shown in high contrast
+
+  /* ---------- FR-215: keyboard-shortcut list (also holds the FR-219 display switches) ---------- */
+  const KEYS = () => [
+    [['?'], T('Открыть этот список', 'Diese Liste öffnen', 'Open this list', 'Осы тізімді ашу')],
+    [['/'], T('Перейти в поиск', 'Zur Suche springen', 'Jump to search', 'Іздеуге өту')],
+    [['Esc'], T('Закрыть окно, карточку или меню; фокус вернётся к кнопке, которая их открыла', 'Fenster, Karte oder Menü schließen; der Fokus kehrt zum auslösenden Element zurück', 'Close a dialog, card or menu; focus returns to the control that opened it', 'Терезені, карточканы немесе мәзірді жабу; фокус ашқан батырмаға оралады')],
+    [['Tab', 'Shift+Tab'], T('Следующий / предыдущий элемент; в открытой карточке фокус остаётся внутри', 'Nächstes / vorheriges Element; in einer offenen Karte bleibt der Fokus darin', 'Next / previous control; inside an open card focus stays in the card', 'Келесі / алдыңғы элемент; ашық карточкада фокус ішінде қалады')],
+    [['Enter', T('Пробел', 'Leertaste', 'Space', 'Бос орын')], T('Нажать ссылку, вкладку, строку таблицы', 'Link, Reiter oder Tabellenzeile auslösen', 'Activate a link, tab or table row', 'Сілтемені, қойындыны, кесте жолын басу')],
+    [['Alt+1…9'], T('Пункт меню 1–9', 'Menüpunkt 1–9', 'Menu item 1–9', 'Мәзір тармағы 1–9')],
+    [['[', ']'], T('Предыдущая / следующая вкладка экрана', 'Vorheriger / nächster Reiter', 'Previous / next tab of the screen', 'Экранның алдыңғы / келесі қойындысы')],
+    [['Alt+Shift+C'], T('Высокий контраст вкл./выкл.', 'Hoher Kontrast an/aus', 'High contrast on/off', 'Жоғары контраст қосу/өшіру')],
+    [['Alt+Shift+M'], T('Меньше анимации вкл./выкл.', 'Weniger Bewegung an/aus', 'Reduced motion on/off', 'Аз анимация қосу/өшіру')],
+  ];
+  globalThis.A11Y_KEYS = KEYS;
+  const kbdLabel = () => T('Клавиатура и отображение', 'Tastatur und Darstellung', 'Keyboard and display', 'Пернетақта және көрініс');
+  globalThis.a11ySideLink = () => `<a class="side-link" data-act="kbdOpen" role="button" tabindex="0" aria-haspopup="dialog" aria-keyshortcuts="Shift+?">${ic('cog', 14)}<span>${esc(kbdLabel())}</span></a>`;
+  const opt = (id, act, on, label, hint) => `<label class="a11y-opt" for="${id}"><input type="checkbox" id="${id}" data-act="${act}"${on ? ' checked' : ''}><span><b>${esc(label)}</b><small>${esc(hint)}</small></span></label>`;
+  globalThis.a11yOverlay = () => !S.kbd ? '' : `<div class="a11y-back" data-act="kbdClose"></div><div class="a11y-dlg" role="dialog" aria-modal="true" aria-labelledby="a11y-h" tabindex="-1" data-a11y-dlg><div class="drawer-head"><h2 id="a11y-h">${esc(kbdLabel())}</h2><button type="button" class="x" data-act="kbdClose" aria-label="${esc(T('Закрыть', 'Schließen', 'Close', 'Жабу'))}">${ic('x', 18)}</button></div>
+<div class="a11y-body"><h3>${esc(T('Сочетания клавиш', 'Tastenkürzel', 'Keyboard shortcuts', 'Пернелер тіркесімі'))}</h3><table class="table kbd-tbl" data-kbd-list><thead><tr><th scope="col">${esc(T('Клавиши', 'Tasten', 'Keys', 'Пернелер'))}</th><th scope="col">${esc(T('Действие', 'Aktion', 'Action', 'Әрекет'))}</th></tr></thead><tbody>${KEYS().map(k => `<tr><td>${k[0].map(x => `<kbd>${esc(x)}</kbd>`).join(' ')}</td><td>${esc(k[1])}</td></tr>`).join('')}</tbody></table>
+<h3>${esc(T('Отображение', 'Darstellung', 'Display', 'Көрініс'))}</h3>${opt('a11y_hc', 'a11yHc', S.a11y.hc, T('Высокий контраст', 'Hoher Kontrast', 'High contrast', 'Жоғары контраст'), T('Тёмный текст, чёткие рамки, подчёркнутые ссылки, толстая рамка фокуса', 'Dunkler Text, klare Rahmen, unterstrichene Links, kräftiger Fokusrahmen', 'Dark text, clear borders, underlined links, thick focus ring', 'Қою мәтін, анық жиектер, асты сызылған сілтемелер, қалың фокус жиегі'))}${opt('a11y_rm', 'a11yRm', S.a11y.rm, T('Меньше анимации', 'Weniger Bewegung', 'Reduced motion', 'Аз анимация'), T('Без переходов, пульсации и автозапуска схем; по умолчанию как в системе', 'Ohne Übergänge, Pulsieren und automatisch laufende Diagramme; Standard wie im System', 'No transitions, pulsing or auto-playing diagrams; follows the system setting by default', 'Өтусіз, бүлкілсіз, сызбалар өздігінен жүрмейді; әдепкіде жүйедегідей'))}
+<p class="note">${esc(T('Каждый график можно открыть как таблицу: кнопка «Таблица данных» под графиком.', 'Jedes Diagramm gibt es auch als Tabelle: „Datentabelle“ unter dem Diagramm.', 'Every chart is also available as a table: "Data table" below the chart.', 'Әр графикті кесте ретінде ашуға болады: графиктің астындағы «Деректер кестесі».'))}</p></div></div>`;
+  const setPref = (k, v) => { S.a11y[k] = v; savePrefs(); applyPrefs(); render(); };
+  Object.assign(ACT, {
+    kbdOpen: () => { S.kbd = true; S.tbMore = false; render(); },
+    kbdClose: () => { S.kbd = false; render(); },
+    a11yHc: (d, el) => setPref('hc', el && el.type === 'checkbox' ? el.checked : !S.a11y.hc),
+    a11yRm: (d, el) => setPref('rm', el && el.type === 'checkbox' ? el.checked : !S.a11y.rm),
+  });
+
+  /* ---------- FR-215: focus memory — which control opened a drawer / dialog, so Esc or ✕ can give focus back ---------- */
+  const SIGK = ['v', 'id', 's', 'k', 'i', 't', 'p'];
+  const sigOf = el => {
+    const t = el && el.closest && el.closest('[data-act],button,a[href],input,select,textarea,[tabindex]'); if (!t || t === document.body) return null;
+    const s = { el: t.id || '', act: (t.dataset && t.dataset.act) || '', d: {} }; SIGK.forEach(k => { if (t.dataset && t.dataset[k] != null) s.d[k] = t.dataset[k]; }); return s.el || s.act ? s : null;
+  };
+  const findSig = s => {
+    if (!s) return null; if (s.el) { const e = document.getElementById(s.el); if (e) return e; } if (!s.act) return null;
+    const q = `[data-act="${CSS.escape(s.act)}"]` + Object.keys(s.d).map(k => `[data-${k}="${CSS.escape(s.d[k])}"]`).join('');
+    return $(q);
+  };
+  const FOC = 'a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),summary,[tabindex]:not([tabindex="-1"])';
+  const shown = e => !!(e.offsetWidth || e.offsetHeight || e.getClientRects().length);
+  const focusables = box => $$(FOC, box).filter(e => shown(e) && !e.closest('[inert],[aria-hidden="true"]'));
+  globalThis.a11yFocusables = focusables;
+  const focusEl = e => { if (!e) return false; if (!e.matches(FOC) && !e.hasAttribute('tabindex')) e.setAttribute('tabindex', '-1'); try { e.focus({ preventScroll: true }); } catch (_) { e.focus(); } return document.activeElement === e; };
+  const topBox = () => $('[data-a11y-dlg]') || $('.login-layer') || $('.drawer.open');
+  let last = null;   // signature of the control the user last pressed
+  document.addEventListener('click', e => { last = sigOf(e.target); }, true);
+  document.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') last = sigOf(e.target); }, true);
+  const A = { drawer: null, kbd: false, dSig: null, kSig: null, dRoute: null };
+  globalThis.a11yFocusState = () => ({ dSig: A.dSig, kSig: A.kSig });
+
+  /* ---------- FR-218: the a11y pass after every render (names, tab stops, roles) ---------- */
+  const txt = s => String(s || '').replace(/\s+/g, ' ').trim();
+  const hasName = el => el.hasAttribute('aria-label') || el.hasAttribute('aria-labelledby') || (el.title && el.title.trim()) || (el.id && document.querySelector(`label[for="${CSS.escape(el.id)}"]`)) || (el.closest('label') && txt(el.closest('label').textContent.replace(el.tagName === 'SELECT' ? el.textContent : '', '')));
+  const ownText = (box, stop) => { let s = ''; for (const n of box.childNodes) { if (n === stop) break; if (n.nodeType === 3) s += n.textContent + ' '; else if (n.nodeType === 1 && !n.matches('input,select,textarea,button,svg,script,style') && !n.querySelector('input,select,textarea')) s += n.textContent + ' '; } return txt(s); };
+  const colHead = el => { const td = el.closest('td'); if (!td) return ''; const tbl = td.closest('table'), th = tbl && tbl.tHead && tbl.tHead.rows[0] && tbl.tHead.rows[0].cells[td.cellIndex]; return th ? txt(th.textContent) : ''; };
+  const nameFor = el => {
+    let n = ownText(el.parentElement, el);
+    if (!n && el.parentElement && el.parentElement.parentElement && !el.parentElement.matches('td,.card,.card-body')) n = ownText(el.parentElement.parentElement, el.parentElement);
+    if (!n) n = colHead(el);
+    if (!n) n = txt(el.getAttribute('placeholder'));
+    if (!n && el.tagName === 'SELECT' && el.options.length) n = txt(el.options[0].textContent);
+    if (!n) { const row = el.closest('tr,.tinted-row,.cfg-row,.row,li'); if (row) n = txt(row.textContent).slice(0, 80); }
+    return (n || T('Поле', 'Feld', 'Field', 'Өріс')).replace(/[:：]\s*$/, '').slice(0, 90);
+  };
+  const NATIVE = /^(A|BUTTON|INPUT|SELECT|TEXTAREA|SUMMARY|OPTION|LABEL)$/;
+  function a11yPass() {
+    const root = $('#root'); if (!root) return;
+    /* 1. form fields without a name get one from the visible text next to them (label, column header, placeholder) */
+    $$('select, textarea, input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset])', root).forEach(el => {
+      if (el.closest('[aria-hidden="true"]') || hasName(el)) return;
+      el.setAttribute('aria-label', nameFor(el));
+    });
+    /* 2. toggles (role=switch / checkbox) without text: name from their row */
+    $$('[role=switch],[role=checkbox]', root).forEach(el => { if (!txt(el.textContent) && !el.hasAttribute('aria-label') && !el.hasAttribute('aria-labelledby')) { const row = el.closest('tr,.cfg-row,.row,label,li,div'); el.setAttribute('aria-label', txt(row ? row.textContent : '').slice(0, 90) || T('Переключатель', 'Schalter', 'Switch', 'Ауыстырғыш')); } });
+    /* 3. every data-act control is reachable with Tab; plain spans / divs act as buttons (Enter / Space: help/00-framework.js) */
+    $$('[data-act]', root).forEach(el => {
+      if (NATIVE.test(el.tagName) || el.hasAttribute('tabindex') || el.matches('.side-back,.a11y-back,.login-layer,.diag-back') || el.closest('[aria-hidden="true"]')) return;
+      el.setAttribute('tabindex', '0');
+      if (!el.hasAttribute('role') && !/^(TR|TD|TH|LI|SVG|G|svg|g|circle|rect|path|text)$/.test(el.tagName) && !el.querySelector('a[href],button,input,select,textarea,[data-act]')) el.setAttribute('role', 'button');
+    });
+    /* 4. aria-pressed / aria-label on an element without a role is not allowed: such pills are toggle buttons */
+    $$('span[aria-pressed]:not([role]),div[aria-pressed]:not([role])', root).forEach(el => { el.setAttribute('role', 'button'); $$('input[type=checkbox]', el).forEach(c => { c.setAttribute('aria-hidden', 'true'); c.tabIndex = -1; }); });
+    $$('div.progress[aria-label]:not([role])', root).forEach(el => { const w = parseFloat((el.firstElementChild && el.firstElementChild.style.width) || el.getAttribute('aria-label')) || 0; el.setAttribute('role', 'progressbar'); el.setAttribute('aria-valuemin', '0'); el.setAttribute('aria-valuemax', '100'); el.setAttribute('aria-valuenow', String(Math.round(w))); });
+    /* 5. regions that scroll get a tab stop so keyboard users can scroll them (WCAG 2.1.1, axe scrollable-region-focusable) */
+    const all = $$('div,section,aside,ul,table,pre', root);
+    for (const el of all) {
+      if (el.hasAttribute('tabindex') || !(el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1)) continue;
+      const cs = getComputedStyle(el), ox = cs.overflowX, oy = cs.overflowY;
+      if (!/(auto|scroll)/.test(ox + oy)) continue;
+      if (el.querySelector(FOC)) continue;
+      el.setAttribute('tabindex', '0');
+      if (!el.hasAttribute('role')) { const h = el.querySelector('h2,h3,h4,caption,th') || (el.parentElement && el.parentElement.querySelector('h2,h3,h4')); el.setAttribute('role', 'region'); el.setAttribute('aria-label', txt(h ? h.textContent : '').slice(0, 80) || T('Прокручиваемая область', 'Scrollbarer Bereich', 'Scrollable area', 'Айналдырылатын аймақ')); }
+    }
+    /* 6. charts: an svg with role=img needs a name (axe svg-img-alt) */
+    $$('svg[role=img]:not([aria-label]):not([aria-labelledby])', root).forEach(el => { const t = el.querySelector('title'); if (!t) el.setAttribute('aria-label', T('График', 'Diagramm', 'Chart', 'График')); });
+  }
+  globalThis.a11yPass = a11yPass;
+
+  /* ---------- render wrapper: preferences, the a11y pass, focus into an opened dialog and back to its trigger.
+     app.js installs it last (a11yInstall), so it wraps every other render hook (shell, driver app, help) ---------- */
+  globalThis.a11yInstall = () => { const render0 = render; render = function () {
+    const before = sigOf(document.activeElement), had = document.activeElement && document.activeElement !== document.body;
+    render0();
+    applyPrefs();
+    try { a11yPass(); } catch (e) { console.error(e); }
+    const box = topBox(), ae = document.activeElement;
+    if (S.kbd && !A.kbd) { A.kSig = last; const d = $('[data-a11y-dlg]'); focusEl((d && focusables(d)[0]) || d); }
+    else if (!S.kbd && A.kbd) focusEl(findSig(A.kSig) || (S.drawer && $('.drawer.open')));
+    else if (S.drawer && !A.drawer) { A.dSig = last; A.dRoute = S.route; const d = $('.drawer.open'); focusEl((d && $('.drawer-tabs [data-act], input, select, textarea', d)) || d); }
+    else if (!S.drawer && A.drawer) { if (S.route === A.dRoute) focusEl(findSig(A.dSig)); }
+    else if (had && (!ae || ae === document.body)) { const e = findSig(before); if (e && (!box || box.contains(e))) focusEl(e); else if (box) focusEl(box); }
+    A.drawer = S.drawer; A.kbd = S.kbd;
+  }; };
+
+  /* ---------- keyboard: focus trap (Tab), shortcuts ---------- */
+  const typing = t => t && (t.isContentEditable || /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Tab') {
+      const box = topBox(); if (!box) return;
+      const f = focusables(box), a = document.activeElement;
+      if (!f.length) { e.preventDefault(); focusEl(box); return; }
+      const first = f[0], lastF = f[f.length - 1];
+      if (!box.contains(a)) { e.preventDefault(); focusEl(e.shiftKey ? lastF : first); }
+      else if (e.shiftKey && (a === first || a === box)) { e.preventDefault(); focusEl(lastF); }
+      else if (!e.shiftKey && a === lastF) { e.preventDefault(); focusEl(first); }
+      return;
+    }
+    if (e.altKey && e.shiftKey && !e.ctrlKey && (e.code === 'KeyC' || e.code === 'KeyM')) { e.preventDefault(); return e.code === 'KeyC' ? setPref('hc', !S.a11y.hc) : setPref('rm', !S.a11y.rm); }
+    if (e.altKey && !e.shiftKey && !e.ctrlKey && /^Digit[1-9]$/.test(e.code)) { const n = navItems()[+e.code.slice(5) - 1]; if (n) { e.preventDefault(); go(n[0]); const m = $('#main-content'); if (m) focusEl(m); } return; }
+    if (e.ctrlKey || e.metaKey || e.altKey || typing(e.target) || (typeof HELP !== 'undefined' && HELP.tour)) return;
+    if (e.key === '?') { e.preventDefault(); S.kbd ? ACT.kbdClose() : ACT.kbdOpen(); }
+    else if (e.key === '/' && !S.kbd && !S.drawer) { const g = $('#gsearch'); if (g) { e.preventDefault(); g.focus(); } else if (ACT.gsTog) { e.preventDefault(); ACT.gsTog(); } }
+    else if ((e.key === '[' || e.key === ']') && !S.kbd && !S.drawer) { const ts = tabsOf(S.route), c = curTab(S.route); if (ts.length > 1) { e.preventDefault(); const i = (ts.indexOf(c) + (e.key === ']' ? 1 : ts.length - 1)) % ts.length; setTab(S.route, ts[i].key); const t = $(`.pill-tab[data-v="${CSS.escape(ts[i].key)}"]`); if (t) focusEl(t); } }
+  });
 })();
 
 /* Q3 · Explanatory notes from 0.3.10: the "?" help bubbles (reference data TIPS) and the inline "how it works / why" lines that v6 did not have yet.
@@ -2694,7 +2892,7 @@ ${howNote('ibDem')}
   DRAWERS.ibGate = d => {
     const j = J(d.id), c = calc(j), z = ZONES[j.zone], x = ibx(j), lg = x.logger, st = recState(j);
     const spark = lg ? (() => { const W = 260, Hh = 60, lo = Math.min(z.lo, lg.min) - 1, hi = Math.max(z.hi, lg.max) + 1, y = t => Hh - (t - lo) / (hi - lo) * Hh, xs = i => i * W / (lg.pts.length - 1);
-      return `<svg viewBox="0 0 ${W} ${Hh}" width="100%" height="${Hh}" role="img" aria-label="logger"><rect x="0" y="${y(z.hi)}" width="${W}" height="${y(z.lo) - y(z.hi)}" fill="var(--chip-green-bg,#e7f6ec)"/><polyline fill="none" stroke="var(--primary)" stroke-width="2" points="${lg.pts.map((p, i) => xs(i) + ',' + y(p.t)).join(' ')}"/>${lg.pts.map((p, i) => p.t < z.lo || p.t > z.hi ? `<circle cx="${xs(i)}" cy="${y(p.t)}" r="3" fill="var(--red)"/>` : '').join('')}</svg>`; })() : '';
+      return `<svg viewBox="0 0 ${W} ${Hh}" width="100%" height="${Hh}" role="img" data-chart aria-label="${esc(T('Кривая логгера', 'Loggerkurve', 'Logger curve', 'Логгер қисығы'))}"><rect x="0" y="${y(z.hi)}" width="${W}" height="${y(z.lo) - y(z.hi)}" fill="var(--chip-green-bg,#e7f6ec)"/><polyline fill="none" stroke="var(--primary)" stroke-width="2" points="${lg.pts.map((p, i) => xs(i) + ',' + y(p.t)).join(' ')}"/>${lg.pts.map((p, i) => p.t < z.lo || p.t > z.hi ? `<circle cx="${xs(i)}" cy="${y(p.t)}" r="3" fill="var(--red)"/>` : '').join('')}</svg>${typeof chartTxt === 'function' ? chartTxt(T('Логгер: мин. ', 'Logger: min. ', 'Logger: min ', 'Логгер: мин. ') + String(lg.min).replace('.', ',') + ' °C, ' + T('макс. ', 'max. ', 'max ', 'макс. ') + String(lg.max).replace('.', ',') + ' °C, ' + T('вне диапазона: ', 'außerhalb: ', 'out of range: ', 'диапазоннан тыс: ') + lg.pts.filter(p => p.t < z.lo || p.t > z.hi).length + ' / ' + lg.pts.length) : ''}`; })() : '';
     const recHtml = !st ? `<button class="btn primary sm" data-act="ibRecStart" data-id="${j.id}">${esc(T('Начать сверку SSCC', 'SSCC-Abgleich starten', 'Start SSCC reconciliation', 'SSCC салыстыруды бастау'))}</button>`
       : `<div class="kv">${kv(T('Ожидается', 'Erwartet', 'Expected', 'Күтіледі'), st.exp)}${kv(T('Отсканировано', 'Gescannt', 'Scanned', 'Сканерленді'), st.ok)}${kv(T('Недостача', 'Fehlmenge', 'Missing', 'Жетіспейді'), st.miss.length)}${kv(T('Чужие / ошибка', 'Fremd / Fehler', 'Foreign / invalid', 'Бөгде / қате'), st.foreign + ' / ' + st.bad)}</div>
 ${st.closed ? `<p>${chip(st.clean ? 'green' : 'yellow', st.clean ? T('сверка закрыта без расхождений', 'Abgleich ohne Abweichung geschlossen', 'closed without mismatch', 'сәйкессіздіксіз жабылды') : T('закрыта с расхождением', 'mit Abweichung geschlossen', 'closed with mismatch', 'сәйкессіздікпен жабылды'))}</p>` : `<div class="actbar" style="margin-top:8px"><input class="select" id="ibg_scan" style="width:220px" placeholder="${esc(T('скан (00) + 18 цифр', 'Scan (00) + 18 Ziffern', 'scan (00) + 18 digits', 'скан (00) + 18 сан'))}"><button class="btn sm primary" data-act="ibScan" data-id="${j.id}">${esc(T('Скан', 'Scan', 'Scan', 'Скан'))}</button><button class="btn sm grey" data-act="ibScanAll" data-id="${j.id}">${esc(T('Скан всех (демо)', 'Alle scannen (Demo)', 'Scan all (demo)', 'Барлығын скан (демо)'))}</button></div>
@@ -2839,7 +3037,7 @@ ${l.pod === 'submitted' && ex > 0 ? `<div class="drawer-section"><div class="tin
   seed({ cust: 'c5', route: HUBS.KAR.city + ' → ' + HUBS.AST.city, zone: 'ambient', total: 1478400, created: '2026-10-08', esf: 'issued' });
   ['LD-2026-001841', 'LD-2026-001843', 'LD-2026-001842'].forEach((id, k) => { const l = load(id), i = buildInvoice({ load: id, cust: l.cust, route: HUBS[l.from].city + ' → ' + HUBS[l.to].city, zone: l.zone, total: revenue(l), created: ['2026-10-17', '2026-10-16', '2026-10-16'][k], paidAt: k === 1 ? '2026-10-17' : null }); S.invoices.push(i); });
   const aging = i => { if (status(i) !== 'overdue') return 'cur'; const d = days(i); return d <= 30 ? '1' : d <= 60 ? '31' : d <= 90 ? '61' : '90'; };
-  const rel = i => { const s = status(i), d = days(i); return s === 'paid' ? `<span style="color:#2a9d52">${esc(T('Оплачен ', 'Bezahlt ', 'Paid ', 'Төленді '))}${fd(i.paidAt)}</span>` : s === 'overdue' ? `<span style="color:var(--label-red)">${d} ${esc(T('дн. просрочки', 'T. überfällig', 'days overdue', 'күн мерзімі өтті'))}</span>` : `<span class="faint">${-d} ${esc(T('дн. осталось', 'T. verbleibend', 'days remaining', 'күн қалды'))}</span>`; };
+  const rel = i => { const s = status(i), d = days(i); return s === 'paid' ? `<span style="color:var(--ok-text)">${esc(T('Оплачен ', 'Bezahlt ', 'Paid ', 'Төленді '))}${fd(i.paidAt)}</span>` : s === 'overdue' ? `<span style="color:var(--label-red)">${d} ${esc(T('дн. просрочки', 'T. überfällig', 'days overdue', 'күн мерзімі өтті'))}</span>` : `<span class="faint">${-d} ${esc(T('дн. осталось', 'T. verbleibend', 'days remaining', 'күн қалды'))}</span>`; };
   const sel = (key, label, opts) => `<label>${esc(label)}:</label><select class="select" data-bf="${key}">${opts.map(o => `<option value="${esc(o[0])}"${F[key] === o[0] ? ' selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
   const ALL = T('Все', 'Alle', 'All', 'Барлығы');
   const invs = () => S.invoices.filter(i => (!F.st || status(i) === F.st) && (!F.cust || i.cust === F.cust) && (!F.age || aging(i) === F.age) && (!F.from || i.created >= F.from) && (!F.to || i.created <= F.to));
@@ -2980,7 +3178,7 @@ ${l.pod === 'submitted' && ex > 0 ? `<div class="drawer-section"><div class="tin
       r('rev', 'fin', T('Выручка', 'Umsatz', 'Revenue', 'Түсім'), T('6 месяцев', '6 Monate', 'Last 6 months', '6 ай'), chart({ id: 4, type: 'area', labels: mo, series: [f3], colors: ['var(--chart-line)'], min: 0, max: hi(f3, Math.max(1e6, Math.ceil(Math.max(...f3) / 5 / 1e6) * 1e6)), step: Math.max(1e6, Math.ceil(Math.max(...f3) / 5 / 1e6) * 1e6), tips: f3.map((v, i) => mo[i] + ': ' + mio(v)) }),
         [tone(mio(net), T('Выручка (без НДС)', 'Umsatz (netto)', 'Total revenue', 'Түсім (ҚҚС-сіз)'), 'g'), tone(sg(net / (f3[4] || 1) * 100 - 100), T('Рост к мес.', 'Wachstum', 'Growth rate', 'Өсім'), 'b'), tone(String(I.length), T('Счетов', 'Rechnungen', 'Invoices', 'Шоттар'), 'k')],
         tone(mio(I.reduce((s, i) => s + i.vat, 0)), T('НДС 12 %', 'MwSt 12 %', 'VAT 12 %', 'ҚҚС 12 %'), 'k'), ir(I), icols),
-      r('mrg', 'fin', T('Маржа по маршрутам', 'Marge je Route', 'Margin analysis', 'Маржа талдауы'), T('3 месяца', '3 Monate', 'Last 3 months', '3 ай'), chart({ id: 5, type: 'stack', labels: mo.slice(3), series: [[nm - 1.1, nm - 0.6, nm], [6.6, 6.1, 5.5]], colors: ['var(--chart-mint)', 'var(--chart-sky)'], min: 0, max: Math.max(10, Math.ceil((mg + 4) / 10) * 10), step: Math.max(10, Math.ceil((mg + 4) / 10) * 10) / 5 }),
+      r('mrg', 'fin', T('Маржа по маршрутам', 'Marge je Route', 'Margin analysis', 'Маржа талдауы'), T('3 месяца', '3 Monate', 'Last 3 months', '3 ай'), chart({ id: 5, type: 'stack', labels: mo.slice(3), series: [[nm - 1.1, nm - 0.6, nm], [6.6, 6.1, 5.5]], colors: ['var(--chart-mint)', 'var(--chart-sky)'], names: [T('Чистая маржа, %', 'Nettomarge, %', 'Net margin, %', 'Таза маржа, %'), T('До валовой маржи, %', 'Bis Bruttomarge, %', 'To gross margin, %', 'Жалпы маржаға дейін, %')], min: 0, max: Math.max(10, Math.ceil((mg + 4) / 10) * 10), step: Math.max(10, Math.ceil((mg + 4) / 10) * 10) / 5 }),
         [tone(pc(mg), T('Валовая маржа', 'Bruttomarge', 'Gross margin', 'Жалпы маржа'), 'g'), tone(pc(nm), T('Чистая маржа', 'Nettomarge', 'Net margin', 'Таза маржа'), 'b'), tone('+' + dec('1.3') + ' %', T('к прошлому кв.', 'ggü. Vorquartal', 'vs last quarter', 'өткен тоқсанға'), 'k')],
         tone(mio(cst), T('Затраты', 'Kosten', 'Costs', 'Шығыстар'), 'k'), ir(I), icols),
       r('acc', 'fin', T('Дополнительные услуги', 'Zusatzleistungen', 'Accessorials', 'Қосымша қызметтер'), T('30 дней', '30 Tage', 'Last 30 days', '30 күн'), chart({ id: 6, type: 'bars', labels: [T('Реф', 'Kühl', 'Reefer', 'Реф'), T('Топливо', 'Treibst.', 'Fuel', 'Отын'), 'Standgeld'], series: [[reefer / 1e3, fuel / 1e3, det / 1e3]], colors: ['var(--chart-amber)', 'var(--chart-amber)', '#f8d080'], min: 0, max: hi([reefer / 1e3, fuel / 1e3, det / 1e3], Math.max(100, Math.ceil(Math.max(reefer, fuel, det) / 1e3 / 5 / 100) * 100)), step: Math.max(100, Math.ceil(Math.max(reefer, fuel, det) / 1e3 / 5 / 100) * 100), tips: [mio(reefer), mio(fuel), mio(det)] }),
@@ -2997,7 +3195,12 @@ ${l.pod === 'submitted' && ex > 0 ? `<div class="drawer-section"><div class="tin
   const csvText = rows => '﻿' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';')).join('\n');
   const dl = (name, text, mime) => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: mime })); a.download = name; a.click(); };
   const pdfDemo = () => toast(T('PDF формируется на сервере — в прототипе доступны CSV и JSON', 'PDF entsteht serverseitig — im Prototyp sind CSV und JSON verfügbar', 'PDF is rendered server-side — CSV and JSON are available in the prototype', 'PDF серверде жасалады — прототипте CSV және JSON қолжетімді'));
-  const card = c => `<div class="card report-card" data-id="${c.id}"><div class="rh"><h4>${esc(c.title)}</h4>${chip('gray', c.period)}</div><div class="chart">${c.ch}</div><div class="kpi3">${c.k.map(kp).join('')}</div>
+  /* FR-219: every chart also as a table (chartAlt in screens/002-a11y.js); the svg is named after its card */
+  const coOf = id => CO[['otif', 'exc', 'drv', 'rev', 'mrg', 'acc'].indexOf(id) + 1];
+  const fv = v => (Math.abs(v) >= 1000 ? nf(v) : dec(String(+(+v).toFixed(1))));
+  const chartTbl = (co, cap) => !co || typeof chartAlt !== 'function' ? '' : chartAlt(cap, [T('Период / категория', 'Zeitraum / Kategorie', 'Period / category', 'Кезең / санат')].concat(co.names || (co.series.length > 1 ? co.series.map((x, k) => T('Ряд ', 'Reihe ', 'Series ', 'Қатар ') + (k + 1)) : [T('Значение', 'Wert', 'Value', 'Мән')])), co.labels.map((l, i) => [l].concat(co.series.map(x => fv(x[i])))));
+  const named = (svg, t) => svg.replace('role="img">', `role="img" aria-label="${esc(t)}" data-chart>`);
+  const card = c => `<div class="card report-card" data-id="${c.id}"><div class="rh"><h4>${esc(c.title)}</h4>${chip('gray', c.period)}</div><div class="chart">${named(c.ch, c.title + ' · ' + c.period)}</div>${chartTbl(coOf(c.id), c.title + ' · ' + c.period)}<div class="kpi3">${c.k.map(kp).join('')}</div>
 <div class="ra"><div class="ex"><button class="xchip pdf" data-act="rPdf">PDF</button><button class="xchip csv" data-act="rCsv" data-id="${c.id}">CSV</button></div><a class="lnk" data-act="rOpen" data-id="${c.id}">View Details</a></div><div class="center-link"><a class="lnk" data-act="rSum" data-id="${c.id}">Toggle AI Summary</a></div>${R.sum[c.id] ? `<div class="aisum">${esc(sumTxt(c))}</div>` : ''}</div>`;
   const sel = (k, lab, opts) => `<label>${esc(lab)}</label><select class="select" data-rf="${k}">${opts.map(o => `<option value="${esc(o[0])}"${R[k] === o[0] ? ' selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
   SCREENS.reports = {
@@ -3014,7 +3217,7 @@ ${l.pod === 'submitted' && ex > 0 ? `<div class="drawer-section"><div class="tin
     const c = cards().find(x => x.id === d.id), co = CO[['otif', 'exc', 'drv', 'rev', 'mrg', 'acc'].indexOf(c.id) + 1];
     const wide = chart(Object.assign({}, co, { w: 720, h: 220, dots: co.dots || 'var(--chart-line)' }));
     const ex = c.k.concat([c.extra]), stCol = 5;
-    return { title: c.title + ' – ' + T('подробно', 'Details', 'Detailed View', 'толық'), xl: true, html: `<div class="drawer-section"><div style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:8px"><button class="btn sm red" data-act="rPdf">PDF</button><button class="btn sm green" data-act="rCsv" data-id="${c.id}">Excel</button></div><div class="chart">${wide}</div></div>
+    return { title: c.title + ' – ' + T('подробно', 'Details', 'Detailed View', 'толық'), xl: true, html: `<div class="drawer-section"><div style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:8px"><button class="btn sm red" data-act="rPdf">PDF</button><button class="btn sm green" data-act="rCsv" data-id="${c.id}">Excel</button></div><div class="chart">${named(wide, c.title)}</div>${chartTbl(co, c.title + ' · ' + c.period)}</div>
 <div class="drawer-section"><div class="kpi4">${ex.map(kp).join('')}</div></div>
 <div class="drawer-section"><h4>${esc(T('Детальные данные', 'Detaildaten', 'Detailed Data', 'Толық деректер'))}</h4><div class="tcard"><table class="table"><thead><tr>${c.cols.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${c.rows.slice(0, 8).map(r => `<tr style="cursor:default">${r.map((v, i) => `<td>${(i === stCol && c.g === 'op') || (i === 6 && c.g === 'fin') ? stChip(v) : esc(v)}</td>`).join('')}</tr>`).join('') || `<tr><td colspan="${c.cols.length}" class="empty">${esc(T('Нет данных', 'Keine Daten', 'No data', 'Дерек жоқ'))}</td></tr>`}</tbody></table></div></div>
 <div class="drawer-section"><h4>Raw Data Export</h4><div style="display:flex;flex-direction:column;gap:8px"><button class="btn red block" data-act="rPdf">Export PDF</button><button class="btn green block" data-act="rCsv" data-id="${c.id}">Export Excel</button><button class="btn primary block" data-act="rJson" data-id="${c.id}">Export JSON</button>${c.g === 'op' ? `<button class="btn grey block" data-act="rGdp" data-id="${c.id}">${esc(T('Лог температуры GDP (CSV)', 'GDP-Temperaturlog (CSV)', 'GDP temperature log (CSV)', 'GDP температура журналы (CSV)'))}</button>` : ''}</div></div>` };
@@ -3162,7 +3365,7 @@ ${prm('params.shift', T('Максимум смены', 'Maximale Schicht', 'Maxi
   SCREENS.settings = {
     title: () => navLabel('settings'),
     sub: () => T('Центр конфигурации и управления', 'Konfigurations- und Governance-Center', 'Company Configuration & Governance Center', 'Конфигурация және басқару орталығы'),
-    actions: () => `<span class="dirty${dirty() ? ' on' : ''}" id="dirtyChip"><i class="dot warn"></i>${esc(T('Есть несохранённые изменения', 'Ungespeicherte Änderungen', 'Unsaved changes', 'Сақталмаған өзгерістер'))}</span><button class="btn grey" data-act="cfgExport">${esc(T('Экспорт конфигурации', 'Konfiguration exportieren', 'Export Configuration', 'Конфигурацияны экспорттау'))}</button><button class="btn primary" data-act="cfgSave"${dirty() ? '' : ' style="opacity:.6"'}>${esc(T('Сохранить всё', 'Alles speichern', 'Save All Changes', 'Барлығын сақтау'))}</button>`,
+    actions: () => `<span class="dirty${dirty() ? ' on' : ''}" id="dirtyChip"><i class="dot warn"></i>${esc(T('Есть несохранённые изменения', 'Ungespeicherte Änderungen', 'Unsaved changes', 'Сақталмаған өзгерістер'))}</span><button class="btn grey" data-act="cfgExport">${esc(T('Экспорт конфигурации', 'Konfiguration exportieren', 'Export Configuration', 'Конфигурацияны экспорттау'))}</button><button class="btn primary${dirty() ? '' : ' idle'}" data-act="cfgSave">${esc(T('Сохранить всё', 'Alles speichern', 'Save All Changes', 'Барлығын сақтау'))}</button>`,
     body: () => cCompany() + cInteg() + cNotify() + cAI() + cSec() + cSrc(),
   };
   DRAWERS.integ = d => { const x = CFG.cur.integ[d.i]; return { title: x.t, html: `<div class="drawer-section"><div class="ident">${tile(x.ic, '', '', x.tint)}<div><b>${esc(x.p)}</b><div class="sub">${esc(ago(x.m))}</div></div></div><div class="kv"><div><small>${esc(T('Статус', 'Status', 'Status', 'Күйі'))}</small>${chip('green', T('Подключено', 'Verbunden', 'Connected', 'Қосылған'))}</div><div><small>${esc(T('Последняя синхронизация', 'Letzte Synchronisation', 'Last sync', 'Соңғы синхрондау'))}</small><b>${esc(ago(x.m))}</b></div></div></div><div class="drawer-section actbar"><button class="btn primary" data-act="intSync" data-i="${d.i}">${esc(T('Синхронизировать', 'Jetzt synchronisieren', 'Sync now', 'Синхрондау'))}</button><button class="btn red" data-act="intOff" data-i="${d.i}">${esc(T('Отключить', 'Trennen', 'Disconnect', 'Ажырату'))}</button></div>` }; };
@@ -3186,7 +3389,7 @@ ${prm('params.shift', T('Максимум смены', 'Maximale Schicht', 'Maxi
       toast(T('Настройки сохранены и применены', 'Einstellungen gespeichert und angewendet', 'Settings saved and applied', 'Баптаулар сақталды және қолданылды'));
     },
   });
-  const paint = () => { const c = $('#dirtyChip'); if (c) c.classList.toggle('on', dirty()); const b = $('[data-act=cfgSave]'); if (b) b.style.opacity = dirty() ? '' : '.6'; };
+  const paint = () => { const c = $('#dirtyChip'); if (c) c.classList.toggle('on', dirty()); const b = $('[data-act=cfgSave]'); if (b) b.classList.toggle('idle', !dirty()); };   // FR-218: "nothing to save" keeps readable contrast (no opacity)
   const read = el => (el.dataset.num ? (el.value === '' ? NaN : +el.value) : el.value);
   document.addEventListener('input', e => {
     const el = e.target, p = el.dataset && el.dataset.cf; if (!p || S.route !== 'settings') return;
@@ -3251,7 +3454,7 @@ ${prm('params.shift', T('Максимум смены', 'Maximale Schicht', 'Maxi
   const head = (mod, ic_, tint, title, src) => `<div class="card-head"><span class="itile ${tint}">${ic(ic_, 18)}</span><h3>${esc(title)}</h3>${chip('gray', 'Data Source: ' + src)}</div>`;
   const off = (m) => `<div class="ai-body"><p class="note">${esc(T('Модуль отключён в Settings → AI & Automation.', 'Modul in Settings → AI & Automation deaktiviert.', 'Module is switched off in Settings → AI & Automation.', 'Модуль Settings → AI & Automation бөлімінде өшірілген.'))} <a class="lnk" data-act="aiSet">${esc(T('Открыть', 'Öffnen', 'Open', 'Ашу'))}</a></p></div>`;
   const none = () => `<p class="note">${esc(T('Сейчас рекомендаций нет.', 'Derzeit keine Empfehlungen.', 'No recommendations right now.', 'Қазір ұсыныс жоқ.'))}</p>`;
-  const money = a => a === 0 ? '' : `<span class="amt" style="color:${a < 0 ? 'var(--label-red)' : '#2a9d52'}">${a < 0 ? '−' : '+'}${nf(Math.abs(a))} ₸</span>`;
+  const money = a => a === 0 ? '' : `<span class="amt" style="color:${a < 0 ? 'var(--label-red)' : 'var(--ok-text)'}">${a < 0 ? '−' : '+'}${nf(Math.abs(a))} ₸</span>`;
 
   function card1() {
     if (!aiOn('match')) return off();
@@ -3436,10 +3639,13 @@ ${ex && CFG.cur.ai.expl ? `<p class="why"><i>${esc(T('Почему: ТС под�
   const lvOf = (v, lo, hi, major) => (v < lo || v > hi ? (major ? 3 : 2) : (v - lo < 0.8 || hi - v < 0.8) ? 1 : 0);
   const vehLvl = t => { const l = thLoad(t); return !l ? 0 : tempState(l) === 'breach' ? 3 : tempState(l) === 'warn' ? 1 : 0; };
   const degC = v => (v > 0 ? '+' : '') + dec(v) + ' °C';
+  /* FR-219: the chart as a table — minimum, maximum and current value per series */
+  const thAlt = (t, h, z) => typeof chartAlt !== 'function' ? '' : chartAlt(T('История температуры', 'Temperaturverlauf', 'Temperature history', 'Температура тарихы') + ' ' + t.plate, [T('Ряд', 'Reihe', 'Series', 'Қатар'), T('Мин.', 'Min.', 'Min', 'Мин.'), T('Макс.', 'Max.', 'Max', 'Макс.'), T('Сейчас', 'Jetzt', 'Now', 'Қазір')],
+    [[T('Камера 1 · ', 'Kammer 1 · ', 'Chamber 1 · ', '1-камера · ') + z.label, h.cold], [T('Камера 2 · 15–25 °C', 'Kammer 2 · 15–25 °C', 'Chamber 2 · 15–25 °C', '2-камера · 15–25 °C'), h.amb], [T('Наружная', 'Außen', 'Outside', 'Сыртқы'), h.out]].map(([n, a]) => [n, degC(Math.min(...a)), degC(Math.max(...a)), degC(a[a.length - 1])]));
   function thChart(t) {
     const h = thHist(t), l = thLoad(t), z = l ? ZONES[l.zone] : ZONES.pharma, all = h.cold.concat(h.amb, h.out), lo = Math.min(-15, z.lo - 5, ...all), hi = Math.max(35, z.hi + 5, ...all), W = 480, H = 160, y = v => H - (v - lo) / (hi - lo) * H, pts = a => a.map((v, i) => (i * W / 47).toFixed(1) + ',' + y(v).toFixed(1)).join(' ');
-    return `<div class="th-chart" data-th-chart="${t.id}"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="${esc(T('История температуры', 'Temperaturverlauf', 'Temperature history', 'Температура тарихы'))} ${esc(t.plate)}"><rect x="0" y="${y(25).toFixed(1)}" width="${W}" height="${(y(15) - y(25)).toFixed(1)}" fill="var(--tint-yellow-100)" opacity=".7"/><rect x="0" y="${y(z.hi).toFixed(1)}" width="${W}" height="${(y(z.lo) - y(z.hi)).toFixed(1)}" fill="var(--temp-ok-bg)"/><line x1="0" x2="${W}" y1="${y(0).toFixed(1)}" y2="${y(0).toFixed(1)}" stroke="#94a3b8" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/><polyline points="${pts(h.out)}" fill="none" stroke="#94a3b8" stroke-width="1.5" vector-effect="non-scaling-stroke"/><polyline points="${pts(h.amb)}" fill="none" stroke="var(--chart-amber)" stroke-width="2" vector-effect="non-scaling-stroke"/><polyline points="${pts(h.cold)}" fill="none" stroke="var(--chart-blue)" stroke-width="2.2" vector-effect="non-scaling-stroke"/></svg>
-<div class="th-legend"><span><i style="background:var(--chart-blue)"></i>${esc(T('Камера 1 · ', 'Kammer 1 · ', 'Chamber 1 · ', '1-камера · '))}${z.label}</span><span><i style="background:var(--chart-amber)"></i>${esc(T('Камера 2 · 15–25 °C', 'Kammer 2 · 15–25 °C', 'Chamber 2 · 15–25 °C', '2-камера · 15–25 °C'))}</span><span><i style="background:#94a3b8"></i>${esc(T('Наружная', 'Außen', 'Outside', 'Сыртқы'))}</span><span><i style="background:var(--temp-ok-bg);border:1px solid #86efac"></i>${esc(T('полосы — допустимые диапазоны', 'Bänder — zulässige Bereiche', 'bands — allowed ranges', 'жолақтар — рұқсат диапазондары'))}</span><span><i style="background:#94a3b8;height:1px"></i>0 °C</span></div></div>`;
+    return `<div class="th-chart" data-th-chart="${t.id}"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" data-chart role="img" aria-label="${esc(T('История температуры', 'Temperaturverlauf', 'Temperature history', 'Температура тарихы'))} ${esc(t.plate)}"><rect x="0" y="${y(25).toFixed(1)}" width="${W}" height="${(y(15) - y(25)).toFixed(1)}" fill="var(--tint-yellow-100)" opacity=".7"/><rect x="0" y="${y(z.hi).toFixed(1)}" width="${W}" height="${(y(z.lo) - y(z.hi)).toFixed(1)}" fill="var(--temp-ok-bg)"/><line x1="0" x2="${W}" y1="${y(0).toFixed(1)}" y2="${y(0).toFixed(1)}" stroke="#94a3b8" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/><polyline points="${pts(h.out)}" fill="none" stroke="#94a3b8" stroke-width="1.5" vector-effect="non-scaling-stroke"/><polyline points="${pts(h.amb)}" fill="none" stroke="var(--chart-amber)" stroke-width="2" vector-effect="non-scaling-stroke"/><polyline points="${pts(h.cold)}" fill="none" stroke="var(--chart-blue)" stroke-width="2.2" vector-effect="non-scaling-stroke"/></svg>
+<div class="th-legend"><span><i style="background:var(--chart-blue)"></i>${esc(T('Камера 1 · ', 'Kammer 1 · ', 'Chamber 1 · ', '1-камера · '))}${z.label}</span><span><i style="background:var(--chart-amber)"></i>${esc(T('Камера 2 · 15–25 °C', 'Kammer 2 · 15–25 °C', 'Chamber 2 · 15–25 °C', '2-камера · 15–25 °C'))}</span><span><i style="background:#94a3b8"></i>${esc(T('Наружная', 'Außen', 'Outside', 'Сыртқы'))}</span><span><i style="background:var(--temp-ok-bg);border:1px solid #86efac"></i>${esc(T('полосы — допустимые диапазоны', 'Bänder — zulässige Bereiche', 'bands — allowed ranges', 'жолақтар — рұқсат диапазондары'))}</span><span><i style="background:#94a3b8;height:1px"></i>0 °C</span></div>${thAlt(t, h, z)}</div>`;
   }
   function temp() {
     const L = hubL(live()), n = k => L.filter(l => tempState(l) === k).length, vs = thVeh(), t = thSel();
@@ -4963,7 +5169,7 @@ ${howNote('gate')}${o.inbox.length ? `<h4 style="margin:12px 0 6px;font-size:13p
   const css = document.createElement('style');
   css.textContent = `.ex-row{display:grid;grid-template-columns:80px minmax(0,1.2fr) minmax(0,1.5fr) 170px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}.ex-slot{display:inline-flex;gap:4px;align-items:center;border:1px solid var(--border);border-radius:999px;padding:2px 8px;margin:2px 4px 2px 0;font-size:12px}.ex-slot.done{background:var(--tint-green-50)}.ex-slot.mine{border-color:var(--primary);color:var(--primary)}.ex-slot.rej{background:var(--tint-red-50)}
 .pl-tbl{display:grid;grid-template-columns:180px repeat(7,minmax(0,1fr));gap:4px;font-size:12px}.pl-tbl .c{padding:8px 6px;border-radius:6px;text-align:center;background:var(--bg-subtle)}.pl-tbl .l{padding:8px 6px;font-weight:600}.pl-tbl .ok{background:var(--tint-green-50)}.pl-tbl .warn{background:var(--tint-yellow-50)}.pl-tbl .crit{background:var(--tint-red-50);color:var(--label-red)}.pl-tbl .hd{color:var(--text-faint);text-align:center}.pl-tbl .off{color:var(--text-faint)}
-.pl-sc{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--border);border-radius:var(--r-btn);padding:8px 12px;margin:0 8px 8px 0;cursor:pointer;font-size:13px}.pl-sc.on{border-color:var(--primary);background:var(--tint-blue-50)}.pl-sc small{display:block;color:var(--text-muted)}`;
+.pl-sc{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--border);border-radius:var(--r-btn);padding:8px 12px;margin:0 8px 8px 0;cursor:pointer;font-size:13px}.pl-sc.on{border-color:var(--primary);background:var(--tint-blue-50)}.pl-sc small{display:block;color:var(--text-muted)}.pl-box{display:inline-grid;place-items:center;flex:none;width:16px;height:16px;border:1.5px solid var(--border-input);border-radius:3px;font-style:normal;font-size:12px;line-height:1;color:#fff}.pl-sc.on .pl-box{background:var(--primary);border-color:var(--primary)}`;
   document.head.appendChild(css);
   const PAL = T('пал.', 'Pal.', 'pal.', 'пал.');
   /* ---------- load drawer: release gate, unassign, replan (additive hook on DRAWERS.load) ---------- */
@@ -5035,7 +5241,7 @@ ${open.map(row).join('') || `<p class="note">${esc(T('Открытых эксп�
   }
   function extras() {
     const target = S.ops.target, rows = capacity(target), cur = target ? capacity(false) : null;
-    const scen = `<div>${Object.keys(SCEN).map(k => `<span class="pl-sc${S.ops.scen[k] ? ' on' : ''}" data-act="plScen" data-v="${k}" data-scen="${k}" aria-pressed="${!!S.ops.scen[k]}"><input type="checkbox" tabindex="-1"${S.ops.scen[k] ? ' checked' : ''}><span><b>${esc(SCEN[k][0])}</b><small>${esc(SCEN[k][1])}</small></span></span>`).join('')}<span class="pl-sc${target ? ' on' : ''}" data-act="plTarget" aria-pressed="${target}"><input type="checkbox" tabindex="-1"${target ? ' checked' : ''}><span><b>${esc(T('Целевой парк: 4 ТС 10 т', 'Zielflotte: 4 Fahrzeuge 10 t', 'Target fleet: 4 trucks 10 t', 'Мақсатты парк: 4 КҚ 10 т'))}</b><small>HOWO T5G ×2 (16 ${esc(PAL)}) + JAC N120 ×2 (14 ${esc(PAL)})</small></span></span></div>`;
+    const scen = `<div>${Object.keys(SCEN).map(k => `<span class="pl-sc${S.ops.scen[k] ? ' on' : ''}" data-act="plScen" data-v="${k}" data-scen="${k}" role="button" aria-pressed="${!!S.ops.scen[k]}"><i class="pl-box" aria-hidden="true">${S.ops.scen[k] ? '✓' : ''}</i><span><b>${esc(SCEN[k][0])}</b><small>${esc(SCEN[k][1])}</small></span></span>`).join('')}<span class="pl-sc${target ? ' on' : ''}" data-act="plTarget" role="button" aria-pressed="${target}"><i class="pl-box" aria-hidden="true">${target ? '✓' : ''}</i><span><b>${esc(T('Целевой парк: 4 ТС 10 т', 'Zielflotte: 4 Fahrzeuge 10 t', 'Target fleet: 4 trucks 10 t', 'Мақсатты парк: 4 КҚ 10 т'))}</b><small>HOWO T5G ×2 (16 ${esc(PAL)}) + JAC N120 ×2 (14 ${esc(PAL)})</small></span></span></div>`;
     const cell = (r, v, cls) => `<div class="c ${cls || ''}" data-day="${r.d}">${v}</div>`;
     const head = `<div class="l"></div>${rows.map(r => `<div class="hd${r.kind !== 'work' ? ' off' : ''}">${DAYN[new Date(r.d + 'T12:00:00+05:00').getDay()]} ${r.d.slice(8)}.${r.d.slice(5, 7)}${r.kind === 'holiday' || r.kind === 'transfer' ? '<br>' + esc(holName(r.d).split(' (')[0]) : r.kind === 'weekend' ? '<br>' + esc(T('выходной', 'Wochenende', 'weekend', 'демалыс')) : ''}</div>`).join('')}`;
     const tbl = `<div class="pl-tbl">${head}<div class="l">${esc(T('Спрос, паллет', 'Bedarf, Paletten', 'Demand, pallets', 'Сұраныс, паллет'))}</div>${rows.map(r => cell(r, r.dem)).join('')}<div class="l">${esc(T('ТС доступно', 'Fahrzeuge verfügbar', 'Trucks available', 'КҚ қолжетімді'))}</div>${rows.map(r => cell(r, r.trucks)).join('')}<div class="l">${esc(T('Водители', 'Fahrer', 'Drivers', 'Жүргізушілер'))}</div>${rows.map(r => cell(r, r.drivers)).join('')}<div class="l">${esc(T('Ёмкость, паллет', 'Kapazität, Paletten', 'Capacity, pallets', 'Сыйымдылық, паллет'))}</div>${rows.map(r => cell(r, r.cap)).join('')}<div class="l">${esc(T('Загрузка', 'Auslastung', 'Utilisation', 'Жүктеме'))}</div>${rows.map(r => cell(r, r.pct > 900 ? '∞' : r.pct + ' %', r.lvl)).join('')}${cur ? `<div class="l">${esc(T('Текущий парк', 'Aktuelle Flotte', 'Current fleet', 'Ағымдағы парк'))}</div>${cur.map(r => cell(r, r.cap + ' · ' + (r.pct > 900 ? '∞' : r.pct + ' %'), r.lvl)).join('')}` : ''}</div>`;
@@ -6028,8 +6234,8 @@ ${staffTable()}<div class="grid2 eq">${urgent()}${absences()}</div>${deadlines()
   const R = RES;
   const css = document.createElement('style'); css.textContent = `
 .da-wrap{display:grid;grid-template-columns:400px 1fr;gap:var(--gap);align-items:start}.da-phone{width:390px;border:10px solid #111827;border-radius:40px;background:#0b1220;box-shadow:var(--sh-pop);overflow:hidden}
-.da-status{display:flex;justify-content:space-between;align-items:center;padding:10px 16px 6px;color:#fff;font-size:12px;gap:8px}.da-status .net{border:0;border-radius:999px;padding:3px 10px;font:inherit;cursor:pointer;background:#16a34a;color:#fff}.da-status .net.off{background:#b45309}.da-status .net.sms{background:#be123c}
-.da-langs button{border:0;background:transparent;color:#9ca3af;font:inherit;font-size:11px;cursor:pointer;padding:2px 4px}.da-langs button.on{color:#fff;text-decoration:underline}
+.da-status{display:flex;justify-content:space-between;align-items:center;padding:10px 16px 6px;color:#fff;font-size:12px;gap:8px}.da-status .net{border:0;border-radius:999px;padding:3px 10px;font:inherit;cursor:pointer;background:#15803d;color:#fff}.da-status .net.off{background:#b45309}.da-status .net.sms{background:#be123c}
+.da-langs button{border:0;background:transparent;color:#d1d5db;font:inherit;font-size:11px;cursor:pointer;padding:2px 4px;min-width:24px;min-height:24px}.da-langs button.on{color:#fff;text-decoration:underline}
 .da-body{background:#f8fafc;min-height:600px;max-height:640px;overflow:auto;padding:12px;display:grid;gap:10px;align-content:start;font-size:13px}.da-head{display:grid;gap:2px}.da-head .cap{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:.04em}.da-head .ttl{font-size:17px;font-weight:700}
 .da-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px;display:grid;gap:8px}.da-cap{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:.04em}
 .da-main{border:0;border-radius:12px;background:var(--primary);color:#fff;font:inherit;font-weight:600;padding:12px;cursor:pointer;width:100%}.da-main:disabled{opacity:.45;cursor:not-allowed}.da-ghost{border:1px solid var(--border-input);border-radius:10px;background:#fff;font:inherit;padding:8px 10px;cursor:pointer;text-align:left}.da-ghost.on{border-color:var(--primary);background:var(--tint-blue-100,#dbeafe)}
@@ -6588,12 +6794,12 @@ ${tripL ? `<p style="font-size:13px"><b>${esc(HUBS[tripL.from].city)} → ${esc(
   const expCard = () => { const rows = R.thcExpected(), tw = canDo('temperature:write');
     return `<div class="card card-body" id="thc_expected"><h3 style="margin:0 0 8px;font-size:15px">${esc(T('Термохроны при приёмке · ожидаются', 'Thermochrone bei Annahme · erwartet', 'Thermochrons at receipt · expected', 'Қабылдаудағы термохрондар · күтілуде'))}</h3>${rows.map(l => { const x = S.res.thcExp[l.id]; return `<div class="tinted-row ${!x ? 'yellow' : x.exc ? 'red' : 'green'}" data-thc-exp="${l.id}" data-done="${x ? 1 : 0}"><span style="flex:1"><b>${l.id}</b> · ${esc(HUBS[l.from].city)} → ${esc(HUBS[l.to].city)} · ${zoneChip(l.zone)}<div class="sub" data-thc-res>${esc(x ? x.txt : T('файл термохрона ожидается при приёмке', 'Thermochron-Datei bei Annahme erwartet', 'thermochron file expected at receipt', 'термохрон файлы қабылдау кезінде күтіледі'))}</div></span>${!x && tw ? `<button class="btn sm primary" data-act="thcExp" data-id="${l.id}">${esc(T('Импорт термохрона', 'Thermochron importieren', 'Import thermochron', 'Термохронды импорттау'))}</button>` : ''}</div>`; }).join('') || `<p class="note">${esc(T('Все доставленные холодовые рейсы имеют термохрон.', 'Alle zugestellten Kühlfahrten haben einen Thermochron.', 'Every delivered cold load has a thermochron.', 'Барлық жеткізілген суық рейстерде термохрон бар.'))}</p>`}<p class="note">${esc(T('Импорт термохрона — право temperature:write; отклонение открывает DEV в «Качестве».', 'Thermochron-Import — Recht temperature:write; eine Abweichung öffnet eine DEV in „Qualität“.', 'Thermochron import needs temperature:write; an excursion opens a DEV in Quality.', 'Термохрон импорты — temperature:write құқығы; ауытқу «Сапада» DEV ашады.'))}</p></div>`; };
   const tk = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
-  const curve = r => { const w = 120, h = 36, mx = Math.max(...r.pts, 9), mn = Math.min(...r.pts, 1); return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"><polyline fill="none" stroke="${r.ok ? 'var(--mk-green)' : 'var(--mk-red)'}" stroke-width="2" points="${r.pts.map((v, i) => (i * w / (r.pts.length - 1)).toFixed(1) + ',' + (h - (v - mn) / (mx - mn || 1) * (h - 4) - 2).toFixed(1)).join(' ')}"/></svg>`; };
+  const curve = r => { const w = 120, h = 36, mx = Math.max(...r.pts, 9), mn = Math.min(...r.pts, 1); return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" data-chart role="img" aria-label="${esc(T('Кривая ', 'Kurve ', 'Curve ', 'Қисық ') + r.id)}"><polyline fill="none" stroke="${r.ok ? 'var(--mk-green)' : 'var(--mk-red)'}" stroke-width="2" points="${r.pts.map((v, i) => (i * w / (r.pts.length - 1)).toFixed(1) + ',' + (h - (v - mn) / (mx - mn || 1) * (h - 4) - 2).toFixed(1)).join(' ')}"/></svg>`; };
   function body() {
     const bad = S.res.thc.filter(r => !r.ok).length, lg = R.loggers(), conts = S.res.cont.map(c => ({ c, s: R.contState(c) }));
     const opts = S.loads.filter(l => ['in_transit', 'delivered', 'loading', 'problem'].includes(l.status));
     return `<div class="kpi-row k4">${tk('blue', 'therm', S.res.thc.length, T('Термохронов в журнале', 'Thermochrone im Journal', 'Thermochrons logged', 'Журналдағы термохрондар'))}${tk('red', 'alert', bad, T('С отклонением', 'Mit Abweichung', 'With excursion', 'Ауытқумен'))}${tk('yellow', 'cog', lg.filter(x => x.st !== 'valid').length, T('Логгеры: поверка скоро/просрочена', 'Logger: Kalibrierung bald/abgelaufen', 'Loggers: calibration due/expired', 'Логгер: поверка жақын/өткен'))}${tk('purple', 'package', conts.filter(x => !x.s.ok).length, T('Контейнеры с замечанием', 'Container mit Hinweis', 'Containers with a remark', 'Ескертпелі контейнерлер'))}</div>
-<div class="card tcard"><div class="card-head" style="padding:14px 20px"><h3 style="margin:0;font-size:15px">${esc(T('Термохроны при приёмке — журнал (FR-40 / FR-58)', 'Thermochrone bei Annahme — Journal (FR-40 / FR-58)', 'Thermochrons at receipt — log (FR-40 / FR-58)', 'Қабылдаудағы термохрондар — журнал (FR-40 / FR-58)'))}</h3>${howNote('thChron')}</div><table class="table" id="thc_log"><thead><tr><th>ID</th><th>${esc(T('Рейс', 'Fahrt', 'Load', 'Рейс'))}</th><th>${esc(T('Логгер', 'Logger', 'Logger', 'Логгер'))}</th><th>${esc(T('Кривая', 'Kurve', 'Curve', 'Қисық'))}</th><th>min … max</th><th>${esc(T('Результат', 'Ergebnis', 'Result', 'Нәтиже'))}</th><th>${esc(T('Источник', 'Quelle', 'Source', 'Дереккөз'))}</th></tr></thead><tbody>${S.res.thc.map(r => `<tr style="cursor:default" data-thc="${r.id}"><td><b>${r.id}</b><div class="sub">${r.at}</div></td><td>${r.load}</td><td>${esc(r.logger)}</td><td>${curve(r)}</td><td>${String(r.min).replace('.', ',')} … ${String(r.max).replace('.', ',')} °C</td><td>${chip(r.ok ? 'green' : 'red', r.ok ? T('в норме', 'im Bereich', 'in range', 'қалыпты') : T('отклонение → DEV', 'Abweichung → DEV', 'excursion → DEV', 'ауытқу → DEV'))}</td><td>${esc(r.src)}<div class="sub">${esc(r.who)}</div></td></tr>`).join('')}</tbody></table>
+<div class="card tcard"><div class="card-head" style="padding:14px 20px"><h3 style="margin:0;font-size:15px">${esc(T('Термохроны при приёмке — журнал (FR-40 / FR-58)', 'Thermochrone bei Annahme — Journal (FR-40 / FR-58)', 'Thermochrons at receipt — log (FR-40 / FR-58)', 'Қабылдаудағы термохрондар — журнал (FR-40 / FR-58)'))}</h3>${howNote('thChron')}</div><table class="table" id="thc_log"><thead><tr><th>ID</th><th>${esc(T('Рейс', 'Fahrt', 'Load', 'Рейс'))}</th><th>${esc(T('Логгер', 'Logger', 'Logger', 'Логгер'))}</th><th>${esc(T('Кривая', 'Kurve', 'Curve', 'Қисық'))}</th><th>min … max</th><th>${esc(T('Результат', 'Ergebnis', 'Result', 'Нәтиже'))}</th><th>${esc(T('Источник', 'Quelle', 'Source', 'Дереккөз'))}</th></tr></thead><tbody>${S.res.thc.map(r => `<tr style="cursor:default" data-thc="${r.id}"><td><b>${r.id}</b><div class="sub">${r.at}</div></td><td>${r.load}</td><td>${esc(r.logger)}</td><td>${curve(r)}</td><td data-chart-alt>${String(r.min).replace('.', ',')} … ${String(r.max).replace('.', ',')} °C</td><td>${chip(r.ok ? 'green' : 'red', r.ok ? T('в норме', 'im Bereich', 'in range', 'қалыпты') : T('отклонение → DEV', 'Abweichung → DEV', 'excursion → DEV', 'ауытқу → DEV'))}</td><td>${esc(r.src)}<div class="sub">${esc(r.who)}</div></td></tr>`).join('')}</tbody></table>
 <div class="card-body"><div class="filters"><label>${esc(T('Импорт файла термохрона', 'Thermochron-Datei importieren', 'Import thermochron file', 'Термохрон файлын импорттау'))}:</label><select class="select" id="thc_load">${opts.map(l => `<option value="${l.id}">${l.id} · ${ZONES[l.zone].label}</option>`).join('')}</select>min <input class="select" id="thc_min" type="number" step="0.1" value="4.0" style="width:80px"> max <input class="select" id="thc_max" type="number" step="0.1" value="6.0" style="width:80px"><button class="btn primary sm" data-act="thcImport">${esc(T('Импорт', 'Importieren', 'Import', 'Импорт'))}</button></div></div></div>
 ${expCard()}
 <div class="grid2 eq"><div class="card tcard"><div class="card-head" style="padding:14px 20px"><h3 style="margin:0;font-size:15px">${esc(T('Реестр логгеров', 'Logger-Register', 'Logger register', 'Логгер тізілімі'))}</h3></div><table class="table" id="thc_loggers"><tbody>${lg.map(x => `<tr style="cursor:default"><td><b>${x.id}</b><div class="sub">${x.t ? esc(x.t.plate) : x.cont}</div></td><td>${x.ch} ${esc(T('камер', 'Kammern', 'chambers', 'камера'))}</td><td>${chip(DOCST[x.st].c, fd(x.to))}</td></tr>`).join('')}</tbody></table></div>
@@ -6654,7 +6860,7 @@ ${expCard()}
 .rec-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.rec-row.sb{justify-content:space-between}
 .lvl3{border-left:4px solid var(--red)}.lvl2{border-left:4px solid var(--yellow)}.lvl1{border-left:4px solid var(--blue)}
 .esc-log{font-size:12px;color:var(--text-muted);margin:6px 0 0;padding-left:16px}.esc-log li{margin:2px 0}
-.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}.dim td{opacity:.55}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}.dim td{color:var(--text-muted);font-style:italic}
 .rec-form label.fl{margin-bottom:10px}.rec-form .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .rc-doc{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px 24px;font-size:13px}.rc-doc h4{margin:0 0 8px}.rc-doc table{width:100%;border-collapse:collapse}.rc-doc td{padding:4px 6px;border-bottom:1px solid var(--border)}
 .ver-tag{font-size:11px;color:var(--text-faint)}.chg-row{cursor:pointer}.chg-det{background:var(--bg-page);padding:10px 16px;font-size:13px}
@@ -9149,7 +9355,7 @@ ${w ? `<div class="grid2" style="margin-top:16px"><div class="card card-body" da
       if (sel.st === 'recharge') acts.push(btn('ack', T('Водитель подтвердил (приложение)', 'Fahrer bestätigt (App)', 'Driver acknowledged (app)', 'Жүргізуші растады (қосымша)'), 'green'), btn('drvDisp', T('Водитель оспорил', 'Fahrer bestreitet', 'Driver disputes', 'Жүргізуші даулады')));
       if (['ack', 'recharge', 'drvDisp'].includes(sel.st)) acts.push(btn('deducted', T('Удержать из зарплаты ', 'Lohnabzug ', 'Deduct from payroll ', 'Жалақыдан ұстау ') + X.period, 'purple'));
       if (['paid50', 'paid', 'recharge', 'drvDisp'].includes(sel.st)) acts.push(btn('company', T('Списать на компанию', 'Als Unternehmenskosten ausbuchen', 'Write off as company cost', 'Компанияға есептен шығару'), 'red'));
-      const timeline = sel.seg.length ? `<div style="position:relative;height:26px;background:var(--bg-subtle);border-radius:6px;margin:8px 0">${sel.seg.map(s => `<span title="${esc(drv(s[2]).name + ' · ' + s[3])}" style="position:absolute;left:${s[0] / 1440 * 100}%;width:${(s[1] - s[0]) / 1440 * 100}%;top:4px;height:18px;border-radius:4px;background:${s[0] <= m && m < s[1] ? 'var(--primary)' : 'var(--chart-grid)'};font-size:10px;color:#fff;padding:2px 4px;overflow:hidden;white-space:nowrap">${esc(drv(s[2]).ini)} · ${esc(s[3])}</span>`).join('')}<span style="position:absolute;left:${m / 1440 * 100}%;top:0;height:26px;border-left:2px solid var(--label-red)"></span></div><div class="sub" data-fine-axis="1" style="display:flex;justify-content:space-between">${['00:00', '06:00', '12:00', '18:00', '24:00'].map(x => `<span>${x}</span>`).join('')}</div><div class="sub">${esc(T('Чёрная линия — время нарушения ', 'Schwarze Linie — Tatzeit ', 'Black line — time of offence ', 'Қара сызық — бұзушылық уақыты ') + sel.t + '.')}</div>` : `<p class="note">${esc(T('Назначений ТС на это время нет — водитель не определён; установите вручную.', 'Keine Fahrzeugzuordnung zu dieser Zeit — Fahrer nicht ermittelt; manuell festlegen.', 'No vehicle assignment at that time — driver not identified; attribute manually.', 'Бұл уақытта КҚ тағайындауы жоқ — қолмен белгілеңіз.'))}</p>`;
+      const timeline = sel.seg.length ? `<div style="position:relative;height:26px;background:var(--bg-subtle);border-radius:6px;margin:8px 0">${sel.seg.map(s => `<span title="${esc(drv(s[2]).name + ' · ' + s[3])}" style="position:absolute;left:${s[0] / 1440 * 100}%;width:${(s[1] - s[0]) / 1440 * 100}%;top:4px;height:18px;border-radius:4px;background:${s[0] <= m && m < s[1] ? 'var(--primary)' : 'var(--chart-grid)'};font-size:10px;color:${s[0] <= m && m < s[1] ? '#fff' : 'var(--text-strong)'};padding:2px 4px;overflow:hidden;white-space:nowrap">${esc(drv(s[2]).ini)} · ${esc(s[3])}</span>`).join('')}<span style="position:absolute;left:${m / 1440 * 100}%;top:0;height:26px;border-left:2px solid var(--label-red)"></span></div><div class="sub" data-fine-axis="1" style="display:flex;justify-content:space-between">${['00:00', '06:00', '12:00', '18:00', '24:00'].map(x => `<span>${x}</span>`).join('')}</div><div class="sub">${esc(T('Чёрная линия — время нарушения ', 'Schwarze Linie — Tatzeit ', 'Black line — time of offence ', 'Қара сызық — бұзушылық уақыты ') + sel.t + '.')}</div>` : `<p class="note">${esc(T('Назначений ТС на это время нет — водитель не определён; установите вручную.', 'Keine Fahrzeugzuordnung zu dieser Zeit — Fahrer nicht ermittelt; manuell festlegen.', 'No vehicle assignment at that time — driver not identified; attribute manually.', 'Бұл уақытта КҚ тағайындауы жоқ — қолмен белгілеңіз.'))}</p>`;
       detail = `<div class="card card-body"><div class="ident"><span class="avatar" style="background:var(--label-red)">${ic('alert', 18)}</span><div><b>${sel.id}</b> · ${esc(TYPE[sel.type])}<div class="sub">${fd(sel.date)} ${sel.t} · ${esc(trk(sel.truck).plate)} · ${esc(sel.place)}</div></div><span style="margin-left:auto">${chip(FSTL[d ? sel.st : 'unattributed'][0], FSTL[d ? sel.st : 'unattributed'][1])}</span></div>
 <h5 style="margin:12px 0 4px">${esc(T('Кто вёл ТС в момент нарушения (FR-122)', 'Wer fuhr das Fahrzeug zur Tatzeit (FR-122)', 'Who held the vehicle at the offence time (FR-122)', 'Бұзушылық кезінде КҚ-ны кім жүргізді (FR-122)'))}</h5>${timeline}<p class="note">${d ? esc(T('Водитель: ', 'Fahrer: ', 'Driver: ', 'Жүргізуші: ')) + esc(drv(d).name) + (sel.note ? ' · ' + esc(sel.note) : esc(T(' · по путевому листу', ' · laut Fahrtenbefehl', ' · from the trip sheet', ' · жол парағы бойынша'))) : ''}${sel.paid ? `<br>${esc(T('Оплачено компанией ', 'Vom Unternehmen bezahlt ', 'Paid by the company ', 'Компания төледі '))}${tg(sel.paid)}` : ''}</p>
 ${!sel.drv && canDo('fines:write') ? `<div class="two"><label class="fl">${esc(T('Установить водителя вручную', 'Fahrer manuell festlegen', 'Attribute driver manually', 'Жүргізушіні қолмен белгілеу'))}<select class="select" id="fa_d"><option value="">—</option>${S.drivers.map(x => `<option value="${x.id}">${esc(x.name)}</option>`).join('')}</select></label><label class="fl">${esc(T('Обоснование (≥ 10 символов)', 'Begründung (≥ 10 Zeichen)', 'Reason (≥ 10 characters)', 'Негіздеме (≥ 10 таңба)'))}<input class="select" id="fa_n" style="width:100%"></label></div><button class="btn sm grey" data-act="ecoFineAttr" data-id="${sel.id}">${esc(T('Привязать', 'Zuordnen', 'Attribute', 'Байлау'))}</button>` : ''}
@@ -9191,8 +9397,8 @@ ${howNote('fineLink')}<p class="note">${esc(T('Штрафы — ответств
       { k: 'inc', label: T('Инциденты на 100 рейсов', 'Vorfälle je 100 Touren', 'Incidents per 100 trips', '100 рейске оқиға'), value: '0,7', sub: T('безопасность и холодовая цепь', 'Sicherheit und Kühlkette', 'security and cold chain', 'қауіпсіздік және суық тізбек'), bars: bars([1.4, 1.2, 1.1, 1.0, 0.9, 0.9, 0.8, 0.7], 1.5), cls: 'red' },
     ];
   };
-  const spark = b => `<span class="spark-bars" aria-hidden="true" style="display:inline-flex;gap:3px;align-items:flex-end;height:30px;margin-top:6px">${b.map(x => `<i title="${f1(x.v)}" style="display:block;width:9px;height:${Math.round(x.h / 100 * 30)}px;background:${x.last ? 'var(--primary)' : 'var(--chart-grid)'};border-radius:2px"></i>`).join('')}</span>`;
-  const tiles = () => `<div class="kpi-row k6" data-rep-kpis>${ecoRepKpis().map(k => `<div class="kpi-tile tint ${k.cls}" data-rep-kpi="${k.k}"><div><div class="label">${esc(k.label)}</div><div class="value">${esc(k.value)}</div>${spark(k.bars)}<div class="delta">${esc(k.sub)}</div></div></div>`).join('')}</div>`;
+  const spark = b => `<span class="spark-bars" aria-hidden="true" data-chart style="display:inline-flex;gap:3px;align-items:flex-end;height:30px;margin-top:6px">${b.map(x => `<i title="${f1(x.v)}" style="display:block;width:9px;height:${Math.round(x.h / 100 * 30)}px;background:${x.last ? 'var(--primary)' : 'var(--chart-grid)'};border-radius:2px"></i>`).join('')}</span>`;
+  const tiles = () => `<div class="kpi-row k6" data-rep-kpis>${ecoRepKpis().map(k => `<div class="kpi-tile tint ${k.cls}" data-rep-kpi="${k.k}"><div><div class="label">${esc(k.label)}</div><div class="value">${esc(k.value)}</div>${spark(k.bars)}${typeof chartTxt === 'function' ? chartTxt(k.label + ' · ' + T('8 недель: ', '8 Wochen: ', '8 weeks: ', '8 апта: ') + k.bars.map(x => f1(x.v)).join(' · '), true) : ''}<div class="delta">${esc(k.sub)}</div></div></div>`).join('')}</div>`;
 
   /* ---------- driver report · 30 days (trips, km, on time, excursions, driving events per driver; fines from the fine register) ---------- */
   const DREP = { d1: [11, 8420, 100, 0, 1], d2: [10, 7960, 90, 1, 2], d3: [12, 9120, 92, 0, 4], d4: [9, 6850, 100, 0, 0], d5: [13, 9880, 85, 2, 3], d6: [6, 4210, 100, 0, 1], d7: [10, 8030, 100, 0, 2] };
@@ -11381,9 +11587,10 @@ helpAdd({ key: 'faq', group: 'ref', special: 'faq', portal: true,
    Texts are quads [ru, de, en, kk] (or T() strings); DE / EN never contain Cyrillic. Colours via tokens in app.css ("Q1 animated help figures"). */
 (function () {
   const RM = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const rmNow = () => (typeof a11yReducedMotion === 'function' ? a11yReducedMotion() : RM);   // FR-219: the in-app "Reduced motion" switch wins
   const t = a => tx(a), E = a => esc(tx(a)), f = n => Math.round(n * 10) / 10;
   const HV = HELP.hv = { defs: {}, timers: new Map(), RM };
-  const stOf = id => { S.hv = S.hv || {}; const d = HV.defs[id]; return (S.hv[id] = S.hv[id] || { i: 0, run: !RM && !!d && d.steps.length > 1 }); };
+  const stOf = id => { S.hv = S.hv || {}; const d = HV.defs[id]; return (S.hv[id] = S.hv[id] || { i: 0, run: !rmNow() && !!d && d.steps.length > 1 }); };
   HELP.fig = (id, def) => { HV.defs[id] = def; HELP.visuals[id] = () => figHtml(id); };
   HELP.hvTimers = () => HV.timers.size;
 
@@ -12077,7 +12284,7 @@ ${n(152, 53, 0)}${n(428, 36, 1)}${n(592, 36, 2)}${n(152, 105, 3)}</svg>`;
     const ok = canSee(c.s.screen) && !(c.s.tab && !tabsOf(c.s.screen).some(t => t.key === c.s.tab));
     const el = ok ? c.s.sel.map(s => { try { return $(s); } catch (_) { return null; } }).find(Boolean) : null;
     const last = c.i === c.t.steps.length - 1, id = 'tourh';
-    const reduced = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reduced = typeof a11yReducedMotion === 'function' ? a11yReducedMotion() : typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
     let hi = '', pos = 'top:80px;left:' + Math.max(8, innerWidth / 2 - 180) + 'px';
     if (el) {
       el.scrollIntoView({ block: 'center', behavior: 'auto' });
@@ -13062,6 +13269,7 @@ helpAdd({ key: 'routes/coverage', group: 'ops', screen: 'routes', tab: 'coverage
     { t: HQ('подтвердить измеренную зону', 'eine gemessene Zone bestätigen', 'confirm a measured zone', 'өлшенген аймақты растау'), steps: [HQ('В таблице «Измерено по телематике» участок с ≥ 3 проездами показывает Ø минут и предлагаемый класс; «Принять» делает его измеренным — на карте линия становится сплошной.', 'In der Tabelle „Gemessen per Telematik“ zeigt ein Abschnitt mit ≥ 3 Durchfahrten Ø Minuten und die vorgeschlagene Klasse; „Annehmen“ macht ihn gemessen — auf der Karte wird die Linie durchgezogen.', 'In the “Measured from telematics” table a stretch with ≥ 3 passes shows Ø minutes and the proposed class; “Accept” makes it measured — the line on the map becomes solid.', '«Телематикамен өлшенген» кестесінде 3+ жүрісі бар учаске ұсынылған класты көрсетеді; «Қабылдау» оны өлшенген етеді.')] }],
   rules: [HQ('«Проверить сейчас» пересчитывает уровень всех машин в рейсе и открывает инцидент при L2 / L3.', '„Jetzt prüfen“ berechnet die Stufe aller Fahrzeuge unterwegs neu und öffnet bei L2 / L3 einen Vorfall.', '“Check now” recomputes the level of every vehicle on trip and opens an incident at L2 / L3.', '«Қазір тексеру» барлық көліктің деңгейін қайта есептейді және L2 / L3 кезінде оқиға ашады.'), HQ('Уверенность ETA = 100 % минус доля маршрута без мобильных данных; окна считаются от текущей позиции при 70 км/ч.', 'ETA-Sicherheit = 100 % minus Anteil der Route ohne mobile Daten; Fenster ab aktueller Position bei 70 km/h.', 'ETA confidence = 100 % minus the share of the route without mobile data; windows are computed from the current position at 70 km/h.', 'ETA сенімділігі = 100 % минус мобильді деректерсіз маршрут үлесі.')] });
 
+if (typeof a11yInstall === 'function') a11yInstall();   // FR-215 / FR-218: outermost render wrapper (screens/002-a11y.js)
 render();
 
 </script></body></html>
