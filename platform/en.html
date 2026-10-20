@@ -677,6 +677,8 @@ html[data-design="kokzhol"] .side-link{color:#c9d8df}html[data-design="kokzhol"]
   .content .da-phone{width:auto;max-width:390px}
   .mini-tile b{font-size:17px;overflow-wrap:anywhere}
 }
+/* Q4 · selects never grow past their container (option text is wider with Linux fonts) */
+.content select,.drawer select{max-width:100%;min-width:0;text-overflow:ellipsis}
 /* Q4 · topbar: only the search box gives way, every other item keeps its size */
 @media (max-width:1100px){ .who>*,.who .avatar{flex:none} .who>.gs{flex:0 1 auto;min-width:0} .gs .searchbox{flex:0 1 auto;min-width:110px} .searchbox input{min-width:0;width:100%} }
 
@@ -998,7 +1000,7 @@ Object.assign(ACT, {
 
 /* Roles & permissions (FR-14/137): 11 roles, permission matrix generated from the source platform (role-perms.json),
    screen / tab gating, role shells (driver, customer, partner use their own menu), role switcher. */
-const VERSION = '6.2.0', BUILD = '2026-10-20 01:31';
+const VERSION = '6.2.1', BUILD = '2026-10-20 01:33';
 const ROLES = ['admin', 'dispatcher', 'warehouse', 'driver', 'auditor', 'viewer', 'manager', 'finance', 'quality', 'customer', 'partner'];
 const ROLE_NAME = {
   admin: T('Администратор', 'Administrator', 'Administrator', 'Әкімші'), dispatcher: T('Диспетчер', 'Disponent', 'Dispatcher', 'Диспетчер'), warehouse: T('Склад', 'Lager', 'Warehouse', 'Қойма'),

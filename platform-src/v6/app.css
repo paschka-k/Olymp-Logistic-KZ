@@ -307,5 +307,7 @@ html[data-design="kokzhol"] .side-link{color:#c9d8df}html[data-design="kokzhol"]
   .content .da-phone{width:auto;max-width:390px}
   .mini-tile b{font-size:17px;overflow-wrap:anywhere}
 }
+/* Q4 · selects never grow past their container (option text is wider with Linux fonts) */
+.content select,.drawer select{max-width:100%;min-width:0;text-overflow:ellipsis}
 /* Q4 · topbar: only the search box gives way, every other item keeps its size */
 @media (max-width:1100px){ .who>*,.who .avatar{flex:none} .who>.gs{flex:0 1 auto;min-width:0} .gs .searchbox{flex:0 1 auto;min-width:110px} .searchbox input{min-width:0;width:100%} }
