@@ -20,5 +20,7 @@ module.exports = defineConfig({
   expect: { toHaveScreenshot: { maxDiffPixelRatio: 0.002, threshold: 0.2, animations: 'disabled', caret: 'hide', scale: 'css' } },
   use: { baseURL: 'http://localhost:8090', deviceScaleFactor: 1, locale: 'en-GB', timezoneId: 'Asia/Aqtobe' },
   webServer: { command: 'python3 -m http.server 8090', cwd: root, url: 'http://localhost:8090/platform/en.html', reuseExistingServer: true, timeout: 30000 },
-  projects: Object.entries(VIEWPORTS).flatMap(([name, viewport]) => ['light', 'dark'].map(colorScheme => ({ name: `${name}-${viewport.width}-${colorScheme}`, use: { viewport, colorScheme } }))),
+  projects: Object.entries(VIEWPORTS).flatMap(([name, viewport]) =>
+    ['light', 'dark'].map(colorScheme => ({ name: `${name}-${viewport.width}-${colorScheme}`, use: { viewport, colorScheme } })),
+  ),
 });

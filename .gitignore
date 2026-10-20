@@ -3,3 +3,7 @@ tools/ci/node_modules/
 ui-results/
 perf-results/
 visual-results/
+
+# FR-204 lint tooling (tools/lint) and the local npm cache
+tools/lint/node_modules/
+.npm-cache/

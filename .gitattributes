@@ -1,2 +1,19 @@
+# FR-204 · one line-ending policy: every text file is stored and checked out with LF (also on Windows with core.autocrlf=true).
+# The index already holds LF for all text files, so this policy needs no renormalisation commit.
+* text=auto eol=lf
 platform-src/** text eol=lf
+
+# binary assets
+*.png binary
+*.webp binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.zip binary
+
+# frozen legacy bundle: byte-for-byte as committed (do not touch, see platform-src/README.md)
 platform-v5.3*.html -text

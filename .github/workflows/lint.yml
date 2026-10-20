@@ -1,0 +1,53 @@
+name: Lint
+
+# FR-204: ESLint (correctness rules, wall-clock guard FR-206) and the Prettier check on every push / PR.
+# FR-203: area ownership report (tools/check-areas.mjs): numbering rule is blocking, cross-area edits are reported.
+# Tooling is pinned in tools/lint/package-lock.json; the platform itself keeps zero runtime dependencies.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Cache tools/lint/node_modules
+        id: mods
+        uses: actions/cache@v4
+        with:
+          path: tools/lint/node_modules
+          key: lint-mods-${{ runner.os }}-node22-${{ hashFiles('tools/lint/package-lock.json') }}
+      - name: Install ESLint + Prettier (npm ci)
+        if: steps.mods.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund --prefix tools/lint
+      - name: Line endings (LF only, FR-204)
+        run: |
+          bad=$(git ls-files --eol | awk '$1 == "i/crlf" || $1 == "i/mixed" {print $NF}')
+          if [ -n "$bad" ]; then echo "CRLF in the index:"; echo "$bad"; exit 1; fi
+      - name: ESLint
+        run: npm run --prefix tools/lint lint
+      - name: Prettier
+        run: npm run --prefix tools/lint format:check
+      - name: Area folders (FR-203) - structure, numbering rule, build order
+        run: node tools/check-areas.mjs
+      - name: Areas touched by this change (FR-203, report only)
+        if: github.event_name == 'pull_request'
+        run: node tools/check-areas.mjs --base origin/${{ github.base_ref }} | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Build (sources assemble)
+        run: node platform-src/build-v6.mjs --out /tmp/v6-build

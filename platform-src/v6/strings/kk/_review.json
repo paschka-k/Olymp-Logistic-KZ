@@ -1,0 +1,482 @@
+{
+  "dashboard.snow_monitor_closely": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "dashboard.colour_trip_risk_details_and_7_days_": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "routes.no_routes_match": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "hub_inbound.gate_blocked_defrost_repair": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "hub_inbound.sscc_reconciled_no_mismatch": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "hub_inbound.foreign_sscc_not_part_of_this_job": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "billing.invoice_sent_esf_e_mail": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "monitor.driver_stop_leave_the_vehicle_exting": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_model.engine_driven_roof_unit": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_model.move_the_bulkhead_back_choose_a_larg": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_model.move_the_bulkhead_forward_choose_a_l": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_model.choose_a_vehicle_with_a_higher_body_": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_model.of_the_mass_min_20_move_heavy_packag": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_model.pal_separate_carriage_contract_ttn_a": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_model.height_of_goods_tallest_pallet": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_model.go_no_go_release_required_tab_docume": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_load.handed_to_a_partner_not_part_of_the_": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_load.2_8_c_chamber_at_the_front_wall_so_t": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_load.lifo_loading_the_last_stop_is_loaded": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_load.days_at_delivery_short_expiry_agree_": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_load.trip_release_blocked_until_rescanned": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_load.no_restrictions_the_load_fits_shelf_": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_load.stack_height_two_pallets_on_top_of_e": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_load.no_catalogue_type_fits_split_the_loa": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_load.approximate_planning_values_eur_pall": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_load.splitting_does_not_fit_either_hand_t": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_load.how_it_decides_for_every_candidate_i": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_load.lifo_the_first_row_stands_at_the_fro": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_docs.demo_form_verify_forms_and_requireme": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_docs.control_s_failed_exception_only_with": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_docs.trip_on_the_road_the_release_was_gra": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_docs.every_control_checks_data_vehicle_av": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_dispatch.express_leaves_only_with_three_signa": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_dispatch.no_shortfall_capacity_covers_the_dem": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_dispatch.baseline_from_data_loads_per_eta_day": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_trips.an_alarm_of_this_trip_or_vehicle_is_": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_trips.reason_of_10_characters_no_personal_": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_trips.go_no_go_failed_exception_only_with_": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_trips.forecast_is_current_no_clearance_nee": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_trips.token_renewed_the_old_link_no_longer": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "driver_app.every_item_is_scanned_mismatch_excep": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "driver_app.photo_reason_deviation_in_quality_di": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "driver_app.accepted_with_scan_return_leg_and_qu": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "driver_app.breakdown_opens_route_service_contac": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "driver_app.each_instruction_is_acknowledged_the": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "driver_app.defect_service_request_after_the_tri": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "driver_app.without_network_events_queue_and_sen": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_insurance.certificates_insured_shipments": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_insurance.planning_value_fictitious": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_insurance.no_contract_yet_the_entry_is_a_plann": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_insurance.a_claim_is_opened_from_a_temperature": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_refdata.deduction_cap_1_of_payroll": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_refdata.verify_kato_stat_gov_kz": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_admin.roles_matrix_from_the_permission_mat": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_admin.every_entry_carries_the_hash_of_the_": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_admin.roadside_mobile_workshops": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_admin.is_esf_e_invoices": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_admin.tax_code_e_invoice_for_every_transpo": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_admin.is_esf_snt_consignment_notes": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_admin.minfin_order_no_657_tax_code_art_179": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_admin.esutd_e_ttn_and_e_trip_sheet": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_admin.mid_order_no_546_suspended_by_order_": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_admin.counterparty_check_at_booking_fr_187": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_admin.fine_import_per_vehicle_recovery_fro": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_admin.road_situation_1403": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_admin.weather_3_7_days_45_c_rule_fr_43": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_admin.toll_for_trucks_3_5_t": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_admin.reefer_service_mobile_workshops": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_admin.prices_in_kzt_with_eur_usd_at_the_ra": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_admin.accounting_costs_outside_the_mock_up": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_admin.no_carrier_duty_found_medicines_mark": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_admin.customer_erp_slots_offers_bookings_s": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_admin.only_the_integration_service_has_int": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "rec_admin.api_keys_partner_api_v1": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "ops_track.public_page_no_login_no_personal_dat": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "eco_costmodel.actuals_come_from_the_costs_tab_stan": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "eco_costmodel.actuals_actuals_register_fuel_fills_": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "eco_costmodel.to_1_every_15_000_km_0_75_day_to_2_e": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "eco_costmodel.hours_km_70_km_h_15_for_loading_and_": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "eco_costmodel.plan_howo_26_l_100_km_jac_17_l_100_k": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "eco_costmodel.deregister_a_vehicle_or_let_ogpo_lap": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "eco_costmodel.own_vehicle_fuel_service_mileage_pay": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "eco_reports.target_80_lower_by_weight_density_16": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "eco_reports.baseline_8_3_of_weight_36_3_of_budge": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "eco_reports.idea_i_12_crossing_of_express_and_te": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "eco_reports.fines_are_the_driver_s_liability_fr_": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "eco_baseline.almaty_hub_sheet_cities": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "eco_baseline.the_item_stays_open_until_every_ques": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "eco_baseline.planned_values_that_drive_the_platfo": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "eco_baseline.23_cities_are_assigned_to_the_astana": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "eco_baseline.target_fleet_h32_r111_r114_4_vehicle": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "eco_baseline.question_catalogue_logistics_kazakhs": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "sla.no_penalty_nothing_to_dispute": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "sla.dispute_opened_penalty_held_until_re": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "r5_network.bid_not_found_or_already_handled": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  },
+  "r5_driver_partner.no_permission_dispatcher_or_administ": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-20"
+  }
+}

@@ -1,7 +1,7 @@
 {
- "_": "FR-196 weight budget per page, checked by build-v6.mjs (exit code 1 when exceeded) and by the delivery tests. Lower page_kb when FR-191 (per-language build) lands.",
- "page_kb": 4400,
- "tests_kb": 700,
- "assets_kb": 40,
- "asset_file_kb": 12
+  "_": "FR-196 weight budget per page, checked by build-v6.mjs (exit code 1 when exceeded) and by the delivery tests. Lower page_kb when FR-191 (per-language build) lands.",
+  "page_kb": 4400,
+  "tests_kb": 700,
+  "assets_kb": 40,
+  "asset_file_kb": 12
 }

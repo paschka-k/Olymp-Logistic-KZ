@@ -22,9 +22,9 @@
     const z3 = ev(`shipLabelZpl('${L}', '${s3}')`); assert(/Отправитель: ТОО «Olymp Logistic» · хаб Астана/.test(z3) && /Получатель: /.test(z3) && !/Филиал KDL Olymp/.test(z3), 'ZPL sender / consignee');
     ev(`ACT.shPick({s:'${s1}'})`); assert(/Филиал KDL Olymp · /.test(lab()), 'own order → KDL branch'); assert(/Филиал KDL Olymp · /.test(ev(`shipLabelZpl('${L}', '${s1}')`)), 'ZPL branch');
     const m1 = [...d.querySelectorAll('[data-marks] .sh-mark')].map(e => e.textContent); assert(m1.includes('+2…+8 °C · НЕ ЗАМОРАЖИВАТЬ') && !m1.includes('СТОРОННИЙ ГРУЗ'), '2–8 °C mark');
-    const box = ev(`ops(load('${L}')).orders.find(x => x.box).places[0].sscc`); ev(`ACT.shPick({s:'${box}'})`); assert([...d.querySelectorAll('[data-marks] .sh-mark')].some(e => e.textContent === '−20 °C · СУХОЙ ЛЁД UN 1845'), 'dry ice mark');
-    const adr = ev(`(ops(load('${L}')).orders.find(x => x.adr && !x.box) || {places:[{}]}).places[0].sscc`); if (adr) { ev(`ACT.shPick({s:'${adr}'})`); assert([...d.querySelectorAll('[data-marks] .sh-mark')].some(e => e.textContent === 'ДОПОГ · LQ'), 'ADR LQ mark'); }
-    const sh = ev("(() => { for (const l of S.loads) for (const o of ops(l).orders) if ((new Date(o.lines[0].exp) - new Date(l.eta)) / 864e5 < 90) return [l.id, o.places[0].sscc]; return null; })()"); if (sh) { ev(`S.ops.shipArch = true; ACT.shSel({id:'${sh[0]}'}); ACT.shPick({s:'${sh[1]}'})`); assert([...d.querySelectorAll('[data-marks] .sh-mark')].some(e => e.textContent === 'КОРОТКИЙ СРОК · FEFO'), 'short expiry mark'); }
+    const box = ev(`ops(load('${L}')).orders.find(x => x.box).places[0].sscc`); ev(`ACT.shPick({s:'${box}'})`); assert(d.querySelector('[data-marks] [data-test="mark:dryice"]'), 'dry ice mark');
+    const adr = ev(`(ops(load('${L}')).orders.find(x => x.adr && !x.box) || {places:[{}]}).places[0].sscc`); if (adr) { ev(`ACT.shPick({s:'${adr}'})`); assert(d.querySelector('[data-marks] [data-test="mark:adr"]'), 'ADR LQ mark'); }
+    const sh = ev("(() => { for (const l of S.loads) for (const o of ops(l).orders) if ((new Date(o.lines[0].exp) - new Date(l.eta)) / 864e5 < 90) return [l.id, o.places[0].sscc]; return null; })()"); if (sh) { ev(`S.ops.shipArch = true; ACT.shSel({id:'${sh[0]}'}); ACT.shPick({s:'${sh[1]}'})`); assert(d.querySelector('[data-marks] [data-test="mark:shortexp"]'), 'short expiry mark'); }
     clean(w, 'label');
   });
   await group('R1 H7: track & trace shows the partner hand-over and the partner portal steps', 'ru', async (g, ev) => {

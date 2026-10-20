@@ -1,0 +1,16 @@
+{
+  "name": "olymp-lint-tools",
+  "private": true,
+  "description": "FR-204: ESLint + Prettier for platform-src (CI job .github/workflows/lint.yml). Dev tooling only; the platform itself has no dependencies.",
+  "scripts": {
+    "lint": "cd ../.. && eslint --config tools/lint/eslint.config.mjs platform-src tools",
+    "format:check": "cd ../.. && prettier --config tools/lint/prettier.config.mjs --check .",
+    "format": "cd ../.. && prettier --config tools/lint/prettier.config.mjs --write ."
+  },
+  "devDependencies": {
+    "eslint": "9.36.0",
+    "@eslint/js": "9.36.0",
+    "globals": "16.4.0",
+    "prettier": "3.6.2"
+  }
+}

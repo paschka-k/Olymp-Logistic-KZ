@@ -3,7 +3,7 @@
   await group('R1-c D6 / D7 / D9 / D11 / D12: trip detail shows the ADR driver, live chambers with SIMULATION chip, weather per stop, roads check, service on route', 'en', async (g, ev, w) => {
     ev("ACT.open({id:'LD-2026-001847'})"); const d = w.document;
     assert(/ · ADR$/.test(d.querySelector('[data-trip-driver]').innerText.trim()), 'driver with ADR marker: ' + d.querySelector('[data-trip-driver]').innerText);
-    const ch = d.querySelector('[data-trip-chambers]'); assert(/\(\d+,\d\)|\(\d+\)/.test(ch.innerText), 'live value in chambers: ' + ch.innerText); const sim = ch.querySelector('[data-sim-chip]'); assert(sim && sim.title === 'Training data, not real telemetry', 'SIMULATION chip with tooltip');
+    const ch = d.querySelector('[data-trip-chambers]'); assert(/\(\d+[.,]\d\)|\(\d+\)/.test(ch.innerText), 'live value in chambers: ' + ch.innerText); const sim = ch.querySelector('[data-sim-chip]'); assert(sim && sim.title === 'Training data, not real telemetry', 'SIMULATION chip with tooltip');
     ev('S.simOn = false; render()'); assert(!d.querySelector('[data-trip-chambers] [data-sim-chip]'), 'no chip while the simulation is paused'); ev('S.simOn = true; render()');
     const wx = [...d.querySelectorAll('[data-stop-wx]')].map(x => x.innerText.trim()); assert(/^[+−]?\d+\/[+−]?\d+ °C · \w+/.test(wx[0]), 'max/min · condition: ' + wx[0]); assert(wx.includes('no forecast'), 'Balkhash has no forecast: ' + wx.join(' | ')); assert(/ · hub/.test(d.querySelector('.tr-stops li').innerText), 'first stop is the hub');
     const st = ev("tripStops(load('LD-2026-001847'))"); eq(st[0].cc, 'AST'); assert(st.some(s => s.cc === 'BAL'), 'via city code');
