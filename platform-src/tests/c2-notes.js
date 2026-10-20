@@ -14,6 +14,10 @@
     ['ibDwell', Q3_TAB('hubs', 'inbound')], ['ibSlot', Q3_TAB('hubs', 'slots')], ['ibPre', Q3_TAB('hubs', 'pre')], ['ibDem', Q3_TAB('hubs', 'dem')], ['ibGate', Q3_TAB('hubs', 'inbound') + ";openDrawer({type:'ibGate',id:'IN-0614'})"],
 
     ['r4Rules', Q3_TAB('settings', 'rules')], ['r4Winter', Q3_TAB('dispatch', 'winter')], ['r4Sla', Q3_TAB('reports', 'sla')], ['r4SlaStmt', Q3_TAB('billing', 'sla')], ['r4Overlap', Q3_TAB('reports', 'cross')],
+
+    /* R5 notes (I-11, I-17, I-18, I-24, I-27, I-28) */
+    ['recNet', Q3_TAB('orders', 'recipients')], ['backhaul', Q3_TAB('dispatch', 'backhaul')], ['kgdOnline', Q3_TAB('orders', 'commercial') + ";ACT.cmSec({v:'customers'})"],
+    ['pinMdm', Q3_TAB('drivers', 'daadmin')], ['hoScan', Q3_TAB('dispatch', 'partners')], ['msgGate', Q3_TAB('settings', 'notify')],
   ];
   const Q3_CYR = /[Ѐ-ӿ]/;
   await group('notes: every key in NOTES has RU / DE / EN / KK text, DE and EN without Cyrillic, and is placed on a screen', 'ru', async (g, ev) => {
