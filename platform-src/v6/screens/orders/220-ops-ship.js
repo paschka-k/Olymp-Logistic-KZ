@@ -22,17 +22,18 @@
   const shThird = o => !!o.third || /^T-/.test(o.id);
   const shSender = l => SH_CO + ' · ' + shHub(l.from);
   const shRecipient = o => shThird(o) ? o.to : T('Филиал KDL Olymp · ', 'Filiale KDL Olymp · ', 'KDL Olymp branch · ', 'KDL Olymp филиалы · ') + o.city + (/\d/.test(o.to) ? ' · №' + o.to.replace(/\D/g, '') : '');
+  const MARKS = new Map();   // mark text -> code, so tests and CSS can address a mark in every language (data-test="mark:<code>")
   function shMarks(l, x) {
-    const o = x.o, m = [];
-    if (o.box) m.push(T('−20 °C · СУХОЙ ЛЁД UN 1845', '−20 °C · TROCKENEIS UN 1845', '−20 °C · DRY ICE UN 1845', '−20 °C · ҚҰРҒАҚ МҰЗ UN 1845'));
-    else if (o.cls === 'pharma') m.push(T('+2…+8 °C · НЕ ЗАМОРАЖИВАТЬ', '+2…+8 °C · NICHT EINFRIEREN', '+2…+8 °C · DO NOT FREEZE', '+2…+8 °C · МҰЗДАТПАУ'));
-    else if (o.cls === 'chilled') m.push(T('0…+4 °C · НЕ ЗАМОРАЖИВАТЬ', '0…+4 °C · NICHT EINFRIEREN', '0…+4 °C · DO NOT FREEZE', '0…+4 °C · МҰЗДАТПАУ'));
-    else if (o.cls === 'frozen') m.push(T('−18 °C · НЕ РАЗМОРАЖИВАТЬ', '−18 °C · NICHT AUFTAUEN', '−18 °C · DO NOT THAW', '−18 °C · ЕРІТПЕУ'));
-    else m.push(T('+15…+25 °C · БЕРЕЧЬ ОТ МОРОЗА', '+15…+25 °C · VOR FROST SCHÜTZEN', '+15…+25 °C · PROTECT FROM FROST', '+15…+25 °C · АЯЗДАН САҚТАУ'));
-    if (o.adr && !o.box) m.push(T('ДОПОГ · LQ', 'ADR · LQ', 'ADR · LQ', 'ДОПОГ · LQ'));
-    if (shThird(o)) m.push(T('СТОРОННИЙ ГРУЗ', 'FREMDFRACHT', 'THIRD-PARTY CARGO', 'БӨГДЕ ЖҮК'));
-    if (x.short) m.push(T('КОРОТКИЙ СРОК · FEFO', 'KURZE RESTLAUFZEIT · FEFO', 'SHORT EXPIRY · FEFO', 'МЕРЗІМІ ҚЫСҚА · FEFO'));
-    m.push(T('IVD · медицинские изделия', 'IVD · Medizinprodukte', 'IVD · medical devices', 'IVD · медициналық бұйымдар'), T('Хрупкое · не кантовать', 'Zerbrechlich · nicht kippen', 'Fragile · do not tilt', 'Сынғыш · аудармау'));
+    const o = x.o, m = [], mk = (code, text) => { MARKS.set(text, code); m.push(text); };
+    if (o.box) mk('dryice', T('−20 °C · СУХОЙ ЛЁД UN 1845', '−20 °C · TROCKENEIS UN 1845', '−20 °C · DRY ICE UN 1845', '−20 °C · ҚҰРҒАҚ МҰЗ UN 1845'));
+    else if (o.cls === 'pharma') mk('pharma', T('+2…+8 °C · НЕ ЗАМОРАЖИВАТЬ', '+2…+8 °C · NICHT EINFRIEREN', '+2…+8 °C · DO NOT FREEZE', '+2…+8 °C · МҰЗДАТПАУ'));
+    else if (o.cls === 'chilled') mk('chilled', T('0…+4 °C · НЕ ЗАМОРАЖИВАТЬ', '0…+4 °C · NICHT EINFRIEREN', '0…+4 °C · DO NOT FREEZE', '0…+4 °C · МҰЗДАТПАУ'));
+    else if (o.cls === 'frozen') mk('frozen', T('−18 °C · НЕ РАЗМОРАЖИВАТЬ', '−18 °C · NICHT AUFTAUEN', '−18 °C · DO NOT THAW', '−18 °C · ЕРІТПЕУ'));
+    else mk('ambient', T('+15…+25 °C · БЕРЕЧЬ ОТ МОРОЗА', '+15…+25 °C · VOR FROST SCHÜTZEN', '+15…+25 °C · PROTECT FROM FROST', '+15…+25 °C · АЯЗДАН САҚТАУ'));
+    if (o.adr && !o.box) mk('adr', T('ДОПОГ · LQ', 'ADR · LQ', 'ADR · LQ', 'ДОПОГ · LQ'));
+    if (shThird(o)) mk('third', T('СТОРОННИЙ ГРУЗ', 'FREMDFRACHT', 'THIRD-PARTY CARGO', 'БӨГДЕ ЖҮК'));
+    if (x.short) mk('shortexp', T('КОРОТКИЙ СРОК · FEFO', 'KURZE RESTLAUFZEIT · FEFO', 'SHORT EXPIRY · FEFO', 'МЕРЗІМІ ҚЫСҚА · FEFO'));
+    mk('ivd', T('IVD · медицинские изделия', 'IVD · Medizinprodukte', 'IVD · medical devices', 'IVD · медициналық бұйымдар')); mk('fragile', T('Хрупкое · не кантовать', 'Zerbrechlich · nicht kippen', 'Fragile · do not tilt', 'Сынғыш · аудармау'));
     return m;
   }
   /* partner hand-overs that carry this place (full hand-over or a partial one listing the place; 160 numbers handed places by their index in the load) */
@@ -92,7 +93,7 @@ ${lines.map(x => `<div class="sh-pkg${sel && x.p.sscc === sel.p.sscc ? ' sel' : 
 <div class="cell" style="margin:8px 0">${mlogo(L.o.mfr, 40)}<span><b>${esc(MFRS[L.o.mfr].name)}</b><div class="sub">${esc(MFRS[L.o.mfr].co)} · ${esc(MFRS[L.o.mfr].url)}</div></span>${logoBadge(L.o.mfr)}</div>
 <div class="sh-lab"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div><span class="k">${esc(T('Отправитель', 'Absender', 'Sender', 'Жөнелтуші'))}</span><b>${esc(L.from)}</b></div><div><span class="k">${esc(T('Получатель', 'Empfänger', 'Recipient', 'Алушы'))}</span><b>${esc(L.to)}</b></div></div>
 <dl><dt>PO</dt><dd><b>${L.o.po}</b></dd><dt>PL</dt><dd><b>${L.o.pl}</b></dd><dt>${esc(T('Заказ · рейс', 'Auftrag · Fahrt', 'Order · load', 'Тапсырыс · рейс'))}</dt><dd>${L.o.id} · ${l.id}</dd><dt>${esc(T('Артикул', 'Artikel', 'Article', 'Артикул'))}</dt><dd><b>${L.ln.art}</b></dd><dt>${esc(T('Товар', 'Ware', 'Goods', 'Тауар'))}</dt><dd>${esc(L.ln.name)}</dd><dt>LOT</dt><dd>${L.ln.lot}</dd><dt>${esc(T('Годен до', 'Verwendbar bis', 'Expiry', 'Жарамды'))}</dt><dd>${fd(L.ln.exp)}${sel.short ? ' <span class="sh-short">FEFO</span>' : ''}</dd><dt>${esc(T('Кол-во', 'Menge', 'Qty', 'Саны'))}</dt><dd>${L.ln.qty}</dd></dl>
-<div class="sh-temp${L.dark ? ' dark' : ''}">${ZONES[L.o.cls].label} · ${esc(L.tNote)}</div><div class="bar"><svg viewBox="0 0 252 40" style="width:100%;max-width:300px;height:40px">${L.bars}</svg><div>(00) ${sel.p.sscc}</div></div><div class="sh-marks" data-marks="${L.hmarks.length}">${L.hmarks.map(m => `<span class="sh-mark">${esc(m)}</span>`).join('')}</div><div class="sub" style="font-family:monospace">${L.marks.join('  ')}</div></div>
+<div class="sh-temp${L.dark ? ' dark' : ''}">${ZONES[L.o.cls].label} · ${esc(L.tNote)}</div><div class="bar"><svg viewBox="0 0 252 40" style="width:100%;max-width:300px;height:40px">${L.bars}</svg><div>(00) ${sel.p.sscc}</div></div><div class="sh-marks" data-marks="${L.hmarks.length}">${L.hmarks.map(m => `<span class="sh-mark" data-test="mark:${(MARKS.get(m) || 'other')}">${esc(m)}</span>`).join('')}</div><div class="sub" style="font-family:monospace">${L.marks.join('  ')}</div></div>
 <div class="actbar" style="margin-top:10px"><button class="btn sm primary" data-act="shPrint" data-s="${sel.p.sscc}">${esc(T('Печать этикетки (демо)', 'Etikett drucken (Demo)', 'Print label (demo)', 'Затбелгіні басып шығару (демо)'))}</button><button class="btn sm grey" data-act="shZpl">${S.ops.zpl ? esc(T('Скрыть ZPL', 'ZPL ausblenden', 'Hide ZPL', 'ZPL жасыру')) : esc(T('ZPL для Zebra (GS1-128)', 'ZPL für Zebra (GS1-128)', 'ZPL for Zebra (GS1-128)', 'Zebra үшін ZPL (GS1-128)'))}</button><button class="btn sm grey" data-act="shExport" data-s="${sel.p.sscc}">${esc(T('Экспорт .zpl', 'Export .zpl', 'Export .zpl', '.zpl экспорты'))}</button></div>
 ${S.ops.zpl ? `<pre class="sh-zpl" data-zpl="1">${esc(L.zpl)}</pre>` : ''}
 <h3 class="lw-h">${esc(T('История сканирования места (Track & Trace)', 'Scanverlauf des Packstücks (Track & Trace)', 'Package scan history (track & trace)', 'Орынды сканерлеу тарихы (Track & Trace)'))}</h3>${howNote('track')}${ev.map(e => `<div class="sh-ev${e.bad ? ' bad' : e.done ? '' : ' todo'}"><span class="faint">${esc(e.t)}</span><i></i><span>${e.html ? e.text : esc(e.text)}</span></div>`).join('')}</div>`;

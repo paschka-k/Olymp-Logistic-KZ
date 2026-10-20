@@ -12,7 +12,7 @@
     assert(v.every(x => x.ktg > 0.9 && x.ktg <= 1 && x.fixDay > 0), 'availability and downtime day');
     ev("go('billing');ACT.stab({s:'billing',v:'model'});ACT.ecoSub({v:'svc'})"); eq(w.document.querySelectorAll('[data-svc]').length, 4, 'rows'); eq(w.document.querySelector('[data-outage]').dataset.outage, '0', 'scenario active at start');
     const tot = w.document.querySelector('[data-outage-total]').innerText; assert(/₸/.test(tot), 'total');
-    const a0 = ev('S.audit.length'); ev("ACT.ecoWs({id:'V01'})"); eq(w.document.querySelector('[data-outage]').dataset.outage, '1', 'scenario not active'); assert(w.document.querySelector('[data-svc=V01]').innerText.includes('в сервисе'), 'V01 not in workshop'); eq(ev('S.audit.length'), a0 + 1, 'scenario not audited');
+    const a0 = ev('S.audit.length'); ev("ACT.ecoWs({id:'V01'})"); eq(w.document.querySelector('[data-outage]').dataset.outage, '1', 'scenario not active'); assert(w.document.querySelector('[data-svc=V01]').dataset.ws === '1', 'V01 not in workshop'); eq(ev('S.audit.length'), a0 + 1, 'scenario not audited');
     ev("ACT.ecoWs({id:'V01'})"); eq(w.document.querySelector('[data-outage]').dataset.outage, '0', 'scenario not ended');
   });
   await group('costs: drivers — FTE = km / 70 × 1.15 / 1814, crew colour, totals (FR-46)', 'ru', async (g, ev, w) => {

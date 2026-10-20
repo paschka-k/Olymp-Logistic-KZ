@@ -59,7 +59,7 @@
     ev("S.inbox[0].st = 'done'; go('dashboard')"); const t = w.document.querySelector('[data-act=ovTab][data-v=inbox]').textContent, n = ev("S.inbox.filter(m => m.st !== 'done').length"); assert(t.includes('(' + n + ')'), t + ' vs ' + n);
   });
   await group('R1 tasks: Mine / All, assignee, CRM #lead, done checkbox, crm:write, empty state', 'en', async (g, ev, w) => {
-    ev("go('orders'); S.tab.orders = 'commercial'; ACT.cmSec({v:'tasks'})"); const d = w.document; assert(d.querySelector('[data-task-seg] .pill-tab.active').textContent === 'Mine', 'Mine by default'); eq(d.querySelectorAll('[data-task]').length, ev("S.tasks.filter(t => t.who === taskMe()).length"));
+    ev("go('orders'); S.tab.orders = 'commercial'; ACT.cmSec({v:'tasks'})"); const d = w.document; assert(d.querySelector('[data-task-seg] .pill-tab.active').dataset.v === '0', 'Mine by default'); eq(d.querySelectorAll('[data-task]').length, ev("S.tasks.filter(t => t.who === taskMe()).length"));
     assert(/CRM #L-101/.test(d.querySelector('[data-task=T-1]').textContent), 'CRM link'); d.querySelector('[data-task=T-2] input[type=checkbox]').click(); assert(ev("S.tasks.find(t => t.id === 'T-2').done"), 'done checkbox');
     ev("ACT.cmTkSeg({v:'1'})"); eq(w.document.querySelectorAll('[data-task]').length, ev('S.tasks.length'), 'All');
     ev("ACT.cmTkSeg({v:'0'}); ACT.setRole({v:'viewer'}); go('orders'); S.tab.orders = 'commercial'; render()"); if (ev("tabsOf('orders').some(t => t.key === 'commercial')")) { ev("ACT.cmSec({v:'tasks'})"); assert(!w.document.querySelector('[data-act=cmTaskAdd]'), 'no form without crm:write'); assert(w.document.querySelector('[data-task-empty]'), 'empty state for the viewer'); } clean(w, 'tasks');

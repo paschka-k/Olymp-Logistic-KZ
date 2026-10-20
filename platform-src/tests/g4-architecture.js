@@ -326,3 +326,39 @@ await group('S4 FR-203: the bundle still follows the file-name order (first and 
     'screens are assembled in NNN order: ' + pos.join(),
   );
 });
+
+/* FR-207 · data-test hooks: the same in every language, tests select by them instead of by visible text */
+const g4Hooks = {};
+for (const lang of LANGS)
+  await group(
+    '[' + lang + '] S4 FR-207: shell and kit carry data-test hooks (nav, tabs, kpi, table, filters, drawer, toast, role, lang)',
+    lang,
+    async (g, ev, w) => {
+      const q = s => [...w.document.querySelectorAll(s)];
+      const vals = () => new Set(q('[data-test]').map(e => e.dataset.test));
+      const seen = new Set();
+      for (const id of ev('NAV.map(n => n[0])')) {
+        ev("go('" + id + "')");
+        for (const v of vals()) seen.add(v);
+      }
+      for (const id of ev('NAV.map(n => n[0])')) assert(seen.has('nav:' + id), 'nav:' + id);
+      for (const h of ['kpi', 'table', 'filters', 'role-select', 'burger', 'help', 'brand', 'lang:ru', 'lang:de', 'lang:en', 'lang:kk'])
+        assert(seen.has(h), 'hook ' + h);
+      assert(
+        [...seen].some(v => /^tab:orders:/.test(v)),
+        'tab hooks on Orders',
+      );
+      ev("go('orders'); openDrawer({type:'load', id:S.loads[0].id, tab:'overview'})");
+      assert(q('aside.drawer[data-test=drawer] [data-test=drawer-close]').length === 1, 'drawer + close hook');
+      ev('closeDrawer(); toast("x")');
+      assert(q('[data-test=toast]').length === 1, 'toast hook');
+      g4Hooks[lang] = [...seen].sort().join('|');
+      assert(
+        q('[data-test]').every(e => !/[^\x20-\x7e]/.test(e.dataset.test)),
+        'hooks are plain ASCII, not translated text',
+      );
+    },
+  );
+await group('S4 FR-207: the hook set is identical in RU, DE, EN and KK', 'ru', async () => {
+  for (const l of ['de', 'en', 'kk']) eq(g4Hooks[l], g4Hooks.ru, l + ' hooks = ru hooks');
+});

@@ -7,17 +7,17 @@
 const KIT = {
   /** coloured KPI tile: KIT.kpi('blue', 'truck', 12, 'Vehicles') */
   kpi: (cls, ico, val, label) =>
-    `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`,
+    `<div class="kpi-tile tint ${cls}" data-test="kpi"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`,
   /** KPI tile with a sub line under the label (SLA, reports) */
   kpiSub: (cls, ico, val, label, sub) =>
-    `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div>${sub ? `<div class="delta">${esc(sub)}</div>` : ''}</div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`,
+    `<div class="kpi-tile tint ${cls}" data-test="kpi"><div><div class="value">${val}</div><div class="label">${esc(label)}</div>${sub ? `<div class="delta">${esc(sub)}</div>` : ''}</div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`,
   /** white KPI tile with a delta line (dashboard) */
   kpiDelta: (cls, ico, label, val, sub, subCls) =>
-    `<div class="kpi-tile"><div><div class="label">${esc(label)}</div><div class="value">${val}</div><div class="delta ${subCls || ''}">${sub}</div></div><div class="icon" style="background:var(--tint-${cls}-100);color:var(--label-${cls})">${ic(ico, 20)}</div></div>`,
+    `<div class="kpi-tile" data-test="kpi"><div><div class="label">${esc(label)}</div><div class="value">${val}</div><div class="delta ${subCls || ''}">${sub}</div></div><div class="icon" style="background:var(--tint-${cls}-100);color:var(--label-${cls})">${ic(ico, 20)}</div></div>`,
   /** key / value cell of a detail grid (v is HTML, k is text) */
   kv: (k, v) => `<div><small>${esc(k)}</small><b>${v}</b></div>`,
-  /** status chip: KIT.chip('green', 'On time') */
-  chip: (c, t) => `<span class="chip ${c}">${esc(t)}</span>`,
+  /** status chip: KIT.chip('green', 'On time'); attrs = raw attributes, e.g. 'data-test="issue:hub"' */
+  chip: (c, t, attrs) => `<span class="chip ${c}"${attrs ? ' ' + attrs : ''}>${esc(t)}</span>`,
   /** <select> of a filter bar bound to a state object through a data attribute:
       const sel = KIT.filterSelect('data-f', () => S.f);  sel('status', 'Status', [['', 'All'], ['x', 'X']]) */
   filterSelect: (attr, state) => (key, label, opts) =>
@@ -27,7 +27,7 @@ const KIT = {
   /** card with a table: head = column titles (text), bodyHtml = <tr> rows. o = { id, attrs (raw attributes, e.g. 'data-list'),
       cols (colspan of the empty row, default head.length), empty (text of the empty row; false = no empty row) } */
   table: (head, bodyHtml, o = {}) =>
-    `<div class="card tcard"><table class="table"${o.id ? ` id="${o.id}"` : ''}${o.attrs ? ' ' + o.attrs : ''}><thead><tr>${head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${bodyHtml || (o.empty === false ? '' : `<tr><td colspan="${o.cols || head.length}" class="empty">${esc(o.empty || LT('kit.empty'))}</td></tr>`)}</tbody></table></div>`,
+    `<div class="card tcard"><table class="table" data-test="table"${o.id ? ` id="${o.id}"` : ''}${o.attrs ? ' ' + o.attrs : ''}><thead><tr>${head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${bodyHtml || (o.empty === false ? '' : `<tr><td colspan="${o.cols || head.length}" class="empty">${esc(o.empty || LT('kit.empty'))}</td></tr>`)}</tbody></table></div>`,
   /** labelled text input of the account / settings forms: KIT.field('au_name', 'Name', 'text', value, 'placeholder') */
   field: (id, label, type, val, hint) =>
     `<label class="fl">${esc(label)}<input class="inp" id="${id}" data-au="${id.slice(3)}" type="${type}" value="${esc(val || '')}" autocomplete="off"${hint ? ` placeholder="${esc(hint)}"` : ''}></label>`,
@@ -35,5 +35,5 @@ const KIT = {
   sectionHead: title => `<div class="drawer-section"><h4>${esc(title)}</h4>`,
   /** drawer frame (labelled modal dialog, FR-215): r = { title, html, xl } as returned by DRAWERS[type] */
   drawer: r =>
-    `<aside class="drawer open${r.xl ? ' xl' : ''}" role="dialog" aria-modal="true" aria-labelledby="drawer-title" tabindex="-1"><div class="drawer-head"><span id="drawer-title">${esc(r.title)}</span><button type="button" class="x" data-act="close" aria-label="${esc(LT('core.close'))}">${ic('x', 18)}</button></div>${r.html}</aside>`,
+    `<aside class="drawer open${r.xl ? ' xl' : ''}" role="dialog" aria-modal="true" aria-labelledby="drawer-title" tabindex="-1" data-test="drawer"><div class="drawer-head"><span id="drawer-title">${esc(r.title)}</span><button type="button" class="x" data-test="drawer-close" data-act="close" aria-label="${esc(LT('core.close'))}">${ic('x', 18)}</button></div>${r.html}</aside>`,
 };
