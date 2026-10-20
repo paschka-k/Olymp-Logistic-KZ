@@ -168,7 +168,7 @@ ${city}
 <div class="card card-body"><h3 style="margin:0 0 8px;font-size:15px">${esc(T('Пороги погодных тревог', 'Schwellen Wetteralarme', 'Weather alert thresholds', 'Ауа райы дабылдарының шектері'))}</h3>${howNote('wxrisk')}${WXR.map(r => `<div class="prm" style="grid-template-columns:1fr auto"><span>${esc(r[0])}</span><small>${esc(r[1])}</small></div>`).join('')}</div></div></div>`;
   }
   /* ---------- security ---------- */
-  const TIME = () => p2(new Date().getHours()) + ':' + p2(new Date().getMinutes());
+  const TIME = () => { const d = clockNow(); return p2(d.getHours()) + ':' + p2(d.getMinutes()); };
   const mkInc = (id, lvl, time, type, text, o) => Object.assign({ id, lvl, time, type, text, st: 'open' }, o);
   S.inc = [];
   const prob = S.loads.find(l => l.status === 'problem'), tr = S.loads.find(l => l.status === 'in_transit');

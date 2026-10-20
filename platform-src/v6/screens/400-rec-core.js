@@ -63,6 +63,6 @@
     NEWB(4, { cust: 'c1', from: 'AST', to: 'KAR', zone: 'pharma', pallets: 4, kg: 1100, express: true, insured: true, value: 12000000, status: 'confirmed', load: 'LD-2026-001855', created: '2026-10-17T16:20:00+05:00', hist: [{ at: '2026-10-17T16:41:00+05:00', st: 'confirmed', who: 'dispatcher' }] }),
     NEWB(5, { cust: 'c5', from: 'AST', to: 'SHY', zone: 'ambient', pallets: 33, kg: 12800, status: 'rejected', created: '2026-10-16T11:00:00+05:00', note: T('Нужен 2-й автопоезд', 'Zweiter Lastzug nötig', 'A second road train is needed', '2-ші автопоезд қажет'), hist: [{ at: '2026-10-16T11:30:00+05:00', st: 'rejected', who: 'dispatcher', why: T('Нет свободной тентованной фуры на дату', 'Kein freier Planen-Lkw zum Termin', 'No free curtain-sider on that date', 'Күнге бос тентті фура жоқ') }] }),
   ];
-  globalThis.addBooking = o => { const n = S.bookings.reduce((m, b) => Math.max(m, +b.id.slice(6)), 0) + 1; const b = NEWB(n, Object.assign({ created: new Date().toISOString() }, o, { status: 'new', load: null, hist: [] })); S.bookings.unshift(b); return b; };
+  globalThis.addBooking = o => { const n = S.bookings.reduce((m, b) => Math.max(m, +b.id.slice(6)), 0) + 1; const b = NEWB(n, Object.assign({ created: clockNow().toISOString() }, o, { status: 'new', load: null, hist: [] })); S.bookings.unshift(b); return b; };
   globalThis.newBookings = () => S.bookings.filter(b => b.status === 'new').length;
 })();
