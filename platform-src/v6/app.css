@@ -311,3 +311,13 @@ html[data-design="kokzhol"] .side-link{color:#c9d8df}html[data-design="kokzhol"]
 .content select,.drawer select{max-width:100%;min-width:0;text-overflow:ellipsis}
 /* Q4 · topbar: only the search box gives way, every other item keeps its size */
 @media (max-width:1100px){ .who>*,.who .avatar{flex:none} .who>.gs{flex:0 1 auto;min-width:0} .gs .searchbox{flex:0 1 auto;min-width:110px} .searchbox input{min-width:0;width:100%} }
+
+/* R4 · I-8 list tools: saved views, column filters, CSV (700-list-views.js) */
+.lv-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 10px}
+.lv-bar .select{height:32px;min-width:0}
+.lv-bar .lv-l{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--text-faint)}
+.lv-bar .lv-name{max-width:200px}
+.lv-bar .lv-n{font-size:12px;color:var(--text-faint);margin-left:auto}
+.table tr.lv-f td{padding-top:0;padding-bottom:8px;background:transparent}
+.table .lv-in{width:100%;min-width:56px;height:26px;border:1px solid var(--border);border-radius:6px;padding:0 6px;font:inherit;font-size:12px;background:var(--bg-surface);color:var(--text)}
+@media (max-width:700px){.lv-bar .lv-name{max-width:none;flex:1 1 140px}.lv-bar .lv-n{margin-left:0;width:100%}}

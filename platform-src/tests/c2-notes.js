@@ -12,6 +12,8 @@
     ['covSchem', Q3_TAB('routes', 'coverage')], ['thChron', Q3_TAB('routes', 'thermochron')],
     ['capa', Q3_TAB('pod', 'quality')], ['costExcl', Q3_TAB('billing', 'model')], ['fineLink', Q3_TAB('reports', 'fines')], ['mdVerified', Q3_TAB('settings', 'ref')],
     ['ibDwell', Q3_TAB('hubs', 'inbound')], ['ibSlot', Q3_TAB('hubs', 'slots')], ['ibPre', Q3_TAB('hubs', 'pre')], ['ibDem', Q3_TAB('hubs', 'dem')], ['ibGate', Q3_TAB('hubs', 'inbound') + ";openDrawer({type:'ibGate',id:'IN-0614'})"],
+
+    ['r4Rules', Q3_TAB('settings', 'rules')], ['r4Winter', Q3_TAB('dispatch', 'winter')], ['r4Sla', Q3_TAB('reports', 'sla')], ['r4SlaStmt', Q3_TAB('billing', 'sla')], ['r4Overlap', Q3_TAB('reports', 'cross')],
   ];
   const Q3_CYR = /[Ѐ-ӿ]/;
   await group('notes: every key in NOTES has RU / DE / EN / KK text, DE and EN without Cyrillic, and is placed on a screen', 'ru', async (g, ev) => {
