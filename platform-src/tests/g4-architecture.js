@@ -220,3 +220,74 @@ await group('S4 FR-200: screens use the kit instead of private copies', 'ru', as
   assert((src.match(/const sel = \(/g) || []).length <= 5, 'private filter-select copies left');
   assert((src.match(/class="kpi-tile tint \$\{cls\}"/g) || []).length <= 5, 'KPI tile markup outside KIT');
 });
+
+/* FR-202 · typed state model (JSDoc + schema check at startup) and the named action registry that feeds the audit log */
+for (const lang of LANGS)
+  await group('[' + lang + '] S4 FR-202: the demo state passes the schema check at startup; a malformed record is reported', lang, async (g, ev) => {
+    eq(ev('S.schemaProblems.join("; ")'), '', 'no schema problems at startup');
+    ev("S.loads[0].status = 'weird'; S.drivers[0].rto = NaN; S.loads.push(Object.assign({}, S.loads[1]))");
+    const bad = ev('schemaCheck()');
+    assert(
+      bad.some(m => /loads\[0\].*status/.test(m)),
+      'status enum: ' + bad.join('; '),
+    );
+    assert(
+      bad.some(m => /drivers\[0\].*rto/.test(m)),
+      'number field',
+    );
+    assert(
+      bad.some(m => /duplicate id/.test(m)),
+      'duplicate id',
+    );
+    eq(
+      ev('schemaCheck({ loads: 1, drivers: [], trucks: [], role: "admin", route: "x", audit: [] }).join()').indexOf('loads: not an array') >= 0,
+      true,
+      'wrong container type',
+    );
+  });
+await group('S4 FR-202: the action registry lists permissions and audit rules; every registered action exists in ACT', 'en', async (g, ev) => {
+  const names = ev('Object.keys(ACTION_REGISTRY)');
+  assert(names.length >= 9, 'registered actions: ' + names.length);
+  for (const n of names) eq(ev('typeof ACT.' + n), 'function', n + ' is bound');
+  eq(ev('ACTION_REGISTRY.doAssign.perm'), 'trips:write', 'permission lives in the registry');
+  eq(ev('ACTION_REGISTRY.setRole.audit.module'), 'Roles', 'audit rule');
+  let threw = false;
+  try {
+    ev("registerAction('doAssign', {})");
+  } catch (e) {
+    threw = true;
+  }
+  assert(threw, 'double registration is refused');
+});
+await group('S4 FR-202: registered actions write the audit log themselves, and only when something changed', 'en', async (g, ev, w) => {
+  const n = () => ev('S.audit.length');
+  let a = n();
+  ev("ACT.setRole({v:'dispatcher'})");
+  eq(n(), a + 1, 'role switch audited');
+  eq(ev('S.audit[0].module + "|" + S.audit[0].subject'), 'Roles|dispatcher', 'entry');
+  a = n();
+  ev("ACT.setRole({v:'dispatcher'})");
+  eq(n(), a, 'same role again: no entry');
+  ev("ACT.setRole({v:'admin'})");
+  const id = ev("S.loads.find(l => l.status === 'unassigned').id");
+  a = n();
+  ev("ACT.adv({id:'" + id + "', to:'delivered'})");
+  eq(n(), a, 'rejected status change: no entry');
+  const ok = ev("(() => { const l = S.loads.find(x => x.status === 'assigned'); return l ? l.id : null; })()");
+  if (ok) {
+    a = n();
+    ev("ACT.adv({id:'" + ok + "', to:'loading'})");
+    eq(n(), a + 1, 'accepted status change audited');
+    assert(/Dispatch/.test(ev('S.audit[0].module')) && ev('S.audit[0].subject') === ok, 'entry names the load');
+  }
+  a = n();
+  ev('ACT.auto()');
+  assert(n() <= a + 1, 'auto-assign writes at most one entry');
+  eq(ev('auditVerify().ok'), true, 'audit chain stays valid');
+  ev("ACT.setRole({v:'viewer'})");
+  w.document.body.insertAdjacentHTML('beforeend', '<button id="g4b" data-act="auto">x</button>');
+  a = n();
+  w.document.getElementById('g4b').click();
+  eq(n(), a, 'a click blocked by the registry permission audits nothing');
+  assert(/permission|Berechtigung|Нет прав|Құқық/i.test(ev('S.toast.msg')), 'viewer is refused by the registry permission: ' + ev('S.toast.msg'));
+});

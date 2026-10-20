@@ -1,0 +1,7 @@
+{
+ "actions.load_assigned": "Fahrt zugewiesen",
+ "actions.status_changed": "Fahrtstatus geändert",
+ "actions.load_created": "Fahrt angelegt",
+ "actions.auto_assigned": "Automatische Zuweisung ausgeführt",
+ "actions.role_switched": "Rolle gewechselt"
+}

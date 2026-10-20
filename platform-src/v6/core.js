@@ -308,10 +308,22 @@ document.addEventListener('keydown', e => {
   e.preventDefault(); el.click();
 });
 /* write actions of Orders / Dispatch need their permission (R6 · 0.3.9 FR-82: a read-only role sees the data but cannot act) */
-const ACT_PERM = { create: 'orders:write', saveLoad: 'orders:write', imp: 'orders:write', auto: 'trips:write', doAssign: 'trips:write', adv: 'trips:status', addD: 'drivers:write', saveD: 'drivers:write' };
+/* FR-202: the named action registry (v6/base/40-state.js). A write action needs its permission (R6 · 0.3.9 FR-82: a read-only role sees the data
+   but cannot act) and, where listed, writes the audit log entry itself when it changed what it watches. */
+const ACTION_DEFS = {
+  create: { area: 'orders', perm: 'orders:write' },
+  imp: { area: 'orders', perm: 'orders:write' },
+  saveLoad: { area: 'orders', perm: 'orders:write', audit: { module: 'Orders', subject: () => S.loads[0].id, watch: () => S.loads.length, decision: () => LT('actions.load_created') } },
+  auto: { area: 'dispatch', perm: 'trips:write', audit: { module: 'Dispatch', subject: () => 'Auto-Assign', watch: () => S.loads.filter(l => l.status === 'unassigned').length, decision: () => LT('actions.auto_assigned') } },
+  doAssign: { area: 'orders', perm: 'trips:write', audit: { module: 'Dispatch', subject: d => d.id, watch: d => (load(d.id) || {}).driver + '|' + (load(d.id) || {}).truck, decision: () => LT('actions.load_assigned') } },
+  adv: { area: 'orders', perm: 'trips:status', audit: { module: 'Dispatch', subject: d => d.id, watch: d => (load(d.id) || {}).status, decision: d => LT('actions.status_changed') + ': ' + ST[load(d.id).status].l } },
+  addD: { area: 'drivers', perm: 'drivers:write' },
+  saveD: { area: 'drivers', perm: 'drivers:write' },   // writes its own audit entry (driver.created, screens/drivers/050-drivers.js)
+};
+Object.entries(ACTION_DEFS).forEach(([name, meta]) => registerAction(name, meta));
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-act]'); if (!el) return;
-  const p = ACT_PERM[el.dataset.act]; if (p && !canDo(p)) return toast(LT('core.no_permission') + p, 'err');
+  const p = (ACTION_REGISTRY[el.dataset.act] || {}).perm; if (p && !canDo(p)) return toast(LT('core.no_permission') + p, 'err');
   const fn = ACT[el.dataset.act]; if (fn) { fn(el.dataset, el, e); }
 });
 document.addEventListener('input', e => {

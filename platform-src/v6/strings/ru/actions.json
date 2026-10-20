@@ -1,0 +1,7 @@
+{
+ "actions.load_assigned": "Рейс назначен",
+ "actions.status_changed": "Статус рейса изменён",
+ "actions.load_created": "Рейс создан",
+ "actions.auto_assigned": "Автоназначение выполнено",
+ "actions.role_switched": "Роль переключена"
+}

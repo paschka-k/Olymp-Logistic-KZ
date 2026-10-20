@@ -16,7 +16,7 @@ const arg = (k, d) => {
 };
 const outDir = resolve(arg('out', join(here, '..', 'platform')));
 const langs = arg('lang', 'ru,de,en,kk').split(',');
-const rd = (...p) => readFileSync(join(here, ...p), 'utf8');
+const rd = (...p) => readFileSync(join(here, ...p), 'utf8').replace(/\r\n/g, '\n'); // FR-204: sources are LF; a stray CRLF checkout must not reach the bundle
 const list = (dir, ext) =>
   existsSync(join(here, dir))
     ? readdirSync(join(here, dir))
@@ -47,9 +47,12 @@ const rolePerms = rd('v6', 'role-perms.json').trim();
 // The build fails when the four languages differ in their keys, when DE / EN contain Cyrillic, or when a KK review entry names no key.
 const STR_LANGS = ['ru', 'de', 'en', 'kk'];
 const readStrings = l => {
-  const dir = join(here, 'v6', 'strings', l), out = {};
+  const dir = join(here, 'v6', 'strings', l),
+    out = {};
   if (!existsSync(dir)) return out;
-  for (const f of readdirSync(dir).filter(x => x.endsWith('.json') && !x.startsWith('_')).sort()) {
+  for (const f of readdirSync(dir)
+    .filter(x => x.endsWith('.json') && !x.startsWith('_'))
+    .sort()) {
     for (const [k, v] of Object.entries(JSON.parse(readFileSync(join(dir, f), 'utf8')))) {
       if (k in out) throw new Error(`strings: duplicate key ${k} (${l}/${f})`);
       out[k] = v;
@@ -59,14 +62,20 @@ const readStrings = l => {
 };
 const strings = Object.fromEntries(STR_LANGS.map(l => [l, readStrings(l)]));
 for (const l of STR_LANGS) {
-  const miss = Object.keys(strings.ru).filter(k => !(k in strings[l])), extra = Object.keys(strings[l]).filter(k => !(k in strings.ru));
+  const miss = Object.keys(strings.ru).filter(k => !(k in strings[l])),
+    extra = Object.keys(strings[l]).filter(k => !(k in strings.ru));
   if (miss.length || extra.length) throw new Error(`strings: ${l} differs from ru (missing ${miss.slice(0, 5)}, extra ${extra.slice(0, 5)})`);
-  if (l === 'de' || l === 'en') for (const [k, v] of Object.entries(strings[l])) if (/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]/.test(v)) throw new Error(`strings: Cyrillic in ${l} key ${k}: ${v}`);
+  if (l === 'de' || l === 'en')
+    for (const [k, v] of Object.entries(strings[l])) if (/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]/.test(v)) throw new Error(`strings: Cyrillic in ${l} key ${k}: ${v}`);
 }
 const kkReviewFile = join(here, 'v6', 'strings', 'kk', '_review.json');
 const kkReview = existsSync(kkReviewFile) ? JSON.parse(readFileSync(kkReviewFile, 'utf8')) : {};
 for (const k of Object.keys(kkReview)) if (!(k in strings.kk)) throw new Error(`strings: kk/_review.json names an unknown key ${k}`);
-const kkOpen = Object.fromEntries(Object.entries(kkReview).filter(([, v]) => v.status !== 'reviewed').map(([k]) => [k, 1]));
+const kkOpen = Object.fromEntries(
+  Object.entries(kkReview)
+    .filter(([, v]) => v.status !== 'reviewed')
+    .map(([k]) => [k, 1]),
+);
 // Changes page (W3): docs/source-platform/register.json -> compact per-language JSON (@@REGISTER@@); KK falls back to RU
 const reg = JSON.parse(readFileSync(join(here, '..', 'docs', 'source-platform', 'register.json'), 'utf8'));
 const regFor = lang => {

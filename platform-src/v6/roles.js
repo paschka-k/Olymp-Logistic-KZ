@@ -18,4 +18,5 @@ const HELP_NAV = ['help', 'spark', LT('role.help'), 0];
 const navItems = () => (SHELL_NAV[S.role] ? SHELL_NAV[S.role].concat([HELP_NAV]) : NAV.filter(n => canSee(n[0])));
 const homeRoute = () => navItems()[0][0];
 Object.assign(ACT, { setRole: d => { S.role = d.v; if (!canSee(S.route)) S.route = homeRoute(); S.drawer = null; render(); }, setDesign: () => { S.design = S.design === 'olymp' ? 'kokzhol' : 'olymp'; document.documentElement.dataset.design = S.design; render(); } });
+registerAction('setRole', { area: 'roles', audit: { module: 'Roles', subject: d => d.v, watch: () => S.role, decision: () => LT('actions.role_switched') } });
 document.addEventListener('change', e => { if (e.target.id === 'roleSel') ACT.setRole({ v: e.target.value }); });
