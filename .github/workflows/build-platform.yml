@@ -2,12 +2,15 @@ name: Build platform (v5.3 + v6)
 
 # Rebuilds platform-v5.3.html / -de / -en and platform/index.html / de / en / kk + platform/tests.html from platform-src/ whenever the sources change.
 # The commit made here only touches the generated HTML (outside platform-src/), so it does not retrigger this job.
+# FR-209: pinned runner image and Node 22 (same as ui-tests.yml). FR-198: the page-weight part of the performance budget
+# (platform-src/perf-budget.json) runs before the commit, so oversized HTML is never committed.
 on:
   push:
     branches: [main, dev]
     paths:
       - 'platform-src/**'
       - '.github/workflows/build-platform.yml'
+      - 'tools/ci/perf-budget.cjs'
   workflow_dispatch:
 
 permissions:
@@ -19,13 +22,13 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: 22
       - name: Build the three language bundles
         run: node platform-src/build.mjs
       - name: Build the v6 prototype (4 languages)
@@ -42,6 +45,8 @@ jobs:
           done
           test -s platform/tests.html || { echo "missing platform/tests.html"; exit 1; }
           grep -q '__TESTS' platform/tests.html || { echo "platform/tests.html has no test harness"; exit 1; }
+      - name: Page-weight budget (FR-198)
+        run: node tools/ci/perf-budget.cjs --weight-only --out perf-results
       - name: Commit regenerated HTML
         run: |
           git config user.name  "github-actions[bot]"
