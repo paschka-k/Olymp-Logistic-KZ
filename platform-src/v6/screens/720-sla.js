@@ -55,7 +55,7 @@
   };
   globalThis.slaDispute = (m, k, reason) => {
     const p = slaPenalty(m), ln = p.lines.find(x => x.k === k); if (!ln) return 'unknown KPI';
-    if (!ln.amt) return T('Пени нет — оспаривать нечего', 'Keine Pönale — nichts zu bestreiten', 'No penalty — nothing to dispute', 'Айыппұл жоқ');
+    if (!ln.amt) return LT('sla.no_penalty_nothing_to_dispute');
     if (!(canDo('costs:approve') || canDo('approvals:sign'))) return T('Нужно право costs:approve', 'Recht costs:approve nötig', 'Needs costs:approve', 'costs:approve құқығы қажет');
     if (SL.disp[dkey(m, k)] && SL.disp[dkey(m, k)].open) return T('Спор уже открыт', 'Streit bereits offen', 'Dispute already open', 'Дау ашық');
     if (!reason || reason.trim().length < 10) return T('Обоснование спора: минимум 10 знаков', 'Begründung des Streits: mindestens 10 Zeichen', 'Dispute reason: at least 10 characters', 'Дау негіздемесі: кемінде 10 таңба');
@@ -122,7 +122,7 @@ ${S.slaDis ? `<div class="card card-body" id="sla_dis_box"><label class="fl">${e
     slaRules: () => { RULES.cur = 'sla'; go('settings'); setTab('settings', 'rules'); },
     slaDis: d => { S.slaDis = d.k; render(); const t = document.getElementById('sla_reason'); if (t) t.focus(); },
     slaDisX: () => { S.slaDis = null; render(); },
-    slaDisGo: () => { const r = slaDispute(SL.month, S.slaDis, (document.getElementById('sla_reason') || {}).value || ''); if (r) return err(r); S.slaDis = null; toast(T('Спор открыт — пеня не удерживается до решения', 'Streit eröffnet — Pönale bis zur Entscheidung nicht abgezogen', 'Dispute opened — penalty held until resolved', 'Дау ашылды')); },
+    slaDisGo: () => { const r = slaDispute(SL.month, S.slaDis, (document.getElementById('sla_reason') || {}).value || ''); if (r) return err(r); S.slaDis = null; toast(LT('sla.dispute_opened_penalty_held_until_re')); },
     slaRes: d => { const r = slaResolve(SL.month, d.k, d.v); if (r) return toast(r, 'err'); toast(T('Спор закрыт', 'Streit geschlossen', 'Dispute closed', 'Дау жабылды')); },
     slaFreeze: () => { const r = slaFreeze(SL.month); if (r) return toast(r, 'err'); toast(T('Замер зафиксирован', 'Messung festgeschrieben', 'Measurement frozen', 'Өлшем бекітілді')); },
     slaPost: () => { const r = slaPost(SL.month); if (r) return toast(r, 'err'); toast(T('Пени внесены в выписку', 'Pönalen gebucht', 'Penalties posted', 'Айыппұлдар енгізілді')); },

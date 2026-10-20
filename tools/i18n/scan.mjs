@@ -38,6 +38,7 @@ export function scanFile(file) {
   return { src, ...out };
 }
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  const equalOk = new Set(JSON.parse(readFileSync(join(root, 'tools', 'i18n', 'kk-equal-ok.json'), 'utf8')).texts); // identical in Kazakh on purpose
   const kk = process.argv.includes('--kk'),
     rows = [];
   let tot = 0,
@@ -58,7 +59,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
             ? 'missing'
             : k == null
               ? null
-              : k === ru && ru.length > 12 && /[а-яё]{4}/i.test(ru)
+              : k === ru && !equalOk.has(ru) && ru.length > 12 && /[а-яё]{4}/i.test(ru)
                 ? 'equal'
                 : k.length < ru.length * 0.45 && ru.length > 24
                   ? 'short'

@@ -78,7 +78,7 @@
     bEsf: d => { const i = INV(d.id); if (blocked(i)) return; setEsf(i, 'issued'); toast(T('ЭСФ выписана', 'ESF ausgestellt', 'ESF issued', 'ЭШФ жазылды')); },
     bEsfOk: d => { setEsf(INV(d.id), 'confirmed'); toast(T('ЭСФ подтверждена в ИС ЭСФ', 'ESF in IS ESF bestätigt', 'ESF confirmed in IS ESF', 'ЭШФ расталды')); },
     bEsfNo: d => { setEsf(INV(d.id), 'rejected'); toast(T('ЭСФ отклонена', 'ESF abgelehnt', 'ESF rejected', 'ЭШФ қабылданбады'), 'err'); },
-    bSend: d => { const i = INV(d.id); if (blocked(i)) return; if (esfOf(i) === 'none') setEsf(i, 'issued'); i.sent = true; toast(T('Счёт отправлен (ЭСФ + e-mail)', 'Rechnung gesendet (ESF + E-Mail)', 'Invoice sent (ESF + e-mail)', 'Шот жіберілді')); },
+    bSend: d => { const i = INV(d.id); if (blocked(i)) return; if (esfOf(i) === 'none') setEsf(i, 'issued'); i.sent = true; toast(LT('billing.invoice_sent_esf_e_mail')); },
     bPay: d => { const i = INV(d.id); if (blocked(i)) return; i.paidAt = '2026-10-18'; toast(T('Оплата зарегистрирована', 'Zahlung erfasst', 'Payment registered', 'Төлем тіркелді')); },
     bDis: d => { const i = INV(d.id), t = ($('#dt') || {}).value || ''; if (!t.trim()) return toast(T('Опишите спор', 'Streit beschreiben', 'Describe the dispute', 'Дауды сипаттаңыз'), 'err'); i.dispute = { open: true, reason: $('#dr').value, text: t.trim(), notes: [] }; toast(T('Спор открыт — счёт заблокирован', 'Streit eröffnet — Rechnung gesperrt', 'Dispute opened — invoice blocked', 'Дау ашылды — шот бұғатталды')); },
     bDisClose: d => { INV(d.id).dispute.open = false; toast(T('Спор закрыт', 'Streit geschlossen', 'Dispute resolved', 'Дау жабылды')); },

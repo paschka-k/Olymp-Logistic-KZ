@@ -66,7 +66,7 @@
 ${howNote('pinMdm')}${shown}<div class="card tcard" id="r5_pinadm"><table class="table"><thead><tr><th>${esc(T('Водитель', 'Fahrer', 'Driver', 'Жүргізуші'))}</th><th>${esc(T('Устройство', 'Gerät', 'Device', 'Құрылғы'))}</th><th>MDM</th><th>${esc(T('Привязка', 'Zuordnung', 'Binding', 'Байлау'))}</th><th>${esc(T('ПИН', 'PIN', 'PIN', 'ПИН'))}</th><th>${esc(T('Ошибки', 'Fehler', 'Fails', 'Қателер'))}</th><th>${esc(T('Статус', 'Status', 'Status', 'Күйі'))}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }
   addTab('drivers', 'daadmin', T('Приложение: устройства и ПИН', 'App: Geräte und PIN', 'Driver app admin', 'Қосымша: құрылғылар мен ПИН'), () => pinAdmin(), { perm: 'drivers:read', badge: () => S.drivers.filter(d => pinState(pinOf(d.id)) === 'locked').length || '' });
-  const pinAct = (d, fn, what) => { const s = pinOf(d.id); if (!s) return; if (!canPin()) return toast(T('Нет права: диспетчер или администратор', 'Kein Recht: Disposition oder Administrator', 'No permission: dispatcher or administrator', 'Құқық жоқ'), 'err'); fn(s); AUD('Driver app', d.id, what, s.dev); render(); };
+  const pinAct = (d, fn, what) => { const s = pinOf(d.id); if (!s) return; if (!canPin()) return toast(LT('r5_driver_partner.no_permission_dispatcher_or_administ'), 'err'); fn(s); AUD('Driver app', d.id, what, s.dev); render(); };
   Object.assign(ACT, {
     r5PinIn: d => { const e = pinLogin(d.id, ($('#r5_pin') || {}).value); Q.pinMsg = e || ''; if (!e) toast(T('Вход выполнен', 'Angemeldet', 'Signed in', 'Кірдіңіз')); else render(); },
     r5PinOut: d => { const s = pinOf(d.id); if (!s) return; s.sess = false; Q.pinMsg = ''; AUD('Driver app', d.id, 'Session ended', s.dev); render(); },

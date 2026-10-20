@@ -143,3 +143,36 @@ for (const lang of LANGS)
     eq(ev('LT_MISS.join()'), '', 'no missing string keys');
     if (lang === 'de' || lang === 'en') assert(!/[А-Яа-яЁё]/.test(w.document.querySelector('#root').innerText), 'no Cyrillic in the shell');
   });
+
+/* FR-220 · Kazakh completeness and review workflow (I-26) */
+await group('S4 FR-220: completed KK texts are keyed, full length, and listed as machine translations in kk/_review.json', 'ru', async () => {
+  const j = async p => JSON.parse(await g4Src('../platform-src/v6/strings/' + p));
+  const kk = await j('kk/kkfill.json'),
+    ru = await j('ru/kkfill.json'),
+    rev = await j('kk/_review.json');
+  const keys = Object.keys(kk);
+  assert(keys.length >= 90, 'at least 90 completed texts: ' + keys.length);
+  for (const k of keys) {
+    assert(k in rev, k + ' is not listed in _review.json');
+    assert(['mt', 'reviewed'].includes(rev[k].status) && rev[k].by && rev[k].date, k + ': review entry needs status, by, date');
+    assert(kk[k].length >= ru[k].length * 0.45 || ru[k].length < 25, k + ' is still much shorter than the Russian text');
+    assert(!/^\s*$/.test(kk[k]), k + ' is empty');
+  }
+  for (const k of Object.keys(rev)) assert(k in kk || k in (await j('kk/shell.json')), '_review.json names unknown key ' + k);
+  const eq = await j('../../../tools/i18n/kk-equal-ok.json');
+  assert(Array.isArray(eq.texts) && eq.texts.length > 10, 'allow-list of intentionally identical texts');
+});
+await group('S4 FR-220: ?kkreview=1 marks unreviewed machine translations [MT]; the normal page does not', 'kk', async (g, ev) => {
+  eq(ev("LT('routes.no_routes_match')"), 'Сүзгілер бойынша маршруттар жоқ', 'plain text');
+  const r = await fresh('kk?kkreview=1');
+  try {
+    eq(r.ev("LT('routes.no_routes_match')"), 'Сүзгілер бойынша маршруттар жоқ [MT]', 'marked in review mode');
+    eq(r.ev("LT('core.assigned')"), r.ev('ST.assigned.l'), 'reviewed shell texts are not marked');
+  } finally {
+    r.done();
+  }
+});
+for (const lang of ['ru', 'de', 'en'])
+  await group('[' + lang + '] S4 FR-220: ?kkreview=1 changes nothing outside Kazakh', lang + '?kkreview=1', async (g, ev) => {
+    assert(!/\[MT\]/.test(ev("LT('routes.no_routes_match')")), 'no [MT] marker');
+  });

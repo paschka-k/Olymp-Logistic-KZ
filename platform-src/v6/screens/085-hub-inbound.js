@@ -72,7 +72,7 @@
     const H = S.hubs[o.hub], g = +o.gate, s = +o.s, len = Math.max(1, Math.min(4, +o.len || 1)), j = o.job ? J(o.job) : null;
     if (!H || !(g >= 1 && g <= H.ramps.length)) return T('Нет такой рампы', 'Rampe existiert nicht', 'No such gate', 'Мұндай рампа жоқ');
     if (!(s >= SL0 && s + len * UNIT <= SL1) || s % UNIT) return T('Слот: 08:00–20:00, шаг 30 мин', 'Slot: 08:00–20:00, Raster 30 Min', 'Slot: 08:00–20:00 in 30-min steps', 'Слот: 08:00–20:00, қадам 30 мин');
-    if (H.blocked.includes(g)) return T('Рампа закрыта (размораживание / ремонт)', 'Rampe gesperrt (Abtauen / Reparatur)', 'Gate blocked (defrost / repair)', 'Рампа жабық');
+    if (H.blocked.includes(g)) return LT('hub_inbound.gate_blocked_defrost_repair');
     if (j && j.hub !== o.hub) return T('Приёмка другого хаба', 'Wareneingang eines anderen Hubs', 'Inbound job of another hub', 'Басқа хабтың қабылдауы');
     if (j && H.ramps[g - 1] !== j.zone) return T('Зона рампы не совпадает с грузом: ', 'Rampenzone passt nicht zur Ware: ', 'Gate zone does not match the cargo: ', 'Рампа аймағы жүкке сай емес: ') + ZONES[H.ramps[g - 1]].label + ' ≠ ' + ZONES[j.zone].label;
     if (j && j.ev.en != null) return T('Разгрузка уже завершена', 'Entladung bereits beendet', 'Unloading already finished', 'Түсіру аяқталған');
@@ -130,7 +130,7 @@
     if (!st.clean && String(note || '').trim().length < 10) return T('Расхождение: причина не менее 10 символов', 'Abweichung: Begründung mind. 10 Zeichen', 'Mismatch: reason of at least 10 characters', 'Сәйкессіздік: себеп кемінде 10 таңба');
     r.closed = true; r.note = String(note || '').trim(); if (!st.clean && j.ev.en != null && j.delay == null) { j.delay = true; j.reason = T('Расхождение SSCC', 'SSCC-Abweichung', 'SSCC mismatch', 'SSCC сәйкессіздігі'); }
     log(j, T('сверка SSCC закрыта: ', 'SSCC-Abgleich geschlossen: ', 'SSCC reconciliation closed: ', 'SSCC салыстыру жабылды: ') + st.ok + ' / ' + st.exp + (st.clean ? '' : ' · ' + r.note));
-    aud(j.id, st.clean ? T('Сверка SSCC без расхождений', 'SSCC-Abgleich ohne Abweichung', 'SSCC reconciled, no mismatch', 'SSCC сәйкес') : T('Сверка SSCC с расхождением', 'SSCC-Abgleich mit Abweichung', 'SSCC reconciled with mismatch', 'SSCC сәйкессіздікпен'), st.ok + ' / ' + st.exp + ' · −' + st.miss.length + ' · +' + st.foreign + (r.note ? ' · ' + r.note : ''));
+    aud(j.id, st.clean ? LT('hub_inbound.sscc_reconciled_no_mismatch') : T('Сверка SSCC с расхождением', 'SSCC-Abgleich mit Abweichung', 'SSCC reconciled with mismatch', 'SSCC сәйкессіздікпен'), st.ok + ' / ' + st.exp + ' · −' + st.miss.length + ' · +' + st.foreign + (r.note ? ' · ' + r.note : ''));
     return null;
   }
 
@@ -321,7 +321,7 @@ ${st.miss.length ? `<p class="note" style="font-family:monospace;font-size:11px"
     ibTemp: d => errOr(gateTemp(d.id, v('ibg_t'))),
     ibLogger: d => { loggerTake(d.id); render(); },
     ibRecStart: d => { recStart(d.id); render(); },
-    ibScan: d => { const r = recScan(d.id, v('ibg_scan')); const M = { ok: T('SSCC принят', 'SSCC angenommen', 'SSCC accepted', 'SSCC қабылданды'), dup: T('Уже отсканирован', 'Bereits gescannt', 'Already scanned', 'Сканерленген'), foreign: T('Чужой SSCC: не из этой приёмки', 'Fremde SSCC: nicht aus diesem Eingang', 'Foreign SSCC: not part of this job', 'Бөгде SSCC'), bad: T('Неверный SSCC (контрольная цифра)', 'Ungültige SSCC (Prüfziffer)', 'Invalid SSCC (check digit)', 'Қате SSCC (бақылау саны)') }; toast(M[r] || r, r === 'ok' ? 'ok' : 'err'); },
+    ibScan: d => { const r = recScan(d.id, v('ibg_scan')); const M = { ok: T('SSCC принят', 'SSCC angenommen', 'SSCC accepted', 'SSCC қабылданды'), dup: T('Уже отсканирован', 'Bereits gescannt', 'Already scanned', 'Сканерленген'), foreign: LT('hub_inbound.foreign_sscc_not_part_of_this_job'), bad: T('Неверный SSCC (контрольная цифра)', 'Ungültige SSCC (Prüfziffer)', 'Invalid SSCC (check digit)', 'Қате SSCC (бақылау саны)') }; toast(M[r] || r, r === 'ok' ? 'ok' : 'err'); },
     ibScanAll: d => { const j = J(d.id), r = ibx(j).rec; if (r) r.exp.forEach(s => recScan(d.id, s)); render(); },
     ibRecClose: d => errOr(recClose(d.id, v('ibg_note'))),
   });
