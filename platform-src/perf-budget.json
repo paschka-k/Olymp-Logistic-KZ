@@ -1,0 +1,14 @@
+{
+  "_doc": "FR-198 performance budget, checked by tools/ci/perf-budget.cjs in CI (UI tests → perf job; page weight also in build-platform.yml). Raise a number only on purpose, in the same commit as the change that needs it. Local reference (browser pane, 2026-10-20): ru 3764 KB raw / 1208 KB gzip, start 254 ms, tick 13–20 ms, renders 8–35 ms; the GitHub runner is about 2–3x slower, hence the timing headroom.",
+  "pageKB": { "raw": 4200, "gzip": 1400 },
+  "startMs": 1500,
+  "tickMs": 80,
+  "renderMs": {
+    "screens": ["dashboard", "orders", "dispatch", "fleet", "drivers", "routes", "hubs", "pod", "billing", "reports", "ai", "baseline", "settings"],
+    "default": 100,
+    "max": { "baseline": 150, "fleet": 120 }
+  },
+  "timedLangs": ["ru", "en"],
+  "runs": 3,
+  "reps": 7
+}
