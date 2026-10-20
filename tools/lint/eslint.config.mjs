@@ -17,7 +17,13 @@ const core = {
   'no-sparse-arrays': 'off',
   'no-irregular-whitespace': ['error', { skipStrings: true, skipTemplates: true, skipRegExps: true, skipComments: true }],
   // FR-206: only CLOCK (v6/data.js) may read the wall clock
-  'no-restricted-syntax': ['error', { selector: "CallExpression[callee.object.name='Date'][callee.property.name='now']", message: 'Use clockNow() (FR-206): only CLOCK in v6/data.js reads the wall clock.' }],
+  'no-restricted-syntax': [
+    'error',
+    {
+      selector: "CallExpression[callee.object.name='Date'][callee.property.name='now']",
+      message: 'Use clockNow() (FR-206): only CLOCK in v6/data.js reads the wall clock.',
+    },
+  ],
 };
 export default [
   { ignores: ['**/node_modules/**', '**/vendor/**', '**/*.min.js', 'platform-src/lang/**', 'platform-src/shared/**', '**/parity-039/**'] },

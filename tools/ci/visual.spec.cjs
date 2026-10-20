@@ -6,9 +6,12 @@ const SCREENS = ['dashboard', 'orders', 'dispatch', 'routes', 'fleet', 'billing'
 for (const id of SCREENS) {
   test(id, async ({ page }) => {
     await page.clock.install({ time: new Date('2026-10-18T09:29:00Z') });
-    await page.clock.pauseAt(new Date('2026-10-18T09:30:00Z'));   // paused before the page loads: no timer ever fires
+    await page.clock.pauseAt(new Date('2026-10-18T09:30:00Z')); // paused before the page loads: no timer ever fires
     await page.goto('/platform/en.html', { waitUntil: 'load' });
-    await page.evaluate(s => { S.simOn = false; go(s); }, id);
+    await page.evaluate(s => {
+      S.simOn = false;
+      go(s);
+    }, id);
     await page.evaluate(() => document.fonts.ready.then(() => true));
     await expect(page).toHaveScreenshot(id + '.png', { mask: [page.locator('.ver')] });
   });
