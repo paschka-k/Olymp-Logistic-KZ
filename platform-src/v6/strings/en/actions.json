@@ -1,7 +1,7 @@
 {
- "actions.load_assigned": "Load assigned",
- "actions.status_changed": "Load status changed",
- "actions.load_created": "Load created",
- "actions.auto_assigned": "Auto-assign executed",
- "actions.role_switched": "Role switched"
+  "actions.load_assigned": "Load assigned",
+  "actions.status_changed": "Load status changed",
+  "actions.load_created": "Load created",
+  "actions.auto_assigned": "Auto-assign executed",
+  "actions.role_switched": "Role switched"
 }

@@ -1,7 +1,7 @@
 {
- "actions.load_assigned": "Рейс тағайындалды",
- "actions.status_changed": "Рейс күйі өзгерді",
- "actions.load_created": "Рейс құрылды",
- "actions.auto_assigned": "Автоматты тағайындау орындалды",
- "actions.role_switched": "Рөл ауыстырылды"
+  "actions.load_assigned": "Рейс тағайындалды",
+  "actions.status_changed": "Рейс күйі өзгерді",
+  "actions.load_created": "Рейс құрылды",
+  "actions.auto_assigned": "Автоматты тағайындау орындалды",
+  "actions.role_switched": "Рөл ауыстырылды"
 }

@@ -70,7 +70,7 @@ for (const [rel, list] of Object.entries(byFile)) {
 }
 for (const l of LANGS) {
   mkdirSync(tdir(l), { recursive: true });
-  writeFileSync(join(tdir(l), table + '.json'), JSON.stringify(tab[l], null, 1) + '\n');
+  writeFileSync(join(tdir(l), table + '.json'), JSON.stringify(tab[l], null, 2) + '\n');
 }
-writeFileSync(revFile, JSON.stringify(review, null, 1) + '\n');
+writeFileSync(revFile, JSON.stringify(review, null, 2) + '\n');
 console.log(`${n} shortened Kazakh texts completed -> table ${table}, ${Object.keys(review).length} entries in kk/_review.json`);

@@ -28,3 +28,4 @@ platform-src/build.mjs
 platform-src/build-design.mjs
 platform-src/tests/shard-weights.json
 platform-src/manifest.json
+.s4/

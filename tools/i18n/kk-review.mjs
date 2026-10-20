@@ -84,9 +84,9 @@ if (cmd === 'export') {
         marked++;
       }
     }
-    if (dirty) writeFileSync(join(sdir('kk'), f), JSON.stringify(kk, null, 1) + '\n');
+    if (dirty) writeFileSync(join(sdir('kk'), f), JSON.stringify(kk, null, 2) + '\n');
   }
-  writeFileSync(revFile, JSON.stringify(review, null, 1) + '\n');
+  writeFileSync(revFile, JSON.stringify(review, null, 2) + '\n');
   console.log(`${changed} texts changed, ${marked} marked reviewed`);
 } else if (cmd === 'status') {
   const c = {};

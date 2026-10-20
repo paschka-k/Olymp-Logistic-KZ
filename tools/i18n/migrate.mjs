@@ -72,6 +72,6 @@ if (!dry) {
   writeFileSync(file, src);
   for (const l of LANGS) {
     mkdirSync(tdir(l), { recursive: true });
-    writeFileSync(join(tdir(l), table + '.json'), JSON.stringify(T[l], null, 1) + '\n');
+    writeFileSync(join(tdir(l), table + '.json'), JSON.stringify(T[l], null, 2) + '\n');
   }
 }

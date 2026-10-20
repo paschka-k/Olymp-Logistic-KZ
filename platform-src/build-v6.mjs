@@ -27,7 +27,9 @@ const list = (dir, ext) =>
 // is unchanged: every file of every area folder, sorted by file name (NNN prefix), exactly the order of the former flat folder.
 const screenFiles = () => {
   const out = [];
-  for (const area of readdirSync(join(here, 'v6', 'screens'), { withFileTypes: true }).filter(d => d.isDirectory()).map(d => d.name)) {
+  for (const area of readdirSync(join(here, 'v6', 'screens'), { withFileTypes: true })
+    .filter(d => d.isDirectory())
+    .map(d => d.name)) {
     for (const f of list(`v6/screens/${area}`, '.js')) out.push([f, `${area}/${f}`]);
   }
   const names = out.map(o => o[0]);

@@ -309,7 +309,13 @@ await group('S4 FR-203: OWNERS.json covers every menu item; each area has an own
 await group('S4 FR-203: the bundle still follows the file-name order (first and last screens, no area-dependent order)', 'ru', async () => {
   const src = await g4Src('index.html');
   const at = s => src.indexOf(s);
-  const marks = ['/* P6 · Shell parity', '/* S3 accessibility (docs/OPTIMISATION-FR.md, section E)', '/* Dashboard · Overview', '/* Orders & Loads (spec 5.2)', '/* S2 · Delivery'];
+  const marks = [
+    '/* P6 · Shell parity',
+    '/* S3 accessibility (docs/OPTIMISATION-FR.md, section E)',
+    '/* Dashboard · Overview',
+    '/* Orders & Loads (spec 5.2)',
+    '/* S2 · Delivery',
+  ];
   const pos = marks.map(at);
   assert(
     pos.every(p => p > 0),
