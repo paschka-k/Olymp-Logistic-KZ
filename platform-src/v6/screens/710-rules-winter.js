@@ -91,7 +91,7 @@
   };
   /* price: the winter surcharge joins the booking price (offer row in 420) */
   const bp0 = bookingPrice;
-  globalThis.bookingPrice = b => { const p = bp0(b), w = winterTier(b.from, b.to); if (!w.tier) return Object.assign({}, p, { winter: 0, wTier: 0, wPct: 0 }); const winter = Math.round(p.base * w.sur / 100), net = p.net + winter, vat = Math.round(net * 0.12); return Object.assign({}, p, { winter, wTier: w.tier, wPct: w.sur, net, vat, total: net + vat }); };
+  globalThis.bookingPrice = b => { const p = bp0(b), w = winterTier(b.from, b.to); if (!w.tier) return Object.assign({}, p, { winter: 0, wTier: 0, wPct: 0 }); const winter = Math.round(p.base * w.sur / 100), net = p.net + winter, vat = Math.round(net * (globalThis.VAT || 0.12)); return Object.assign({}, p, { winter, wTier: w.tier, wPct: w.sur, net, vat, total: net + vat }); };
 
   /* ---------- Settings → Rules · SLA & winter ---------- */
   const VST = { active: ['green', T('действует', 'gültig', 'active', 'жарамды')], pending: ['yellow', T('ждёт 2-й подписи', 'wartet auf 2. Freigabe', 'awaiting 2nd approval', '2-қолтаңбаны күтуде')], rejected: ['red', T('отклонено', 'abgelehnt', 'rejected', 'қабылданбады')], superseded: ['gray', T('заменено', 'ersetzt', 'superseded', 'ауыстырылды')] };

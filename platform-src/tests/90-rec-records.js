@@ -60,7 +60,7 @@
   });
   await group('integrations catalogue: systems, deadlines, connect, API key shown once, webhook rules (FR-173)', 'ru', async (g, ev, w) => {
     assert(ev('S.integ.length') >= 20, 'systems'); ev("ACT.igConn({id:'lardi'})"); eq(ev("S.integ.find(s=>s.key==='lardi').conn"), 'configured');
-    ev("openDrawer({type:'keyNew'})"); w.document.querySelector('#ik_n').value = 'Test ERP'; ev("ACT.igKeySave()"); assert(/olp_live_/.test(ev('S.ux.key')), 'secret'); eq(ev('S.apiKeys[0].name'), 'Test ERP'); ev("ACT.igRevoke({id:S.apiKeys[0].id})"); eq(ev('S.apiKeys[0].active'), false); eq(ev('S.ux.key'), null);
+    ev("openDrawer({type:'keyNew'})"); w.document.querySelector('#ik_n').value = 'Test ERP'; w.document.querySelector('#ik_c').value = 'c1'; ev("ACT.igKeySave()"); assert(/^olk_[0-9a-f]{8}_/.test(ev('S.ux.key')), 'secret'); eq(ev('S.apiKeys[0].name'), 'Test ERP'); ev("ACT.igRevoke({id:S.apiKeys[0].id})"); eq(ev('S.apiKeys[0].active'), false); eq(ev('S.ux.key'), null);
     ev("openDrawer({type:'hookNew'})"); w.document.querySelector('#ih_u').value = 'http://insecure.example'; ev("ACT.igHookSave()"); assert(w.document.querySelector('#ih_err').textContent, 'http rejected'); ev("S.tab.settings='integ';go('settings')"); clean(w, 'integ');
   });
   await group('changes page: register filters by type/status/group/date, KK falls back to RU, DE has German titles', 'ru', async (g, ev, w) => {

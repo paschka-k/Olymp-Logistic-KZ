@@ -25,7 +25,7 @@
     assert([...w.document.querySelectorAll('[data-lv-table="loads"] tbody tr')].every(r => r.children[2].textContent.includes('Алматы')), 'non-matching row left');
     assert(/по фильтрам/.test(w.document.querySelector('[data-lv-count]').textContent), 'count line');
     const all = ev("lvRows('loads')"), expect = ev("S.loads.filter(l=>HUBS[l.from].city==='Алматы'||HUBS[l.to].city==='Алматы').length");
-    eq(all.rows.length, expect, 'CSV covers all pages'); eq(all.head.length, 10, 'header'); eq(ev('S.f.page'), 1, 'page restored');
+    eq(all.rows.length, expect, 'CSV covers all pages'); eq(all.head.length, 11, 'header (R1 added a column)'); eq(ev('S.f.page'), 1, 'page restored');
     const d0 = w.__downloads.length; ev("ACT.lvCsv({k:'loads'})"); eq(w.__downloads.length, d0 + 1, 'download recorded'); eq(w.__downloads[d0].name, 'loads-view.csv');
     eq(ev('S.audit[0].decision'), 'Экспорт CSV', 'CSV audited');
     ev("S.f.zone='pharma'");
@@ -58,7 +58,7 @@
     ev("go('dispatch');ACT.stab({s:'dispatch',v:'winter'})"); const btn = w.document.querySelector(`[data-wl="${lid}"] [data-act="wPre"]`); assert(btn, 'confirm button'); btn.click();
     assert(ev(`gate(load('${lid}')).find(x=>x.key==='winter').pass`), 'confirmed → green'); assert(ev("S.audit[0].decision==='Pre-conditioning confirmed'"), 'audited');
     const moving = ev("S.loads.find(l=>winterOf(l).tier&&l.status==='in_transit').id"); assert(typeof ev(`winterPreconfirm('${moving}')`) === 'string', 'confirm after departure accepted');
-    const p = ev("bookingPrice({from:'AST',to:'KAR',zone:'pharma',pallets:20})"); eq(p.wTier, 2); eq(p.winter, Math.round(p.base * 0.15), '15 % of base'); eq(p.net, p.base + p.winter); eq(p.total, p.net + Math.round(p.net * 0.12));
+    const p = ev("bookingPrice({from:'AST',to:'KAR',zone:'pharma',pallets:20})"); eq(p.wTier, 2); eq(p.winter, Math.round(p.base * 0.15), '15 % of base'); eq(p.net, p.base + p.winter); eq(p.total, p.net + Math.round(p.net * ev('VAT')));
     eq(ev("bookingPrice({from:'ALA',to:'SHY',zone:'pharma',pallets:20}).winter"), 0, 'no surcharge without tier');
     ev("go('orders');ACT.stab({s:'orders',v:'bookings'});openDrawer({type:'booking',id:'BK-26-000004',view:'offer'})"); assert(/Winter surcharge \+15 %/.test(w.document.querySelector('.drawer').innerText), 'offer shows the winter line');
     const wp = ev(`winterPrice(load('${lid}'))`); eq(wp.total, wp.base + wp.sur); assert(wp.sur > 0, 'trip surcharge');

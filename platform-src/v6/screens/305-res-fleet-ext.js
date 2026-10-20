@@ -19,6 +19,16 @@
     D('p2', '05 AAR 02', T('Прицеп-фургон 2-осный', 'Kofferanhänger 2-achsig', 'Box trailer, 2 axles', '2 осьті фургон тіркемесі'), 'Trailer', T('Прицеп', 'Anhänger', 'Trailer', 'Тіркеме'), 'none', 18, ['ambient'], 'ALA', '—', '2099-01-01')];
   R.DEMO_35 = [D('v8', '218 JAC 02', 'JAC N35', 'Reefer 3,5 t', '3,5 т', 'active', 4, ['chilled'], 'ALA', 'Carrier Xarios 150', '2027-03-01'),
     D('v9', '377 GAZ 02', 'GAZelle NEXT', 'Van 3,5 t', '3,5 т', 'none', 5, ['ambient'], 'AST', '—', '2099-01-01')];
+  /* R2 · F5 / F14 (0.3.9 screen 10 + register): ADR approval, payload kg, logger ID and winter kit of every truck (real, demo, new) */
+  R.WINTER = { thermo: T('зимние шины, цепи, утеплённые термоконтейнеры', 'Winterreifen, Schneeketten, isolierte Thermocontainer', 'winter tyres, chains, insulated thermo containers', 'қысқы шиналар, шынжырлар, жылытылған термоконтейнерлер'), demo: T('зимние шины, автономный отопитель', 'Winterreifen, Standheizung', 'winter tyres, parking heater', 'қысқы шиналар, автономды жылытқыш'), none: T('зимние шины', 'Winterreifen', 'winter tyres', 'қысқы шиналар') };
+  const DEMO_ADR = { v5: true, v6: true };
+  R.fleetMeta = (t, i) => { if (t.adr == null) t.adr = t.demo ? !!DEMO_ADR[t.id] : !!(globalThis.ADR_TRK && ADR_TRK[t.id]);
+    if (t.kg == null) t.kg = t.demo ? Math.round(parseFloat(String(t.cls).replace(',', '.')) * 1000 * 0.55) || 1200 : (typeof typeOfTruck === 'function' ? typeOfTruck(t).kg : 10000);
+    if (t.code == null) t.code = t.demo ? t.id.toUpperCase() : 'V' + p2((i != null ? i : S.trucks.indexOf(t)) + 1);
+    if (t.logger == null) t.logger = R.truckCooling(t) === 'none' ? '' : 'L-22' + p2((i != null ? i : S.trucks.indexOf(t)) + 1 + (t.demo ? 20 : 0));
+    return t; };
+  R.winter = t => (R.truckCooling(t) === 'none' ? R.WINTER.none : t.demo ? R.WINTER.demo : R.WINTER.thermo);
+  S.trucks.forEach((t, i) => R.fleetMeta(t, i)); R.DEMO_X.concat(R.DEMO_35).forEach((t, i) => R.fleetMeta(t, i));
   R.demoTrucks = () => (S.res.fleet.ext ? R.DEMO_X : []).concat(S.res.fleet.demo35 ? R.DEMO_35 : []);
   R.fleetAll = () => S.trucks.concat(R.demoTrucks());
   /* KPIs by model class: one tile per class of the shown fleet, plus "without active cooling" and "on the road" */
