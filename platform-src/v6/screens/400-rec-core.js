@@ -29,8 +29,8 @@
   document.addEventListener('input', e => { const el = e.target; if (el.dataset && el.dataset.rc) { RC[el.dataset.rc] = el.type === 'checkbox' ? el.checked : el.value; render(); } });
   globalThis.rcSel = (key, label, opts) => `<label>${esc(label)}:</label><select class="select" data-rc="${key}">${opts.map(o => `<option value="${esc(o[0])}"${(RC[key] || '') === o[0] ? ' selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
   globalThis.rcTile = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
-  globalThis.recDl = (name, text, mime) => { try { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: mime || 'text/plain' })); a.download = name; a.click(); } catch (_) { /* no download in tests */ } };
-  globalThis.csvOf = rows => '﻿' + rows.map(r => r.map(v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(';')).join('\n');
+  globalThis.recDl = XP.save;
+  globalThis.csvOf = rows => XP.csv(rows);
   globalThis.fval = id => { const e = document.getElementById(id); return e ? (e.type === 'checkbox' ? e.checked : e.value) : ''; };
   globalThis.ALLT = T('Все', 'Alle', 'All', 'Барлығы');
   globalThis.YES = T('Да', 'Ja', 'Yes', 'Иә'); globalThis.NO = T('Нет', 'Nein', 'No', 'Жоқ');

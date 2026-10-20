@@ -8,7 +8,7 @@
   const DRV = () => (globalThis.hubFilter ? hubFilter(S.drivers, d => d.hub) : S.drivers);
   /* R2 · S8 / S11: assign / book / medical / absences need drivers:write (admin), fines fines:write (admin, finance); other drivers:read roles read only */
   const DW = () => canDo('drivers:write'), FNW = () => canDo('fines:write');
-  const h = x => String(Math.round(x * 10) / 10).replace('.', ',') + ' ' + T('ч', 'h', 'h', 'сағ');
+  const h = x => LF.dec(Math.round(x * 10) / 10) + ' ' + LF.unit('h');
   const tk = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
   const bar = (v, max, cls) => `<div class="progress ${cls || ''}" style="width:90px;display:inline-block;vertical-align:middle"><i style="width:${Math.min(100, Math.round(v / max * 100))}%"></i></div>`;
   const LV = { 0: 'green', 2: 'yellow', 3: 'red' };

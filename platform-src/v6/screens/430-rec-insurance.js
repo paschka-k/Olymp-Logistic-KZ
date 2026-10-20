@@ -4,7 +4,7 @@
 (function () {
   const CST = { open: ['red', T('Открыт', 'Offen', 'Open', 'Ашық')], submitted: ['yellow', T('Подан страховщику', 'Eingereicht', 'Submitted', 'Сақтандырушыға берілді')], settled: ['green', T('Урегулирован', 'Reguliert', 'Settled', 'Реттелді')], rejected: ['gray', T('Отклонён', 'Abgelehnt', 'Rejected', 'Қабылданбады')] };
   const NEXT = { submitted: T('Подать страховщику', 'Beim Versicherer einreichen', 'Submit to insurer', 'Сақтандырушыға беру'), settled: T('Урегулирован (выплата получена)', 'Reguliert (Zahlung erhalten)', 'Settled (payment received)', 'Реттелді (төлем алынды)'), rejected: T('Отклонён страховщиком', 'Vom Versicherer abgelehnt', 'Rejected by the insurer', 'Сақтандырушы қабылдамады') };
-  const nf = n => Math.round(n).toLocaleString('ru-RU');
+  const nf = n => LF.int(n);
   const DAY = 864e3 * 1000;
   const addD = (iso, n) => new Date(new Date(iso).getTime() + n * DAY).toISOString().slice(0, 10);
   let seq = 0;

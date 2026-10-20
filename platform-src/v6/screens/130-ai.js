@@ -2,8 +2,8 @@
    every Accept / Dismiss / Override is written to the audit trail (GDP: who / when / why). Override needs a reason. */
 (function () {
   const A = S.ai = { done: {}, exp: '', hist: false };
-  const nf = n => Math.round(n).toLocaleString('ru-RU');
-  const dec = s => (LANG === 'en' ? s : String(s).replace('.', ','));
+  const nf = n => LF.int(n);
+  const dec = s => LF.dec(s);
   const rt = l => HUBS[l.from].city + ' → ' + HUBS[l.to].city;
   const esfOf = i => (i.load && load(i.load) ? load(i.load).esf : i.esf);
   const lvl = c => { const t = aiThr(); return c >= t.high ? 'high' : c >= t.medium ? 'medium' : 'low'; };

@@ -108,7 +108,7 @@ ${S.ops.zpl ? `<pre class="sh-zpl" data-zpl="1">${esc(L.zpl)}</pre>` : ''}
     return `<div class="card lw-card" style="margin-top:16px" data-mfr-registry="${Object.keys(MFRS).length}"><h3 class="lw-h" style="margin-top:0">${esc(T('Реестр производителей', 'Herstellerregister', 'Manufacturer registry', 'Өндірушілер тізілімі'))} · ${Object.keys(MFRS).length}</h3><p class="note">${esc(T('Полный каталог источника (экран 04 платформы 0.3.9): группа и число грузовых мест в демо-рейсах.', 'Vollständiger Katalog der Quelle (Bildschirm 04 der Plattform 0.3.9): Gruppe und Packstücke in den Demo-Fahrten.', 'Full catalogue of the source (screen 04 of platform 0.3.9): group and demo-load places.', 'Бастапқы платформаның (0.3.9, 04-экран) толық каталогы.'))}</p><div class="sh-mfrs">${rows}</div></div>`;
   }
   addTab('orders', 'ship', T('Отправки и маркировка', 'Sendungen & Etiketten', 'Shipments & labels', 'Жөнелтулер мен таңбалау'), body, { perm: 'orders:read' });
-  const dl = (name, text, mime) => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: mime })); a.download = name; a.click(); };
+  const dl = XP.save;
   /* scanner search (FR-01): a scanned GS1-128 (AI 00) opens the label of the place at once, also across loads and the archive */
   function scanTo(raw) {
     const ep = String(raw).trim().match(/^(EPOD-d{3,}|LD-d{4}-d{6})$/i);   // ePOD number or load id (archive search, FR-02)

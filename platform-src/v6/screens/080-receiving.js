@@ -16,7 +16,7 @@
   const sel = (key, label, opts) => `<label>${esc(label)}:</label><select class="select" data-rff="${key}">${opts.map(o => `<option value="${esc(o[0])}"${S.rf[key] === o[0] ? ' selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
   const tk = (cls, ico, val, label) => `<div class="kpi-tile tint ${cls}"><div><div class="value">${val}</div><div class="label">${esc(label)}</div></div><div class="icon" style="background:var(--${cls});color:#fff;border-radius:50%">${ic(ico, 18)}</div></div>`;
   const filt = () => { if (globalThis.ibEnsure) ibEnsure(); const f = S.rf, q = f.q.trim().toLowerCase(); return hubFilter(S.jobs).filter(j => (!f.hub || j.hub === f.hub) && (!f.st || String(calc(j, S.clock).st) === f.st) && (!f.flag || j.flags.includes(f.flag)) && (!q || (j.id + ' ' + j.plate + ' ' + j.carrier + ' ' + j.senders.join(' ')).toLowerCase().includes(q))); };
-  const nf = n => Math.round(n).toLocaleString('ru-RU');
+  const nf = n => LF.int(n);
   function body() {
     const all = S.jobs.map(j => calc(j, S.clock)), gate = all.filter(c => c.st === 2).length, done = all.filter(c => c.st === 3).length, accrued = S.jobs.reduce((s, j, i) => s + (j.booked ? 0 : (all[i].st >= 2 ? all[i].amount : 0)), 0);
     const rows = filt().map(j => { const c = calc(j, S.clock), ev = j.ev, H = S.hubs[j.hub];
@@ -70,7 +70,7 @@ ${globalThis.ibGateBtn ? ibGateBtn(j) : ''}<div class="drawer-section stops"><h4
     jBook: d => { const j = J(d.id), c = calc(j, S.clock); if (!(j.ev.en != null && j.delay === true && c.amount > 0 && !j.booked)) return; const r = $('#jrs'); j.reason = r ? r.value : j.reason; j.booked = c.amount;
       S.costs.push({ id: 'C-' + (S.costs.length + 1), date: '2026-10-18', hub: j.hub, text: 'Standgeld · ' + j.id + (j.reason ? ' · ' + j.reason : ''), amount: c.amount, ref: j.id, cat: 'detention' }); log(j, 'Standgeld ' + nf(c.amount) + ' ₸ → ' + T('Затраты', 'Kosten', 'Costs', 'Шығыс')); toast(T('Standgeld записан в затраты: ', 'Standgeld in Kosten gebucht: ', 'Demurrage booked to costs: ', 'Standgeld шығысқа жазылды: ') + nf(c.amount) + ' ₸'); },
     csvR: () => { const rows = [['id', 'hub', 'plate', 'zone', 'window', 'status', 'dwell_min', 'over_min', 'standgeld_kzt', 'booked_kzt']]; filt().forEach(j => { const c = calc(j, S.clock); rows.push([j.id, j.hub, j.plate, j.zone, j.win ? hmm(j.win[0]) + '-' + hmm(j.win[1]) : '', IST[c.st].l, c.dwell, c.over, c.amount, j.booked]); });
-      const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';')).join('\n'), a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv' })); a.download = 'receiving.csv'; a.click(); },
+      XP.save('receiving.csv', XP.csv(rows), 'text/csv'); },
     saveV: () => { S.views.push({ name: T('Вид ', 'Ansicht ', 'View ', 'Көрініс ') + (S.views.length + 1), f: { ...S.rf } }); render(); },
     applyV: d => { S.rf = { ...S.views[+d.v].f }; render(); },
     delV: (d, el, e) => { e.stopPropagation(); S.views.splice(+d.v, 1); render(); },

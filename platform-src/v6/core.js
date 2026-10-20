@@ -1,10 +1,7 @@
-/* v6 core: i18n, helpers, icons, store + dispatch rules, shell, drawer, router. */
-const LANG = '@@LANG@@';
-const LI = { ru: 0, de: 1, en: 2, kk: 3 }[LANG];
+/* v6 core: helpers, icons, store + dispatch rules, shell, drawer, router (LANG / T / LF come from v6/base/). */
 const HOOKS = { status: [] };   // screens subscribe here (e.g. hubs create inbound jobs when a load departs)
-const hmm = m => { const x = Math.floor(m + 1e-9); return p2(Math.floor(x / 60) % 24) + ':' + p2(x % 60); };
+const hmm = LF.hm;
 const fileFor = l => (l === 'ru' ? 'index.html' : l + '.html');
-const T = (...a) => (a[LI] != null ? a[LI] : a[0]);
 /* proper names (people, companies, places, addresses) in the UI language (Q2): RU / KK keep the Cyrillic source; DE / EN get the
    NM romanisation or, failing that, a Kazakh-style transliteration. Initials (1–3 capitals) map letter by letter so "ЕС" → "YS". */
 const NM = {
@@ -36,9 +33,9 @@ const nm = s => {
 const esc = s =>String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-const kzt = n => Math.round(n).toLocaleString('ru-RU').replace(/ | /g, ' ') + ' ₸';
+const kzt = LF.kzt;   // FR-221: number / date formats live in v6/base/10-locale.js
 const p2 = n => String(n).padStart(2, '0');
-const fdt = iso => { const d = new Date(iso); return p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + ', ' + p2(d.getHours()) + ':' + p2(d.getMinutes()); };
+const fdt = LF.dt;
 
 const IC = {
   grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
@@ -82,7 +79,7 @@ const ESF = {
 const chip = (c, t) => `<span class="chip ${c}">${esc(t)}</span>`;
 const stChip = s => chip(ST[s].c, ST[s].l);
 const zoneChip = z => `<span class="chip zone-${z}">${ZONES[z].label}</span>`;
-const fd = iso => { const d = new Date(iso); return p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '.' + d.getFullYear(); };
+const fd = LF.date;
 /* document validity: expired / renew soon (<= 30 d) / valid */
 const docState = iso => { const days = Math.floor((new Date(iso + 'T23:59:59+05:00') - NOW) / 864e5); return days < 0 ? 'expired' : days <= 30 ? 'soon' : 'valid'; };
 const DOCST = { valid: { c: 'green', l: T('Действует', 'Gültig', 'Valid', 'Жарамды') }, soon: { c: 'yellow', l: T('Скоро истекает', 'Läuft bald ab', 'Renew soon', 'Жақында аяқталады') }, expired: { c: 'red', l: T('Просрочен', 'Abgelaufen', 'Expired', 'Мерзімі өтті') } };
@@ -118,7 +115,7 @@ const hrs = l => Math.round(dist(l.from, l.to) / 65 * 10) / 10;
 /* driving time the driver must still have: one shift (max 9 h); longer routes get planned rest stops (norms to be verified, spec Q5) */
 const needRto = l => Math.min(hrs(l), typeof CFG !== 'undefined' ? CFG.live.shift : 9);
 const tempState = l => { const z = ZONES[l.zone]; if (l.temp < z.lo || l.temp > z.hi) return 'breach'; return (l.temp - z.lo < 0.8 || z.hi - l.temp < 0.8) ? 'warn' : 'ok'; };
-const tempChip = l => `<span class="chip temp-${tempState(l)}">${l.temp > 0 ? '+' : ''}${String(l.temp).replace('.', ',')} °C</span>`;
+const tempChip = l => `<span class="chip temp-${tempState(l)}">${LF.temp(l.temp)}</span>`;
 const revenue = l => dist(l.from, l.to) * ZONES[l.zone].rate;
 const cost = l => Math.round(revenue(l) * 0.78);
 const isActive = l => ['assigned', 'loading', 'in_transit', 'problem'].includes(l.status);

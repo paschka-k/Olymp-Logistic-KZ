@@ -3,12 +3,12 @@
    the 30-day driver report and the report catalogue (6 groups × 4 reports, PDF / Excel demo exports, audited).
    The six tiles and the driver report are prepended / appended to the KPI tab of 610; the catalogue is a new tab. */
 (function () {
-  const nf = n => Math.round(n).toLocaleString('ru-RU');
-  const f1 = (n, d = 1) => (LANG === 'en' ? n.toFixed(d) : n.toFixed(d).replace('.', ','));
+  const nf = n => LF.int(n);
+  const f1 = (n, d = 1) => LF.dec(n, d);
   const tg = n => nf(n) + ' ₸';
   const X = S.eco = S.eco || {}; X.rep = { exports: [] };
-  const csvText = rows => '﻿' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';')).join('\n');
-  const dl = (name, text, mime) => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: mime })); a.download = name; a.click(); };
+  const csvText = rows => XP.csv(rows);
+  const dl = XP.save;
   /* ---------- six KPI tiles (values of the 0.3.10 demo; cost per pallet = actuals register / delivered pallets when the ledger has data, FR-125) ---------- */
   globalThis.ecoRepKpis = () => {
     const dv = S.loads.filter(l => l.status === 'delivered'), pal = dv.reduce((s, l) => s + l.pallets, 0), cost = S.costs.reduce((s, c) => s + c.amount, 0);
@@ -32,7 +32,7 @@
     const r = DREP[d.id], fines = (X.fines || []).filter(f => (typeof ecoFineDriver === 'function' ? ecoFineDriver(f) : f.drv) === d.id), open = fines.filter(f => ['unpaid', 'recharge', 'ack', 'drvDisp'].includes(f.st));
     return { id: d.id, name: d.name, hub: d.hub, trips: r[0], km: r[1], ontime: r[2], temp: r[3], ev: r[4], fines, open: open.reduce((a, f) => a + f.amt, 0) };
   });
-  const drvTable = () => `<div class="card tcard" data-drv-report><div class="card-body" style="padding-bottom:0"><h4 style="margin:0">${esc(T('Отчёт по водителям · 30 дней', 'Fahrerbericht · 30 Tage', 'Driver report · 30 days', 'Жүргізушілер есебі · 30 күн'))}</h4></div><table class="table"><thead><tr><th>${esc(T('Водитель', 'Fahrer', 'Driver', 'Жүргізуші'))}</th><th>${esc(T('Хаб', 'Hub', 'Hub', 'Хаб'))}</th><th>${esc(T('Рейсы', 'Touren', 'Trips', 'Рейстер'))}</th><th>${esc(T('км', 'km', 'km', 'км'))}</th><th>${esc(T('Вовремя', 'Pünktlich', 'On time', 'Уақытында'))}</th><th>${esc(T('Темп. откл.', 'Temp.-Abw.', 'Temp. exc.', 'Темп. ауытқу'))}</th><th>${esc(T('События вождения', 'Fahrereignisse', 'Driving events', 'Жүргізу оқиғалары'))}</th><th>${esc(T('Штрафы', 'Bußgelder', 'Fines', 'Айыппұлдар'))}</th><th>${esc(T('Не закрыто', 'Offen', 'Open', 'Жабылмаған'))}</th></tr></thead><tbody>${ecoDrvRep().map(r => `<tr style="cursor:default" data-drvrep="${r.id}"><td><b>${esc(r.name)}</b></td><td>${esc(HUBS[r.hub].city)}</td><td>${r.trips}</td><td>${nf(r.km)}</td><td>${chip(r.ontime >= 95 ? 'green' : r.ontime >= 90 ? 'yellow' : 'red', r.ontime + ' %')}</td><td>${r.temp || '—'}</td><td>${r.ev}</td><td>${r.fines.length ? r.fines.length + ' · ' + tg(r.fines.reduce((a, f) => a + f.amt, 0)) : '—'}</td><td>${r.open ? chip('yellow', tg(r.open)) : chip('green', '—')}</td></tr>`).join('')}</tbody></table></div>`;
+  const drvTable = () => `<div class="card tcard" data-drv-report><div class="card-body" style="padding-bottom:0"><h4 style="margin:0">${esc(T('Отчёт по водителям · 30 дней', 'Fahrerbericht · 30 Tage', 'Driver report · 30 days', 'Жүргізушілер есебі · 30 күн'))}</h4></div><table class="table"><thead><tr><th>${esc(T('Водитель', 'Fahrer', 'Driver', 'Жүргізуші'))}</th><th>${esc(T('Хаб', 'Hub', 'Hub', 'Хаб'))}</th><th>${esc(T('Рейсы', 'Touren', 'Trips', 'Рейстер'))}</th><th>${esc(LF.unit('km'))}</th><th>${esc(T('Вовремя', 'Pünktlich', 'On time', 'Уақытында'))}</th><th>${esc(T('Темп. откл.', 'Temp.-Abw.', 'Temp. exc.', 'Темп. ауытқу'))}</th><th>${esc(T('События вождения', 'Fahrereignisse', 'Driving events', 'Жүргізу оқиғалары'))}</th><th>${esc(T('Штрафы', 'Bußgelder', 'Fines', 'Айыппұлдар'))}</th><th>${esc(T('Не закрыто', 'Offen', 'Open', 'Жабылмаған'))}</th></tr></thead><tbody>${ecoDrvRep().map(r => `<tr style="cursor:default" data-drvrep="${r.id}"><td><b>${esc(r.name)}</b></td><td>${esc(HUBS[r.hub].city)}</td><td>${r.trips}</td><td>${nf(r.km)}</td><td>${chip(r.ontime >= 95 ? 'green' : r.ontime >= 90 ? 'yellow' : 'red', r.ontime + ' %')}</td><td>${r.temp || '—'}</td><td>${r.ev}</td><td>${r.fines.length ? r.fines.length + ' · ' + tg(r.fines.reduce((a, f) => a + f.amt, 0)) : '—'}</td><td>${r.open ? chip('yellow', tg(r.open)) : chip('green', '—')}</td></tr>`).join('')}</tbody></table></div>`;
 
   /* wrap the KPI tab of 610: tiles first, then the original KPI table, then the driver report */
   const kpi = (SCREENS.reports.tabs || []).find(t => t.key === 'kpi');

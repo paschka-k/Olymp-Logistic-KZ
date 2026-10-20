@@ -5,7 +5,7 @@
   const css = document.createElement('style');
   css.textContent = `.pn-ord{display:grid;grid-template-columns:24px 92px minmax(0,1fr) 96px 56px 66px;gap:8px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--border);font-size:13px;cursor:pointer}.pn-ord.sel{background:var(--tint-blue-50)}.pn-dep{display:grid;grid-template-columns:minmax(0,1.3fr) 110px 150px auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}.pn-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}@media (max-width:1100px){.pn-form{grid-template-columns:1fr 1fr}}`;
   document.head.appendChild(css);
-  const KG = T('кг', 'kg', 'kg', 'кг'), PAL = T('пал.', 'Pal.', 'pal.', 'пал.');
+  const KG = LF.unit('kg'), PAL = T('пал.', 'Pal.', 'pal.', 'пал.');
   const P = S.ops.plan = { q: '', sel: [], truck: '', drv: '', dep: '', eta: '', note: '', cust: 'c1', done: {}, err: '', ok: '' };
   const pool = () => S.orders.filter(o => o.status === 'new' && !o.load);
   const selOrders = () => pool().filter(o => P.sel.includes(o.id));
@@ -14,7 +14,7 @@
   function box() {
     const os = selOrders(), t = P.truck ? trk(P.truck) : null, ty = t && t.id ? typeOfTruck(t) : null, pal = os.reduce((s, o) => s + o.pal, 0), kg = os.reduce((s, o) => s + o.kg, 0);
     const pp = ty ? Math.round(pal / ty.pal * 100) : 0, kp = ty ? Math.round(kg / ty.kg * 100) : 0;
-    return `<div class="lw-sum" data-plan-box style="grid-template-columns:1fr 1fr"><div class="${ty && pal > ty.pal ? 'over' : ''}">${esc(T('Выбрано · паллет / вместимость', 'Gewählt · Paletten / Kapazität', 'Selected · pallets / capacity', 'Таңдалды · паллет / сыйымдылық'))}<b>${os.length} · ${pal} / ${ty ? ty.pal : '—'}</b><div class="progress${pp > 100 ? ' crit' : pp > 90 ? ' warn' : ''}"><i style="width:${Math.min(100, pp)}%"></i></div></div><div class="${ty && kg > ty.kg ? 'over' : ''}">${esc(T('Масса / грузоподъёмность', 'Masse / Nutzlast', 'Weight / payload', 'Масса / жүк көтергіштік'))}<b>${kg.toLocaleString('ru-RU')} / ${ty ? ty.kg.toLocaleString('ru-RU') : '—'} ${esc(KG)}</b><div class="progress${kp > 100 ? ' crit' : kp > 90 ? ' warn' : ''}"><i style="width:${Math.min(100, kp)}%"></i></div></div></div>`;
+    return `<div class="lw-sum" data-plan-box style="grid-template-columns:1fr 1fr"><div class="${ty && pal > ty.pal ? 'over' : ''}">${esc(T('Выбрано · паллет / вместимость', 'Gewählt · Paletten / Kapazität', 'Selected · pallets / capacity', 'Таңдалды · паллет / сыйымдылық'))}<b>${os.length} · ${pal} / ${ty ? ty.pal : '—'}</b><div class="progress${pp > 100 ? ' crit' : pp > 90 ? ' warn' : ''}"><i style="width:${Math.min(100, pp)}%"></i></div></div><div class="${ty && kg > ty.kg ? 'over' : ''}">${esc(T('Масса / грузоподъёмность', 'Masse / Nutzlast', 'Weight / payload', 'Масса / жүк көтергіштік'))}<b>${LF.n(kg)} / ${ty ? LF.n(ty.kg) : '—'} ${esc(KG)}</b><div class="progress${kp > 100 ? ' crit' : kp > 90 ? ' warn' : ''}"><i style="width:${Math.min(100, kp)}%"></i></div></div></div>`;
   }
   function records() {
     const q = P.q.trim().toLowerCase(), list = pool().filter(o => !q || (o.id + ' ' + o.goods + ' ' + o.lot + ' ' + o.city).toLowerCase().includes(q)), os = selOrders();

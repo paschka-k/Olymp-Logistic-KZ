@@ -6,7 +6,7 @@
   const F = { tab: 'inv', st: '', cust: '', age: '', from: '', to: '', cat: '', hub: '' };
   const D0 = s => new Date(s + 'T12:00:00+05:00'), DAY = 864e5;
   const addDays = (s, n) => new Date(D0(s).getTime() + n * DAY).toISOString().slice(0, 10);
-  const nf = n => Math.round(n).toLocaleString('ru-RU');
+  const nf = n => LF.int(n);
   const status = i => i.paidAt ? 'paid' : D0(i.due) < NOW ? 'overdue' : 'pending';
   const days = i => Math.round((NOW - D0(i.due)) / DAY);
   const esfOf = i => (i.load && load(i.load) ? load(i.load).esf : i.esf);
@@ -83,7 +83,7 @@
     bDis: d => { const i = INV(d.id), t = ($('#dt') || {}).value || ''; if (!t.trim()) return toast(T('Опишите спор', 'Streit beschreiben', 'Describe the dispute', 'Дауды сипаттаңыз'), 'err'); i.dispute = { open: true, reason: $('#dr').value, text: t.trim(), notes: [] }; toast(T('Спор открыт — счёт заблокирован', 'Streit eröffnet — Rechnung gesperrt', 'Dispute opened — invoice blocked', 'Дау ашылды — шот бұғатталды')); },
     bDisClose: d => { INV(d.id).dispute.open = false; toast(T('Спор закрыт', 'Streit geschlossen', 'Dispute resolved', 'Дау жабылды')); },
     bExp: () => { const rows = [['invoice', 'customer', 'total_kzt', 'due', 'status', 'esf']].concat(invs().map(i => [i.id, cust(i.cust).name, i.total, i.due, status(i), esfOf(i)])), a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob(['﻿' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';')).join('\n')], { type: 'text/csv' })); a.download = 'invoices.csv'; a.click(); },
+      XP.save('invoices.csv', XP.csv(rows), 'text/csv'); },
     cAdd: () => openDrawer({ type: 'cost' }), cDel: (d, el, e) => { e.stopPropagation(); S.costs = S.costs.filter(c => c.id !== d.id); render(); },
     cSave: () => { const a = +$('#ca').value, t = $('#ct').value.trim(); if (!t || !(a > 0)) { $('#ce').textContent = T('Укажите описание и сумму', 'Beschreibung und Betrag angeben', 'Enter a description and an amount', 'Сипаттама мен соманы көрсетіңіз'); return; } S.costs.push({ id: 'C-' + (S.costs.length + 1), date: $('#cd').value, hub: $('#ch').value, text: t, amount: a, ref: '', cat: $('#cc').value }); S.drawer = null; toast(T('Затрата добавлена', 'Kosten erfasst', 'Cost added', 'Шығыс қосылды')); },
   });

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Assemble the v6 platform (standalone vanilla JS, no template engine) into platform/: index.html (RU), de.html, en.html, kk.html + tests.html
 //   node platform-src/build-v6.mjs [--out <dir>] [--lang ru,de,en,kk]
-// Bundle order: core -> roles -> data -> v6/screens/*.js (file-name order, NN-name.js) -> v6/help/*.js -> app.
+// Bundle order: v6/base/*.js -> core -> roles -> data -> v6/screens/*.js (file-name order, NN-name.js) -> v6/help/*.js -> app.
 // Areas add their own files (screens/NNN-area.js, help/area.js, tests/NN-area.js); no manifest to edit. Placeholders: @@LANG@@ @@BUILD@@ @@ROLEPERMS@@.
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
@@ -28,6 +28,7 @@ const css =
   '\n' +
   rd('v6', 'app.css');
 const js = [
+  ...list('v6/base', '.js').map(f => rd('v6', 'base', f)), // S4: language, locale (FR-221), strings (FR-199), kit (FR-200), export (FR-201), state (FR-202)
   rd('v6', 'core.js'),
   rd('v6', 'roles.js'),
   rd('v6', 'data.js'),
@@ -71,6 +72,8 @@ const preload = '<link rel="preload" as="image" type="image/svg+xml" href="asset
 for (const lang of langs) {
   // FR-204: data placeholders are written as /*@@NAME@@*/{} so the sources stay valid JavaScript for ESLint / Prettier
   const code = js
+    .replace(/\/\*@@STRINGS@@\*\/\s*\{\}/, () => JSON.stringify(strings[lang]))
+    .replace(/\/\*@@STRINGS_MT@@\*\/\s*\{\}/, () => JSON.stringify(lang === 'kk' ? kkOpen : {}))
     .replaceAll('/*@@ROLEPERMS@@*/{}', () => rolePerms)
     .replaceAll('/*@@REGISTER@@*/{}', () => regFor(lang))
     .replaceAll('/*@@WHATSNEW@@*/{}', () => whatsNew)

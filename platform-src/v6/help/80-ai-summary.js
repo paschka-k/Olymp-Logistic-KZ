@@ -2,7 +2,7 @@
    advisory summary computed from the live state — counts, the worst case by name and one recommendation. Advisory only, like the AI
    assistant (spec 5.11): it never changes data. AISUM[screen] -> text; S.aiSum[screen] keeps the toggle per screen. */
 (function () {
-  const nf = n => Math.round(n).toLocaleString('ru-RU');
+  const nf = n => LF.int(n);
   const rt = l => HUBS[l.from].city + ' → ' + HUBS[l.to].city;
   const act = () => S.loads.filter(isActive);
   const probl = () => S.loads.filter(l => l.status === 'problem' || tempState(l) === 'breach');
@@ -38,7 +38,7 @@
     routes() {
       const live = S.loads.filter(l => l.status === 'in_transit' || l.status === 'problem'), crit = live.filter(l => l.status === 'problem' || tempState(l) === 'breach');
       return T('В движении ', 'Unterwegs ', 'Moving ', 'Жолда ') + live.length + T(' ТС, критичных ', ' Fahrzeuge, kritisch ', ' trucks, critical ', ' КҚ, сыни ') + crit.length + '. '
-        + (crit.length ? rec(crit.map(l => trk(l.truck).plate + ' (' + l.id + ', ' + (l.temp > 0 ? '+' : '') + String(l.temp).replace('.', ',') + ' °C)').join('; ') + T(' — открыть карточку и действовать по плейбуку.', ' — Karte öffnen und nach Playbook handeln.', ' — open the card and follow the playbook.', ' — картаны ашып, плейбук бойынша әрекет етіңіз.'))
+        + (crit.length ? rec(crit.map(l => trk(l.truck).plate + ' (' + l.id + ', ' + (l.temp > 0 ? '+' : '') + LF.dec(l.temp) + ' °C)').join('; ') + T(' — открыть карточку и действовать по плейбуку.', ' — Karte öffnen und nach Playbook handeln.', ' — open the card and follow the playbook.', ' — картаны ашып, плейбук бойынша әрекет етіңіз.'))
           : rec(T('все рейсы в графике и в температурном диапазоне.', 'alle Fahrten im Zeitplan und im Temperaturbereich.', 'every load is on schedule and in range.', 'барлық рейс кестеде және диапазонда.')));
     },
     fleet() {

@@ -41,7 +41,7 @@
     eq(rows.join(','), ev("S.loads.filter(l=>l.status==='delivered'&&l.zone!=='ambient'&&!S.res.thc.some(r=>r.load===l.id)).map(l=>l.id).join(',')"), 'one row per delivered cold load without a thermochron');
     assert(rows.length >= 2, 'rows'); assert(/thermochron file expected at receipt/.test(w.document.querySelector('#thc_expected').innerText), 'expected text');
     w.document.querySelector('[data-thc-exp="LD-2026-001840"] [data-act=thcExp]').click(); const r1 = w.document.querySelector('[data-thc-exp="LD-2026-001840"] [data-thc-res]').innerText;
-    assert(/^min [-\d,]+ · max [-\d,]+ · Ø [-\d,]+ °C · no excursion$/.test(r1), 'result ' + r1);
+    assert(/^min [-\d.,]+ · max [-\d.,]+ · Ø [-\d.,]+ °C · no excursion$/.test(r1), 'result ' + r1);
     const d0 = ev('S.devs.length'); ev("ACT.thcExp({id:'LD-2026-001842'})"); const x = ev("S.res.thcExp['LD-2026-001842']"); assert(x.exc > 0 && /^DEV-/.test(x.dev), 'excursion → DEV'); assert(ev('S.devs.length') > d0, 'deviation opened');
     assert(/ · out of range \d+ min → DEV-/.test(x.txt), 'text ' + x.txt); eq(typeof ev("ACT.thcExp({id:'LD-2026-001842'})"), 'string', 'second import refused'); assert(w.document.querySelector('[data-thc-exp="LD-2026-001842"][data-done="1"]'), 'row stays with result');
     ev("ACT.setRole({v:'viewer'});go('routes');ACT.stab({s:'routes',v:'thermochron'})"); assert(!w.document.querySelector('[data-act=thcExp]'), 'no button without temperature:write'); eq(typeof ev("RES.thcExpImport('LD-2026-001843')"), 'string');

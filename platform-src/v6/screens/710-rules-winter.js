@@ -6,8 +6,8 @@
    "Winter rules" check while a tier applies and bookingPrice() adds the winter surcharge (shown on the offer). */
 (function () {
   const today = NOW.toISOString().slice(0, 10);
-  const nf = n => Math.round(n).toLocaleString('ru-RU');
-  const H = T('ч', 'h', 'h', 'сағ'), MIN = T('мин', 'Min.', 'min', 'мин');
+  const nf = n => LF.int(n);
+  const H = LF.unit('h'), MIN = LF.unit('min');
   const deg = v => (v < 0 ? '−' + -v : v > 0 ? '+' + v : '0') + ' °C';
   /* field meta: [key, label, unit, min, max] */
   const FIELDS = {
@@ -96,7 +96,7 @@
   /* ---------- Settings → Rules · SLA & winter ---------- */
   const VST = { active: ['green', T('действует', 'gültig', 'active', 'жарамды')], pending: ['yellow', T('ждёт 2-й подписи', 'wartet auf 2. Freigabe', 'awaiting 2nd approval', '2-қолтаңбаны күтуде')], rejected: ['red', T('отклонено', 'abgelehnt', 'rejected', 'қабылданбады')], superseded: ['gray', T('заменено', 'ersetzt', 'superseded', 'ауыстырылды')] };
   const vchip = s => chip(VST[s][0], VST[s][1]);
-  const fmt = (f, v) => (f[2] === '₸' ? nf(v) + ' ₸' : String(v).replace('.', LANG === 'en' ? '.' : ',') + ' ' + f[2]);
+  const fmt = (f, v) => (f[2] === '₸' ? nf(v) + ' ₸' : LF.dec(v) + ' ' + f[2]);
   function rulesBody() {
     const set = R.cur, s = R.sets[set], F = FIELDS[set], w = canDo('planning:admin') || canDo('costs:approve');
     const nav = Object.keys(R.sets).map(k => `<span class="pill-tab${k === set ? ' active' : ''}" role="tab" tabindex="0" data-act="ruSet" data-v="${k}">${esc(SET_L[k])}${R.sets[k].pending ? ' <span class="n">1</span>' : ''}</span>`).join('');

@@ -59,7 +59,7 @@
     const cols = (head || []).map((h, i) => h ? i : -1).filter(i => i >= 0);
     return { head: cols.map(i => head[i]), rows: out.map(r => cols.map(i => r[i])) };
   }
-  const csvText = (head, rows) => '﻿' + [head].concat(rows).map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';')).join('\n');
+  const csvText = (head, rows) => XP.csv([head].concat(rows));
   function lvSaveView(key, name) {
     const st = LV[key], L = byKey(key), n = String(name || '').trim();
     if (n.length < 2) return T('Имя вида: минимум 2 знака', 'Name der Ansicht: mindestens 2 Zeichen', 'View name: at least 2 characters', 'Көрініс атауы: кемінде 2 таңба');
@@ -91,7 +91,7 @@
     lvSave: d => { const e = document.getElementById('lv_' + d.k + '_name'); const r = lvSaveView(d.k, e ? e.value : LV[d.k].name); if (typeof r === 'string') return toast(r, 'err'); toast(T('Вид сохранён: ', 'Ansicht gespeichert: ', 'View saved: ', 'Көрініс сақталды: ') + r.name); },
     lvDel: d => { if (lvDelete(d.k)) { LV[d.k].c = {}; toast(T('Вид удалён', 'Ansicht gelöscht', 'View deleted', 'Көрініс жойылды')); } },
     lvReset: d => { lvApply(d.k, ''); render(); },
-    lvCsv: d => { const r = lvRows(d.k), a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csvText(r.head, r.rows)], { type: 'text/csv' })); a.download = d.k + '-view.csv'; a.click(); audit(T('Списки', 'Listen', 'Lists', 'Тізімдер'), d.k, T('Экспорт CSV', 'CSV-Export', 'CSV export', 'CSV экспорт'), r.rows.length + ' ' + T('строк', 'Zeilen', 'rows', 'жол')); },
+    lvCsv: d => { const r = lvRows(d.k); XP.save(d.k + '-view.csv', csvText(r.head, r.rows), 'text/csv'); audit(T('Списки', 'Listen', 'Lists', 'Тізімдер'), d.k, T('Экспорт CSV', 'CSV-Export', 'CSV export', 'CSV экспорт'), r.rows.length + ' ' + T('строк', 'Zeilen', 'rows', 'жол')); },
   });
   document.addEventListener('input', e => {
     const el = e.target, ds = el.dataset || {};

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// FR-199 / FR-220 · inventory of inline T(ru, de, en, kk) tuples and keyed L('key') calls in platform-src/v6 (espree from tools/lint).
+// FR-199 / FR-220 · inventory of inline T(ru, de, en, kk) tuples and keyed LT('key') calls in platform-src/v6 (espree from tools/lint).
 //   node tools/i18n/scan.mjs [--json] [--kk]      --kk lists Kazakh gaps (missing, equal to RU, much shorter than RU)
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
@@ -26,7 +26,7 @@ export function scanFile(file) {
     if (!n || typeof n.type !== 'string') return;
     if (n.type === 'CallExpression' && n.callee.type === 'Identifier') {
       if (n.callee.name === 'T') out.T.push({ range: n.range, line: n.loc.start.line, args: n.arguments.map(lit), n: n.arguments.length });
-      if (n.callee.name === 'L' && n.arguments[0]) out.L.push({ key: lit(n.arguments[0]), line: n.loc.start.line });
+      if (n.callee.name === 'LT' && n.arguments[0]) out.L.push({ key: lit(n.arguments[0]), line: n.loc.start.line });
     }
     for (const k in n) {
       if (k === 'parent') continue;
@@ -70,6 +70,6 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   if (process.argv.includes('--json')) console.log(JSON.stringify(rows, null, 1));
   else {
     for (const r of rows) console.log(kk ? `${r.file}:${r.line} [${r.why}] ${r.ru.slice(0, 70)} || ${(r.kk || '').slice(0, 50)}` : `${r.T}\t${r.L}\t${r.file}`);
-    console.log(`T() calls: ${tot} (${lits} all-literal) · L() calls: ${keyed}`);
+    console.log(`T() calls: ${tot} (${lits} all-literal) · LT() calls: ${keyed}`);
   }
 }

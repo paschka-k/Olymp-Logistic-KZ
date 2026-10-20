@@ -240,7 +240,7 @@
       const V = LV[s >= 3 ? 1 : 0], unit = t(KGL);
       [[t(['Мест', 'Plätze', 'Places', 'Орын']), 'pl', ''], [t(['Масса', 'Masse', 'Weight', 'Салмақ']), 'kg', unit], [t(['Пер. ось', 'Vorderachse', 'Front axle', 'Алд. ось']), 'fa', unit], [t(['Задн. ось', 'Hinterachse', 'Rear axle', 'Арт. ось']), 'ra', unit], [t(['Высота', 'Höhe', 'Height', 'Биіктік']), 'h', 'm']].forEach((b, j) => {
         const y = 232 + j * 28, v = V[b[1]][0], max = V[b[1]][1], over = s >= 2 && v > max, show = s >= 2, w = show ? 120 * Math.min(1.25, v / max) / 1.25 : 0;
-        const dec = n => (LI === 2 ? n.toFixed(1) : n.toFixed(1).replace('.', ',')), val = b[1] === 'h' ? dec(v) + ' / ' + dec(max) : fmtKg(v) + ' / ' + fmtKg(max);
+        const dec = n => LF.dec(n, 1), val = b[1] === 'h' ? dec(v) + ' / ' + dec(max) : fmtKg(v) + ' / ' + fmtKg(max);
         g += `<g data-lbar="${b[1]}" data-over="${over ? 1 : 0}">${Txt(20, y + 6, b[0] + (show ? ': ' + val + (b[2] ? ' ' + b[2] : '') : ''), { size: 11.5, cls: show ? '' : 'hv-sb' })}<rect x="170" y="${y - 4}" width="120" height="12" rx="6" class="hf-box hs-line"/><rect x="170" y="${y - 4}" width="${f(w)}" height="12" rx="6" class="hv-mv ${over ? 'hf-bad' : 'hf-ok'}"/><line x1="266" x2="266" y1="${y - 7}" y2="${y + 11}" class="hs-ink" stroke-width="1.5"/></g>`;
       });
       /* truck 1, top view */
@@ -341,7 +341,7 @@
     title: ['Холодовая цепь: отклонение → тревога → эскалация → карантин → решение QA', 'Kühlkette: Abweichung → Alarm → Eskalation → Sperre → QA-Entscheidung', 'Cold chain: excursion → alarm → escalation → hold → QA decision', 'Суық тізбек: ауытқу → дабыл → эскалация → карантин → QA шешімі'],
     steps: CS, view: '0 0 1000 380', ms: 2800,
     draw(s) {
-      const m = CAT[s], c = cint(m), lvl = s === 0 ? 0 : s === 1 ? 2 : s <= 3 ? 3 : 0, dec = n => LI === 2 ? n.toFixed(1) : n.toFixed(1).replace('.', ',');
+      const m = CAT[s], c = cint(m), lvl = s === 0 ? 0 : s === 1 ? 2 : s <= 3 ? 3 : 0, dec = n => LF.dec(n, 1);
       const path = CC.map((p, i) => (i ? 'L' : 'M') + cpx(p[0]).toFixed(1) + ',' + cpy(p[1]).toFixed(1)).join(' ');
       let g = `<rect x="${CX0}" y="${f(cpy(8))}" width="${CX1 - CX0}" height="${f(cpy(2) - cpy(8))}" class="hv-band"/><rect x="${CX0}" y="${CY1}" width="${CX1 - CX0}" height="${CY0 - CY1}" class="hs-line"/>`;
       [0, 2, 8, 10, 14].forEach(v => { g += `<line x1="${CX0 - 4}" x2="${CX1}" y1="${f(cpy(v))}" y2="${f(cpy(v))}" class="hs-line"${v === 2 || v === 8 ? '' : ' stroke-dasharray="2 4"'}/>` + Txt(CX0 - 8, cpy(v), v + ' °C', { anchor: 'end', mid: true, size: 11, cls: 'hv-sb' }); });

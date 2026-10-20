@@ -55,7 +55,7 @@
       return `<svg viewBox="0 0 650 190" class="hv-svg"><rect x="6" y="6" width="140" height="176" rx="10" style="fill:var(--bg-subtle,#f3f4f6);stroke:var(--border,#e5e7eb)"/>
 ${row(16, '01 · ' + navLabel('dashboard'), false)}${row(42, '03 · ' + navLabel('dispatch'), i <= 1)}${row(68, '02 · ' + navLabel('orders'), false)}${row(94, '06 · ' + navLabel('routes'), i === 3)}
 <g class="hv-box hv-e"><rect x="160" y="6" width="484" height="176" rx="10" style="fill:var(--surface,#fff)"/><text x="176" y="30" style="font-weight:700">${esc(T('Экспресс · ждут выпуска (2)', 'Express · warten auf Freigabe (2)', 'Express · waiting for release (2)', 'Экспресс · шығаруды күтуде (2)'))}</text></g>
-${card(44, 'EX-0311', HUBS.ALA.city + ' → ' + HUBS.ATY.city + ' · 18 ' + T('кг', 'kg', 'kg', 'кг') + ' · 2–8 °C', '1 / 3', i === 1)}${card(94, 'EX-0312', HUBS.AST.city + ' → ' + HUBS.SHY.city + ' · 9 ' + T('кг', 'kg', 'kg', 'кг') + ' · 15–25 °C', '0 / 3', false)}
+${card(44, 'EX-0311', HUBS.ALA.city + ' → ' + HUBS.ATY.city + ' · 18 ' + LF.unit('kg') + ' · 2–8 °C', '1 / 3', i === 1)}${card(94, 'EX-0312', HUBS.AST.city + ' → ' + HUBS.SHY.city + ' · 9 ' + LF.unit('kg') + ' · 15–25 °C', '0 / 3', false)}
 <text x="176" y="166" style="font-size:10px;opacity:.7">${esc(T('Срок приёма 16:00 · подписи: руководитель · экономика · диспетчер', 'Annahmeschluss 16:00 · Unterschriften: Leitung · Wirtschaft · Dispo', 'Cut-off 16:00 · signatures: manager · economics · dispatch', 'Қабылдау мерзімі 16:00 · қолдар: басшы · экономика · диспетчер'))}</text>
 ${n(152, 53, 0)}${n(428, 36, 1)}${n(592, 36, 2)}${n(152, 105, 3)}</svg>`;
     },

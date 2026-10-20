@@ -7,7 +7,7 @@
   /* ---- class and cooling derived from the model (new trucks of Fleet → Add vehicle get it too) ---- */
   const CLS = { t1: '20 т', t2: '12 т', t3: '20 т', t4: '10 т', t5: '20 т', t6: '12 т', t7: '20 т' };
   R.COOL = { active: T('активный холод', 'aktive Kühlung', 'active cooling', 'белсенді суыту'), iso: T('изотерм · термоконтейнеры', 'Isotherm · Thermocontainer', 'isothermal · thermo containers', 'изотерм · термоконтейнерлер'), none: T('без термоконтроля', 'ohne Temperaturführung', 'no temperature control', 'термобақылаусыз') };
-  R.truckClass = t => { if (!t.cls) t.cls = CLS[t.id] || ((t.model.match(/(\d+(?:,\d)?) t/) || [])[1] || (t.cap > 20 ? '20' : '12')) + ' ' + T('т', 't', 't', 'т'); return String(t.cls).replace(' т', ' ' + T('т', 't', 't', 'т')); };
+  R.truckClass = t => { if (!t.cls) t.cls = CLS[t.id] || ((t.model.match(/(\d+(?:,\d)?) t/) || [])[1] || (t.cap > 20 ? '20' : '12')) + ' ' + LF.unit('t'); return String(t.cls).replace(' т', ' ' + LF.unit('t')); };
   R.truckCooling = t => t.cool || (t.cool = t.unit && t.unit !== '—' ? 'active' : t.zones.some(z => z !== 'ambient') ? 'iso' : 'none');
   S.trucks.forEach(t => { R.truckClass(t); R.truckCooling(t); });
   /* ---- demo fleets (FR-38: the real plan stays at the registered trucks; demo rows are not used in trips, thermo status or costs) ---- */

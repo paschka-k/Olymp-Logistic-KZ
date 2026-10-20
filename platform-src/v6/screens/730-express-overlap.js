@@ -5,8 +5,8 @@
    moved (decisions from the W5 list, S.eco.cross.regular). The section is appended to the existing tab body (no edit to 610). */
 (function () {
   const RATE = { express: 1440, ltl: 228 }, TARGET = 78;
-  const nf = n => Math.round(n).toLocaleString('ru-RU');
-  const f1 = v => (LANG === 'en' ? v.toFixed(1) : v.toFixed(1).replace('.', ','));
+  const nf = n => LF.int(n);
+  const f1 = v => LF.dec(v, 1);
   const XO = S.xo = { by: 'week' };
   const isoWeek = iso => { const d = new Date(iso), t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); const day = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - day); const y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1)); return Math.ceil(((t - y0) / 864e5 + 1) / 7); };
   const BY = {
@@ -39,7 +39,7 @@
   Object.assign(ACT, {
     xoBy: d => { XO.by = d.v; render(); },
     xoCsv: () => { const o = xoOverlap(XO.by), rows = [[o.by, 'express_loads', 'temperature_loads', 'overlap_pct', 'planned_saving_kzt', 'secured_kzt', 'secured_pct', 'target_pct', 'moved_kzt']].concat(o.rows.concat([o.total]).map(r => [r.label, r.n, r.temp, r.overlap.toFixed(1), Math.round(r.plan), Math.round(r.secured), r.securedPct.toFixed(1), TARGET, Math.round(r.moved)]));
-      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';')).join('\n')], { type: 'text/csv' })); a.download = 'express-overlap-' + o.by + '.csv'; a.click();
+      XP.save('express-overlap-' + o.by + '.csv', XP.csv(rows), 'text/csv');
       audit(T('Отчёты', 'Berichte', 'Reports', 'Есептер'), 'express-overlap', T('Экспорт CSV', 'CSV-Export', 'CSV export', 'CSV экспорт'), o.by); },
   });
 })();

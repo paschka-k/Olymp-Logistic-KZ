@@ -3,10 +3,10 @@
    trend history before the current period is derived demo data. */
 (function () {
   const R = { from: '2026-09-01', to: '2026-10-31', hub: '', zone: '', sum: {} };
-  const dec = s => (LANG === 'en' ? s : s.replace('.', ','));
+  const dec = s => LF.dec(s);
   const pc = v => dec(v.toFixed(1)) + ' %';
   const sg = v => (v < 0 ? '−' : '+') + dec(Math.abs(v).toFixed(1)) + ' %';
-  const nf = n => Math.round(n).toLocaleString('ru-RU');
+  const nf = n => LF.int(n);
   const mio = n => n >= 1e6 ? dec((n / 1e6).toFixed(1)) + ' ' + T('млн', 'Mio.', 'M', 'млн') + ' ₸' : n >= 1e3 ? dec((n / 1e3).toFixed(1)) + ' ' + T('тыс', 'Tsd.', 'K', 'мың') + ' ₸' : nf(n) + ' ₸';
   const dd = iso => { const d = new Date(iso); return p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '.' + d.getFullYear(); };
   const lane = l => HUBS[l.from].city + ' → ' + HUBS[l.to].city;
@@ -68,7 +68,7 @@
         [tone(pc(otif), T('Текущий уровень', 'Aktuell', 'Current rate', 'Ағымдағы деңгей'), 'g'), tone(sg(otif - otifS[3]), T('к прошлой неделе', 'ggü. Vorwoche', 'vs last week', 'өткен аптаға'), 'b'), tone(String(dv.length), T('Доставок', 'Lieferungen', 'Total deliveries', 'Жеткізулер'), 'k')],
         tone(String(L.length), T('Всего рейсов', 'Fahrten gesamt', 'Total loads', 'Барлық рейс'), 'k'), lr(dv.length ? dv : L), lcols),
       r('exc', 'op', T('Температурные отклонения по линиям', 'Temperaturabweichungen je Linie', 'Temperature excursions by lane', 'Желілер бойынша температура ауытқулары'), T('30 дней', '30 Tage', 'Last 30 days', '30 күн'), chart({ id: 2, type: 'bars', labels: lk.map(k => k.replace(' → ', '→')), series: [lk.map(k => lanes[k].n)], colors: ['var(--chart-amber)', 'var(--chart-amber)', '#f8d080', 'var(--chart-amber)'], min: 0, max: hi(lk.map(k => lanes[k].n)), step: hi(lk.map(k => lanes[k].n)) / 5 >= 1 ? Math.ceil(hi(lk.map(k => lanes[k].n)) / 5) : 1, tips: lk.map(k => k + ': ' + lanes[k].n) }),
-        [tone(String(exTotal), T('Отклонений', 'Abweichungen', 'Excursions', 'Ауытқулар'), 'r'), tone(dec(mins.toFixed(0)) + ' ' + T('мин', 'Min.', 'min', 'мин'), T('Средняя длит.', 'Ø Dauer', 'Avg duration', 'Орташа ұзақтық'), 'a'), tone(lk[0] || '—', T('Больше всего', 'Am meisten', 'Most affected', 'Көбірек'), 'k')],
+        [tone(String(exTotal), T('Отклонений', 'Abweichungen', 'Excursions', 'Ауытқулар'), 'r'), tone(dec(mins.toFixed(0)) + ' ' + LF.unit('min'), T('Средняя длит.', 'Ø Dauer', 'Avg duration', 'Орташа ұзақтық'), 'a'), tone(lk[0] || '—', T('Больше всего', 'Am meisten', 'Most affected', 'Көбірек'), 'k')],
         tone(String(ev.length), T('Рейсов с отклонением сейчас', 'Fahrten mit Abweichung', 'Loads with excursion', 'Ауытқуы бар рейстер'), 'r'), lr(ev.length ? ev : L), lcols),
       r('drv', 'op', T('Эффективность водителей и ТС', 'Fahrer- und Fahrzeugeffizienz', 'Driver & vehicle performance', 'Жүргізушілер мен КҚ тиімділігі'), T('30 дней', '30 Tage', 'Last 30 days', '30 күн'), chart({ id: 3, type: 'line', labels: wk.slice(0, 4), series: [[4.6, 4.7, 4.8, +rate.toFixed(2)]], colors: ['#7bc9b0'], min: 0, max: 5, step: 1, dots: '#4e5ba6' }),
         [tone(dec(rate.toFixed(1)), T('Ср. рейтинг', 'Ø Bewertung', 'Avg rating', 'Орт. рейтинг'), 'g'), tone(pc(comp), T('Завершено', 'Abgeschlossen', 'Completion rate', 'Аяқталды'), 'b'), tone(String(act), T('Активных водителей', 'Aktive Fahrer', 'Active drivers', 'Белсенді жүргізушілер'), 'k')],
@@ -90,8 +90,8 @@
   const col = { g: 'tone-g', b: 'tone-b', k: 'tone-k', r: 'tone-r', a: 'tone-a' };
   const kp = x => `<div><b class="${col[x.t]}"${x.v.length > 9 ? ' style="font-size:13px"' : ''}>${esc(x.v)}</b><small>${esc(x.l)}</small></div>`;
   const csvOf = c => [c.cols].concat(c.rows.map(r => r.map(v => ({ ok: 'on time', exc: 'excursion' }[v] || v))));
-  const csvText = rows => '﻿' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';')).join('\n');
-  const dl = (name, text, mime) => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: mime })); a.download = name; a.click(); };
+  const csvText = rows => XP.csv(rows);
+  const dl = XP.save;
   const pdfDemo = () => toast(T('PDF формируется на сервере — в прототипе доступны CSV и JSON', 'PDF entsteht serverseitig — im Prototyp sind CSV und JSON verfügbar', 'PDF is rendered server-side — CSV and JSON are available in the prototype', 'PDF серверде жасалады — прототипте CSV және JSON қолжетімді'));
   /* FR-219: every chart also as a table (chartAlt in screens/002-a11y.js); the svg is named after its card */
   const coOf = id => CO[['otif', 'exc', 'drv', 'rev', 'mrg', 'acc'].indexOf(id) + 1];
