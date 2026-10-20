@@ -48,3 +48,6 @@ const suites = testFiles.map((f, i) => `__suite(${i});   /* ${f} */\n` + rd('tes
 writeFileSync(join(outDir, 'tests.html'), rd('tests', 'template.html').replace('/*@@SUITELIST@@*/[]', () => suiteList).replace('/*@@QUARANTINE@@*/[]', () => quarantine).replace('/*@@SUITES@@*/', () => suites));
 console.log(`tests: ${testFiles.length} suites -> ${join(outDir, 'tests.html')}`);
 if (existsSync(join(outDir, 'assets'))) finishDelivery(outDir, { version: VERSION, pages: langs.map(l => (l === 'ru' ? 'index.html' : `${l}.html`)).concat('tests.html') });
+// FR-218: axe-core (MPL-2.0) is a test-only file next to tests.html; the product pages never load it
+mkdirSync(join(outDir, 'test-vendor'), { recursive: true });
+for (const f of list('tests/vendor', '')) writeFileSync(join(outDir, 'test-vendor', f), rd('tests', 'vendor', f));

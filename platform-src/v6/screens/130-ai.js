@@ -52,7 +52,7 @@
   const head = (mod, ic_, tint, title, src) => `<div class="card-head"><span class="itile ${tint}">${ic(ic_, 18)}</span><h3>${esc(title)}</h3>${chip('gray', 'Data Source: ' + src)}</div>`;
   const off = (m) => `<div class="ai-body"><p class="note">${esc(T('Модуль отключён в Settings → AI & Automation.', 'Modul in Settings → AI & Automation deaktiviert.', 'Module is switched off in Settings → AI & Automation.', 'Модуль Settings → AI & Automation бөлімінде өшірілген.'))} <a class="lnk" data-act="aiSet">${esc(T('Открыть', 'Öffnen', 'Open', 'Ашу'))}</a></p></div>`;
   const none = () => `<p class="note">${esc(T('Сейчас рекомендаций нет.', 'Derzeit keine Empfehlungen.', 'No recommendations right now.', 'Қазір ұсыныс жоқ.'))}</p>`;
-  const money = a => a === 0 ? '' : `<span class="amt" style="color:${a < 0 ? 'var(--label-red)' : '#2a9d52'}">${a < 0 ? '−' : '+'}${nf(Math.abs(a))} ₸</span>`;
+  const money = a => a === 0 ? '' : `<span class="amt" style="color:${a < 0 ? 'var(--label-red)' : 'var(--ok-text)'}">${a < 0 ? '−' : '+'}${nf(Math.abs(a))} ₸</span>`;
 
   function card1() {
     if (!aiOn('match')) return off();

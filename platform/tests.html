@@ -1,18 +1,41 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>Kökzhol · platform tests</title>
-<style>body{font:14px/1.5 system-ui,sans-serif;margin:24px;max-width:960px}h1{font-size:20px}.ok{color:#166534}.bad{color:#be123c;font-weight:600}#sum{padding:10px 14px;border-radius:8px;background:#f3f4f6;margin:12px 0}li{margin:2px 0}iframe{display:none}</style></head>
+<style>body{font:14px/1.5 system-ui,sans-serif;margin:24px;max-width:960px}h1{font-size:20px}.ok{color:#166534}.bad{color:#be123c;font-weight:600}.flaky{color:#a16207}.quar{color:#6b21a8}#sum{padding:10px 14px;border-radius:8px;background:#f3f4f6;margin:12px 0}li{margin:2px 0}iframe{display:none}#frames iframe.kept{display:block;border:2px solid #be123c;margin:0 0 16px}#frames .failcap{font-weight:600;color:#be123c;margin-top:16px}</style></head>
 <body><h1>Platform tests</h1><div id="sum">running…</div><ul id="out"></ul><div id="frames"></div>
 <script>
 /* Same contract as tests.html (window.__TESTS) so tools/run-ui-tests.cjs runs it unchanged.
-   Every group loads a fresh copy of platform-v6*.html in a hidden iframe, so tests never share state. */
-window.__TESTS = { total: 0, passed: 0, failed: 0, failures: [], done: false };
+   Every group loads a fresh copy of platform-v6*.html in a hidden iframe, so tests never share state.
+   URL options (CI, FR-205 / FR-209 / FR-210):
+     ?shard=k/n   run only the suite files of shard k of n (greedy split by the recorded suite times, see shard-weights.json)
+     ?retries=N   retry a failed group N times in a fresh iframe (default 1); a group that passes on a retry counts as passed
+                  and is listed in __TESTS.flaky (the flaky report). Groups named in quarantine.json are reported, not failed.
+     ?keepfail=1  keep the iframe of every failed group visible (iframe.kept, in place: moving an iframe reloads it), so the CI runner can screenshot it
+   A group's lang may carry a query for the app page, e.g. 'en?today=2026-11-02' (FR-206 injectable clock). */
+window.__TESTS = { total: 0, passed: 0, failed: 0, failures: [], flaky: [], quarantined: [], suites: {}, shard: null, done: false };
 const LANGS = ['ru', 'de', 'en', 'kk'], file = l => (l === 'ru' ? 'index.html' : l + '.html');
 const out = document.getElementById('out');
-const log = (name, err) => { const R = window.__TESTS; R.total++; if (err) { R.failed++; R.failures.push(name + ' — ' + err); } else R.passed++; const li = document.createElement('li'); li.className = err ? 'bad' : 'ok'; li.textContent = (err ? '✗ ' : '✓ ') + name + (err ? ' — ' + err : ''); out.appendChild(li); };
+const __Q = new URLSearchParams(location.search);
+const __SUITES = [{"name":"10-navigation.js","ms":3049},{"name":"20-dispatch.js","ms":587},{"name":"30-chain.js","ms":447},{"name":"40-reports-ai-settings.js","ms":531},{"name":"50-legacy-tabs.js","ms":786},{"name":"60-foundation.js","ms":971},{"name":"61-shell-ext.js","ms":4141},{"name":"62-language-audit.js","ms":2265},{"name":"63-narrow.js","ms":9450},{"name":"70-ops-load.js","ms":4070},{"name":"71-ops-ship.js","ms":1035},{"name":"72-ops-docs.js","ms":861},{"name":"73-ops-dispatch.js","ms":1011},{"name":"74-ops-dashboard.js","ms":1042},{"name":"75-ops-trips.js","ms":1180},{"name":"76-ops-docs.js","ms":835},{"name":"80-res-fleet-staff.js","ms":948},{"name":"81-res-driver-app.js","ms":1133},{"name":"82-res-coverage-lines.js","ms":1350},{"name":"83-res-thermo.js","ms":871},{"name":"84-res-weather.js","ms":902},{"name":"85-res-coverage.js","ms":1915},{"name":"86-res-fleet-ext.js","ms":1277},{"name":"87-res-partners.js","ms":3018},{"name":"88-res-staff-app.js","ms":1163},{"name":"90-rec-records.js","ms":2493},{"name":"a0-por-portals.js","ms":1760},{"name":"b0-eco-economics.js","ms":1944},{"name":"b1-eco-reports-ext.js","ms":1157},{"name":"b2-eco-costs-ext.js","ms":1484},{"name":"c0-help-content.js","ms":3125},{"name":"c1-help-visuals.js","ms":1756},{"name":"c2-notes.js","ms":2682},{"name":"d0-v6-parity.js","ms":3193},{"name":"e1-mirror-ops-a.js","ms":2411},{"name":"e1-mirror-ops-b.js","ms":1870},{"name":"e1-mirror-ops-c.js","ms":3096},{"name":"e1-mirror-ops.js","ms":5006},{"name":"e2-mirror-res.js","ms":15641},{"name":"e3-hub-inbound.js","ms":1449},{"name":"e4-rules-sla.js","ms":1977},{"name":"e5-driver-partner.js","ms":1798},{"name":"f0-a11y.js","ms":915},{"name":"f0-ci-infra.js","ms":3922},{"name":"f0-delivery.js","ms":627},{"name":"f0-shell-parity.js","ms":357},{"name":"f1-data-integrity.js","ms":582},{"name":"f2-ops-fleet.js","ms":200},{"name":"f3-records-portals.js","ms":211},{"name":"f4-economics.js","ms":200},{"name":"f5-a11y-layout.js","ms":744}];
+const __QUARANTINE = [];
+const __HARNESS = {
+  /* longest-processing-time split: heaviest suite first onto the lightest shard; deterministic for a given suite list */
+  plan(n) { const load = Array(n).fill(0), of = {}; __SUITES.map((s, i) => [s, i]).sort((a, b) => b[0].ms - a[0].ms || a[1] - b[1]).forEach(([s, i]) => { const k = load.indexOf(Math.min(...load)); of[i] = k + 1; load[k] += s.ms; }); return { of, load }; },
+  /* run fn up to 1 + retries times; returns the first error and whether the last attempt passed */
+  async attempts(fn, retries) { const errs = []; for (let i = 0; i <= retries; i++) { try { await fn(i); return { ok: true, errs }; } catch (e) { errs.push(e && e.message || String(e)); } } return { ok: false, errs }; },
+  quarantined: (name, list = __QUARANTINE) => list.some(q => (q.startsWith('/') ? new RegExp(q.slice(1, q.lastIndexOf('/')), q.slice(q.lastIndexOf('/') + 1)).test(name) : name.includes(q))),
+};
+const __SHARD = (() => { const m = /^(\d+)\/(\d+)$/.exec(__Q.get('shard') || ''); if (!m || +m[2] < 1 || +m[1] < 1 || +m[1] > +m[2]) return null; return { k: +m[1], n: +m[2], of: __HARNESS.plan(+m[2]).of }; })();
+const __RETRIES = Math.max(0, Math.min(3, parseInt(__Q.get('retries') == null ? '1' : __Q.get('retries'), 10) || 0)), __KEEPFAIL = __Q.get('keepfail') === '1';
+let __CUR = -1, __T0 = 0;
+const __suite = i => { const t = performance.now(); if (__CUR >= 0 && __runs(__CUR)) window.__TESTS.suites[__SUITES[__CUR].name] = Math.round(t - __T0); __CUR = i; __T0 = t; };
+const __runs = i => !__SHARD || i < 0 || __SHARD.of[i] === __SHARD.k;
+if (__SHARD) window.__TESTS.shard = { k: __SHARD.k, n: __SHARD.n, files: __SUITES.filter((s, i) => __SHARD.of[i] === __SHARD.k).map(s => s.name), of: __SUITES.length };
+const log = (name, err, kind) => { const R = window.__TESTS; R.total++; if (err && kind !== 'quar') { R.failed++; R.failures.push(name + ' — ' + err); } else R.passed++; const li = document.createElement('li'); li.className = kind === 'quar' ? 'quar' : err ? 'bad' : kind === 'flaky' ? 'flaky' : 'ok'; li.textContent = (kind === 'quar' ? '⚠ quarantined: ' : err ? '✗ ' : kind === 'flaky' ? '↻ flaky (passed on retry): ' : '✓ ') + name + (err ? ' — ' + err : ''); out.appendChild(li); };
 const assert = (c, msg) => { if (!c) throw new Error(msg || 'assertion failed'); };
 const eq = (a, b, msg) => assert(a === b, (msg || 'expected equal') + ': ' + JSON.stringify(a) + ' !== ' + JSON.stringify(b));
 async function fresh(lang) {
-  const f = document.createElement('iframe'); f.style.cssText = 'width:1316px;height:760px'; f.src = file(lang); document.getElementById('frames').appendChild(f);
+  const [l, q] = String(lang || 'ru').split('?');
+  const f = document.createElement('iframe'); f.style.cssText = 'width:1316px;height:760px'; f.src = file(l) + (q ? '?' + q : ''); document.getElementById('frames').appendChild(f);
   await new Promise((ok, no) => { f.onload = ok; f.onerror = no; setTimeout(() => no(new Error('iframe timeout')), 20000); });
   const w = f.contentWindow; w.__errs = []; w.addEventListener('error', e => w.__errs.push(e.message));
   /* exports must not reach the browser: a click on <a download> and window.open() are recorded in w.__downloads instead of
@@ -21,12 +44,31 @@ async function fresh(lang) {
   const aClick = w.HTMLAnchorElement.prototype.click;
   w.HTMLAnchorElement.prototype.click = function () { if (this.hasAttribute('download') || /^blob:/.test(this.href)) { w.__downloads.push({ name: this.getAttribute('download') || '', href: this.href }); return; } return aClick.call(this); };
   w.open = (url, target) => { w.__downloads.push({ name: '', href: String(url || ''), target: target || '' }); return null; };
-  return { w, ev: c => w.eval(c), done: () => f.remove() };
+  return { w, f, ev: c => w.eval(c), done: () => f.remove() };
 }
-async function group(name, lang, fn) { let g; try { g = await fresh(lang || 'ru'); } catch (e) { return log(name, 'cannot load: ' + e.message); } try { await fn(g, g.ev, g.w); log(name); } catch (e) { log(name, e.message); } finally { g.done(); } }
+/* keep the failed iframe visible for the CI screenshot (FR-209), at most 12 */
+const keepFail = (g, name, err) => { if (!__KEEPFAIL || !g || document.querySelectorAll('#frames iframe.kept').length >= 12) return false; const cap = document.createElement('div'); cap.className = 'failcap'; cap.textContent = name + ' — ' + err; g.f.before(cap); g.f.dataset.fail = name; g.f.classList.add('kept'); return true; };
+async function group1(name, lang, fn) {
+  if (!__runs(__CUR)) return;
+  let last = null;
+  const r = await __HARNESS.attempts(async () => {
+    if (last) { last.g.done(); last = null; }   // drop the iframe of the previous failed attempt
+    let g; try { g = await fresh(lang || 'ru'); } catch (e) { throw new Error('cannot load: ' + e.message); }
+    try { await fn(g, g.ev, g.w); } catch (e) { last = { g }; throw e; }
+    g.done();
+  }, __RETRIES);
+  if (r.ok) { if (r.errs.length) window.__TESTS.flaky.push({ name, attempts: r.errs.length + 1, errors: r.errs }); log(name, null, r.errs.length ? 'flaky' : ''); return; }
+  const err = r.errs[0] + (r.errs.length > 1 ? ' (also failed on ' + (r.errs.length - 1) + ' retr' + (r.errs.length > 2 ? 'ies' : 'y') + ')' : '');
+  const quar = __HARNESS.quarantined(name);
+  if (quar) window.__TESTS.quarantined.push({ name, error: r.errs[0] });
+  if (last && !(!quar && keepFail(last.g, name, r.errs[0]))) last.g.done();
+  log(name, err, quar ? 'quar' : '');
+}
+async function group(name, lang, fn) { const t0 = performance.now(); try { await group1(name, lang, fn); } finally { (window.__TESTS.times = window.__TESTS.times || []).push([name, Math.round(performance.now() - t0)]); } }
 const clean = (w, where) => { const t = w.document.querySelector('#root').innerText; const m = t.match(/.{0,20}(undefined|NaN|\[object|\bnull\b).{0,20}/); assert(!m, where + ' contains "' + (m && m[0]) + '"'); assert(!w.__errs.length, where + ' threw: ' + w.__errs[0]); };
 
 (async () => {
+__suite(0);   /* 10-navigation.js */
   /* ---- navigation: 12 items, every screen / tab / drawer renders in all four languages ---- */
   for (const lang of LANGS) await group('[' + lang + '] 13 menu items, every screen renders', lang, async (g, ev, w) => {
     eq(ev('NAV.length'), 13, 'menu items'); eq(w.document.querySelectorAll('.nav-item').length, 13, 'rendered items');
@@ -45,6 +87,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
   });
   await group('language switcher links to all four files', 'ru', async (g, ev, w) => { const hrefs = [...w.document.querySelectorAll('.langs a')].map(a => a.getAttribute('href')); eq(hrefs.join(','), LANGS.map(file).join(','), 'links'); });
 
+__suite(1);   /* 20-dispatch.js */
 /* ---- phase 2: dispatch rules ---- */
   await group('create load, assign, status chain to delivered', 'ru', async (g, ev) => {
     const id = ev(`createLoad({cust:'c1',from:'AST',to:'KAR',zone:'ambient',pallets:10,priority:'low'}).ok`).slice(8); assert(id, 'load created');
@@ -72,6 +115,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     assert(/drop-no/.test(dnd('LD-2026-001852', 'in_transit')), 'no refuse highlight'); eq(ev(`load('LD-2026-001852').status`), 'assigned', 'illegal move executed');
   });
 
+__suite(2);   /* 30-chain.js */
 /* ---- phases 3-5: hubs, POD -> invoice -> ESF -> payment ---- */
   await group('receiving: Standgeld 6 000 ₸ per started 30 min after 45 min', 'ru', async (g, ev) => { eq(ev('RECV.rate'), 6000); eq(ev('RECV.free'), 45); eq(ev('RECV.step'), 30); });
   await group('delivered -> POD -> invoice -> ESF -> paid', 'ru', async (g, ev, w) => {
@@ -87,6 +131,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
   });
   await group('invoice maths: VAT 12 % and totals', 'ru', async (g, ev) => { assert(ev(`S.invoices.every(i=>Math.abs(i.vat-Math.round(i.net*0.12))<=1&&i.net+i.vat===i.total&&i.lines.reduce((s,x)=>s+x.amount,0)===i.net)`), 'invoice arithmetic'); });
 
+__suite(3);   /* 40-reports-ai-settings.js */
 /* ---- phase 6: reports, AI, settings ---- */
   await group('reports: six cards with exactly three KPIs, filters re-query', 'ru', async (g, ev, w) => {
     ev("go('reports')"); const cs = w.document.querySelectorAll('.report-card'); eq(cs.length, 6, 'cards'); cs.forEach(c => eq(c.querySelectorAll('.kpi3 > div').length, 3, 'KPIs per card'));
@@ -106,6 +151,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
   });
   await group('AI modules can be switched off in settings', 'ru', async (g, ev, w) => { ev("CFG.cur.ai.mod.match=false;ACT.cfgSave()"); ev("go('ai')"); assert(!w.document.querySelector('[data-act=aiAcc]'), 'matching card still active'); });
 
+__suite(4);   /* 50-legacy-tabs.js */
 /* ---- phase 7: legacy screens as tabs ---- */
   await group('temperature alarm: load turns problem, deviation opens, QA flow closes it', 'ru', async (g, ev, w) => {
     const L = 'LD-2026-001847'; ev("go('routes');ACT.rtab({v:'temp'})"); w.document.querySelector('#sim_l').value = L; ev("ACT.sim({v:'freeze'})");
@@ -126,6 +172,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
   await group('security incidents: accept / escalate / close are audited', 'ru', async (g, ev) => { const id = ev('S.inc[0].id'); ev(`ACT.incSt({id:'${id}',v:'accepted'})`); eq(ev('S.inc[0].st'), 'accepted'); ev(`ACT.incSt({id:'${id}',v:'closed',cat:'resolved_on_site',note:'Checked with the driver, route restored'})`); eq(ev('S.inc[0].st'), 'closed'); assert(ev('S.audit.length') >= 2, 'not audited'); });
   await group('weather risk is computed for every active load', 'ru', async (g, ev, w) => { ev("go('routes');ACT.rtab({v:'wx'})"); assert(w.document.querySelectorAll('table tbody tr').length >= 4, 'forecast matrix'); assert(w.document.querySelector('main').innerText.includes('LD-2026-001847'), 'route risk list'); });
 
+__suite(5);   /* 60-foundation.js */
   /* ---- foundation: roles, tabs API, help, design switch, version, skip link ---- */
   await group('roles: admin sees 13 items, shells for customer / partner / driver, access refused', 'ru', async (g, ev, w) => {
     eq(ev('ROLES.length'), 11, 'roles'); eq(ev('navItems().length'), 13, 'admin menu');
@@ -151,6 +198,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     assert(new RegExp('v' + ev('VERSION').replace(/\./g, '\\.')).test(w.document.querySelector('.ver').innerText), 'version'); assert(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(w.document.querySelector('.ver').innerText), 'build time'); assert(w.document.querySelector('a.skip') && w.document.getElementById('main-content'), 'skip link target');
   });
 
+__suite(6);   /* 61-shell-ext.js */
   /* ---- P6 shell parity: hub filter, global search, clock / alarms / banner, bottom bar, eyebrow / diagram, deep links, sign-in, account ---- */
   for (const lang of LANGS) await group('[' + lang + '] shell: hub filter narrows lists, menu stays 13, topbar has clock and alarms button', lang, async (g, ev, w) => {
     eq(ev('NAV.length'), 13, 'menu items');
@@ -224,6 +272,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     ev("ACT.setRole({v:'admin'});S.loads[0].status='problem'"); ev('ACT.resetAsk()'); ev('ACT.resetGo()'); assert(ev("S.loads[0].status!=='problem'"), 'reset restores demo data');
   });
 
+__suite(7);   /* 62-language-audit.js */
   /* ---- Q2 language audit: the DE / EN UI shows no Cyrillic — visible text and title / placeholder / aria-label / alt across
      every screen × tab (admin + the driver / customer / partner shells), the load drawer (all tabs) and the main drawers ---- */
   const langAudit = (ev, w) => {
@@ -274,6 +323,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     eq(ev("S.inbox.find(m=>m.kind==='weather_warning').src"), lat ? 'Kazhydromet' : 'Казгидромет', 'inbox source');
   });
 
+__suite(8);   /* 63-narrow.js */
   /* ---- Q4 narrow-window layout: at 375 and 768 px no screen / tab / load-drawer tab scrolls sideways, the page title never breaks
      word by word, header buttons stay one line, the burger opens and closes the off-canvas menu, search and "⋯" overflow work ---- */
   const narrow = async (w, px) => { w.frameElement.style.cssText = `display:block;position:absolute;left:-10000px;top:0;width:${px}px;height:760px;border:0`; await new Promise(r => setTimeout(r, 30)); /* not requestAnimationFrame: it never fires in a hidden tab */ eq(w.innerWidth, px, 'iframe width'); };
@@ -337,6 +387,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     assert(/active alarms/.test(d.querySelector('[data-alarms]').textContent), 'alarms label');
   });
 
+__suite(9);   /* 70-ops-load.js */
   /* ---- W1 operations: Load & weight (FR-99/139/140/143/144/145/146, FR-05/06) ---- */
   await group('ops model: SSCC check digit, one place per pallet, lines and places are separate records (FR-73)', 'ru', async (g, ev) => {
     assert(ev('ssccValid(ssccMake(1)) && ssccValid(ssccMake(987654))'), 'generated SSCC must be valid'); assert(!ev("ssccValid(ssccMake(1).slice(0,17) + ((+ssccMake(1)[17] + 1) % 10))"), 'wrong check digit must be detected');
@@ -454,6 +505,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
       gg.ev(`ACT.lwType({id:'${W}', v:'t20'})`); clean(gg.w, lang + ' tent without temperature control'); gg.ev(`ACT.lwType({id:'${W}', v:'t75'}); ACT.lwZones({id:'${W}', v:'2'})`); clean(gg.w, lang + ' two zones'); } finally { gg.done(); } }
   });
 
+__suite(10);   /* 71-ops-ship.js */
   /* ---- W1 operations: Shipments & labels (FR-01..06, 73, 176) ---- */
   await group('scanner search: a GS1-128 scan (AI 00) opens the label of the place, also from the archive (FR-01/02)', 'ru', async (g, ev, w) => {
     ev("go('orders'); ACT.stab({s:'orders',v:'ship'})"); assert(!ev("S.loads.filter(l => (S.ops.shipArch || l.status !== 'delivered')).some(l => l.status === 'delivered')"), 'archive hidden by default');
@@ -479,6 +531,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("go('orders'); ACT.stab({s:'orders',v:'ship'}); S.ops.zpl = true; render()"); clean(gg.w, lang + ' shipments'); } finally { gg.done(); } }
   });
 
+__suite(11);   /* 72-ops-docs.js */
   /* ---- W1 operations: Documents KZ and Go/No-Go (FR-12, 91, 92, 116, 11, 114) ---- */
   await group('document chain generate → sign → send → accepted; ESF only from a delivered order with approved POD (FR-12/116)', 'ru', async (g, ev) => {
     eq(ev("docGen('LD-2026-001851', 'ttn')"), null, 'TTN generated'); eq(ev("docSign('LD-2026-001851', 'ttn')"), null, 'TTN signed'); assert(typeof ev("docSend('LD-2026-001851', 'ttn')") === 'string', 'TTN goes to no state system');
@@ -507,6 +560,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("go('orders'); ACT.stab({s:'orders',v:'docs'})"); clean(gg.w, lang + ' documents'); gg.ev("ACT.dkSel({id:'LD-2026-001841'})"); clean(gg.w, lang + ' documents delivered'); gg.ev("ACT.dkSel({id:'LD-2026-001851'})"); clean(gg.w, lang + ' documents assigned'); } finally { gg.done(); } }
   });
 
+__suite(12);   /* 73-ops-dispatch.js */
   /* ---- W1 operations: Dispatch release / double booking / replanning, Waybills & express, Planning extras (FR-93/94, 41/126/154, 38/119/156) ---- */
   await group('double booking: a driver or truck on a running load cannot be assigned again, whatever its status flag says (FR-93)', 'ru', async (g, ev) => {
     ev("drv('d4').status = 'available'; trk('t1').status = 'available'"); assert(/001847/.test(ev("assign('LD-2026-001852', 'd4', 't1')") || ''), 'driver d4 is on 001847'); ev("trk('t5').status = 'available'"); assert(/001847/.test(ev("assign('LD-2026-001852', 'd3', 't5') || ''") || ''), 'truck t5 is on 001847'); eq(ev("load('LD-2026-001852').status"), 'unassigned', 'nothing assigned');
@@ -539,6 +593,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("go('dispatch'); ACT.stab({s:'dispatch',v:'express'})"); clean(gg.w, lang + ' express'); gg.ev("ACT.stab({s:'dispatch',v:'planning'}); S.ops.target = true; S.ops.scen.storm = true; render()"); clean(gg.w, lang + ' planning'); gg.ev("ACT.stab({s:'dispatch',v:'board'}); ACT.open({id:'LD-2026-001850'})"); clean(gg.w, lang + ' drawer'); } finally { gg.done(); } }
   });
 
+__suite(13);   /* 74-ops-dashboard.js */
   /* ---- P2: Dashboard overview (0.3.10 screen 01), trip detail aside, planning records (screen 02) ---- */
   await group('dashboard: 0.3.10 KPI set, alarms (≤ 9) and risks (≤ 6) with source links, compact inbox of 5, hub weather 3 days', 'ru', async (g, ev, w) => {
     ev("go('dashboard')"); const d = w.document;
@@ -578,6 +633,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
       if (lang === 'de' || lang === 'en') { for (const sel of ['[data-ov-kpis]', '[data-alert-list=risks]', '.wx-tiles', '[data-plan-form]']) { const el = gg.w.document.querySelector(sel); if (el) { const t = el.innerText; assert(!/[А-Яа-яЁё]/.test(t.replace(/.*(?:ТОО|Астана).*/g, '')), lang + ' Cyrillic in ' + sel); } } } } finally { gg.done(); } }
   });
 
+__suite(14);   /* 75-ops-trips.js */
   /* ---- P2: trips and orders records — abort trip (FR-173), stops and outcomes (FR-98), unassign order, new order, tracking token ---- */
   await group('abort trip (FR-173): only under way, needs a linked alarm and a reason, orders go back to "new" or to a rescue trip, resources are freed', 'ru', async (g, ev, w) => {
     assert(typeof ev("tripAbort('LD-2026-001851', {alarm:'x', reason:'long enough reason'})") === 'string', 'planned trip cannot be aborted');
@@ -618,6 +674,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("go('orders'); ACT.stab({s:'orders',v:'rec'}); ACT.orNew()"); clean(gg.w, lang + ' orders'); gg.ev("ACT.open({id:'LD-2026-001848'}); ACT.tab({v:'stops'})"); clean(gg.w, lang + ' stops'); gg.ev("closeDrawer(); ACT.open({id:'LD-2026-001847'})"); clean(gg.w, lang + ' abort form'); } finally { gg.done(); } }
   });
 
+__suite(15);   /* 76-ops-docs.js */
   /* ---- P2: Documents KZ — full 0.3.10 set, "Generate all", gate 9 + 2, "Clear without weather forecast" ---- */
   await group('Documents KZ: 12 document types in the catalogue; the set follows the load (third-party, ADR, partner handover)', 'ru', async (g, ev, w) => {
     const keys = ev("Object.keys(KDOC)"); for (const k of ['order', 'waybill', 'ttn', 'transfer', 'temp', 'reg', 'contract', 'esf', 'snt', 'adrdoc', 'adrinst', 'adrcert', 'ho', 'hottn', 'epod']) assert(keys.includes(k), 'type ' + k);
@@ -640,6 +697,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     for (const lang of LANGS) { const gg = await fresh(lang); try { for (const id of ['LD-2026-001850', 'LD-2026-001856', 'LD-2026-001841']) { gg.ev("S.ops.docSel = '" + id + "'; go('orders'); ACT.stab({s:'orders',v:'docs'})"); clean(gg.w, lang + ' documents ' + id); } if (lang === 'de' || lang === 'en') assert(!/[А-Яа-яЁё]/.test([...gg.w.document.querySelectorAll('[data-doc] b, [data-doc] .sub')].map(e => e.innerText).join(' ')), lang + ' Cyrillic in document names'); } finally { gg.done(); } }
   });
 
+__suite(16);   /* 80-res-fleet-staff.js */
   /* ---- W2 resources: fleet registry (FR-27/50/118/141/157/158) and staff (FR-08/10/46/55/114/120/122/123) ---- */
   await group('W2 fleet: new truck needs checklist, then becomes plannable (FR-157)', 'ru', async (g, ev, w) => {
     ev("go('fleet');ACT.stab({s:'fleet',v:'registry'})"); assert(w.document.querySelector('#rg_table'), 'registry table'); clean(w, 'registry');
@@ -697,6 +755,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     ev("go('drivers');ACT.stab({s:'drivers',v:'staff'})"); assert(w.document.querySelector('[data-fine]'), 'fines table'); clean(w, 'staff');
   });
 
+__suite(17);   /* 81-res-driver-app.js */
   /* ---- W2 driver app (FR-52…67, 83, 107, 108) ---- */
   const DAPP = "ACT.setRole({v:'driver'})";   // R2/D2: only the driver role acts in the app (admin = read-only preview)
   await group('W2 driver app: role shell, own trip binding, all tabs render (FR-83)', 'ru', async (g, ev, w) => {
@@ -739,6 +798,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     ev("ACT.setRole({v:'driver'});ACT.daLang({v:'kk'})"); assert(/Ауысым/.test(w.document.querySelector('.da-tabs').innerText), 'app language independent of page');
   });
 
+__suite(18);   /* 82-res-coverage-lines.js */
   /* ---- W2 coverage, lines & tariffs, thermochron (FR-39/40/96/97/109/110/111/155) ---- */
   await group('W2 coverage: escalation L1/L2/L3 by expected zone, window and cold cargo (FR-109)', 'ru', async (g, ev, w) => {
     ev("go('routes');ACT.stab({s:'routes',v:'coverage'})"); assert(w.document.querySelector('#cov_contacts'), 'contacts'); clean(w, 'coverage');
@@ -776,6 +836,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
       if (lang === 'de' || lang === 'en') { let txt = gg.ev("document.querySelector('#root').innerText"); const known = gg.ev("S.drivers.flatMap(d=>[d.name,d.ini]).concat(CUSTOMERS.flatMap(c=>[c.name,c.ini]))"); known.forEach(n => { txt = txt.split(n).join(''); }); const cyr = txt.match(/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүІі]+/g) || []; assert(!cyr.length, lang + ' Cyrillic in ' + s + '/' + k + ': ' + cyr.slice(0, 5)); } } } finally { gg.done(); } }
   });
 
+__suite(19);   /* 83-res-thermo.js */
   /* ---- P3 thermo: history chart, readouts, status, door timer, temperature log (0.3.10 screen 05, FR-39/40/102) ---- */
   await group('P3 thermo: chips, readout tiles, 48-reading chart with bands and legend, status block', 'ru', async (g, ev, w) => {
     ev("go('routes');ACT.stab({s:'routes',v:'temp'})"); clean(w, 'temp');
@@ -806,6 +867,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
       if (lang === 'de' || lang === 'en') { let txt = gg.ev("document.querySelector('.content').innerText"); const known = gg.ev("S.drivers.flatMap(d=>[d.name,d.ini]).concat(CUSTOMERS.flatMap(c=>[c.name,c.ini]))"); known.forEach(n => { txt = txt.split(n).join(''); }); const cyr = txt.match(/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүІі]+/g) || []; assert(!cyr.length, lang + ' Cyrillic in ' + k + ': ' + cyr.slice(0, 5)); } } } finally { gg.done(); } }
   });
 
+__suite(20);   /* 84-res-weather.js */
   /* ---- P3 weather: horizon 3 / 7, stale warning + refresh, sources card, city card, West cities (0.3.10 screen 06, FR-16/42/106) ---- */
   await group('P3 weather: grid has hubs + West cities, horizon 3 / 7 switches the columns', 'ru', async (g, ev, w) => {
     ev("go('routes');ACT.stab({s:'routes',v:'wx'})"); clean(w, 'wx');
@@ -824,6 +886,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
       if (lang === 'de' || lang === 'en') { const txt = gg.ev("document.querySelector('.content').innerText"); const cyr = txt.match(/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүІі]+/g) || []; assert(!cyr.length, lang + ' Cyrillic: ' + cyr.slice(0, 5)); } } finally { gg.done(); } }
   });
 
+__suite(21);   /* 85-res-coverage.js */
   /* ---- P3 coverage FR-111 on the road map, offline windows, OL1 SMS, security close form (0.3.10 /coverage, screen 07) ---- */
   await group('P3 coverage: map on the road network — stretches by class, dashed estimate / solid measured, hubs, cities, live vehicles, West segments', 'ru', async (g, ev, w) => {
     ev("go('routes');ACT.stab({s:'routes',v:'coverage'})"); clean(w, 'coverage');
@@ -865,6 +928,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     const l = ev("S.loads.find(l=>l.status==='in_transit'&&l.zone!=='ambient').id"); eq(ev(`RES.covSet('${l}',10).lvl`), 0); eq(ev(`RES.covSet('${l}',75).lvl`), 3, 'L3 kept');
   });
 
+__suite(22);   /* 86-res-fleet-ext.js */
   /* ---- P4 fleet parity: class KPIs, demo toggles, insurance / tax / fees, West approval, compliance 60 days ---- */
   await group('P4 fleet: KPIs by class, demo fleets never join S.trucks, trailer note', 'ru', async (g, ev, w) => {
     ev("go('fleet')"); assert(w.document.querySelector('#fl_classes'), 'class KPIs'); clean(w, 'fleet');
@@ -898,6 +962,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
       if (lang === 'de' || lang === 'en') { const t = gg.w.document.querySelector('#root').innerText.replace(/Алматы|Астана/g, ''); assert(!/[А-Яа-яЁё]/.test(t.replace(/[«»]/g, '')) || true, ''); const cy = gg.ev("(()=>{const bad=[];document.querySelectorAll('#fl_table td, #fl_classes, #fl_demo, #rg_comply').forEach(e=>{const m=e.innerText.match(/[А-Яа-я]{3,}/);if(m)bad.push(m[0])});return bad.filter(x=>!/^(Реф|Астана|Алматы)/.test(x)).slice(0,3)})()"); assert(!cy.length, lang + ' has Cyrillic in the fleet tab: ' + cy.join(',')); } } finally { gg.done(); } }
   });
 
+__suite(23);   /* 87-res-partners.js */
   /* ---- P4 partners parity (screen 11): city groups, contacts, renewal, demotion, coverage, handover, ePOD on behalf ---- */
   const PTAB = "go('dispatch');ACT.dtab({v:'partners'})";
   await group('P4 partners: city-group filter, city directory, full table columns', 'ru', async (g, ev, w) => {
@@ -962,6 +1027,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
       if (lang === 'de' || lang === 'en') { const cy = gg.ev("(()=>{const bad=[];document.querySelectorAll('#pt_cov, #pt_ho, #pt_ws, #pt_cities, .filters').forEach(e=>{const m=e.innerText.replace(/ТОО|ИП/g,'').match(/[А-Яа-я]{3,}/);if(m)bad.push(m[0])});return bad})()"); assert(!cy.length, lang + ' Cyrillic in partner panels: ' + cy.join(',')); } } finally { gg.done(); } }
   });
 
+__suite(24);   /* 88-res-staff-app.js */
   /* ---- P4 staff + driver-app admin panels ---- */
   await group('P4 staff: where-now columns and 90-day document deadlines with renewal booking', 'ru', async (g, ev, w) => {
     ev("go('drivers');ACT.stab({s:'drivers',v:'staff'})"); assert(w.document.querySelector('#st_docs'), 'deadlines card'); clean(w, 'staff');
@@ -984,6 +1050,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
       if (lang === 'de' || lang === 'en') { const cy = gg.ev("(()=>{const bad=[];document.querySelectorAll('#da_eco, #da_frs').forEach(e=>{const m=e.innerText.match(/[А-Яа-я]{3,}/);if(m)bad.push(m[0])});return bad})()"); assert(!cy.length, lang + ' Cyrillic in driver-app panels: ' + cy.join(',')); gg.ev("ACT.stab({s:'drivers',v:'staff'})"); const cs = gg.ev("(()=>{const c=document.querySelector('#st_docs').cloneNode(true);c.querySelectorAll('td:first-child').forEach(x=>x.remove());const m=c.innerText.match(/[А-Яа-я]{3,}/);return m?m[0]:''})()"); assert(!cs, lang + ' Cyrillic in deadlines: ' + cs); } } finally { gg.done(); } }
   });
 
+__suite(25);   /* 90-rec-records.js */
   /* ---- W3 records & administration ---- */
   const KEYS = ['dashboard/alarms', 'dashboard/inbox', 'orders/bookings', 'billing/insurance', 'settings/ref', 'settings/oncall', 'settings/users', 'settings/audit', 'integrations-catalogue', 'changes'];
   await group('rec: all W3 tabs and the changes route render in 4 languages without undefined/NaN', 'ru', async (g, ev, w) => {
@@ -1056,6 +1123,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     const kk = await fresh('kk'); try { assert(/[А-Яа-яЁё]/.test(kk.ev('CHANGES.entries[0].title')), 'KK fallback to RU'); } finally { kk.done(); }
   });
 
+__suite(26);   /* a0-por-portals.js */
   /* ---- W4 Customers & portals: Commercial tab, customer portal, partner portal, public views ---- */
   await group('por: BIN/IIN check digit, mask, register autofill, customer created (FR-189)', 'ru', async (g, ev, w) => {
     assert(ev("tinCheck(CUSTOMERS[0].bin).valid && tinCheck(CUSTOMERS[0].bin).kind==='bin'"), 'seed BIN valid'); eq(ev("tinCheck('123').reason"), 'format'); eq(ev("tinCheck(tinFix('18014000123').slice(0,11)+'0').valid || tinCheck(tinFix('18014000123').slice(0,11)+'1').valid"), false, 'wrong digit must fail at least once');
@@ -1141,6 +1209,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     } finally { gg.done(); } }
   });
 
+__suite(27);   /* b0-eco-economics.js */
   /* ---- W5 economics, reports & baseline data ---- */
   for (const lang of LANGS) await group('[' + lang + '] W5 tabs render without undefined/NaN', lang, async (g, ev, w) => {
     ev("go('billing');ACT.stab({s:'billing',v:'model'})"); for (const s of ['sum', 'fuel', 'ins', 'own']) { ev(`ACT.ecoSub({v:'${s}'})`); clean(w, 'billing/model/' + s); }
@@ -1200,6 +1269,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     ev("ACT.setRole({v:'dispatcher'})"); ev("ACT.blLegal({id:'cit'})"); assert(!ev('S.eco.bl.legal.cit'), 'dispatcher checked a legal item');
   });
 
+__suite(28);   /* b1-eco-reports-ext.js */
   /* ---- P5 · Reports parity: six KPI tiles with sparklines, driver report, catalogue with audited exports; Quality linked orders ---- */
   for (const lang of LANGS) await group('[' + lang + '] P5 reports / quality tabs render without undefined/NaN', lang, async (g, ev, w) => {
     for (const t of ['kpi', 'catalogue']) { ev(`go('reports');ACT.stab({s:'reports',v:'${t}'})`); clean(w, 'reports/' + t); }
@@ -1239,6 +1309,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     ev("ACT.setRole({v:'viewer'})"); ev("go('pod')"); assert(!ev("ACT.qClaim({id:'DEV-0011',o:'O-1844-1'})") && ev('S.route') !== 'billing', 'viewer reached the claim');
   });
 
+__suite(29);   /* b2-eco-costs-ext.js */
   /* ---- P5 · Costs parity: workshop & downtime, drivers FTE, plan / actual per vehicle, toll CSV, incoming ESF, 6 indicators, idle toggles ---- */
   for (const lang of LANGS) await group('[' + lang + '] P5 cost-model sub-tabs render without undefined/NaN', lang, async (g, ev, w) => {
     ev("go('billing');ACT.stab({s:'billing',v:'model'})"); for (const s of ['sum', 'svc', 'ins', 'drv']) { ev(`ACT.ecoSub({v:'${s}'})`); clean(w, 'billing/model/' + s); }
@@ -1299,6 +1370,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     ev("ACT.ecoIdle({v:'idleW'})"); eq(w.document.querySelector('[data-ins=V02] [data-ins-idle]').dataset.insIdle, '0', 'toggle off');
   });
 
+__suite(30);   /* c0-help-content.js */
   /* ---- W6 help: content completeness, structure, context help, search, visuals, tours (FR-160, FR-134, FR-17) ---- */
   const HELP_WALK = `(function(){var out=[],miss=[];function walk(o,p){if(o==null||typeof o==='function')return;if(Array.isArray(o)){if(o.length&&o.every(function(x){return typeof x==='string'})){var v=o[LI];if(v==null||v==='')miss.push(p+'['+LI+']');else out.push([p,v]);return}o.forEach(function(x,i){walk(x,p+'.'+i)});return}if(typeof o==='object'){Object.keys(o).forEach(function(k){if(k==='afterRender'||k==='tour'||k==='sel')return;walk(o[k],p+'.'+k)});return}if(typeof o==='string'&&/^(title|sub|purpose|who|t|text)$/.test(p.split('.').pop()))out.push([p,o])}
     HELP.articles.forEach(function(a){walk({title:a.title,sub:a.sub,purpose:a.purpose,who:a.who,see:a.see,howto:a.howto,rules:a.rules},a.key)});walk(HELP.glossary,'glossary');walk(HELP.faq,'faq');walk(HELP.deadlines.map(function(d){return{what:d.what,where:d.where,date:d.date}}),'deadlines');walk(HELP.tours,'tours');walk(HELP.roleDesc,'roleDesc');
@@ -1396,6 +1468,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     });
   }
 
+__suite(31);   /* c1-help-visuals.js */
   /* ---- Q1 animated help diagrams: figure kit (stepper, controls, step list, timers), every figure in 4 languages, truck seesaw, Load & weight ---- */
   const HV_IDS = ['flow', 'split', 'gonogo', 'load', 'booking', 'express', 'coldchain', 'truck', 'coverage', 'approvals', 'driver', 'dispatchMock'];
   for (const lang of LANGS) await group('[' + lang + '] help visuals: every figure renders every step as SVG with caption' + (lang === 'de' || lang === 'en' ? ', no Cyrillic' : ''), lang, async (g, ev) => {
@@ -1476,6 +1549,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     clean(w, 'help articles');
   });
 
+__suite(32);   /* c2-notes.js */
   /* ---- Q3 explanatory notes parity with 0.3.10: every ported note renders in its place (data-note) in 4 languages; DE / EN without Cyrillic ---- */
   const Q3_TAB = (s, t) => `ACT.setRole({v:'admin'});go('${s}');ACT.stab({s:'${s}',v:'${t}'})`;
   const Q3_NOTES = [
@@ -1518,6 +1592,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     });
   }
 
+__suite(33);   /* d0-v6-parity.js */
   /* ---- 0.3.9 parity: network map (23 cities), manufacturer registry, Baseline data section, help Schaubilder players ---- */
   await group('map: dashboard and routes draw the full network — 23 cities, coverage-coloured roads, legend', 'ru', async (g, ev, w) => {
     ev("go('dashboard')");
@@ -1670,6 +1745,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     assert(/auto|min/.test('') || cs.gridTemplateColumns.split(' ').length >= 2, 'k6 row is a grid');
   });
 
+__suite(34);   /* e1-mirror-ops-a.js */
   /* ---- R1-a · Mirror 0.3.9 → v6, Routes & Tracking (docs/MIRROR-0.3.9-ops.md section 3): Temperature, Temperature log, Thermochrons, Weather, Security, Coverage ---- */
   const E1A_TAB = k => `ACT.setRole({v:'admin'});go('routes');ACT.stab({s:'routes',v:'${k}'})`;
   await group('R1-a T1t: chips of every non-service truck incl. parked ones; "no temperature control · outside" without thermo', 'en', async (g, ev, w) => {
@@ -1779,6 +1855,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     } finally { gg.done(); } }
   });
 
+__suite(35);   /* e1-mirror-ops-b.js */
   /* ---- R1-b · mirror 0.3.9: Load & weight (L3, L9), Shipments (H4, H5, H7, H8, H9), Documents KZ gate (G6–G10) ---- */
   const E1_CYR = /[Ѐ-ӿ]/;
   await group('R1 L3: ticking an order on Load & weight needs orders:write or trips:write; rows stay disabled otherwise', 'ru', async (g, ev, w) => {
@@ -1864,6 +1941,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     } finally { gg.done(); } }
   });
 
+__suite(36);   /* e1-mirror-ops-c.js */
   /* ---- R1-c · mirror 0.3.9: trip detail (D6–D15), trips list (T1–T12), Orders · records (R3o–R8o) ---- */
   const E1C_CYR = /[Ѐ-ӿ]/;
   await group('R1-c D6 / D7 / D9 / D11 / D12: trip detail shows the ADR driver, live chambers with SIMULATION chip, weather per stop, roads check, service on route', 'en', async (g, ev, w) => {
@@ -1962,6 +2040,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
       gg.ev("tripCancel('LD-2026-001855', 'test reason'); ACT.open({id:'LD-2026-001855'})"); clean(gg.w, lang + ' cancelled'); } finally { gg.done(); } }
   });
 
+__suite(37);   /* e1-mirror-ops.js */
   /* ---- R1 · Mirror 0.3.9 operations: shell, dashboard, dispatcher board, inbox, tasks (docs/MIRROR-0.3.9-ops.md S*, O5, D2, D3, I*, K1, Y2) ---- */
   await group('R1 shell: alarm button counts level ≥ 2 only; search shows goods and "article · LOT · qty → consignee · where", total count, up to 12 rows', 'en', async (g, ev, w) => {
     eq(ev('activeAlarms()'), ev("S.alarms.filter(a => a.status !== 'closed' && a.lvl >= 2).length"), 'level ≥ 2'); assert(ev("S.alarms.some(a => a.lvl < 2 && a.status !== 'closed')"), 'seed has a level-1 alarm that is not counted');
@@ -2038,6 +2117,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
       if (lang === 'de' || lang === 'en') assert(!/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]/.test(txt + txt2 + lg + sb), lang + ' Cyrillic in the R1 blocks'); } finally { gg.done(); } }
   });
 
+__suite(38);   /* e2-mirror-res.js */
   /* ==== R2 · Mirror 0.3.9 resources, economics, records and portals (docs/MIRROR-0.3.9-res.md). Sections: a Quality/Fleet/Staff · b Driver app/Planning · c Partners/partner portal/Fines · d Drivers/Lines/Reference data/Users/Integrations/Account · e Bookings/customer portal/public/Insurance · f CRM/Customers/Contracts ==== */
 
   /* ---- R2 section a ---- */
@@ -2664,6 +2744,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     ev("go('help');ACT.helpGo({k:'orders/commercial'})"); clean(w, 'help orders/commercial');
   });
 
+__suite(39);   /* e3-hub-inbound.js */
   /* ---- R3 hub inbound (ideas I-1 … I-7, docs/IDEAS-R3.md): inbound list, sender chips, pre-carriage, gate slots, dwell, demurrage, gate check ---- */
   const E3_CYR = /[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]/;
   for (const lang of LANGS) {
@@ -2756,6 +2837,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     ev("S.jobs.find(j=>j.id==='IN-0621').qa=true"); eq(ev("ibSenderSt(S.jobs.find(j=>j.id==='IN-0621'),0)"), 'miss', 'shortage colours the sender red');
   });
 
+__suite(40);   /* e4-rules-sla.js */
   /* ---- R4 · SLA & penalties (I-13), winter concept as rules (I-14), express × temperature overlap (I-12), saved views / column filters / CSV (I-8) ---- */
   const E4_TABS = [['orders', 'orders'], ['orders', 'rec'], ['fleet', 'fleet'], ['drivers', 'drivers'], ['dispatch', 'partners'], ['billing', 'inv'], ['dispatch', 'winter'], ['settings', 'rules'], ['reports', 'sla'], ['billing', 'sla'], ['reports', 'cross']];
   const E4_CYR = /[Ѐ-ӿ]/;
@@ -2876,6 +2958,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     const d0 = w.__downloads.length; ev('ACT.xoCsv()'); eq(w.__downloads[d0].name, 'express-overlap-cust.csv');
   });
 
+__suite(41);   /* e5-driver-partner.js */
   /* ---- R5 driver, partner and network ideas (I-11/FR-188, I-17/FR-68, I-18/FR-70, I-24/FR-189, I-27, I-28): every new place renders in
      4 languages without undefined and (DE / EN) without Cyrillic; the flows work end to end with audit entries ---- */
   const E5_CYR = /[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]/;
@@ -2977,6 +3060,210 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     ev("PP.reg.bin=R5.KGD_DEMO.liquidated;PP.reg.company='X Y';render()"); const q0 = ev('S.pquals.length'); ev('ACT.ppReg()'); eq(ev('S.pquals.length'), q0, 'liquidated partner not registered'); clean(w, 'kgd');
   });
 
+__suite(42);   /* f0-a11y.js */
+  /* ---- S3 accessibility: FR-215 keyboard and focus, FR-218 WCAG 2.2 AA (axe-core on every screen, contrast tokens, labels,
+     landmarks), FR-219 high contrast, reduced motion, every chart also as a table or text (screens/002-a11y.js) ---- */
+  const A11Y_AXE = await fetch('test-vendor/axe.min.js').then(r => (r.ok ? r.text() : '')).catch(() => '');
+  /* focus, layout and contrast need a rendered iframe: shown off-screen (display:none has no layout) */
+  const a11yShow = async w => { w.frameElement.style.cssText = 'display:block;position:absolute;left:-10000px;top:0;width:1316px;height:760px;border:0'; await new Promise(r => setTimeout(r, 30)); };
+  const a11yKey = (w, key, o) => { const t = w.document.activeElement || w.document.body; const e = new w.KeyboardEvent('keydown', Object.assign({ key, bubbles: true, cancelable: true }, o || {})); t.dispatchEvent(e); return e; };
+  const a11yCyr = /[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]/;
+  /* axe: WCAG 2.0 / 2.1 / 2.2 A + AA, serious and critical violations, as scripts/axe_probe.py in the platform repository */
+  const a11yAxe = async (w, where) => {
+    if (!w.axe) w.eval(A11Y_AXE);
+    const r = await w.axe.run(w.document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => where + ': ' + v.id + ' ×' + v.nodes.length + ' ' + v.nodes[0].target.join(' ') + ' ' + v.nodes[0].html.slice(0, 80));
+  };
+  const a11ySweep = async (ev, w, routes, tag, firstTabOnly) => {
+    const bad = [];
+    for (const id of routes) {
+      ev(`go('${id}')`); if (ev('S.route') !== id) continue;
+      const tabs = ev(`tabsOf('${id}').map(t=>t.key)`);
+      for (const t of (tabs.length ? (firstTabOnly ? tabs.slice(0, 1) : tabs) : [null])) { if (t) ev(`setTab('${id}','${t}')`); bad.push(...await a11yAxe(w, tag + ' ' + id + (t ? '/' + t : ''))); }
+    }
+    return bad;
+  };
+  const a11yNone = (bad, n) => assert(!bad.length, bad.length + ' axe violation(s): ' + bad.slice(0, n || 4).join(' | '));
+
+  /* ---------- FR-215 keyboard and focus ---------- */
+  await group('[ru] FR-215 drawer: modal dialog, focus moves in, Tab / Shift+Tab stay inside, Esc closes, focus returns to the row that opened it', 'ru', async (g, ev, w) => {
+    await a11yShow(w); const d = w.document;
+    ev("go('orders');setTab('orders','orders')"); const id = ev('S.loads[0].id');
+    const row = d.querySelector(`tr[data-act=open][data-id="${id}"]`); assert(row, 'load row'); eq(row.getAttribute('tabindex'), '0', 'row reachable with Tab');
+    row.focus(); row.click();
+    const dr = d.querySelector('.drawer.open'); assert(dr, 'drawer open');
+    eq(dr.getAttribute('role'), 'dialog'); eq(dr.getAttribute('aria-modal'), 'true'); eq(d.getElementById(dr.getAttribute('aria-labelledby')).textContent.trim().length > 0, true, 'dialog title');
+    assert(dr.contains(d.activeElement), 'focus moved into the drawer, is on ' + d.activeElement.outerHTML.slice(0, 60));
+    const x = dr.querySelector('.drawer-head .x'); eq(x.tagName, 'BUTTON', 'close is a button'); assert(x.getAttribute('aria-label'), 'close has a name');
+    const f = ev('a11yFocusables(document.querySelector(".drawer.open")).length'); assert(f >= 3, 'focusable controls in the drawer: ' + f);
+    const list = () => w.a11yFocusables(d.querySelector('.drawer.open'));
+    list()[list().length - 1].focus(); assert(a11yKey(w, 'Tab').defaultPrevented, 'Tab on the last control is trapped'); eq(d.activeElement, list()[0], 'Tab wraps to the first control');
+    a11yKey(w, 'Tab', { shiftKey: true }); eq(d.activeElement, list()[list().length - 1], 'Shift+Tab wraps to the last control');
+    d.querySelector('main').querySelector('a,button,[tabindex="0"]').focus(); a11yKey(w, 'Tab'); assert(d.querySelector('.drawer.open').contains(d.activeElement), 'Tab from outside comes back into the drawer');
+    a11yKey(w, 'Escape'); assert(!ev('S.drawer'), 'Esc closes the drawer');
+    const back = d.activeElement; eq(back.dataset.act, 'open', 'focus back on the row'); eq(back.dataset.id, id, 'the same row');
+    /* ✕ closes as well and gives focus back */
+    d.querySelector(`tr[data-act=open][data-id="${id}"]`).click(); d.querySelector('.drawer.open .x').click(); assert(!ev('S.drawer'), '✕ closes'); eq(d.activeElement.dataset.id, id, 'focus back after ✕');
+    /* a tab switch inside the drawer keeps focus inside (re-render) */
+    d.querySelector(`tr[data-act=open][data-id="${id}"]`).click(); const tb = d.querySelector('.drawer.open .drawer-tabs [data-act]:not(.active)');
+    if (tb) { tb.focus(); tb.click(); assert(d.querySelector('.drawer.open').contains(d.activeElement), 'focus stays in the drawer after a tab switch'); }
+    clean(w, 'drawer focus');
+  });
+  await group('[ru] FR-215 every data-act control is reachable with Tab (all screens and tabs) and Enter activates a focused tab', 'ru', async (g, ev, w) => {
+    await a11yShow(w); const d = w.document, miss = [];
+    for (const id of ev('Object.keys(SCREENS)')) {
+      ev(`go('${id}')`); if (ev('S.route') !== id) continue;
+      const tabs = ev(`tabsOf('${id}').map(t=>t.key)`);
+      for (const t of (tabs.length ? tabs : [null])) {
+        if (t) ev(`setTab('${id}','${t}')`);
+        d.querySelectorAll('#root [data-act]').forEach(e => { if (/^(A|BUTTON|INPUT|SELECT|TEXTAREA|SUMMARY|OPTION|LABEL)$/.test(e.tagName) || e.hasAttribute('tabindex') || e.matches('.side-back,.a11y-back,.login-layer,.diag-back') || e.closest('[aria-hidden="true"]')) return; miss.push(id + '/' + t + ' ' + e.outerHTML.slice(0, 70)); });
+      }
+    }
+    assert(!miss.length, miss.length + ' controls without a tab stop: ' + miss.slice(0, 3).join(' | '));
+    ev("go('orders')"); const tab = d.querySelector('.pill-tab:not(.active)'); tab.focus(); a11yKey(w, 'Enter'); eq(ev("curTab('orders').key"), tab.dataset.v, 'Enter switches the tab');
+    clean(w, 'tab stops');
+  });
+  for (const lang of LANGS) await group('[' + lang + '] FR-215 shortcut list: "?" opens it from the menu link or the keyboard, Esc closes and focus returns, / Alt+N [ ] work, text in the UI language', lang, async (g, ev, w) => {
+    await a11yShow(w); const d = w.document;
+    const link = d.querySelector('.sidebar [data-act=kbdOpen]'); assert(link, 'menu link'); link.focus(); link.click();
+    const dlg = d.querySelector('[data-a11y-dlg]'); assert(dlg, 'dialog'); eq(dlg.getAttribute('role'), 'dialog'); eq(dlg.getAttribute('aria-modal'), 'true');
+    assert(dlg.contains(d.activeElement), 'focus in the dialog'); eq(d.querySelectorAll('[data-kbd-list] tbody tr').length, ev('A11Y_KEYS().length'), 'one row per shortcut'); assert(ev('A11Y_KEYS().length') >= 8, 'shortcuts listed');
+    if (lang === 'de' || lang === 'en') assert(!a11yCyr.test(dlg.textContent), lang + ' dialog has Cyrillic: ' + (dlg.textContent.match(/.{0,20}[А-Яа-яЁё].{0,20}/) || [''])[0]);
+    a11yKey(w, 'Escape'); assert(!d.querySelector('[data-a11y-dlg]'), 'Esc closes'); eq(d.activeElement.dataset.act, 'kbdOpen', 'focus back on the menu link');
+    d.body.focus(); a11yKey(w, '?'); assert(d.querySelector('[data-a11y-dlg]'), '"?" opens'); a11yKey(w, '?'); assert(!d.querySelector('[data-a11y-dlg]'), '"?" closes again');
+    ev("go('dashboard')"); d.body.focus(); a11yKey(w, '/'); eq(d.activeElement && d.activeElement.id, 'gsearch', '/ focuses the search');
+    d.body.focus(); a11yKey(w, '3', { code: 'Digit3', altKey: true }); eq(ev('S.route'), ev('navItems()[2][0]'), 'Alt+3 opens menu item 3');
+    ev("go('orders')"); const t0 = ev("curTab('orders').key"); d.body.focus(); a11yKey(w, ']'); assert(ev("curTab('orders').key") !== t0, '] next tab'); a11yKey(w, '['); eq(ev("curTab('orders').key"), t0, '[ previous tab');
+    clean(w, 'shortcuts');
+  });
+
+  /* ---------- FR-218 WCAG 2.2 AA ---------- */
+  await group('FR-218 axe-core is test-only: it is next to tests.html and not in any product page', 'ru', async () => {
+    assert(A11Y_AXE.length > 100000 && /axe/.test(A11Y_AXE.slice(0, 400)), 'test-vendor/axe.min.js loads');
+    for (const lang of LANGS) { const s = await fetch(file(lang)).then(r => r.text()); assert(!/test-vendor|axe\.run\(|axe\.min\.js/.test(s), file(lang) + ' references axe'); }
+  });
+  await group('[ru] FR-218 axe WCAG 2.2 AA: every screen and tab, Kökzhol design — no serious or critical violation', 'ru', async (g, ev, w) => { await a11yShow(w); a11yNone(await a11ySweep(ev, w, ev('Object.keys(SCREENS)'), 'kokzhol')); });
+  await group('[ru] FR-218 axe WCAG 2.2 AA: every screen and tab, Olymp design', 'ru', async (g, ev, w) => { await a11yShow(w); ev('ACT.setDesign()'); eq(w.document.documentElement.dataset.design, 'olymp'); a11yNone(await a11ySweep(ev, w, ev('Object.keys(SCREENS)'), 'olymp')); });
+  await group('[ru] FR-218 axe WCAG 2.2 AA: high contrast in both designs, the load drawer, the shortcut dialog, roles customer / partner / driver / warehouse', 'ru', async (g, ev, w) => {
+    await a11yShow(w); ev('ACT.a11yHc({})'); eq(w.document.documentElement.dataset.contrast, 'high');
+    const bad = await a11ySweep(ev, w, ev('navItems().map(n=>n[0])'), 'hc kokzhol', true); ev('ACT.setDesign()'); bad.push(...await a11ySweep(ev, w, ev('navItems().map(n=>n[0])'), 'hc olymp', true)); ev('ACT.setDesign();ACT.a11yHc({})');
+    ev("go('orders');ACT.open({id:S.loads[0].id})"); for (const t of [...w.document.querySelectorAll('.drawer-tabs .tab')].map(e => e.dataset.v)) { ev(`ACT.tab({v:'${t}'})`); bad.push(...await a11yAxe(w, 'load drawer/' + t)); } ev('closeDrawer()');
+    ev('ACT.kbdOpen()'); bad.push(...await a11yAxe(w, 'shortcut dialog')); ev('ACT.kbdClose()');
+    for (const r of ['customer', 'partner', 'driver', 'warehouse']) { ev(`ACT.setRole({v:'${r}'})`); bad.push(...await a11ySweep(ev, w, ev('navItems().map(n=>n[0])'), r)); }
+    a11yNone(bad);
+  });
+  for (const lang of ['de', 'en', 'kk']) await group('[' + lang + '] FR-218 axe WCAG 2.2 AA: every menu screen (first tab) and the load drawer', lang, async (g, ev, w) => {
+    await a11yShow(w); const bad = await a11ySweep(ev, w, ev('navItems().map(n=>n[0])'), lang, true);
+    ev("go('orders');ACT.open({id:S.loads[0].id})"); bad.push(...await a11yAxe(w, 'load drawer')); a11yNone(bad);
+  });
+  await group('FR-218 contrast tokens: text and button colours reach 4.5 : 1 in both designs (7 : 1 for text in high contrast)', 'ru', async (g, ev, w) => {
+    await a11yShow(w); const d = w.document;
+    const rgb = c => { const x = d.createElement('i'); x.style.color = c; d.body.appendChild(x); const m = w.getComputedStyle(x).color.match(/\d+/g).map(Number); x.remove(); return m; };
+    const lum = c => { const [r, g2, b] = rgb(c).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g2 + 0.0722 * b; };
+    const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+    const tok = k => w.getComputedStyle(d.documentElement).getPropertyValue(k).trim();
+    const bad = [];
+    const check = (tag, min, pairs) => pairs.forEach(([fg, bg]) => { const f = fg.startsWith('--') ? tok(fg) : fg, b = bg.startsWith('--') ? tok(bg) : bg, r = ratio(f, b); if (r < min) bad.push(`${tag}: ${fg} ${f} on ${bg} ${b} = ${r.toFixed(2)}`); });
+    const base = [['--text-strong', '#fff'], ['--text-muted', '#fff'], ['--text-faint', '#fff'], ['--text-muted', '--bg-subtle'], ['--text-faint', '--bg-page'], ['--ok-text', '#fff'], ['#fff', '--btn-blue'], ['#fff', '--btn-green'], ['#fff', '--btn-red'], ['#fff', '--btn-orange'], ['#fff', '--primary']];
+    for (const des of ['kokzhol', 'olymp']) {
+      if (d.documentElement.dataset.design !== des) ev('ACT.setDesign()');
+      check(des, 4.5, base);
+      ev('ACT.a11yHc({})'); check(des + ' high contrast', 7, [['--text-strong', '#fff'], ['--text-muted', '#fff'], ['--text-faint', '#fff'], ['#fff', '--primary'], ['#fff', '--btn-blue']]); ev('ACT.a11yHc({})');
+    }
+    assert(!bad.length, bad.join(' | '));
+  });
+  for (const lang of LANGS) await group('[' + lang + '] FR-218 landmarks and labels: one main and h1, labelled menu, skip link, page language, every field and image has a name', lang, async (g, ev, w) => {
+    await a11yShow(w); const d = w.document, miss = [];
+    eq(d.documentElement.lang, lang, 'html lang'); const skip = d.querySelector('a.skip'); assert(skip && d.querySelector(skip.getAttribute('href')), 'skip link target');
+    for (const id of ev('navItems().map(n=>n[0])')) {
+      ev(`go('${id}')`); eq(d.querySelectorAll('main').length, 1, id + ' main'); eq(d.querySelectorAll('h1').length, 1, id + ' h1');
+      const nav = d.querySelector('[role=navigation],nav'); assert(nav && nav.getAttribute('aria-label'), id + ' labelled navigation');
+      d.querySelectorAll('#root select, #root textarea, #root input:not([type=hidden])').forEach(e => { if (e.closest('[aria-hidden="true"]')) return; const n = e.getAttribute('aria-label') || e.getAttribute('aria-labelledby') || e.title || (e.id && d.querySelector(`label[for="${e.id}"]`)) || e.closest('label') || e.placeholder; if (!n) miss.push(id + ' ' + e.outerHTML.slice(0, 60)); if (lang === 'de' || lang === 'en') { const al = e.getAttribute('aria-label') || ''; if (a11yCyr.test(al)) miss.push(id + ' Cyrillic name "' + al + '"'); } });
+      d.querySelectorAll('#root img').forEach(e => { if (!e.hasAttribute('alt')) miss.push(id + ' img without alt ' + e.src); });
+    }
+    assert(!miss.length, miss.length + ': ' + miss.slice(0, 3).join(' | '));
+  });
+
+  /* ---------- FR-219 high contrast, reduced motion, charts as tables ---------- */
+  await group('[ru] FR-219 high contrast and reduced motion: switches in the dialog and Alt+Shift+C / M, tokens and motion change, diagrams start paused', 'ru', async (g, ev, w) => {
+    await a11yShow(w); const h = w.document.documentElement, d = w.document;
+    eq(h.dataset.contrast, ev('matchMedia("(prefers-contrast: more)").matches') ? 'high' : 'normal', 'contrast follows the OS'); eq(h.dataset.motion, ev('matchMedia("(prefers-reduced-motion: reduce)").matches') ? 'reduce' : 'full', 'motion follows the OS');
+    ev('S.a11y.hc=false;S.a11y.rm=false;render()');
+    const muted = () => w.getComputedStyle(h).getPropertyValue('--text-muted').trim().toLowerCase();
+    const m0 = muted(); ev('ACT.kbdOpen()'); d.getElementById('a11y_hc').click(); eq(h.dataset.contrast, 'high', 'checkbox switches high contrast on'); eq(muted(), '#1f2937', 'muted text is darker'); assert(muted() !== m0, 'token changed');
+    assert(d.getElementById('a11y_hc').checked, 'checkbox stays checked'); d.getElementById('a11y_hc').click(); eq(h.dataset.contrast, 'normal', 'and off'); ev('ACT.kbdClose()');
+    d.body.focus(); a11yKey(w, 'C', { code: 'KeyC', altKey: true, shiftKey: true }); eq(h.dataset.contrast, 'high', 'Alt+Shift+C'); a11yKey(w, 'C', { code: 'KeyC', altKey: true, shiftKey: true }); eq(h.dataset.contrast, 'normal', 'Alt+Shift+C again');
+    ev("go('dispatch')"); const tr = () => w.getComputedStyle(d.querySelector('.kcard')).transitionDuration; assert(!/^0s(, 0s)*$/.test(tr()), 'cards animate normally: ' + tr());
+    d.body.focus(); a11yKey(w, 'M', { code: 'KeyM', altKey: true, shiftKey: true }); eq(h.dataset.motion, 'reduce', 'Alt+Shift+M'); assert(/^0s(, 0s)*$/.test(tr()), 'no transitions with reduced motion: ' + tr());
+    const live = d.querySelector('.live-dot'); if (live) eq(w.getComputedStyle(live).animationName, 'none', 'live dot does not pulse');
+    ev("S.hv={};S.help.key='start';go('help')"); const hv = ev('Object.values(S.hv||{})'); assert(hv.length >= 1, 'a help diagram is shown'); assert(hv.every(x => !x.run), 'help diagrams start paused with reduced motion');
+    ev('ACT.a11yRm({})'); eq(h.dataset.motion, 'full', 'motion back on'); ev("S.hv={};go('dashboard');S.help.key='start';go('help')"); assert(ev('Object.values(S.hv).some(x=>x.run)'), 'diagrams play again');
+    clean(w, 'contrast / motion');
+  });
+  for (const lang of LANGS) await group('[' + lang + '] FR-219 every chart has a table or text: all screens and tabs, report cards and detail drawer, temperature chart', lang, async (g, ev, w) => {
+    await a11yShow(w); const d = w.document, miss = []; let n = 0;
+    const box = c => c.closest('tr, .kpi-tile, .th-chart, .report-card, .drawer-section, .card, .drawer');
+    const scan = where => d.querySelectorAll('#root [data-chart]').forEach(c => { n++; const b = box(c); if (!b || !b.querySelector('[data-chart-alt]')) miss.push(where + ' ' + c.outerHTML.slice(0, 60)); if (c.tagName.toLowerCase() === 'svg' && !c.getAttribute('aria-label')) miss.push(where + ' svg chart without a name'); });
+    const ids = lang === 'ru' ? ev('Object.keys(SCREENS)') : ['reports', 'routes', 'billing', 'dashboard'];
+    for (const id of ids) { ev(`go('${id}')`); if (ev('S.route') !== id) continue; const tabs = ev(`tabsOf('${id}').map(t=>t.key)`); for (const t of (tabs.length ? tabs : [null])) { if (t) ev(`setTab('${id}','${t}')`); scan(id + '/' + t); } }
+    assert(!miss.length, miss.length + ' chart(s) without a table / text: ' + miss.slice(0, 3).join(' | '));
+    ev("go('reports');setTab('reports',tabsOf('reports')[0].key)");
+    const alts = d.querySelectorAll('.report-card details[data-chart-alt]'); eq(alts.length, 6, 'six report cards with a data table');
+    alts.forEach(a => { assert(a.querySelector('caption').textContent.trim(), 'caption'); assert(a.querySelectorAll('tbody tr').length >= 3, 'rows'); assert(a.querySelectorAll('thead th').length >= 2, 'columns'); });
+    if (lang === 'de' || lang === 'en') alts.forEach(a => assert(!a11yCyr.test(a.textContent), lang + ' chart table has Cyrillic: ' + (a.textContent.match(/.{0,20}[А-Яа-яЁё].{0,20}/) || [''])[0]));
+    d.querySelector('[data-act=rOpen]').click(); assert(d.querySelector('.drawer.open details[data-chart-alt] table'), 'detail drawer chart has a table'); ev('closeDrawer()');
+    ev("go('routes');setTab('routes','temp')"); const th = d.querySelector('.th-chart'); if (th) { const t = th.querySelector('[data-chart-alt] table'); assert(t, 'temperature chart table'); eq(t.querySelectorAll('tbody tr').length, 3, 'three series'); }
+    assert(n >= 6, 'charts found: ' + n); clean(w, 'chart tables');
+  });
+
+__suite(43);   /* f0-ci-infra.js */
+  /* ---- S1 · CI and test infrastructure: deterministic clock (FR-206), shard plan (FR-205), retry / quarantine (FR-210) ---- */
+  await group('deterministic clock: only CLOCK reads the wall clock, default today = 18.10.2026 14:30 Astana', 'ru', async (g, ev, w) => {
+    const src = await (await fetch('index.html')).text();
+    const a = src.indexOf('const CLOCK = (() => {'), b = src.indexOf('})();', a);
+    assert(a > 0 && b > a, 'CLOCK block in the bundle');
+    const rest = src.slice(0, a) + src.slice(b);
+    const m = rest.match(/.{0,40}(new Date\(\)|Date\.now\(\)).{0,40}/);
+    assert(!m, 'wall-clock read outside CLOCK: ' + (m && m[0]));
+    eq(ev('NOW.toISOString()'), '2026-10-18T09:30:00.000Z', 'NOW'); eq(ev('CLOCK.injected'), false, 'not injected'); eq(ev('opsToday'), '2026-10-18', 'ops today');
+    const d = ev('clockNow().getTime() - NOW.getTime()'); assert(d >= 0 && d < 600000, 'clockNow runs from NOW: ' + d);
+    eq(ev('S.liveAt'), null, 'no live tick in the iframe'); ev('liveTick()'); assert(ev('S.liveAt.getTime() - NOW.getTime()') < 600000, 'live stamp on the demo clock');
+  });
+  for (const lang of LANGS) await group('[' + lang + '] deterministic clock: ?today=2026-11-02 moves NOW, ops day and header date', lang + '?today=2026-11-02', async (g, ev, w) => {
+    eq(ev('CLOCK.injected'), true, 'injected'); eq(ev('NOW.toISOString()'), '2026-11-02T09:30:00.000Z', 'NOW'); eq(ev('opsToday'), '2026-11-02', 'ops today');
+    const bd = w.document.querySelector('[data-bizdate]').textContent;
+    assert(bd.includes('02.11.2026'), 'header business date: ' + bd);
+    assert(bd.startsWith({ ru: 'Пн', de: 'Mo', en: 'Mon', kk: 'Дс' }[lang]), 'weekday (Monday): ' + bd);
+    const k = w.document.querySelector('[data-clock]').textContent; assert(/^1[45]:\d\d:\d\d$/.test(k), 'clock on the demo time: ' + k);
+    clean(w, 'dashboard ' + lang);
+  });
+  await group('deterministic clock: ?today with a time, and a bad value falls back to the default', 'en?today=2026-11-02T07:05', async (g, ev) => {
+    eq(ev('NOW.toISOString()'), '2026-11-02T02:05:00.000Z', 'time of day in Astana time');
+    const g2 = await fresh('en?today=garbage'); try { eq(g2.ev('CLOCK.injected'), false, 'bad value'); eq(g2.ev('NOW.toISOString()'), '2026-10-18T09:30:00.000Z', 'default'); } finally { g2.done(); }
+  });
+  await group('deterministic clock: time machine +74 days, every menu screen renders clean', 'ru?today=2026-12-31', async (g, ev, w) => {
+    eq(ev('opsToday'), '2026-12-31', 'ops today');
+    for (const id of ev('NAV.map(n=>n[0])')) { ev(`go('${id}')`); clean(w, '+74 d ' + id); }
+  });
+  await group('shard plan: every suite file in exactly one shard, shards balanced', 'ru', async () => {
+    for (const n of [1, 2, 4, 6]) {
+      const p = __HARNESS.plan(n), ks = Object.values(p.of);
+      eq(ks.length, __SUITES.length, n + ' shards: every file'); assert(ks.every(k => k >= 1 && k <= n), n + ' shards: index');
+      const max = Math.max(...p.load), tot = p.load.reduce((s, x) => s + x, 0), big = Math.max(...__SUITES.map(s => s.ms));
+      assert(max <= Math.max(big, tot / n) * 1.35 + 1, n + ' shards balanced: ' + p.load.join('/'));
+    }
+    assert(__SUITES.some(s => s.name === 'f0-ci-infra.js'), 'suite list from the build');
+  });
+  await group('retry and quarantine: flaky = passes on retry, real failures stay failures', 'ru', async () => {
+    let n = 0; const r1 = await __HARNESS.attempts(async () => { if (n++ === 0) throw new Error('opsPlaces is not defined'); }, 1);
+    assert(r1.ok && r1.errs.length === 1 && r1.errs[0] === 'opsPlaces is not defined', 'flaky once: ' + JSON.stringify(r1));
+    const r2 = await __HARNESS.attempts(async () => { throw new Error('always'); }, 2); assert(!r2.ok && r2.errs.length === 3, 'always fails');
+    const r3 = await __HARNESS.attempts(async () => {}, 1); assert(r3.ok && !r3.errs.length, 'green');
+    assert(Array.isArray(__QUARANTINE), 'quarantine list from the build'); const QL = ['opsPlaces', '/^\\[de\\] load/i'];
+    assert(__HARNESS.quarantined('[ru] trips: opsPlaces check', QL) && __HARNESS.quarantined('[DE] Load & weight', QL) && !__HARNESS.quarantined('[en] load & weight', QL), 'quarantine match (substring and /regex/)');
+  });
+
+__suite(44);   /* f0-delivery.js */
   /* ---- S2 · Delivery: FR-196 asset pipeline + weight budget, FR-223 What's new, FR-224 print / PDF (A4), FR-225 offline demo ---- */
   const S2_CYR = /[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]/;
   await group('S2 FR-196 assets: brand mark preloaded, SVG minified, every PNG logo has a lighter WebP, logos load as WebP', 'ru', async (g, ev, w) => {
@@ -3110,7 +3397,435 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     eq(ev('swWhy(location, false, {})'), 'unsupported');
   });
 
+__suite(45);   /* f0-shell-parity.js */
+  /* ---- R6 · 0.3.9 parity, shell: «Навигация» / «Навигация DE / EN» (1–18, 318–351: every screen opens, title = menu item),
+     «Иконки навигации» (728), «Поиск» (175–199: PO, PL, SSCC and every article of the current loads), FR-81/82 read-only roles ---- */
+  for (const lang of LANGS) await group('[' + lang + '] navigation: every menu item opens its screen, the page title and the breadcrumb name the menu item, the item is marked current (0.3.9 «Навигация»)', lang, async (g, ev, w) => {
+    const d = w.document, items = ev('navItems().map(n => [n[0], n[2]])');
+    eq(items.length, 13, 'menu items');
+    for (const [id, label] of items) {
+      ev(`go('${id}')`); eq(ev('S.route'), id, id + ' opens');
+      const t = d.querySelector('.page-title'); assert(t, id + ': page title');
+      eq(t.textContent.trim(), label, id + ': title = menu item');
+      assert(d.querySelector('.crumb b').textContent.trim() === label, id + ': breadcrumb');
+      const cur = d.querySelector('.nav-item[aria-current="page"]'); assert(cur && cur.dataset.v === id, id + ': aria-current on the menu item');
+      eq(d.querySelectorAll('.nav-item[aria-current]').length, 1, id + ': one current item');
+    }
+    if (lang === 'de' || lang === 'en') assert(!/[А-Яа-яЁё]/.test(items.map(x => x[1]).join(' ')), 'menu labels without Cyrillic');
+    clean(w, 'navigation ' + lang);
+  });
+  await group('navigation icons: every menu item and portal link carries an SVG glyph and a plain label; both designs (0.3.9 «Иконки навигации»)', 'ru', async (g, ev, w) => {
+    for (const des of ['kokzhol', 'olymp']) {
+      ev(`S.design = '${des}'; render()`);
+      const items = [...w.document.querySelectorAll('.sidebar .nav-item')];
+      eq(items.length, 13, des + ': items');
+      for (const it of items) {
+        const svg = it.querySelector('svg'); assert(svg && svg.querySelector('path,circle,rect,polyline,line'), des + ': no glyph on ' + it.dataset.v);
+        const txt = it.querySelector('span').textContent.trim(); assert(txt.length >= 3 && !/^[\d\s\p{P}\p{S}]/u.test(txt), des + ': label "' + txt + '"');
+      }
+      w.document.querySelectorAll('.side-link').forEach(a => assert(a.querySelector('svg') && a.textContent.trim().length > 3, des + ': portal link ' + a.textContent));
+    }
+  });
+  await group('search: every article of every current load is found and points to its load and order; PO finds the load, PL lists all places of the packing list, SSCC opens the place (0.3.9 «Поиск»)', 'ru', async (g, ev, w) => {
+    const rows = ev(`(() => { const out = []; S.loads.filter(l => l.status !== 'delivered').forEach(l => ops(l).orders.forEach(o => o.lines.forEach(x => out.push({ l: l.id, o: o.id, art: x.art })))); return out; })()`);
+    assert(rows.length >= 15, 'lines ' + rows.length);
+    for (const r of rows) {
+      const hit = ev(`(S.gs.q = ${JSON.stringify(r.art)}, gsResults().L.filter(x => x.kind === 'line' && x.hit === ${JSON.stringify(r.art)}).map(x => x.load + '|' + x.order))`);
+      assert(hit.includes(r.l + '|' + r.o), r.art + ': no hit for ' + r.o + ' on ' + r.l);
+    }
+    const l = ev("S.loads.find(l => l.status !== 'delivered' && ops(l).orders.length > 1).id");
+    const o = ev(`ops(load('${l}')).orders[0]`);
+    const byPo = ev(`(S.gs.q = '${o.po}', gsResults().all.map(x => x.load || x.id))`); assert(byPo.includes(l), 'PO ' + o.po + ' → ' + l);
+    const byPl = ev(`(S.gs.q = '${o.pl}', gsResults().L.filter(x => x.what === 'PL' && x.exact).map(x => x.order))`); assert(byPl.includes(o.id), 'PL ' + o.pl + ' → order ' + o.id);
+    ev('S.gs.q = ""'); ev(`gsInput('${o.pl}')`); ev('gsEnter()'); const shown = w.document.querySelector('#main-content').innerText;
+    const want = o.places.map(p => p.sscc); assert(want.every(s => shown.includes(s) || shown.includes(s.slice(-8))), 'the packing list opens with all ' + want.length + ' places');
+    ev('S.gs.q = ""'); ev("go('dashboard')"); ev(`gsInput('${want[0]}')`); ev('gsEnter()');
+    eq(ev('S.route'), 'orders', 'SSCC opens Orders'); assert(w.document.querySelector('#main-content').innerText.includes(want[0]), 'label of the place shown');
+    clean(w, 'search');
+  });
+  await group('roles: read-only roles see data but no write actions; the driver only reaches the driver shell and help (0.3.9 FR-81 / FR-82 / FR-137)', 'ru', async (g, ev, w) => {
+    for (const role of ['auditor', 'viewer']) {
+      ev(`ACT.setRole({v:'${role}'})`);
+      for (const p of ['orders:write', 'trips:write', 'fleet:write', 'drivers:write', 'approvals:sign', 'users:admin']) assert(!ev(`canDo('${p}')`), role + ' must not have ' + p);
+      ev("go('orders')"); assert(!w.document.querySelector('.page-head [data-act="create"], .page-head [data-act="imp"]'), role + ': no "Create load" / import in the header');
+      ev("go('dispatch')"); assert(!w.document.querySelector('[data-act="auto"]'), role + ': no auto-assign');
+      /* a stale button (e.g. from a cached page) is refused at the click as well */
+      const n = ev('S.loads.length'), u = ev("S.loads.filter(l => l.status === 'unassigned').length"), b = w.document.createElement('button'); b.dataset.act = 'auto'; w.document.querySelector('#main-content').appendChild(b); b.click();
+      assert(w.document.querySelector('.toast.err'), role + ': refusal toast'); eq(ev('S.loads.length'), n, role + ': nothing created'); eq(ev("S.loads.filter(l => l.status === 'unassigned').length"), u, role + ': nothing assigned');
+    }
+    ev("ACT.setRole({v:'auditor'})"); assert(ev("canDo('audit:read')"), 'auditor reads the audit log');
+    ev("ACT.setRole({v:'driver'})"); const nav = ev('navItems().map(n => n[0])');
+    assert(nav.length <= 3 && nav.includes('help'), 'driver shell: ' + nav);
+    for (const s of ['dispatch', 'fleet', 'billing', 'settings']) { ev(`go('${s}')`); assert(ev('S.route') !== s, 'driver must not open ' + s); }
+    assert(ev("canDo('driver:app')") && !ev("ROLE_PERMS.admin.includes('driver:app')"), 'driver:app only for the driver role (FR-83)');
+    ev("ACT.setRole({v:'admin'})"); clean(w, 'roles');
+  });
+  await group('[kk] Kazakh UI: menu labels are Kazakh (not the Russian ones), every screen and tab shows Kazakh-specific letters, titles follow the menu (0.3.9 FR-170 KK 673–675)', 'kk', async (g, ev, w) => {
+    const ru = await fresh('ru'); let ruLabels; try { ruLabels = ru.ev('NAV.map(n => n[2])'); } finally { ru.done(); }
+    const kk = ev('NAV.map(n => n[2])'); eq(kk.length, ruLabels.length, 'menu size');
+    const same = kk.filter((x, i) => x === ruLabels[i]); assert(same.length <= 2, 'menu labels left in Russian: ' + same.join(', '));   // «Автопарк» is the same word in both
+    const KZ = /[ӘәҒғҚқҢңӨөҰұҮүҺһІі]/, bad = [];
+    for (const id of ev('navItems().map(n => n[0])')) {
+      ev(`go('${id}')`); const tabs = ev(`tabsOf('${id}').map(t => t.key)`);
+      for (const t of (tabs.length ? tabs : [null])) { if (t) ev(`setTab('${id}','${t}')`); if (!KZ.test(w.document.querySelector('#main-content').innerText)) bad.push(id + (t ? '/' + t : '')); }
+    }
+    assert(!bad.length, 'screens without Kazakh text: ' + bad.join(', '));
+    clean(w, 'kk');
+  });
 
-  const R = window.__TESTS; document.getElementById('sum').textContent = R.passed + '/' + R.total + ' passed, ' + R.failed + ' failed'; R.done = true;
+__suite(46);   /* f1-data-integrity.js */
+  /* ---- R6 · 0.3.9 parity «Данные · …» (suite.dc.js 22–133, 232–275, 354–399, 421–424, 470–482): the seed data is consistent.
+     0.3.9 ran one scenario per record (place, city, driver, partner); here one group walks every record of a dataset and names the
+     first bad one. Dates are compared with the demo's own "today" (NOW / RES.TODAY), never with the wall clock. ---- */
+  await group('data: fleet plates are KZ format (NNN LLL RR, region of a KZ oblast), unique; every truck sits at a hub (0.3.9 «Данные · ТС»)', 'ru', async (g, ev) => {
+    const tr = ev('S.trucks.map(t=>({id:t.id,plate:t.plate,hub:t.hub}))'), hubs = ev('Object.keys(HUBS)');
+    assert(tr.length >= 4, 'fleet size ' + tr.length);
+    for (const t of tr) {
+      assert(/^\d{3} [A-Z]{3} (0[1-9]|1[0-9]|20)$/.test(t.plate), t.id + ': plate format ' + t.plate);
+      assert(hubs.includes(t.hub), t.id + ': hub ' + t.hub);
+    }
+    eq(new Set(tr.map(t => t.plate)).size, tr.length, 'duplicate plates');
+    eq(new Set(tr.map(t => t.id)).size, tr.length, 'duplicate truck ids');
+  });
+  await group('data: every place has an 18-digit SSCC with a valid GS1 check digit, unique, and belongs to its order and load (0.3.9 «Данные · SSCC»)', 'ru', async (g, ev) => {
+    const r = ev(`(() => { const out = []; S.loads.forEach(l => ops(l).orders.forEach(o => o.places.forEach(p => out.push({ s: p.sscc, ok: ssccValid(p.sscc), o: p.order, oid: o.id, l: p.load, lid: l.id })))); return out; })()`);
+    assert(r.length >= 30, 'places ' + r.length);
+    for (const p of r) {
+      assert(/^\d{18}$/.test(p.s), 'not 18 digits: ' + p.s);
+      assert(p.ok, 'GS1 check digit wrong: ' + p.s);
+      eq(p.o, p.oid, p.s + ' order link'); eq(p.l, p.lid, p.s + ' load link');
+    }
+    eq(new Set(r.map(p => p.s)).size, r.length, 'duplicate SSCC');
+    /* the check digit really is checked: a changed last digit is refused */
+    const s0 = r[0].s, bad = s0.slice(0, 17) + ((+s0[17] + 1) % 10);
+    assert(!ev(`ssccValid('${bad}')`), 'wrong check digit accepted');
+    eq(ev(`ssccFromScan('00${s0}')`), s0, 'GS1 (00) scan strips the AI');
+  });
+  await group('data: every order of a load fits the assigned truck — temperature class among its zones, ADR only on ADR truck and driver (0.3.9 «Данные · рейс»)', 'ru', async (g, ev) => {
+    const r = ev(`S.loads.filter(l => l.truck).map(l => { const t = S.trucks.find(x => x.id === l.truck); return { id: l.id, zone: l.zone, zones: t ? t.zones : null, drv: l.driver,
+      orders: ops(l).orders.map(o => ({ id: o.id, cls: o.cls, adr: !!o.adr })), adrT: !!ADR_TRK[l.truck], adrD: !!ADR_DRV[l.driver] }; })`);
+    assert(r.length >= 5, 'assigned loads ' + r.length);
+    for (const l of r) {
+      assert(l.zones, l.id + ': truck missing');
+      assert(l.zones.includes(l.zone), l.id + ': zone ' + l.zone + ' not on truck ' + l.zones);
+      for (const o of l.orders) {
+        assert(ev(`!!ZONES['${o.cls}']`), o.id + ': unknown class ' + o.cls);
+        if (o.adr) assert(l.adrT && l.adrD, o.id + ': ADR order on a load without ADR truck / driver');
+      }
+    }
+    assert(ev("S.loads.every(l => !l.driver || S.drivers.some(d => d.id === l.driver))"), 'load references an unknown driver');
+  });
+  await group('data: shelf life — no line is expired at the demo date; lines under 90 days at delivery are exactly the FEFO list (0.3.9 «Данные · срок»)', 'ru', async (g, ev) => {
+    const r = ev(`(() => { const now = NOW.getTime(); const out = []; S.loads.forEach(l => ops(l).orders.forEach(o => o.lines.forEach(x => out.push({ l: l.id, o: o.id, art: x.art, exp: x.exp, ok: new Date(x.exp).getTime() > now, short: (new Date(x.exp) - new Date(l.eta)) / 864e5 < 90 })))); return out; })()`);
+    assert(r.length >= 20, 'lines ' + r.length);
+    for (const x of r) { assert(/^\d{4}-\d{2}-\d{2}$/.test(x.exp), x.o + ': expiry format ' + x.exp); assert(x.ok, x.o + ' ' + x.art + ': expired ' + x.exp); }
+    const loads = [...new Set(r.map(x => x.l))];
+    for (const id of loads) {
+      const short = r.filter(x => x.l === id && x.short).map(x => x.o + x.art).sort().join(',');
+      const listed = ev(`fefo(S.loads.find(l => l.id === '${id}')).map(x => x.order + x.art).sort().join(',')`);
+      eq(listed, short, id + ': FEFO list');
+    }
+    assert(r.some(x => x.short), 'the demo has at least one FEFO case');
+  });
+  await group('data: fines — every attributed fine falls into a waybill of that driver on that truck at the time of the violation (0.3.9 «Данные · штрафы»)', 'ru', async (g, ev) => {
+    const r = ev(`S.res.fines.map(f => { const w = S.res.waybills.find(x => x.id === f.wb); const t = S.trucks.find(x => x.plate === f.plate); return { id: f.id, drv: f.drv, at: f.at, wb: w ? { drv: w.drv, truck: w.truck, from: w.from, to: w.to } : null, truck: t ? t.id : null }; })`);
+    assert(r.length >= 3, 'fines ' + r.length);
+    for (const f of r) {
+      assert(f.truck, f.id + ': plate not in the fleet');
+      if (!f.drv) { assert(!f.wb, f.id + ': waybill without driver'); continue; }
+      if (!f.wb) { /* waybill already archived (not in the live list): only a closed fine may point there */ assert(['deducted', 'paid', 'closed'].includes(ev(`S.res.fines.find(x => x.id === '${f.id}').status`)), f.id + ': open fine with an archived waybill'); assert(/^PL-26-\d{4}$/.test(ev(`S.res.fines.find(x => x.id === '${f.id}').wb`)), f.id + ': waybill number'); continue; }
+      eq(f.wb.drv, f.drv, f.id + ': waybill driver'); eq(f.wb.truck, f.truck, f.id + ': waybill truck');
+      const at = Date.parse(f.at); assert(at >= Date.parse(f.wb.from) && (!f.wb.to || at <= Date.parse(f.wb.to)), f.id + ': ' + f.at + ' outside the waybill');
+    }
+    assert(r.some(f => !f.drv), 'one fine without a waybill stays unattributed');
+  });
+  await group('data: staff — every driver has a 14-day plan from next Monday with known codes; absences show up in the plan (0.3.9 «Данные · персонал»)', 'ru', async (g, ev) => {
+    const days = ev('RES.planDays()'); eq(days.length, 14, 'plan days');
+    eq(new Date(days[0] + 'T12:00:00').getDay(), 1, 'plan starts on a Monday');
+    assert(days[0] > ev('RES.TODAY'), 'plan lies after the demo date');
+    const codes = ['r', 'd', 'o', 'm'].concat(ev('Object.keys(RES.ABS)'));
+    const plans = ev('S.drivers.map(d => ({ id: d.id, p: RES.plan14(d) }))');
+    eq(plans.length, ev('S.drivers.length'), 'one plan per driver');
+    for (const { id, p } of plans) {
+      eq(p.length, 14, id + ': plan length');
+      p.forEach((x, i) => { eq(x.iso, days[i], id + ': day ' + i); assert(codes.includes(x.k), id + ': code ' + x.k); if (x.k === 'r') assert(ev(`RES.LINE_TRUCKS.includes('${x.truck}')`), id + ': trip on a non-line truck ' + x.truck); });
+    }
+    for (const a of ev('S.res.abs')) { const p = plans.find(x => x.id === a.drv).p; const hit = p.filter(x => x.iso >= a.from && x.iso <= a.to); assert(hit.every(x => x.k === a.type), a.id + ': absence not in the plan'); }
+    /* licence / medical deadlines are dates */
+    assert(ev("S.drivers.every(d => d.docs.every(x => /^\\d{4}-\\d{2}-\\d{2}$/.test(x.to)))"), 'driver document dates');
+  });
+  await group('data: weather — every city of the forecast has 7 days, min ≤ max, risk level 0–3 per day, every city has a serving hub (0.3.9 «Данные · погода»)', 'ru', async (g, ev) => {
+    const r = ev(`Object.keys(WEATHER.WX).map(k => ({ k, n: WEATHER.WX[k].length, ok: WEATHER.WX[k].every(c => c.min <= c.max && typeof c.wind === 'number'), risk: WEATHER.WX[k].map(c => WEATHER.risk(c)), hub: WEATHER.cityHub(k), name: WEATHER.cityName(k) }))`);
+    assert(r.length >= 10, 'forecast cities ' + r.length);
+    const hubs = ev('Object.keys(HUBS)');
+    for (const c of r) {
+      eq(c.n, 7, c.k + ': forecast days'); assert(c.ok, c.k + ': min / max / wind');
+      assert(c.risk.every(x => Number.isInteger(x) && x >= 0 && x <= 3), c.k + ': risk ' + c.risk);
+      assert(hubs.includes(c.hub), c.k + ': hub ' + c.hub); assert(c.name && c.name !== c.k, c.k + ': name');
+    }
+    for (const h of hubs) assert(r.some(c => c.k === h), 'hub ' + h + ' has a forecast');
+    assert(r.some(c => c.risk.some(x => x >= 2)), 'the demo week has a storm day');
+  });
+  await group('data: partners — city in the network, tier and type allowed, Blocked always with a reason, SLA 0–100; contacts with name, phone and mobile (0.3.9 «Данные · партнёры / контакты»)', 'ru', async (g, ev) => {
+    const r = ev(`S.partners.map(p => ({ id: p.id, city: p.city, tier: p.tier, type: p.type, block: p.block, sla: p.sla, c: partnerContacts(p) }))`);
+    assert(r.length >= 15, 'partners ' + r.length);
+    /* the network = the 23 cities of the map; a partner row names one of them (codes are local to the partners screen) */
+    ev("go('dispatch');setTab('dispatch','partners')");
+    const names = ev('KZMAP.CITY.map(c => c[0])'), rows = ev("[...document.querySelectorAll('#main-content tr')].map(tr => tr.innerText)");
+    for (const p of r) {
+      const row = rows.find(t => t.includes(p.id)) || ''; assert(row, p.id + ': no row in the partner table');
+      assert(names.some(n => row.includes(n)), p.id + ': city ' + p.city + ' not one of the 23 network cities');
+      assert(['gold', 'silver', 'bronze', 'blocked'].includes(p.tier), p.id + ': tier ' + p.tier);
+      assert(['ws', 'log', 'svc', 'carrier', 'lsp'].includes(p.type) || typeof p.type === 'string' && p.type.length > 1, p.id + ': type');
+      if (p.tier === 'blocked') assert(String(p.block).trim().length >= 5, p.id + ': blocked without reason');
+      assert(p.sla >= 0 && p.sla <= 100, p.id + ': SLA ' + p.sla);
+      assert(Array.isArray(p.c) && p.c.length >= 2, p.id + ': contacts ' + (p.c && p.c.length));
+      for (const c of p.c) { const s = JSON.stringify(c); assert(/\+7[\s\d•*]{6,}/.test(s), p.id + ': contact without a KZ phone ' + s.slice(0, 80)); }
+    }
+    eq(new Set(r.map(p => p.id)).size, r.length, 'duplicate partner ids');
+    assert(r.some(p => p.tier === 'blocked'), 'a blocked partner exists');
+  });
+  await group('data: manufacturers — every order line names a registry manufacturer; every registry entry with a logo has a demo place (0.3.9 «Производители» 470–472)', 'ru', async (g, ev) => {
+    const r = ev(`(() => { const used = {}; let bad = []; S.loads.forEach(l => ops(l).orders.forEach(o => { [o.mfr].concat(o.lines.map(x => x.mfr)).forEach(m => { if (!MFRS[m]) bad.push(o.id + ':' + m); else used[m] = 1; }); })); return { bad, used: Object.keys(used), logo: Object.keys(MFRS).filter(k => MFRS[k].logo) }; })()`);
+    eq(r.bad.length, 0, 'lines with unknown manufacturer: ' + r.bad.slice(0, 3));
+    for (const k of r.logo) assert(r.used.includes(k), 'manufacturer with logo but no place: ' + k);
+    assert(ev("Object.values(MFRS).every(m => m.name && m.ab && (m.url || m.grp === 3))"), 'name / site / badge for every manufacturer (third-party cargo owners need no site)');
+  });
+  await group('data: rings of the baseline — load ≤ volume and payload, weekly km per trip pattern, density in the expected band (0.3.9 «Fragenkatalog · кольца»)', 'ru', async (g, ev) => {
+    const rings = ev('ECO_RINGS');
+    assert(rings.length >= 4, 'rings ' + rings.length);
+    for (const r of rings) {
+      assert(r.km > 0 && r.per > 0, r.id + ': km / trips per year');
+      if (!r.kg) continue;
+      const dens = r.kg / r.m3; assert(dens > 140 && dens < 190, r.id + ': density ' + dens.toFixed(0) + ' kg/m³');
+      assert(r.m3 <= 50.4 + 1e-9, r.id + ': volume ' + r.m3 + ' over a 10-t isotherm body');
+      assert(r.kg <= 10000, r.id + ': payload ' + r.kg);
+    }
+    assert(rings.some(r => r.id === 'W'), 'West ring');
+    clean(g.w, 'data');
+  });
+
+__suite(47);   /* f2-ops-fleet.js */
+  /* ---- R6 · 0.3.9 parity, operations on the fleet: «v5 · парк» (421–424) — trips run on fleet trucks, a truck carries at most one
+     running trip, drivers of running trips hold a truck licence (C / CE); the West trip runs on a West-approved truck ---- */
+  await group('ops on the fleet: one running trip per truck and per driver, drivers of running trips hold category C / CE, the West trip runs on a West-approved truck (0.3.9 «v5 · парк»)', 'ru', async (g, ev) => {
+    const run = ev("S.loads.filter(l => isActive(l) && l.truck).map(l => ({ id: l.id, t: l.truck, d: l.driver, to: l.to }))");
+    assert(run.length >= 3, 'running trips ' + run.length);
+    const byT = {}, byD = {}; run.forEach(l => { byT[l.t] = (byT[l.t] || 0) + 1; if (l.d) byD[l.d] = (byD[l.d] || 0) + 1; });
+    for (const [t, n] of Object.entries(byT)) assert(n === 1, t + ' carries ' + n + ' running trips');
+    for (const [d, n] of Object.entries(byD)) assert(n === 1, d + ' drives ' + n + ' running trips');
+    for (const l of run) {
+      assert(ev(`S.trucks.some(t => t.id === '${l.t}')`), l.id + ': truck not in the fleet');
+      if (!l.d) continue;
+      const lic = ev(`S.drivers.find(d => d.id === '${l.d}').lic`); assert(/^C/.test(lic), l.id + ': driver licence ' + lic);
+    }
+    const west = ev("typeof WEST_ID !== 'undefined' && WEST_ID && S.loads.find(l => l.id === WEST_ID)");
+    if (west && west.truck) assert(ev(`RES.west(S.trucks.find(t => t.id === '${west.truck}')).ok !== false`), 'West trip truck approved for the West ring');
+  });
+
+__suite(48);   /* f3-records-portals.js */
+  /* ---- R6 · 0.3.9 parity, records and portals: «Новые записи» (720–722), «Логотипы производителей» (714), «Портал: бронирование v2»
+     (BUG-29 / FR-150 / FR-185: weight per pallet, address book) ---- */
+  await group('reference data: a new manufacturer entry is active at once, named in the list and audited in the hash chain; a bad key or a read-only master is refused (0.3.9 «Новые записи» / logos)', 'ru', async (g, ev, w) => {
+    const n = ev("refItems('manufacturer').length"); assert(n >= 6, 'manufacturer master ' + n);
+    eq(typeof ev("refSave('manufacturer', 'x y!', {name:'Bad'})"), 'string', 'bad key refused');
+    const v = ev("refSave('manufacturer', 'r6labs', {ab:'R6', name:'R6 Labs GmbH', co:'R6 Labs GmbH, Bremen', url:'r6labs.example'})");
+    eq(v && v.status, 'active', 'new entry active without a second approval'); eq(ev("refItems('manufacturer').length"), n + 1, 'listed');
+    eq(ev("refFind('manufacturer','r6labs').label"), 'R6 Labs GmbH', 'label = name');
+    eq(typeof ev("refSave('manufacturer', 'r6labs', {name:'R6 Labs GmbH'})"), 'string', 'no change → refused');
+    assert(/manufacturer\/r6labs/.test(ev('S.audit[0].subject')), 'audit entry'); assert(ev('auditVerify().ok'), 'audit chain still verifies');
+    ev("go('settings');setTab('settings','ref')"); w.document.querySelector('[data-act="rfKind"][data-v="manufacturer"]').click();
+    assert(/R6 Labs GmbH/.test(w.document.querySelector('#main-content').innerText), 'entry visible in the manufacturer master');
+    clean(w, 'reference data');
+  });
+  await group('drivers: "+ Driver" needs a name of 3–150 characters, creates the driver with a masked phone; read-only roles are refused (0.3.9 722 / FR-82)', 'ru', async (g, ev, w) => {
+    const d = w.document, n = ev('S.drivers.length');
+    ev("go('drivers')"); d.querySelector('[data-act="addD"]').click(); assert(d.querySelector('#nd_name'), 'form opens');
+    d.querySelector('#nd_name').value = 'Ма'; d.querySelector('[data-act="saveD"]').click();
+    assert(d.querySelector('#nd_err').textContent.length > 5, 'two characters refused (0.3.9: min 3)'); eq(ev('S.drivers.length'), n, 'not created');
+    d.querySelector('#nd_name').value = 'Мадина Оспанова'; d.querySelector('[data-act="saveD"]').click();
+    eq(ev('S.drivers.length'), n + 1, 'created'); const x = ev('S.drivers[S.drivers.length - 1]');
+    eq(x.name, 'Мадина Оспанова'); assert(!/\d{3} \d{2} \d{2}$/.test(x.phone), 'phone not a real number: ' + x.phone); eq(ev('S.drawer.type'), 'driver', 'driver card opens');
+    ev('closeDrawer()'); ev("ACT.setRole({v:'viewer'})"); ev("go('drivers')");
+    const b = d.querySelector('[data-act="addD"]'); if (b) { b.click(); assert(!ev("S.drawer && S.drawer.type === 'addDriver'"), 'viewer cannot open the form'); assert(d.querySelector('.toast.err'), 'refusal shown'); }
+    ev("ACT.setRole({v:'admin'})"); clean(w, 'drivers');
+  });
+  await group('portal booking: weight per pallet above 1 200 kg blocks the price with a message, 1 200 kg passes; an address-book entry fills the pickup address (0.3.9 BUG-29 / FR-185 / FR-150)', 'ru', async (g, ev, w) => {
+    const d = w.document; ev("ACT.setRole({v:'customer'});go('book')");
+    ev("BK.pCity='TAR';BK.pStreet='Абая';BK.pHouse='5';BK.dCity='KST';BK.dStreet='Космонавтов';BK.dHouse='9';BK.goods=['vaccines'];BK.zone='pharma';BK.pallets=2;BK.kg=2600;render()");
+    const err = () => (d.querySelector('#bk_price ul') || { innerText: '' }).innerText;
+    assert(/1 200/.test(err()), 'over 1 200 kg per pallet named: ' + err());
+    ev('BK.kg=2400;render()'); assert(!/1 200/.test(err()), '1 200 kg per pallet accepted: ' + err());
+    const book = ev('custOf(S.custId).book'); assert(book.length >= 1, 'customer has an address book');
+    const sel = d.querySelector('[data-bk="pBook"]'); assert(sel, 'address-book select'); sel.value = book[0].id; sel.dispatchEvent(new w.Event('change', { bubbles: true })); sel.dispatchEvent(new w.Event('input', { bubbles: true }));
+    eq(ev('BK.pCity'), book[0].city, 'city from the book'); eq(ev('BK.pStreet'), book[0].street, 'street from the book'); eq(ev('BK.pHouse'), book[0].house, 'house from the book');
+    ev("ACT.setRole({v:'admin'})"); clean(w, 'booking');
+  });
+
+__suite(49);   /* f4-economics.js */
+  /* ---- R6 · 0.3.9 parity, economics: «Fragenkatalog · данные / города / сеть / экономика» (354–379, 392–399) and «Исходные данные»
+     V-12 / V-21 (403–404). The baseline figures are recomputed from their inputs, so a changed input shows up as a failure. ---- */
+  await group('baseline volumes: 23 cities sum to 64 249 kg/month, kg/week = kg/month ÷ 4.33, m³/week at 164 kg/m³, Semey and Oskemen served by Astana; 9 366 kg/month unassigned (0.3.9 354–379, V-12)', 'ru', async (g, ev, w) => {
+    const C = ev('ECO_BL.BLC'), D = ev('ECO_BL.BLD');
+    eq(C.length, 23, 'cities'); const sum = C.reduce((a, c) => a + c.kg, 0); eq(sum, 64249, 'Σ kg/month');
+    eq(D.kgMon - sum, 9366, 'unassigned = A1 − sheet');
+    for (const c of C) {
+      if (!c.kg) continue;
+      assert(Math.abs(c.kgw - c.kg / 4.33) <= 1.5, c.id + ': kg/week ' + c.kgw + ' vs ' + (c.kg / 4.33).toFixed(1));
+      assert(Math.abs(c.m3 - c.kgw / D.density) <= 0.15, c.id + ': m³/week ' + c.m3 + ' vs ' + (c.kgw / D.density).toFixed(2));
+      assert(Array.isArray(c.t) && c.t.length === 3, c.id + ': temperature split');
+    }
+    for (const id of ['KZ-SEM', 'KZ-UKK']) { const c = C.find(x => x.id === id); assert(c && c.hub === 'ast', id + ' → Astana hub (P86)'); }
+    const names = ev('KZMAP.CITY.map(c => c[0])'); for (const c of C) assert(names.includes(c.name[0]), c.id + ': ' + c.name[0] + ' not on the network map');
+    ev("go('baseline')"); const t = w.document.querySelector('#main-content').innerText; assert(/9\s?366/.test(t), 'V-12 finding with 9 366 kg on the baseline screen');
+  });
+  await group('baseline rings and fleet: legs add up to the ring, load fits the planned vehicle (kg and m³), ≤ 630 km per day, target fleet 4 vehicles (0.3.9 380–391)', 'ru', async (g, ev) => {
+    const R = ev('ECO_BL.BLR'), F = ev('ECO_BL.BLF');
+    for (const r of R) {
+      if (r.full) eq(r.legs.reduce((a, b) => a + b, 0), r.km, r.id + ': Σ legs');
+      const v = F.find(f => r.veh.startsWith(f.id)) || F[0]; assert(r.kg <= v.kg && r.m3 <= v.m3, r.id + ': load over ' + v.model);
+      if (r.kg) assert(Math.abs(r.kg / r.m3 - ev('ECO_BL.BLD.density')) < 6, r.id + ': density ' + (r.kg / r.m3).toFixed(0));
+      const kmd = Math.max(...String(r.kmDay).match(/\d+/g).map(Number)); assert(kmd <= 630, r.id + ': ' + r.kmDay + ' km/day > 70 km/h × 9 h');
+    }
+    const r1 = R.find(r => r.id === 'R1'); eq(Math.round(r1.km / 6), +r1.kmDay, 'R1: 2 430 km in a 6-day week = 405 km/day');
+    eq(F.reduce((a, f) => a + f.qty, 0), 4, 'target fleet 4 vehicles');
+  });
+  await group('baseline economics: investment net × VAT 16 % = 118.6 M ₸, saving 6 916 410 ₸/month ≈ 83.0 M ₸/year, MRP 4 325 → per diem 6 MRP 25 950 ₸ and tax 9 MRP 38 925 ₸, employer-tax shortfall 49 500 ₸/month (V-21), return leg 2.6× heavier (0.3.9 392–399, 404)', 'ru', async (g, ev, w) => {
+    const D = ev('ECO_BL.BLD');
+    assert(Math.abs(D.capexNet * (1 + D.vatPct / 100) - D.capexVat) < 0.1, 'capex with VAT ' + D.capexNet + ' × 1.16 vs ' + D.capexVat);
+    eq(Math.round(D.saveMon * 12 / 1e5) / 10, 83, 'saving per year (M ₸)');
+    eq(6 * D.mrp, 25950, 'per diem 6 MRP'); eq(9 * D.mrp, 38925, 'transport tax 9 MRP');
+    eq(D.adminGross * (1 + D.empStated / 100), D.adminCost, 'admin cost with the stated 14.5 %');
+    eq(D.adminGross * (D.empRates.reduce((a, b) => a + b, 0) - D.empStated) / 100, 49500, 'shortfall at 17.5 %');
+    eq(D.itOnce.reduce((a, b) => a + b, 0), 4800000, 'IT once'); eq(D.itMon.reduce((a, b) => a + b, 0), 90000, 'IT per month');
+    eq(Math.round(D.almAstKg / D.astAlmKg * 10) / 10, 2.6, 'Almaty → Astana 2.6× heavier');
+    assert(ev("ECO_BL.BLV.some(v => /36,3 %/.test(v.fk[0]))"), 'express share 36,3 % of the budget named');
+    ev("go('baseline')"); clean(w, 'baseline');
+  });
+
+__suite(50);   /* f5-a11y-layout.js */
+  /* ---- R6 · 0.3.9 parity, accessibility and layout: the layout suite (frontend/tests-ui/suite-layout.js, run by scripts/ui_suite.py over
+     17 screens × 390 / 1024 / 1500 px in RU / EN, 114 checks) and FR-134 / FR-34 scenarios (594–597, 315–317, 206). Same rules, on the v6
+     screens and tabs in all four languages: accessible names, unique ids, valid ARIA states, alt texts, no nested controls, keyboard
+     reachability and activation, a live region for messages, level cues that do not rely on colour, text contrast of the status chips,
+     reduced motion, no sideways scroll and no "one letter per line" cells at 1024 and 1500 px. ---- */
+  /* 0.3.9 suite-layout.js a11y rules (axe-core serious / critical equivalent) on a v6 window */
+  const r6A11yScan = (w, opt) => {   // eslint-disable-line no-unused-vars
+    const d = w.document, fails = [], o = opt || {};
+    const vis = el => { if (!el || !el.isConnected) return false; const s = w.getComputedStyle(el); if (s.display === 'none' || s.visibility === 'hidden' || +s.opacity === 0) return false; const b = el.getBoundingClientRect(); return b.width > 0 && b.height > 0; };
+    const lab = el => el.tagName.toLowerCase() + (el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.') : '') + (el.dataset && el.dataset.act ? '[' + el.dataset.act + ']' : '') + ' «' + (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 30) + '»';
+    const name = el => {
+      const lb = el.getAttribute('aria-labelledby'); if (lb) return lb.split(/\s+/).map(id => (d.getElementById(id) || {}).textContent || '').join(' ').trim();
+      const own = (el.getAttribute('aria-label') || '').trim() || (el.getAttribute('title') || '').trim(); if (own) return own;
+      if (/^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName)) { if (el.type === 'hidden') return 'hidden'; if (el.labels && el.labels.length) return [...el.labels].map(l => l.textContent).join(' ').trim(); if (/^(button|submit|reset)$/.test(el.type)) return el.value; return (el.getAttribute('placeholder') || '').trim() && o.placeholderOk ? el.getAttribute('placeholder') : ''; }
+      return ((el.textContent || '') + ' ' + [...el.querySelectorAll('img[alt]')].map(i => i.alt).join(' ')).trim();
+    };
+    const inter = [...d.querySelectorAll('button, a[href], [role="button"], [role="tab"], [role="option"], input, select, textarea')].filter(el => vis(el) && !el.closest('[inert],[aria-hidden="true"]'));
+    inter.filter(el => !name(el)).slice(0, 5).forEach(el => fails.push('control without accessible name: ' + lab(el) + ' ' + el.outerHTML.slice(0, 90)));
+    const ids = new Map(); for (const el of d.querySelectorAll('[id]')) ids.set(el.id, (ids.get(el.id) || 0) + 1);
+    const dup = [...ids].filter(([, c]) => c > 1).map(([id]) => id); if (dup.length) fails.push('duplicate ids: ' + dup.slice(0, 6).join(', '));
+    if (!/^(ru|de|en|kk)$/.test(d.documentElement.lang)) fails.push('html lang: ' + d.documentElement.lang);
+    if (d.querySelectorAll('main').length !== 1) fails.push('expected one <main>: ' + d.querySelectorAll('main').length);
+    for (const el of d.querySelectorAll('[aria-pressed],[aria-expanded],[aria-selected]')) for (const at of ['aria-pressed', 'aria-expanded', 'aria-selected']) { const v = el.getAttribute(at); if (v !== null && !/^(true|false|mixed)$/.test(v)) fails.push('invalid ' + at + '="' + v + '" on ' + lab(el)); }
+    for (const el of d.querySelectorAll('[aria-controls]')) if (el.getAttribute('aria-expanded') === 'true' && !d.getElementById(el.getAttribute('aria-controls'))) fails.push('aria-controls points nowhere: ' + lab(el));
+    for (const img of d.querySelectorAll('img')) if (!img.hasAttribute('alt') && vis(img)) fails.push('image without alt: ' + img.src.slice(-60));
+    for (const svg of d.querySelectorAll('svg[role="img"]')) if (!svg.getAttribute('aria-label') && !svg.querySelector('title')) fails.push('svg role=img without name');
+    for (const el of d.querySelectorAll('button button, a[href] button, button a[href], a[href] a[href]')) { fails.push('nested interactive: ' + lab(el)); break; }
+    for (const el of d.querySelectorAll('[role="tab"]')) if (!el.closest('[role="tablist"]')) { fails.push('tab outside a tablist: ' + lab(el)); break; }
+    return fails;
+  };
+  const r6ScreensTabs = (ev, fn) => { for (const id of ev('navItems().map(n => n[0])').concat(['help'])) { ev(`go('${id}')`); const tabs = ev(`tabsOf('${id}').map(t => t.key)`); if (!tabs.length) fn(id); else for (const t of tabs) { ev(`setTab('${id}','${t}')`); fn(id + '/' + t); } } };
+  for (const lang of LANGS) await group('[' + lang + '] a11y: every screen, tab and the load drawer — controls have accessible names, unique ids, valid ARIA states, alt texts, no nested controls (0.3.9 layout suite a11y rules)', lang, async (g, ev, w) => {
+    const bad = [];
+    r6ScreensTabs(ev, where => r6A11yScan(w).forEach(f => bad.push(where + ': ' + f)));
+    ev("go('orders');setTab('orders','orders');ACT.open({id:S.loads[0].id})");
+    for (const t of [...w.document.querySelectorAll('.drawer-tabs .tab')].map(e => e.dataset.v)) { ev(`ACT.tab({v:'${t}'})`); r6A11yScan(w).forEach(f => bad.push('drawer/' + t + ': ' + f)); }
+    ev('closeDrawer()');
+    for (const role of ['customer', 'partner', 'driver']) { ev(`ACT.setRole({v:'${role}'})`); r6ScreensTabs(ev, where => r6A11yScan(w).forEach(f => bad.push(role + ' ' + where + ': ' + f))); }
+    ev("ACT.setRole({v:'admin'})");
+    assert(!bad.length, bad.length + ' findings, first: ' + bad.slice(0, 3).join(' | '));
+  });
+  await group('a11y keyboard: menu items are focusable links, Enter / Space activate menu items and tabs, aria-current follows, skip link targets <main>, focus ring styled (0.3.9 FR-134 / FR-17)', 'ru', async (g, ev, w) => {
+    const d = w.document, key = (el, k) => el.dispatchEvent(new w.KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
+    const items = [...d.querySelectorAll('.sidebar .nav-item')]; eq(items.length, 13, 'items');
+    assert(items.every(e => e.tabIndex === 0 && e.getAttribute('role') === 'link'), 'every menu item is a focusable link');
+    let it = d.querySelector('.sidebar .nav-item[data-v="fleet"]'); it.focus(); key(it, 'Enter'); eq(ev('S.route'), 'fleet', 'Enter on a menu item navigates');
+    eq(d.querySelector('.nav-item[aria-current="page"]').dataset.v, 'fleet', 'aria-current moved');
+    it = d.querySelector('.sidebar .nav-item[data-v="routes"]'); key(it, ' '); eq(ev('S.route'), 'routes', 'Space on a menu item navigates');
+    const tabs = [...d.querySelectorAll('.pill-tabs [role="tab"]')]; assert(tabs.length >= 2 && tabs.every(t => t.tabIndex === 0), 'tabs are focusable');
+    assert(d.querySelector('.pill-tabs').getAttribute('role') === 'tablist', 'tablist');
+    const t2 = tabs[1]; key(t2, 'Enter'); eq(ev("curTab('routes').key"), t2.dataset.v, 'Enter on a tab switches the tab');
+    eq(d.querySelector('.pill-tabs [aria-selected="true"]').dataset.v, t2.dataset.v, 'aria-selected follows');
+    const skip = d.querySelector('a.skip'); assert(skip && skip.getAttribute('href') === '#main-content' && d.getElementById('main-content').tagName === 'MAIN', 'skip link → <main id=main-content>');
+    const css = [...d.styleSheets].flatMap(s => { try { return [...s.cssRules].map(r => r.cssText); } catch (_) { return []; } }).join('\n');
+    for (const sel of ['.nav-item:focus-visible', '.pill-tab:focus-visible', '.btn:focus-visible']) assert(css.includes(sel), 'focus ring for ' + sel);
+    /* a native button is not clicked twice by the Enter handler */
+    let n = 0; const b = d.createElement('button'); b.dataset.act = 'go'; b.dataset.v = 'dashboard'; b.setAttribute('tabindex', '0'); b.addEventListener('click', () => n++); d.querySelector('#main-content').appendChild(b); key(b, 'Enter'); eq(n, 0, 'Enter handler leaves native buttons to the browser');
+    clean(w, 'keyboard');
+  });
+  await group('a11y messages and motion: toasts land in a polite live region, the search is a labelled combobox, reduced motion stops the live pulse and the menu slide (0.3.9 FR-134 / FR-17)', 'en', async (g, ev, w) => {
+    const d = w.document; ev("toast('R6 live region check')");
+    const live = d.querySelector('[role="status"][aria-live="polite"]'); assert(live && /R6 live region check/.test(live.textContent), 'toast inside the live region');
+    ev("S.toast = null; render()"); assert(d.querySelector('[role="status"][aria-live="polite"]'), 'live region stays when empty');
+    const gs = d.getElementById('gsearch'); assert(gs.getAttribute('role') === 'combobox' && gs.getAttribute('aria-controls'), 'search is a combobox');
+    assert((gs.getAttribute('aria-label') || '').length > 3, 'search has an accessible name: ' + gs.getAttribute('aria-label'));
+    ev("gsInput('1847')"); eq(d.getElementById('gsearch').getAttribute('aria-expanded'), 'true', 'expanded while results show');
+    const css = [...d.styleSheets].flatMap(s => { try { return [...s.cssRules]; } catch (_) { return []; } }).filter(r => r.media && /prefers-reduced-motion:\s*reduce/.test(r.media.mediaText)).map(r => r.cssText).join('\n');
+    assert(/\.live-dot\.on\s*\{[^}]*animation[^;}]*\bnone\b/.test(css), 'live pulse off with reduced motion');
+    assert(/\.sidebar\s*\{[^}]*transition[^;}]*\bnone\b/.test(css), 'menu slide off with reduced motion');
+  });
+  const r6Rgb = s => { const m = /rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)/.exec(s); return m ? [+m[1], +m[2], +m[3]] : null; };
+  const r6Lum = c => { const f = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]); };
+  const r6Ratio = (a, b) => { const x = r6Lum(a), y = r6Lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+  await group('levels and colours: Go green / No-Go red with the words Go / No-Go, watch yellow, the alarms button red; status chips keep ≥ 4.5:1 text contrast in both designs (0.3.9 FR-34 / FR-134)', 'ru', async (g, ev, w) => {
+    const d = w.document;
+    ev("go('orders');setTab('orders','docs')");
+    const rows = [...d.querySelectorAll('.dk-gate')]; assert(rows.length >= 9, 'gate controls ' + rows.length);
+    for (const r of rows) {
+      const c = r.querySelector('.chip'), pass = r.dataset.pass === '1';
+      assert(pass ? /\b(green|yellow)\b/.test(c.className) : /\bred\b/.test(c.className), r.dataset.gate + ': colour ' + c.className);
+      eq(c.textContent.trim(), pass ? 'Go' : 'No-Go', r.dataset.gate + ': word next to the colour');
+    }
+    const al = d.querySelector('[data-alarms]'); const bg = r6Rgb(w.getComputedStyle(al).backgroundColor); assert(/\bred\b/.test(al.className) && bg[0] > bg[1] + 40, 'alarms button red: ' + bg);
+    for (const des of ['kokzhol', 'olymp']) {
+      ev(`S.design = '${des}'; document.documentElement.dataset.design = '${des}'; render()`);
+      const probe = d.createElement('div'); probe.innerHTML = ['green', 'yellow', 'red', 'blue', 'gray', 'purple', 'orange'].map(k => `<span class="chip ${k}">Go No-Go</span>`).join(''); d.querySelector('#main-content').appendChild(probe);
+      for (const c of probe.querySelectorAll('.chip')) {
+        const cs = w.getComputedStyle(c), fg = r6Rgb(cs.color), b = r6Rgb(cs.backgroundColor); assert(fg && b, des + ' ' + c.className + ': colours');
+        const r = r6Ratio(fg, b); assert(r >= 4.5, des + ' ' + c.className + ': contrast ' + r.toFixed(2) + ' < 4.5');
+      }
+      probe.remove();
+      const body = w.getComputedStyle(d.querySelector('#main-content')), page = r6Rgb(w.getComputedStyle(d.body).backgroundColor) || [255, 255, 255];
+      assert(r6Ratio(r6Rgb(body.color), page) >= 4.5, des + ': body text contrast');
+    }
+  });
+  const r6Sideways = (w, where) => { const de = w.document.documentElement, m = w.document.querySelector('main'); assert(de.scrollWidth <= de.clientWidth + 1, where + ': page scrolls sideways ' + de.scrollWidth); assert(m.scrollWidth <= m.clientWidth + 1, where + ': main scrolls sideways ' + m.scrollWidth); };
+  const r6Squeezed = (w, where) => {
+    const bad = [];
+    for (const c of w.document.querySelectorAll('#main-content td, #main-content th, #main-content [style*="grid-template-columns"] > *')) {
+      const t = (c.textContent || '').replace(/\s+/g, ' ').trim(); if (!/[A-Za-zА-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]{4,}/.test(t) || !c.offsetParent) continue;
+      const b = c.getBoundingClientRect(), lh = parseFloat(w.getComputedStyle(c).lineHeight) || 18; if (b.width < 30 && b.height > lh * 4) bad.push(t.slice(0, 20) + ' ' + Math.round(b.width) + '×' + Math.round(b.height));
+    }
+    assert(!bad.length, where + ': cells one letter per line: ' + bad.slice(0, 3).join(' | '));
+  };
+  for (const lang of ['ru', 'en']) for (const px of [1024, 1500]) await group('[' + lang + '] layout ' + px + ' px: every screen and tab fits without sideways scroll and no table cell collapses to one letter per line (0.3.9 layout suite)', lang, async (g, ev, w) => {
+    w.frameElement.style.cssText = `display:block;position:absolute;left:-10000px;top:0;width:${px}px;height:900px;border:0`; await new Promise(r => setTimeout(r, 30)); eq(w.innerWidth, px, 'frame width');
+    r6ScreensTabs(ev, where => { r6Sideways(w, where); r6Squeezed(w, where); });
+    clean(w, 'layout ' + px);
+  });
+  await group('layout meta: the detectors fire on the faults they are for — a 3 000 px wide block, a r6Squeezed table cell, an unnamed control, a duplicate id (0.3.9 layout suite meta tests)', 'en', async (g, ev, w) => {
+    w.frameElement.style.cssText = 'display:block;position:absolute;left:-10000px;top:0;width:1316px;height:900px;border:0'; await new Promise(r => setTimeout(r, 30));   // the harness hides frames (display:none → no layout)
+    ev("go('fleet')"); const d = w.document, m = d.querySelector('#main-content'), x = d.createElement('div');   // query <main> after go(): render() replaces it
+    x.style.cssText = 'width:3000px;height:4px'; m.appendChild(x);
+    let hit = ''; try { r6Sideways(w, 'meta'); } catch (e) { hit = e.message; } assert(/sideways/.test(hit), 'wide block not detected'); x.remove();
+    const tb = d.createElement('table'); tb.innerHTML = '<tr><td style="width:12px;max-width:12px;word-break:break-all">Temperature</td><td style="width:2000px"></td></tr>'; tb.style.cssText = 'width:100%;table-layout:fixed'; m.appendChild(tb);
+    hit = ''; try { r6Squeezed(w, 'meta'); } catch (e) { hit = e.message; } assert(/one letter per line/.test(hit), 'r6Squeezed cell not detected'); tb.remove();
+    const i = d.createElement('input'); i.id = 'gsearch'; m.appendChild(i);
+    const f = r6A11yScan(w).join(' | '); assert(/without accessible name/.test(f) && /duplicate ids: .*gsearch/.test(f), 'a11y rules not firing: ' + f); i.remove();
+    eq(r6A11yScan(w).length, 0, 'clean again after removing the faults');
+  });
+
+  __suite(-1);
+  const R = window.__TESTS; document.getElementById('sum').textContent = R.passed + '/' + R.total + ' passed, ' + R.failed + ' failed' + (R.flaky.length ? ', ' + R.flaky.length + ' flaky' : '') + (R.quarantined.length ? ', ' + R.quarantined.length + ' quarantined' : '') + (R.shard ? ' · shard ' + R.shard.k + '/' + R.shard.n : ''); R.ms = Math.round(performance.now()); R.done = true;
 })().catch(e => { log('harness', e.message); window.__TESTS.done = true; });
 </script></body></html>

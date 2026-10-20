@@ -12,11 +12,11 @@
     assert(/R6 Labs GmbH/.test(w.document.querySelector('#main-content').innerText), 'entry visible in the manufacturer master');
     clean(w, 'reference data');
   });
-  await group('drivers: "+ Driver" needs first and last name, creates the driver with a masked phone; read-only roles are refused (0.3.9 722 / FR-82)', 'ru', async (g, ev, w) => {
+  await group('drivers: "+ Driver" needs a name of 3–150 characters, creates the driver with a masked phone; read-only roles are refused (0.3.9 722 / FR-82)', 'ru', async (g, ev, w) => {
     const d = w.document, n = ev('S.drivers.length');
     ev("go('drivers')"); d.querySelector('[data-act="addD"]').click(); assert(d.querySelector('#nd_name'), 'form opens');
-    d.querySelector('#nd_name').value = 'Мадина'; d.querySelector('[data-act="saveD"]').click();
-    assert(d.querySelector('#nd_err').textContent.length > 5, 'one word refused'); eq(ev('S.drivers.length'), n, 'not created');
+    d.querySelector('#nd_name').value = 'Ма'; d.querySelector('[data-act="saveD"]').click();
+    assert(d.querySelector('#nd_err').textContent.length > 5, 'two characters refused (0.3.9: min 3)'); eq(ev('S.drivers.length'), n, 'not created');
     d.querySelector('#nd_name').value = 'Мадина Оспанова'; d.querySelector('[data-act="saveD"]').click();
     eq(ev('S.drivers.length'), n + 1, 'created'); const x = ev('S.drivers[S.drivers.length - 1]');
     eq(x.name, 'Мадина Оспанова'); assert(!/\d{3} \d{2} \d{2}$/.test(x.phone), 'phone not a real number: ' + x.phone); eq(ev('S.drawer.type'), 'driver', 'driver card opens');

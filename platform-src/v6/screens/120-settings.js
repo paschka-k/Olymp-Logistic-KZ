@@ -126,7 +126,7 @@ ${prm('params.shift', T('Максимум смены', 'Maximale Schicht', 'Maxi
   SCREENS.settings = {
     title: () => navLabel('settings'),
     sub: () => T('Центр конфигурации и управления', 'Konfigurations- und Governance-Center', 'Company Configuration & Governance Center', 'Конфигурация және басқару орталығы'),
-    actions: () => `<span class="dirty${dirty() ? ' on' : ''}" id="dirtyChip"><i class="dot warn"></i>${esc(T('Есть несохранённые изменения', 'Ungespeicherte Änderungen', 'Unsaved changes', 'Сақталмаған өзгерістер'))}</span><button class="btn grey" data-act="cfgExport">${esc(T('Экспорт конфигурации', 'Konfiguration exportieren', 'Export Configuration', 'Конфигурацияны экспорттау'))}</button><button class="btn primary" data-act="cfgSave"${dirty() ? '' : ' style="opacity:.6"'}>${esc(T('Сохранить всё', 'Alles speichern', 'Save All Changes', 'Барлығын сақтау'))}</button>`,
+    actions: () => `<span class="dirty${dirty() ? ' on' : ''}" id="dirtyChip"><i class="dot warn"></i>${esc(T('Есть несохранённые изменения', 'Ungespeicherte Änderungen', 'Unsaved changes', 'Сақталмаған өзгерістер'))}</span><button class="btn grey" data-act="cfgExport">${esc(T('Экспорт конфигурации', 'Konfiguration exportieren', 'Export Configuration', 'Конфигурацияны экспорттау'))}</button><button class="btn primary${dirty() ? '' : ' idle'}" data-act="cfgSave">${esc(T('Сохранить всё', 'Alles speichern', 'Save All Changes', 'Барлығын сақтау'))}</button>`,
     body: () => cCompany() + cInteg() + cNotify() + cAI() + cSec() + cSrc(),
   };
   DRAWERS.integ = d => { const x = CFG.cur.integ[d.i]; return { title: x.t, html: `<div class="drawer-section"><div class="ident">${tile(x.ic, '', '', x.tint)}<div><b>${esc(x.p)}</b><div class="sub">${esc(ago(x.m))}</div></div></div><div class="kv"><div><small>${esc(T('Статус', 'Status', 'Status', 'Күйі'))}</small>${chip('green', T('Подключено', 'Verbunden', 'Connected', 'Қосылған'))}</div><div><small>${esc(T('Последняя синхронизация', 'Letzte Synchronisation', 'Last sync', 'Соңғы синхрондау'))}</small><b>${esc(ago(x.m))}</b></div></div></div><div class="drawer-section actbar"><button class="btn primary" data-act="intSync" data-i="${d.i}">${esc(T('Синхронизировать', 'Jetzt synchronisieren', 'Sync now', 'Синхрондау'))}</button><button class="btn red" data-act="intOff" data-i="${d.i}">${esc(T('Отключить', 'Trennen', 'Disconnect', 'Ажырату'))}</button></div>` }; };
@@ -150,7 +150,7 @@ ${prm('params.shift', T('Максимум смены', 'Maximale Schicht', 'Maxi
       toast(T('Настройки сохранены и применены', 'Einstellungen gespeichert und angewendet', 'Settings saved and applied', 'Баптаулар сақталды және қолданылды'));
     },
   });
-  const paint = () => { const c = $('#dirtyChip'); if (c) c.classList.toggle('on', dirty()); const b = $('[data-act=cfgSave]'); if (b) b.style.opacity = dirty() ? '' : '.6'; };
+  const paint = () => { const c = $('#dirtyChip'); if (c) c.classList.toggle('on', dirty()); const b = $('[data-act=cfgSave]'); if (b) b.classList.toggle('idle', !dirty()); };   // FR-218: "nothing to save" keeps readable contrast (no opacity)
   const read = el => (el.dataset.num ? (el.value === '' ? NaN : +el.value) : el.value);
   document.addEventListener('input', e => {
     const el = e.target, p = el.dataset && el.dataset.cf; if (!p || S.route !== 'settings') return;

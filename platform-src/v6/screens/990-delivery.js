@@ -69,7 +69,7 @@ ${rels.map(({ r, list }) => `<section class="wn-rel" data-wn-rel="${esc(r.v)}"><
 
   /* ---------- FR-224 print / PDF: A4, print-only header (brand, screen › tab, date, version, role), no navigation (app.css @media print) ---------- */
   globalThis.printHead = () => {
-    const sc = SCREENS[S.route], tab = sc && sc.tabs ? curTab(S.route) : null, now = new Date();
+    const sc = SCREENS[S.route], tab = sc && sc.tabs ? curTab(S.route) : null, now = clockNow();
     return `<div class="print-head" aria-hidden="true"><span class="ph-brand"><b>Kökzhol</b> · Olymp Logistic KZ</span><span class="ph-title">${esc(sc ? sc.title() : navLabel(S.route))}${tab ? ' › ' + esc(tab.label) : ''}</span><span class="ph-meta">${esc(T('Напечатано', 'Gedruckt', 'Printed', 'Басылды'))} ${fd(now.toISOString())} ${p2(now.getHours())}:${p2(now.getMinutes())} · v${VERSION} · ${esc(ROLE_NAME[S.role] || '')}</span></div>`;
   };
   globalThis.printBtn = () => `<button type="button" class="btn grey sm print-btn" data-act="printPage" title="${esc(T('Печать / PDF (A4): текущий экран или открытый документ', 'Drucken / PDF (A4): aktueller Screen oder offenes Dokument', 'Print / PDF (A4): current screen or open document', 'Басып шығару / PDF (A4): ағымдағы экран немесе ашық құжат'))}" aria-label="${esc(T('Печать / PDF', 'Drucken / PDF', 'Print / PDF', 'Басып шығару / PDF'))}">⎙</button>`;
@@ -77,7 +77,7 @@ ${rels.map(({ r, list }) => `<section class="wn-rel" data-wn-rel="${esc(r.v)}"><
   /* stand-alone documents (KZ documents, loading sequence, booking certificates, offers) share one A4 sheet style + header */
   globalThis.DOC_PRINT_CSS = '@page{size:A4;margin:16mm 14mm 18mm}@media print{body{margin:0!important;max-width:none!important}h1,h2,h3{break-after:avoid}thead{display:table-header-group}tr,img,svg{break-inside:avoid}}'
     + '.doc-head{display:flex;justify-content:space-between;gap:12px;font:11px/1.3 system-ui,sans-serif;color:#333;border-bottom:1.5px solid #0E6E7E;padding:0 0 6px;margin:0 0 14px}table{border-collapse:collapse}';
-  globalThis.docHead = title => `<div class="doc-head"><span><b>Kökzhol</b> · Olymp Logistic KZ</span><span>${esc(title)}</span><span>${fd(new Date().toISOString())} · v${VERSION}</span></div>`;
+  globalThis.docHead = title => `<div class="doc-head"><span><b>Kökzhol</b> · Olymp Logistic KZ</span><span>${esc(title)}</span><span>${fd(clockNow().toISOString())} · v${VERSION}</span></div>`;
 
   /* ---------- FR-225 offline demo: register sw.js (versioned cache, see platform-src/delivery.mjs) ---------- */
   /* why not: '' = register; 'frame' (test harness iframes), 'tests', 'file', 'dev' (localhost without ?sw=1), 'unsupported' */

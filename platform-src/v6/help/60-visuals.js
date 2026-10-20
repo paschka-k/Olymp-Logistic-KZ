@@ -8,9 +8,10 @@
    Texts are quads [ru, de, en, kk] (or T() strings); DE / EN never contain Cyrillic. Colours via tokens in app.css ("Q1 animated help figures"). */
 (function () {
   const RM = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const rmNow = () => (typeof a11yReducedMotion === 'function' ? a11yReducedMotion() : RM);   // FR-219: the in-app "Reduced motion" switch wins
   const t = a => tx(a), E = a => esc(tx(a)), f = n => Math.round(n * 10) / 10;
   const HV = HELP.hv = { defs: {}, timers: new Map(), RM };
-  const stOf = id => { S.hv = S.hv || {}; const d = HV.defs[id]; return (S.hv[id] = S.hv[id] || { i: 0, run: !RM && !!d && d.steps.length > 1 }); };
+  const stOf = id => { S.hv = S.hv || {}; const d = HV.defs[id]; return (S.hv[id] = S.hv[id] || { i: 0, run: !rmNow() && !!d && d.steps.length > 1 }); };
   HELP.fig = (id, def) => { HV.defs[id] = def; HELP.visuals[id] = () => figHtml(id); };
   HELP.hvTimers = () => HV.timers.size;
 

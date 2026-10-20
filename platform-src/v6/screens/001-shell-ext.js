@@ -135,7 +135,7 @@
     }
     if (e.key !== 'Escape') return;
     if (typeof HELP !== 'undefined' && HELP.tour) return;   // 70-tours.js handles its own Escape
-    if (S.diag) { S.diag = null; render(); } else if (S.drawer) closeDrawer(); else if (S.tbMore) { S.tbMore = false; render(); } else if (S.sideOpen) { S.sideOpen = false; render(); }
+    if (S.kbd) { S.kbd = false; render(); } else if (S.diag) { S.diag = null; render(); } else if (S.drawer) closeDrawer(); else if (S.tbMore) { S.tbMore = false; render(); } else if (S.sideOpen) { S.sideOpen = false; render(); }
   });
 
   /* ---------- 4. phone bottom bar: 4 screens per role (0.3.10 BOTTOM map translated to the v6 sections) ---------- */
