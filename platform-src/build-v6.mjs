@@ -7,6 +7,7 @@ import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync } from 
 import { execSync } from 'node:child_process';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { whatsNewData, optimiseAssets, finishDelivery } from './delivery.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
@@ -23,9 +24,14 @@ const rolePerms = rd('v6', 'role-perms.json').trim();
 const reg = JSON.parse(readFileSync(join(here, '..', 'docs', 'source-platform', 'register.json'), 'utf8'));
 const regFor = lang => { const L = lang === 'kk' ? 'ru' : lang; return JSON.stringify({ as_of: reg.as_of, n: reg.entries.length, entries: reg.entries.map(e => ({ id: e.id, type: e.type, date: e.date || e.date_approx || '', status: e.status, group: (e.group || {})[L] || (e.group || {}).en || '', module: e.module || '', title: (e[L] || e.en || {}).title || '', change: (e[L] || e.en || {}).change || '', finding: (e[L] || e.en || {}).finding || '' })) }); };
 mkdirSync(outDir, { recursive: true });
+// S2 delivery: What's new data (FR-223, @@WHATSNEW@@), optimised assets (FR-196) before the pages reference them
+const whatsNew = JSON.stringify(whatsNewData(join(here, '..')));
+const VERSION = (rd('v6', 'roles.js').match(/VERSION = '([^']+)'/) || [])[1] || '6';
+if (existsSync(join(outDir, 'assets'))) optimiseAssets(outDir);
+const preload = '<link rel="preload" as="image" type="image/svg+xml" href="assets/brand/kokzhol-mark-on-ink.svg">';
 for (const lang of langs) {
-  const code = js.replaceAll('@@LANG@@', lang).replaceAll('@@BUILD@@', build).replaceAll('@@ROLEPERMS@@', rolePerms).replaceAll('@@REGISTER@@', () => regFor(lang)).replace(/<\/script/gi, '<\\/script');
-  const html = `<!doctype html><html lang="${lang}" data-design="kokzhol"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kökzhol · Platform v6 (${lang})</title><link rel="icon" type="image/svg+xml" href="assets/brand/kokzhol-favicon.svg"><style>\n${css}\n</style></head><body><a class="skip" href="#main-content">Skip to content</a><div id="root"></div><script>\n${code}\n</script></body></html>\n`;
+  const code = js.replaceAll('@@LANG@@', lang).replaceAll('@@BUILD@@', build).replaceAll('@@ROLEPERMS@@', rolePerms).replaceAll('@@REGISTER@@', () => regFor(lang)).replaceAll('@@WHATSNEW@@', () => whatsNew).replace(/<\/script/gi, '<\\/script');
+  const html = `<!doctype html><html lang="${lang}" data-design="kokzhol"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kökzhol · Platform v6 (${lang})</title><link rel="icon" type="image/svg+xml" href="assets/brand/kokzhol-favicon.svg">${preload}<style>\n${css}\n</style></head><body><a class="skip" href="#main-content">Skip to content</a><div id="root"></div><script>\n${code}\n</script></body></html>\n`;
   const file = join(outDir, lang === 'ru' ? 'index.html' : `${lang}.html`);
   writeFileSync(file, html);
   console.log(`${lang}: ${file} (${(html.length / 1024).toFixed(0)} KB)`);
@@ -34,3 +40,4 @@ for (const lang of langs) {
 const suites = list('tests', '.js').map(f => rd('tests', f)).join('\n');
 writeFileSync(join(outDir, 'tests.html'), rd('tests', 'template.html').replace('/*@@SUITES@@*/', () => suites));
 console.log(`tests: ${list('tests', '.js').length} suites -> ${join(outDir, 'tests.html')}`);
+if (existsSync(join(outDir, 'assets'))) finishDelivery(outDir, { version: VERSION, pages: langs.map(l => (l === 'ru' ? 'index.html' : `${l}.html`)).concat('tests.html') });

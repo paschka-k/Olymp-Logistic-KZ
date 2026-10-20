@@ -143,7 +143,7 @@ ${howNote('tariff')}<div class="card tcard"><table class="table"><thead><tr><th>
     const html = view === 'info' ? info : view === 'offer' ? `<div class="drawer-section">${offerDoc(b, { k: 'doc' })}</div>` : `<div class="drawer-section">${docCert(b)}<button class="btn grey" style="margin-top:12px" data-act="bkPrint" data-id="${b.id}" data-v="cert">${esc(T('Печать / PDF', 'Drucken / PDF', 'Print / PDF', 'Басып шығару / PDF'))}</button></div>`;
     return { title: b.id + ' · ' + c.name, html: bar + html, xl: view !== 'info' };
   };
-  const printDoc = (name, html) => recDl(name, '<!doctype html><meta charset="utf-8"><title>' + esc(name) + '</title><body style="font-family:sans-serif;max-width:900px;margin:24px auto">' + html, 'text/html');
+  const printDoc = (name, html) => recDl(name, '<!doctype html><meta charset="utf-8"><title>' + esc(name) + '</title><style>' + (globalThis.DOC_PRINT_CSS || '') + '</style><body style="font-family:sans-serif;max-width:900px;margin:24px auto">' + (globalThis.docHead ? docHead(name) : '') + html, 'text/html');
   Object.assign(ACT, {
     bkOpen: d => openDrawer({ type: 'booking', id: d.id, view: 'info' }),
     bkView: d => { S.drawer.view = d.v; render(); },
