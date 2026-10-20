@@ -1,4 +1,4 @@
-<!doctype html><html lang="de" data-design="kokzhol"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kökzhol · Platform v6 (de)</title><link rel="icon" type="image/svg+xml" href="assets/brand/kokzhol-favicon.svg"><style>
+<!doctype html><html lang="de" data-design="kokzhol"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kökzhol · Platform v6 (de)</title><link rel="icon" type="image/svg+xml" href="assets/brand/kokzhol-favicon.svg"><link rel="preload" as="image" type="image/svg+xml" href="assets/brand/kokzhol-mark-on-ink.svg"><style>
 /* ==========================================================================
    part-D-tokens.css  -  FleetFlow-style design tokens (light theme)
    Source: pixel measurements of 2026-10-18_SampleStructure_Aufzeichnung.mp4
@@ -692,6 +692,35 @@ html[data-design="kokzhol"] .side-link{color:#c9d8df}html[data-design="kokzhol"]
 .table .lv-in{width:100%;min-width:56px;height:26px;border:1px solid var(--border);border-radius:6px;padding:0 6px;font:inherit;font-size:12px;background:var(--bg-surface);color:var(--text)}
 @media (max-width:700px){.lv-bar .lv-name{max-width:none;flex:1 1 140px}.lv-bar .lv-n{margin-left:0;width:100%}}
 
+/* ===== S2 · FR-223 What's new (sidebar link + drawer) ===== */
+.wn-link{cursor:pointer;white-space:nowrap;position:relative}.wn-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--warning,#d97706);margin-left:4px;vertical-align:middle}
+.wn .wn-links{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}.wn .wn-links a.btn{text-decoration:none}
+.wn-rel{border-top:1px solid var(--border,#e5e7eb);padding:10px 0 4px}.wn-rel h3{margin:0 0 4px;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.wn-rel h3 small{color:var(--text-muted);font-weight:400}
+.wn-rel p{margin:0 0 6px;color:var(--text-muted)}.wn-rel ul{margin:0;padding-left:18px}.wn-rel li{margin:3px 0}.wn-rel li small{color:var(--text-muted)}
+
+/* ===== S2 · FR-224 print / PDF: A4, print-only header, no navigation, sensible page breaks; an open drawer (document, trip sheet,
+   report) is printed on its own. Stand-alone exported documents use DOC_PRINT_CSS (990-delivery.js). ===== */
+.print-head{display:none}
+@page{size:A4;margin:14mm 12mm 16mm}
+@media print{
+  html,body{background:#fff!important;color:#000!important;height:auto!important}
+  .sidebar,.topbar,.side-back,.toast,.skip,.live-badge,.pill-tabs,.page-head .actions,.btn,.bottombar,.tb-x,.burger,.drawer-head .x,.help-q,.help-nav,.diag-pop,.login-layer,.tour-layer,.alarm-banner,.demo-bar,.pager,[data-act="close"]{display:none!important}
+  .app{display:block!important;height:auto!important}
+  main{display:block!important;overflow:visible!important;height:auto!important;padding:0!important;margin:0!important}
+  .content{padding:0!important;overflow:visible!important}.page-head{padding:0 0 8px!important}
+  .print-head{display:flex!important;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:1.5px solid #0E6E7E;padding:0 0 6px;margin:0 0 10px;font:11px/1.3 system-ui,sans-serif;color:#333}
+  .print-head .ph-title{font-weight:600}
+  .card,.kpi-tile,.drawer-section,figure{break-inside:avoid;box-shadow:none!important}
+  .card,.content [style*="overflow"]{overflow:visible!important}
+  table{width:100%!important}thead{display:table-header-group}tr,img,svg{break-inside:avoid}h1,h2,h3,h4{break-after:avoid}
+  .print-break{break-before:page}
+  .app:has(.drawer.open) main>:not(.print-head){display:none!important}
+  .drawer.open{position:static!important;inset:auto!important;width:auto!important;max-width:none!important;height:auto!important;box-shadow:none!important;transform:none!important;overflow:visible!important;border:0!important}
+  .drawer-head{font-size:16px;font-weight:700;padding:0 0 8px!important;border:0!important}
+  a[href]{color:inherit;text-decoration:none}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+
 </style></head><body><a class="skip" href="#main-content">Skip to content</a><div id="root"></div><script>
 /* v6 core: i18n, helpers, icons, store + dispatch rules, shell, drawer, router. */
 const LANG = 'de';
@@ -914,7 +943,7 @@ const alertsCount = () => S.loads.filter(l => tempState(l) === 'breach' && isAct
 function shell() {
   const sc = SCREENS[S.route];
   const nav = navItems().map(n => `<div class="nav-item${n[0] === S.route ? ' active' : ''}" data-act="go" data-v="${n[0]}">${ic(n[1])}<span>${esc(n[2])}</span>${NAV_BADGE[n[0]] && NAV_BADGE[n[0]]() ? `<span class="badge-count nav-n">${NAV_BADGE[n[0]]()}</span>` : ''}</div>`).join('');
-  const ver = `<div class="ver"><a data-act="go" data-v="changes">v${VERSION}</a> · ${esc(BUILD)}</div>`;
+  const ver = `<div class="ver"><a data-act="go" data-v="changes">v${VERSION}</a> · ${esc(BUILD)}${typeof wnLink === 'function' ? ' · ' + wnLink() : ''}</div>`;
   const lang = ['ru', 'de', 'en', 'kk'].map(l => `<a href="${fileFor(l)}"${l === LANG ? ' class="on"' : ''}>${l.toUpperCase()}</a>`).join('');
   const body = sc ? screenBody(S.route) : placeholder(S.route);
   const title = sc ? sc.title() : navLabel(S.route);
@@ -933,10 +962,10 @@ ${shellRole ? '' : `<a class="side-link${S.route === 'help' ? ' on' : ''}" data-
   const USER = { admin: ['Sarah Johnson', 'SJ'], dispatcher: [nm('Айгерим Сапарова'), nm('АС')], warehouse: [nm('Болат Ермеков'), nm('БЕ')], driver: [nm('Ерлан Сейтқали'), nm('ЕС')], auditor: ['Olga Berg', 'OB'], viewer: ['Timur Akhmetov', 'TA'], manager: ['Max Keller', 'MK'], finance: [nm('Дана Жумабаева'), nm('ДЖ')], quality: ['Anna Schulz', 'AS'], customer: [nm('ТОО «Аптека Сервис»'), nm('АС')], partner: [nm('ТОО «ТрансХолод»'), nm('ТХ')] };
   const usr = USER[S.role] || USER.admin;
   return `<div class="app"><aside class="sidebar${S.sideOpen ? ' open' : ''}">${brand}${nav}${tools}${typeof shellSideExtra === 'function' ? shellSideExtra() : ''}${liveBadge()}<div class="langs">${lang}</div>${ver}</aside>
-<main id="main-content"><header class="topbar"><button class="burger" data-act="sideTog" aria-label="Menu" aria-expanded="${S.sideOpen ? 'true' : 'false'}">☰</button><span class="crumb"><a class="lnk" data-act="go" data-v="${homeRoute()}" role="link" tabindex="0">${esc(navLabel(homeRoute()))}</a> › <a class="lnk" data-act="crumb" role="link" tabindex="0"><b>${esc(navLabel(S.route))}</b></a></span>
+<main id="main-content">${typeof printHead === 'function' ? printHead() : ''}<header class="topbar"><button class="burger" data-act="sideTog" aria-label="Menu" aria-expanded="${S.sideOpen ? 'true' : 'false'}">☰</button><span class="crumb"><a class="lnk" data-act="go" data-v="${homeRoute()}" role="link" tabindex="0">${esc(navLabel(homeRoute()))}</a> › <a class="lnk" data-act="crumb" role="link" tabindex="0"><b>${esc(navLabel(S.route))}</b></a></span>
 <div class="who">${typeof shellSearchBox === 'function' ? shellSearchBox() : `<label class="searchbox">${ic('search', 14)}<input id="gsearch" placeholder="${esc(T('Поиск рейсов, ТС, водителей…', 'Fahrten, Fahrzeuge, Fahrer suchen…', 'Search loads, trucks, drivers…', 'Рейс, КҚ, жүргізуші іздеу…'))}" value="${esc(S.f.q)}"></label>`}${typeof shellTopExtra === 'function' ? shellTopExtra() : ''}
 <button type="button" class="btn grey sm tb-morebtn" data-act="tbMore" aria-expanded="${S.tbMore ? 'true' : 'false'}" aria-label="${esc(T('Ещё: хаб, время, роль, тема', 'Mehr: Hub, Uhrzeit, Rolle, Design', 'More: hub, time, role, theme', 'Тағы: хаб, уақыт, рөл, тақырып'))}">⋯</button><div class="tb-x${S.tbMore ? ' open' : ''}">${typeof shellTopMore === 'function' ? shellTopMore() : ''}
-<label class="rolebox" title="${esc(T('Переключить роль: меню и права меняются сразу', 'Rolle wechseln: Menü und Rechte ändern sich sofort', 'Switch the role: menu and permissions change at once', 'Рөлді ауыстыру'))}">${ic('user', 14)}<span>${esc(T('Роль', 'Rolle', 'Role', 'Рөл'))}</span><select id="roleSel" class="select" aria-label="Role" style="height:32px">${ROLES.map(r => `<option value="${r}"${r === S.role ? ' selected' : ''}>${esc(ROLE_NAME[r])}</option>`).join('')}</select></label><button class="btn grey sm design-btn" data-act="setDesign" title="${S.design === 'kokzhol' ? 'Kökzhol → Olymp' : 'Olymp → Kökzhol'}">${S.design === 'olymp' ? '◐' : '◑'}</button></div><button class="btn grey sm help-top" data-act="helpHere" aria-label="Help" title="${esc(T('Справка по этому экрану', 'Hilfe zu diesem Bildschirm', 'Help for this screen', 'Осы экран анықтамасы'))}">?</button><span class="bell">${ic('bell', 18)}${alertsCount() ? `<span class="badge-count">${alertsCount()}</span>` : ''}</span>
+<label class="rolebox" title="${esc(T('Переключить роль: меню и права меняются сразу', 'Rolle wechseln: Menü und Rechte ändern sich sofort', 'Switch the role: menu and permissions change at once', 'Рөлді ауыстыру'))}">${ic('user', 14)}<span>${esc(T('Роль', 'Rolle', 'Role', 'Рөл'))}</span><select id="roleSel" class="select" aria-label="Role" style="height:32px">${ROLES.map(r => `<option value="${r}"${r === S.role ? ' selected' : ''}>${esc(ROLE_NAME[r])}</option>`).join('')}</select></label><button class="btn grey sm design-btn" data-act="setDesign" title="${S.design === 'kokzhol' ? 'Kökzhol → Olymp' : 'Olymp → Kökzhol'}">${S.design === 'olymp' ? '◐' : '◑'}</button>${typeof printBtn === 'function' ? printBtn() : ''}</div><button class="btn grey sm help-top" data-act="helpHere" aria-label="Help" title="${esc(T('Справка по этому экрану', 'Hilfe zu diesem Bildschirm', 'Help for this screen', 'Осы экран анықтамасы'))}">?</button><span class="bell">${ic('bell', 18)}${alertsCount() ? `<span class="badge-count">${alertsCount()}</span>` : ''}</span>
 <div class="usr" data-act="go" data-v="account" role="link" tabindex="0" title="${esc(T('Мой аккаунт', 'Mein Konto', 'My account', 'Менің аккаунтым'))}"><b>${esc(usr[0])}</b><small>${esc(ROLE_NAME[S.role])}</small></div><span class="avatar" style="background:var(--primary)">${esc(usr[1])}</span></div></header>
 <div class="page-head"><div>${typeof shellEyebrow === 'function' ? shellEyebrow() : ''}<h1 class="page-title">${esc(title)}</h1>${sc && sc.sub ? `<p class="page-sub">${esc(sc.sub())}</p>` : ''}</div><div class="actions">${sc && sc.actions ? sc.actions() : ''}</div></div>
 <div class="content">${body}</div></main>${S.sideOpen ? '<div class="side-back" data-act="sideTog"></div>' : ''}${typeof shellOverlays === 'function' ? shellOverlays() : ''}${drawerHtml()}${S.toast ? `<div class="toast ${S.toast.kind}">${esc(S.toast.msg)}</div>` : ''}</div>`;
@@ -1010,7 +1039,7 @@ Object.assign(ACT, {
 
 /* Roles & permissions (FR-14/137): 11 roles, permission matrix generated from the source platform (role-perms.json),
    screen / tab gating, role shells (driver, customer, partner use their own menu), role switcher. */
-const VERSION = '6.2.1', BUILD = '2026-10-20 21:20';
+const VERSION = '6.2.1', BUILD = '2026-10-20 21:27';
 const ROLES = ['admin', 'dispatcher', 'warehouse', 'driver', 'auditor', 'viewer', 'manager', 'finance', 'quality', 'customer', 'partner'];
 const ROLE_NAME = {
   admin: T('Администратор', 'Administrator', 'Administrator', 'Әкімші'), dispatcher: T('Диспетчер', 'Disponent', 'Dispatcher', 'Диспетчер'), warehouse: T('Склад', 'Lager', 'Warehouse', 'Қойма'),
@@ -4699,7 +4728,7 @@ ${rc.map(r => `<div class="lw-row" style="grid-template-columns:80px minmax(0,1f
     return chips() + typeCard(l, p, r) + `<div class="lw-grid" style="margin-top:16px">${ordersCard(l, p, r)}${diagramCard(l, p, r)}</div><div class="lw-grid" style="margin-top:16px">${barsCard(l, p, r)}<div>${cogCard(l, p, r)}<div style="margin-top:16px">${reconCard(l)}</div><div style="margin-top:16px">${weighCard(l)}</div></div></div><div style="margin-top:16px">${matchCard(l)}</div><div style="margin-top:16px">${finderCard(l)}</div><div style="margin-top:16px">${seqCard(l, p)}</div>`;
   }
   addTab('orders', 'loadw', T('Загрузка и вес', 'Beladung und Gewicht', 'Load & weight', 'Тиеу және салмақ'), body, { perm: 'orders:read', badge: () => S.loads.filter(l => ['assigned', 'loading'].includes(l.status) && !recon(l).every(r => r.ok)).length });
-  const seqHtml = (l, p) => { const sq = sequence(l, p); return `<!doctype html><html><head><meta charset="utf-8"><title>${l.id}</title><style>body{font:13px system-ui;margin:24px}table{border-collapse:collapse}td,th{border:1px solid #999;padding:4px 8px}</style></head><body><h2>${esc(T('Порядок погрузки', 'Ladereihenfolge', 'Loading sequence', 'Тиеу реті'))} · ${l.id} · ${esc(p.label)}</h2><table><tr><th>#</th><th>${esc(T('Позиция', 'Platz', 'Position', 'Орын'))}</th><th>${esc(T('Зона', 'Zone', 'Zone', 'Аймақ'))}</th><th>${esc(T('Заказ', 'Auftrag', 'Order', 'Тапсырыс'))}</th><th>${esc(T('Выгрузка', 'Entladung', 'Unloading', 'Түсіру'))}</th><th>SSCC</th><th>✓</th></tr>${sq.rows.map(r => `<tr><td>${r.n}</td><td>${esc(r.pos)}</td><td>${esc(r.zone)}</td><td>${r.id}</td><td>${esc(r.stop)}</td><td>${r.sscc}</td><td>☐</td></tr>`).join('')}</table></body></html>`; };
+  const seqHtml = (l, p) => { const sq = sequence(l, p); return `<!doctype html><html><head><meta charset="utf-8"><title>${l.id}</title><style>body{font:13px system-ui;margin:24px}table{border-collapse:collapse}td,th{border:1px solid #999;padding:4px 8px}${globalThis.DOC_PRINT_CSS || ''}</style></head><body>${globalThis.docHead ? docHead(T('Порядок погрузки', 'Ladereihenfolge', 'Loading sequence', 'Тиеу реті') + ' · ' + l.id) : ''}<h2>${esc(T('Порядок погрузки', 'Ladereihenfolge', 'Loading sequence', 'Тиеу реті'))} · ${l.id} · ${esc(p.label)}</h2><table><tr><th>#</th><th>${esc(T('Позиция', 'Platz', 'Position', 'Орын'))}</th><th>${esc(T('Зона', 'Zone', 'Zone', 'Аймақ'))}</th><th>${esc(T('Заказ', 'Auftrag', 'Order', 'Тапсырыс'))}</th><th>${esc(T('Выгрузка', 'Entladung', 'Unloading', 'Түсіру'))}</th><th>SSCC</th><th>✓</th></tr>${sq.rows.map(r => `<tr><td>${r.n}</td><td>${esc(r.pos)}</td><td>${esc(r.zone)}</td><td>${r.id}</td><td>${esc(r.stop)}</td><td>${r.sscc}</td><td>☐</td></tr>`).join('')}</table></body></html>`; };
   const whatIf = (o, d) => { o.type = d.v; o.zones = d.z != null && d.z !== '' ? +d.z : null; o.split = d.s != null && d.s !== '' && +d.z === 2 ? +d.s : null; o.regime = null; };
   Object.assign(ACT, {
     lwSel: d => { S.ops.sel = d.id; S.ops.seqMsg = null; S.ops.weighMsg = null; render(); },
@@ -4903,7 +4932,7 @@ ${S.ops.zpl ? `<pre class="sh-zpl" data-zpl="1">${esc(L.zpl)}</pre>` : ''}
   globalThis.docGen = docGen;
   const docLoads = () => S.loads.filter(l => l.status !== 'unassigned');
   const curLoad = () => { const v = docLoads(); let l = v.find(x => x.id === S.ops.docSel); if (!l) { l = v.find(x => x.status === 'loading') || v[0]; S.ops.docSel = l && l.id; } return l; };
-  const pdfHtml = (l, name) => `<!doctype html><html><head><meta charset="utf-8"><title>${esc(name)} · ${l.id}</title><style>body{font:13px system-ui;margin:32px}h1{font-size:18px}table{border-collapse:collapse}td{border:1px solid #999;padding:4px 10px}</style></head><body><h1>${esc(name)} · ${l.id}</h1><p>ТОО «Олимп Логистик KZ» · БИН 190340012345</p><table><tr><td>${esc(T('Грузоотправитель', 'Absender', 'Consignor', 'Жүк жөнелтуші'))}</td><td>${esc(HUBS[l.from].name)}</td></tr><tr><td>${esc(T('Грузополучатель', 'Empfänger', 'Consignee', 'Жүк алушы'))}</td><td>${esc(cust(l.cust).name)} · ${esc(HUBS[l.to].city)}</td></tr><tr><td>${esc(T('ТС / водитель', 'Fahrzeug / Fahrer', 'Truck / driver', 'КҚ / жүргізуші'))}</td><td>${esc(trk(l.truck).plate)} · ${esc(drv(l.driver).name)}</td></tr><tr><td>${esc(T('Груз', 'Ladung', 'Cargo', 'Жүк'))}</td><td>${l.pallets} ${esc(T('пал.', 'Pal.', 'pal.', 'пал.'))} · ${l.kg} ${esc(T('кг', 'kg', 'kg', 'кг'))} · ${ZONES[l.zone].label}</td></tr>${ops(l).orders.map(o => `<tr><td>${o.id}</td><td>${esc(o.to)} · ${o.pal} ${esc(T('пал.', 'Pal.', 'pal.', 'пал.'))} · ${o.places.length} SSCC</td></tr>`).join('')}</table><p>${esc(T('Демонстрационная форма; формы и обязательность проверить с юристом и налоговым консультантом РК.', 'Demoformular; Formulare und Pflicht mit Anwalt und Steuerberater in KZ prüfen.', 'Demo form; verify forms and requirements with a KZ lawyer and tax adviser.', 'Демо нысан; заңгермен тексеріңіз.'))}</p></body></html>`;
+  const pdfHtml = (l, name) => `<!doctype html><html><head><meta charset="utf-8"><title>${esc(name)} · ${l.id}</title><style>body{font:13px system-ui;margin:32px}h1{font-size:18px}table{border-collapse:collapse}td{border:1px solid #999;padding:4px 10px}${globalThis.DOC_PRINT_CSS || ''}</style></head><body>${globalThis.docHead ? docHead(name + ' · ' + l.id) : ''}<h1>${esc(name)} · ${l.id}</h1><p>ТОО «Олимп Логистик KZ» · БИН 190340012345</p><table><tr><td>${esc(T('Грузоотправитель', 'Absender', 'Consignor', 'Жүк жөнелтуші'))}</td><td>${esc(HUBS[l.from].name)}</td></tr><tr><td>${esc(T('Грузополучатель', 'Empfänger', 'Consignee', 'Жүк алушы'))}</td><td>${esc(cust(l.cust).name)} · ${esc(HUBS[l.to].city)}</td></tr><tr><td>${esc(T('ТС / водитель', 'Fahrzeug / Fahrer', 'Truck / driver', 'КҚ / жүргізуші'))}</td><td>${esc(trk(l.truck).plate)} · ${esc(drv(l.driver).name)}</td></tr><tr><td>${esc(T('Груз', 'Ladung', 'Cargo', 'Жүк'))}</td><td>${l.pallets} ${esc(T('пал.', 'Pal.', 'pal.', 'пал.'))} · ${l.kg} ${esc(T('кг', 'kg', 'kg', 'кг'))} · ${ZONES[l.zone].label}</td></tr>${ops(l).orders.map(o => `<tr><td>${o.id}</td><td>${esc(o.to)} · ${o.pal} ${esc(T('пал.', 'Pal.', 'pal.', 'пал.'))} · ${o.places.length} SSCC</td></tr>`).join('')}</table><p>${esc(T('Демонстрационная форма; формы и обязательность проверить с юристом и налоговым консультантом РК.', 'Demoformular; Formulare und Pflicht mit Anwalt und Steuerberater in KZ prüfen.', 'Demo form; verify forms and requirements with a KZ lawyer and tax adviser.', 'Демо нысан; заңгермен тексеріңіз.'))}</p></body></html>`;
   function docsCard(l) {
     const o = ops(l), set = docSet(l);
     const rows = set.map(d => `<div class="dk-row" data-doc="${d.k}" data-st="${d.st}"><span><b>${esc(d.name)}</b><div class="sub">${esc(d.sub || SUB)}${d.send ? ' · ' + esc(T('передаётся в ', 'geht an ', 'sent to ', 'жіберіледі: ')) + esc(SND(d.send)) : ''}${d.k === 'esf' && l.esf !== 'none' ? ' · ' + chip(ESF[l.esf].c, ESF[l.esf].l) : ''}</div></span><span>${chip(d.chip[0], d.chip[1])}</span><span class="btns">
@@ -6969,7 +6998,7 @@ ${howNote('tariff')}<div class="card tcard"><table class="table"><thead><tr><th>
     const html = view === 'info' ? info : view === 'offer' ? `<div class="drawer-section">${offerDoc(b, { k: 'doc' })}</div>` : `<div class="drawer-section">${docCert(b)}<button class="btn grey" style="margin-top:12px" data-act="bkPrint" data-id="${b.id}" data-v="cert">${esc(T('Печать / PDF', 'Drucken / PDF', 'Print / PDF', 'Басып шығару / PDF'))}</button></div>`;
     return { title: b.id + ' · ' + c.name, html: bar + html, xl: view !== 'info' };
   };
-  const printDoc = (name, html) => recDl(name, '<!doctype html><meta charset="utf-8"><title>' + esc(name) + '</title><body style="font-family:sans-serif;max-width:900px;margin:24px auto">' + html, 'text/html');
+  const printDoc = (name, html) => recDl(name, '<!doctype html><meta charset="utf-8"><title>' + esc(name) + '</title><style>' + (globalThis.DOC_PRINT_CSS || '') + '</style><body style="font-family:sans-serif;max-width:900px;margin:24px auto">' + (globalThis.docHead ? docHead(name) : '') + html, 'text/html');
   Object.assign(ACT, {
     bkOpen: d => openDrawer({ type: 'booking', id: d.id, view: 'info' }),
     bkView: d => { S.drawer.view = d.v; render(); },
@@ -10207,6 +10236,111 @@ ${a.extra.length ? `<p class="note">${esc(T('Лишние места от вод
     r5NtfTest: d => { const l = S.loads.find(x => x.cust === d.id && isActive(x)) || S.loads.find(x => x.cust === d.id); if (!l) return toast(T('У клиента нет рейса', 'Kunde hat keine Fahrt', 'Customer has no load', 'Клиентте рейс жоқ'), 'err'); const out = ntfSend(l, 'eta'); AUD('Notifications', l.id, 'ETA sent', out.map(m => m.ch).join('+')); toast(T('Отправлено: ', 'Gesendet: ', 'Sent: ', 'Жіберілді: ') + out.map(m => CH[m.ch]).join(', ')); },
     r5TplLang: d => { N.prev = d.v; render(); },
   });
+})();
+
+/* S2 · Delivery: FR-223 What's new panel, FR-224 print / PDF (A4), FR-225 offline demo (service worker registration), FR-196 WebP logos.
+   Hooks used by core.js: wnLink() (sidebar version line), printHead() (print-only header in <main>), printBtn() (top bar, behind "⋯" on narrow windows).
+   Build side: platform-src/delivery.mjs (TRACEABILITY.md -> {"releases":[{"v":"next","date":""},{"v":"6.2.1","date":"2026-10-20"},{"v":"6.2.0","date":"2026-10-20"},{"v":"6.1.0","date":"2026-10-19"},{"v":"6.0.0","date":"2026-10-19"}],"streams":[{"k":"W1","h":"Operations flow (LH-B, C, D, H, N1, O1)","rows":29,"frs":["FR-01","FR-02","FR-03","FR-04","FR-05","FR-06","FR-09","FR-11","FR-12","FR-38","FR-41","FR-73","FR-91","FR-92","FR-93","FR-94","FR-99","FR-114","FR-116","FR-119","FR-126","FR-139","FR-140","FR-143","FR-144","FR-145","FR-146","FR-154","FR-156","FR-176"],"v":"6.1.0"},{"k":"W2","h":"Resources & driver app","rows":25,"frs":["FR-08","FR-10","FR-27","FR-39","FR-40","FR-46","FR-50","FR-52","FR-53","FR-54","FR-55","FR-56","FR-57","FR-58","FR-59","FR-60","FR-61","FR-62","FR-63","FR-64","FR-65","FR-66","FR-67","FR-83","FR-96","FR-97","FR-107","FR-108","FR-109","FR-110","FR-111","FR-114","FR-118","FR-120","FR-122","FR-123","FR-141","FR-155","FR-157","FR-158"],"v":"6.1.0"},{"k":"W3","h":"Records & administration","rows":10,"frs":["FR-14","FR-28","FR-78","FR-85","FR-101","FR-104","FR-105","FR-110","FR-135","FR-137","FR-153","FR-166","FR-167","FR-169","FR-173","FR-174","FR-176","FR-188","FR-190"],"v":"6.1.0"},{"k":"W4","h":"Customers & portals","rows":23,"frs":["FR-02","FR-30","FR-68","FR-112","FR-127","FR-146","FR-147","FR-148","FR-149","FR-150","FR-151","FR-152","FR-153","FR-154","FR-155","FR-172","FR-175","FR-185","FR-186","FR-187","FR-188","FR-189","FR-190"],"v":"6.1.0"},{"k":"W5","h":"Economics, reports & baseline data","rows":14,"frs":["FR-07","FR-35","FR-36","FR-37","FR-38","FR-41","FR-47","FR-48","FR-49","FR-85","FR-119","FR-122","FR-123","FR-125","FR-174"],"v":"6.1.0"},{"k":"W6","h":"Help & i18n","rows":8,"frs":["FR-14","FR-17","FR-41","FR-126","FR-132","FR-134","FR-135","FR-137","FR-154","FR-160","FR-170","FR-175"],"v":"6.1.0"},{"k":"P6","h":"Shell parity","rows":7,"frs":["FR-74","FR-131","FR-133","FR-134","FR-163","FR-175"],"v":"6.2.0"},{"k":"P1","h":"Load & weight parity","rows":11,"frs":["FR-05","FR-06","FR-17","FR-73","FR-99","FR-135","FR-140","FR-142","FR-143","FR-146"],"v":"6.2.0"},{"k":"P2","h":"Dashboard, dispatcher, trips, documents","rows":15,"frs":["FR-11","FR-12","FR-33","FR-34","FR-43","FR-44","FR-51","FR-91","FR-92","FR-94","FR-96","FR-98","FR-99","FR-101","FR-116","FR-138","FR-173","FR-175"],"v":"6.2.0"},{"k":"P3","h":"Routes parity","rows":12,"frs":["FR-16","FR-39","FR-40","FR-42","FR-102","FR-105","FR-106","FR-109","FR-110","FR-111"],"v":"6.2.0"},{"k":"P4","h":"Fleet, Staff, Partners parity","rows":17,"frs":["FR-10","FR-21","FR-38","FR-52","FR-82","FR-108","FR-117","FR-121"],"v":"6.2.0"},{"k":"P5","h":"Reports, Costs, Quality parity","rows":11,"frs":["FR-07","FR-11","FR-46","FR-64","FR-116","FR-125"],"v":"6.2.0"},{"k":"Q1","h":"Animated help diagrams","rows":8,"frs":["FR-138"],"v":"6.2.0"},{"k":"Q2","h":"UI language consistency","rows":4,"frs":[],"v":"6.2.0"},{"k":"Q3","h":"Explanatory notes parity","rows":8,"frs":[],"v":"6.2.0"},{"k":"Q4","h":"Narrow-window layout","rows":7,"frs":["FR-133","FR-163"],"v":"6.2.0"},{"k":"R3","h":"Hub inbound (I-1…I-7)","rows":8,"frs":[],"v":"next"},{"k":"R4","h":"SLA, winter rules, express overlap, views","rows":10,"frs":[],"v":"next"},{"k":"R5","h":"Driver, partner, network ideas","rows":7,"frs":["FR-68","FR-70","FR-188","FR-189"],"v":"next"},{"k":"R1","h":"Mirror 0.3.9 operations","rows":67,"frs":["FR-105","FR-114","FR-136"],"v":"next"},{"k":"R2","h":"Mirror 0.3.9 resources and economics","rows":69,"frs":["FR-78","FR-83","FR-117","FR-124","FR-125","FR-141","FR-157","FR-172"],"v":"next"},{"k":"S2","h":"Delivery: assets, What's new, print, offline (wave 1 of docs/OPTIMISATION-FR.md)","rows":7,"frs":["FR-196","FR-223","FR-224","FR-225"],"v":"next"}]}, assets/manifest.json, sw.js). Tests: platform-src/tests/f0-delivery.js. */
+(() => {
+  /* ---------- FR-223 What's new: releases and streams generated from docs/TRACEABILITY.md at build time ---------- */
+  const WN = {"releases":[{"v":"next","date":""},{"v":"6.2.1","date":"2026-10-20"},{"v":"6.2.0","date":"2026-10-20"},{"v":"6.1.0","date":"2026-10-19"},{"v":"6.0.0","date":"2026-10-19"}],"streams":[{"k":"W1","h":"Operations flow (LH-B, C, D, H, N1, O1)","rows":29,"frs":["FR-01","FR-02","FR-03","FR-04","FR-05","FR-06","FR-09","FR-11","FR-12","FR-38","FR-41","FR-73","FR-91","FR-92","FR-93","FR-94","FR-99","FR-114","FR-116","FR-119","FR-126","FR-139","FR-140","FR-143","FR-144","FR-145","FR-146","FR-154","FR-156","FR-176"],"v":"6.1.0"},{"k":"W2","h":"Resources & driver app","rows":25,"frs":["FR-08","FR-10","FR-27","FR-39","FR-40","FR-46","FR-50","FR-52","FR-53","FR-54","FR-55","FR-56","FR-57","FR-58","FR-59","FR-60","FR-61","FR-62","FR-63","FR-64","FR-65","FR-66","FR-67","FR-83","FR-96","FR-97","FR-107","FR-108","FR-109","FR-110","FR-111","FR-114","FR-118","FR-120","FR-122","FR-123","FR-141","FR-155","FR-157","FR-158"],"v":"6.1.0"},{"k":"W3","h":"Records & administration","rows":10,"frs":["FR-14","FR-28","FR-78","FR-85","FR-101","FR-104","FR-105","FR-110","FR-135","FR-137","FR-153","FR-166","FR-167","FR-169","FR-173","FR-174","FR-176","FR-188","FR-190"],"v":"6.1.0"},{"k":"W4","h":"Customers & portals","rows":23,"frs":["FR-02","FR-30","FR-68","FR-112","FR-127","FR-146","FR-147","FR-148","FR-149","FR-150","FR-151","FR-152","FR-153","FR-154","FR-155","FR-172","FR-175","FR-185","FR-186","FR-187","FR-188","FR-189","FR-190"],"v":"6.1.0"},{"k":"W5","h":"Economics, reports & baseline data","rows":14,"frs":["FR-07","FR-35","FR-36","FR-37","FR-38","FR-41","FR-47","FR-48","FR-49","FR-85","FR-119","FR-122","FR-123","FR-125","FR-174"],"v":"6.1.0"},{"k":"W6","h":"Help & i18n","rows":8,"frs":["FR-14","FR-17","FR-41","FR-126","FR-132","FR-134","FR-135","FR-137","FR-154","FR-160","FR-170","FR-175"],"v":"6.1.0"},{"k":"P6","h":"Shell parity","rows":7,"frs":["FR-74","FR-131","FR-133","FR-134","FR-163","FR-175"],"v":"6.2.0"},{"k":"P1","h":"Load & weight parity","rows":11,"frs":["FR-05","FR-06","FR-17","FR-73","FR-99","FR-135","FR-140","FR-142","FR-143","FR-146"],"v":"6.2.0"},{"k":"P2","h":"Dashboard, dispatcher, trips, documents","rows":15,"frs":["FR-11","FR-12","FR-33","FR-34","FR-43","FR-44","FR-51","FR-91","FR-92","FR-94","FR-96","FR-98","FR-99","FR-101","FR-116","FR-138","FR-173","FR-175"],"v":"6.2.0"},{"k":"P3","h":"Routes parity","rows":12,"frs":["FR-16","FR-39","FR-40","FR-42","FR-102","FR-105","FR-106","FR-109","FR-110","FR-111"],"v":"6.2.0"},{"k":"P4","h":"Fleet, Staff, Partners parity","rows":17,"frs":["FR-10","FR-21","FR-38","FR-52","FR-82","FR-108","FR-117","FR-121"],"v":"6.2.0"},{"k":"P5","h":"Reports, Costs, Quality parity","rows":11,"frs":["FR-07","FR-11","FR-46","FR-64","FR-116","FR-125"],"v":"6.2.0"},{"k":"Q1","h":"Animated help diagrams","rows":8,"frs":["FR-138"],"v":"6.2.0"},{"k":"Q2","h":"UI language consistency","rows":4,"frs":[],"v":"6.2.0"},{"k":"Q3","h":"Explanatory notes parity","rows":8,"frs":[],"v":"6.2.0"},{"k":"Q4","h":"Narrow-window layout","rows":7,"frs":["FR-133","FR-163"],"v":"6.2.0"},{"k":"R3","h":"Hub inbound (I-1…I-7)","rows":8,"frs":[],"v":"next"},{"k":"R4","h":"SLA, winter rules, express overlap, views","rows":10,"frs":[],"v":"next"},{"k":"R5","h":"Driver, partner, network ideas","rows":7,"frs":["FR-68","FR-70","FR-188","FR-189"],"v":"next"},{"k":"R1","h":"Mirror 0.3.9 operations","rows":67,"frs":["FR-105","FR-114","FR-136"],"v":"next"},{"k":"R2","h":"Mirror 0.3.9 resources and economics","rows":69,"frs":["FR-78","FR-83","FR-117","FR-124","FR-125","FR-141","FR-157","FR-172"],"v":"next"},{"k":"S2","h":"Delivery: assets, What's new, print, offline (wave 1 of docs/OPTIMISATION-FR.md)","rows":7,"frs":["FR-196","FR-223","FR-224","FR-225"],"v":"next"}]};
+  const WN_T = {
+    W1: T('Операционный поток: погрузка, отгрузки, документы', 'Operativer Ablauf: Beladung, Sendungen, Dokumente', 'Operations flow: loading, shipments, documents', 'Операциялық ағын: тиеу, жөнелтімдер, құжаттар'),
+    W2: T('Ресурсы и приложение водителя', 'Ressourcen und Fahrer-App', 'Resources and driver app', 'Ресурстар және жүргізуші қосымшасы'),
+    W3: T('Журналы и администрирование', 'Register und Administration', 'Records and administration', 'Журналдар және әкімшілендіру'),
+    W4: T('Клиенты и порталы', 'Kunden und Portale', 'Customers and portals', 'Клиенттер мен порталдар'),
+    W5: T('Экономика, отчёты и исходные данные', 'Wirtschaftlichkeit, Berichte und Basisdaten', 'Economics, reports and baseline data', 'Экономика, есептер және бастапқы деректер'),
+    W6: T('Справка и языки', 'Hilfe und Sprachen', 'Help and languages', 'Анықтама және тілдер'),
+    P1: T('Погрузка и вес: паритет с 0.3.10', 'Beladung und Gewicht: Parität mit 0.3.10', 'Load and weight: parity with 0.3.10', 'Тиеу және салмақ: 0.3.10 паритеті'),
+    P2: T('Обзор, диспетчер, рейсы, документы', 'Übersicht, Disposition, Fahrten, Dokumente', 'Dashboard, dispatcher, trips, documents', 'Шолу, диспетчер, рейстер, құжаттар'),
+    P3: T('Маршруты: паритет с 0.3.10', 'Routen: Parität mit 0.3.10', 'Routes: parity with 0.3.10', 'Маршруттар: 0.3.10 паритеті'),
+    P4: T('Автопарк, персонал, партнёры', 'Fuhrpark, Personal, Partner', 'Fleet, staff, partners', 'Автопарк, персонал, серіктестер'),
+    P5: T('Отчёты, затраты, качество', 'Berichte, Kosten, Qualität', 'Reports, costs, quality', 'Есептер, шығындар, сапа'),
+    P6: T('Оболочка: поиск, тревоги, вход', 'Rahmen: Suche, Alarme, Anmeldung', 'Shell: search, alarms, sign-in', 'Қабық: іздеу, дабылдар, кіру'),
+    Q1: T('Анимированные схемы в справке', 'Animierte Hilfediagramme', 'Animated help diagrams', 'Анықтамадағы анимациялық сызбалар'),
+    Q2: T('Единый язык интерфейса', 'Einheitliche Oberflächensprache', 'One UI language', 'Интерфейс тілінің біркелкілігі'),
+    Q3: T('Пояснения на экранах', 'Erläuterungen auf den Screens', 'Explanatory notes on screens', 'Экрандардағы түсіндірмелер'),
+    Q4: T('Узкие окна и телефоны', 'Schmale Fenster und Telefone', 'Narrow windows and phones', 'Тар терезелер мен телефондар'),
+    R1: T('Сверка с 0.3.9: операции', 'Abgleich mit 0.3.9: Betrieb', 'Mirror of 0.3.9: operations', '0.3.9 салыстыру: операциялар'),
+    R2: T('Сверка с 0.3.9: ресурсы и экономика', 'Abgleich mit 0.3.9: Ressourcen und Wirtschaftlichkeit', 'Mirror of 0.3.9: resources and economics', '0.3.9 салыстыру: ресурстар және экономика'),
+    R3: T('Приёмка на хабе (I-1…I-7)', 'Hub-Wareneingang (I-1…I-7)', 'Hub inbound (I-1…I-7)', 'Хабта қабылдау (I-1…I-7)'),
+    R4: T('SLA, зимние правила, экспресс, представления', 'SLA, Winterregeln, Express, Ansichten', 'SLA, winter rules, express overlap, views', 'SLA, қысқы ережелер, экспресс, көріністер'),
+    R5: T('Идеи: водитель, партнёр, сеть', 'Ideen: Fahrer, Partner, Netz', 'Driver, partner and network ideas', 'Идеялар: жүргізуші, серіктес, желі'),
+    S1: T('CI и тестовая инфраструктура', 'CI und Testinfrastruktur', 'CI and test infrastructure', 'CI және тест инфрақұрылымы'),
+    S2: T('Поставка: ресурсы, «Что нового», печать, офлайн', 'Auslieferung: Assets, Neuigkeiten, Druck, offline', 'Delivery: assets, what\'s new, print, offline', 'Жеткізу: ресурстар, «Не жаңа», басып шығару, офлайн'),
+    S3: T('Доступность', 'Barrierefreiheit', 'Accessibility', 'Қолжетімділік'),
+    S4: T('Архитектура', 'Architektur', 'Architecture', 'Архитектура'),
+    S5: T('Производительность', 'Performance', 'Performance', 'Өнімділік'),
+    S6: T('Удобство работы', 'Bedienkomfort', 'User experience', 'Пайдаланушы тәжірибесі'),
+  };
+  const WN_R = {
+    next: T('Изменения после последнего выпуска (в разработке).', 'Änderungen seit der letzten Version (in Arbeit).', 'Changes since the last release (in progress).', 'Соңғы шығарылымнан кейінгі өзгерістер (әзірленуде).'),
+    '6.2.1': T('Исправление: списки выбора не выходят за край контейнера (узкие окна).', 'Korrektur: Auswahllisten ragen nicht mehr über ihren Container (schmale Fenster).', 'Fix: selects never grow past their container (narrow windows).', 'Түзету: таңдау тізімдері контейнерден шықпайды (тар терезелер).'),
+    '6.2.0': T('Паритет с 0.3.10 (P1–P6), анимированные схемы, единый язык, пояснения, узкие окна, логотипы.', 'Parität mit 0.3.10 (P1–P6), animierte Diagramme, einheitliche Sprache, Erläuterungen, schmale Fenster, Logos.', 'Parity with 0.3.10 (P1–P6), animated diagrams, one UI language, explanatory notes, narrow windows, logos.', '0.3.10 паритеті (P1–P6), анимациялық сызбалар, бір тіл, түсіндірмелер, тар терезелер, логотиптер.'),
+    '6.1.0': T('Бренд Kökzhol, реальные логотипы, хаб Атырау-Запад, порталы и справка в один клик; потоки W1–W6.', 'Marke Kökzhol, echte Logos, Hub Atyrau-West, Portale und Hilfe mit einem Klick; Streams W1–W6.', 'Kökzhol brand, real logos, Atyrau-West hub, portals and help one click away; streams W1–W6.', 'Kökzhol бренді, нақты логотиптер, Атырау-Батыс хабы, порталдар мен анықтама бір басуда; W1–W6 ағындары.'),
+    '6.0.0': T('Основа v6: новая структура, вкладки, роли, справка, автотесты.', 'Grundlage v6: neue Struktur, Tabs, Rollen, Hilfe, Autotests.', 'v6 foundation: new layout, tabs, roles, help, automated tests.', 'v6 негізі: жаңа құрылым, қойындылар, рөлдер, анықтама, автотесттер.'),
+  };
+  const CYR = /[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]/;
+  /* a stream without a translation shows its TRACEABILITY heading — never Cyrillic in DE / EN */
+  const wnTitle = s => WN_T[s.k] || (LI === 1 || LI === 2 ? (CYR.test(s.h) ? s.k || '—' : s.h) : s.h);
+  /* the "next" block becomes the current version once VERSION is bumped but whatsnew.json still lacks it */
+  const relLabel = r => r.v === 'next' ? (WN.releases.some(x => x.v === VERSION) ? T('Следующий выпуск', 'Nächste Version', 'Next release', 'Келесі шығарылым') : 'v' + VERSION) : 'v' + r.v;
+  const isCur = r => r.v === VERSION || (r.v === 'next' && !WN.releases.some(x => x.v === VERSION));
+  const SEEN = 'kokzhol.v6.whatsnew.seen';
+  const seen = () => { try { return localStorage.getItem(SEEN); } catch (_) { return null; } };
+  const markSeen = () => { try { localStorage.setItem(SEEN, VERSION); } catch (_) { /* private mode */ } };
+  globalThis.WHATSNEW = WN;
+  globalThis.wnTitle = wnTitle;
+  globalThis.wnLink = () => `<a class="wn-link" data-act="whatsNew" role="button" tabindex="0" title="${esc(T('Что нового в этой версии', 'Neu in dieser Version', 'What is new in this version', 'Бұл нұсқада не жаңа'))}">✦ ${esc(T('Что нового', 'Neuigkeiten', 'What\'s new', 'Не жаңа'))}${seen() === VERSION ? '' : '<i class="wn-dot" aria-hidden="true"></i>'}</a>`;
+  const nFn = n => n + ' ' + T('функц.', 'Funktionen', n === 1 ? 'function' : 'functions', 'функц.');
+  DRAWERS.whatsNew = () => {
+    const rels = WN.releases.map(r => ({ r, list: WN.streams.filter(s => s.v === r.v).sort((a, b) => a.k.localeCompare(b.k, 'en', { numeric: true })) }));
+    const html = `<div class="drawer-section wn">
+<p class="note">${esc(T('Изменения по версиям. Список собирается при сборке из таблицы трассируемости (docs/TRACEABILITY.md): поток, число функций и FR.', 'Änderungen je Version. Die Liste entsteht beim Build aus der Rückverfolgbarkeitstabelle (docs/TRACEABILITY.md): Stream, Anzahl Funktionen und FR.', 'Changes per version. The list is built from the traceability table (docs/TRACEABILITY.md): stream, number of functions and FRs.', 'Нұсқалар бойынша өзгерістер. Тізім құрастыру кезінде бақылау кестесінен (docs/TRACEABILITY.md) жиналады: ағын, функциялар саны және FR.'))}</p>
+<div class="wn-links"><a class="btn grey sm" href="../versions.html" target="_blank" rel="noopener" data-wn-versions>${esc(T('Все версии', 'Alle Versionen', 'All versions', 'Барлық нұсқалар'))} ↗</a><button type="button" class="btn grey sm" data-act="go" data-v="changes">${esc(T('Реестр изменений', 'Änderungsregister', 'Change register', 'Өзгерістер тізілімі'))}</button></div>
+${rels.map(({ r, list }) => `<section class="wn-rel" data-wn-rel="${esc(r.v)}"><h3>${esc(relLabel(r))}${isCur(r) ? ` <span class="chip green">${esc(T('текущая', 'aktuell', 'current', 'ағымдағы'))}</span>` : ''}${r.date ? ` <small>${esc(fd(r.date))}</small>` : ''}</h3>
+<p>${esc(WN_R[r.v] || '')}</p>${list.length ? `<ul>${list.map(s => `<li data-wn-stream="${esc(s.k)}"><b>${esc(s.k)}</b> ${esc(wnTitle(s))} <small>· ${esc(nFn(s.rows))}${s.frs.length ? ' · ' + esc(s.frs.slice(0, 6).join(', ')) + (s.frs.length > 6 ? ' +' + (s.frs.length - 6) : '') : ''}</small></li>`).join('')}</ul>` : ''}</section>`).join('')}
+<p class="note" data-wn-offline>${esc(swNote())}</p></div>`;
+    return { title: T('Что нового', 'Neuigkeiten', 'What\'s new', 'Не жаңа') + ' · v' + VERSION, html };
+  };
+  Object.assign(ACT, { whatsNew: () => { markSeen(); openDrawer({ type: 'whatsNew' }); } });
+  /* deep link from versions.html: ?whatsnew=1 opens the panel */
+  try { if (/[?&]whatsnew=1\b/.test(location.search)) { markSeen(); S.drawer = { type: 'whatsNew' }; } } catch (_) { /* no location */ }
+
+  /* ---------- FR-224 print / PDF: A4, print-only header (brand, screen › tab, date, version, role), no navigation (app.css @media print) ---------- */
+  globalThis.printHead = () => {
+    const sc = SCREENS[S.route], tab = sc && sc.tabs ? curTab(S.route) : null, now = new Date();
+    return `<div class="print-head" aria-hidden="true"><span class="ph-brand"><b>Kökzhol</b> · Olymp Logistic KZ</span><span class="ph-title">${esc(sc ? sc.title() : navLabel(S.route))}${tab ? ' › ' + esc(tab.label) : ''}</span><span class="ph-meta">${esc(T('Напечатано', 'Gedruckt', 'Printed', 'Басылды'))} ${fd(now.toISOString())} ${p2(now.getHours())}:${p2(now.getMinutes())} · v${VERSION} · ${esc(ROLE_NAME[S.role] || '')}</span></div>`;
+  };
+  globalThis.printBtn = () => `<button type="button" class="btn grey sm print-btn" data-act="printPage" title="${esc(T('Печать / PDF (A4): текущий экран или открытый документ', 'Drucken / PDF (A4): aktueller Screen oder offenes Dokument', 'Print / PDF (A4): current screen or open document', 'Басып шығару / PDF (A4): ағымдағы экран немесе ашық құжат'))}" aria-label="${esc(T('Печать / PDF', 'Drucken / PDF', 'Print / PDF', 'Басып шығару / PDF'))}">⎙</button>`;
+  Object.assign(ACT, { printPage: () => { S.tbMore = false; S.sideOpen = false; render(); window.print(); } });
+  /* stand-alone documents (KZ documents, loading sequence, booking certificates, offers) share one A4 sheet style + header */
+  globalThis.DOC_PRINT_CSS = '@page{size:A4;margin:16mm 14mm 18mm}@media print{body{margin:0!important;max-width:none!important}h1,h2,h3{break-after:avoid}thead{display:table-header-group}tr,img,svg{break-inside:avoid}}'
+    + '.doc-head{display:flex;justify-content:space-between;gap:12px;font:11px/1.3 system-ui,sans-serif;color:#333;border-bottom:1.5px solid #0E6E7E;padding:0 0 6px;margin:0 0 14px}table{border-collapse:collapse}';
+  globalThis.docHead = title => `<div class="doc-head"><span><b>Kökzhol</b> · Olymp Logistic KZ</span><span>${esc(title)}</span><span>${fd(new Date().toISOString())} · v${VERSION}</span></div>`;
+
+  /* ---------- FR-225 offline demo: register sw.js (versioned cache, see platform-src/delivery.mjs) ---------- */
+  /* why not: '' = register; 'frame' (test harness iframes), 'tests', 'file', 'dev' (localhost without ?sw=1), 'unsupported' */
+  globalThis.swWhy = (loc, framed, nav) => !(nav && 'serviceWorker' in nav) ? 'unsupported' : framed ? 'frame' : /tests\.html$/.test(loc.pathname) ? 'tests'
+    : loc.protocol === 'file:' ? 'file' : /^(localhost|127\.0\.0\.1|\[::1\])$/.test(loc.hostname) && !/[?&]sw=1\b/.test(loc.search) ? 'dev' : '';
+  const SW = globalThis.SW_STATE = { why: 'unsupported', on: false };
+  function swNote() {
+    return SW.on ? T('Офлайн-демо включено: страницы и ресурсы сохранены в браузере.', 'Offline-Demo aktiv: Seiten und Assets sind im Browser gespeichert.', 'Offline demo on: pages and assets are stored in the browser.', 'Офлайн-демо қосулы: беттер мен ресурстар браузерде сақталды.')
+      : SW.why === 'dev' ? T('Офлайн-демо выключено на localhost (разработка); включить: ?sw=1.', 'Offline-Demo auf localhost aus (Entwicklung); einschalten: ?sw=1.', 'Offline demo is off on localhost (development); turn on with ?sw=1.', 'Офлайн-демо localhost-та өшірулі (әзірлеу); қосу: ?sw=1.')
+      : T('Офлайн-демо работает при открытии с сервера (https), не во встроенных окнах.', 'Offline-Demo läuft beim Öffnen vom Server (https), nicht in eingebetteten Fenstern.', 'The offline demo runs when opened from the server (https), not in embedded frames.', 'Офлайн-демо серверден (https) ашқанда жұмыс істейді, ендірілген терезелерде емес.');
+  }
+  if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
+    SW.why = swWhy(location, !!window.frameElement, navigator);
+    if (SW.why === '') {
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').then(() => { SW.on = true; }).catch(() => { SW.why = 'error'; }));
+    } else if (SW.why === 'dev') {
+      /* development: drop a worker left over from a ?sw=1 session so python -m http.server always serves fresh files */
+      navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => { const u = (r.active || r.waiting || r.installing || {}).scriptURL || ''; if (/\/sw\.js$/.test(u)) r.unregister(); })).catch(() => {});
+    }
+  }
+
+  /* ---------- FR-196: logos as WebP (≈ 60 % lighter); PNG stays as source and for uploads ---------- */
+  if (typeof globalThis.mfrSrc === 'function') { const ms0 = globalThis.mfrSrc; globalThis.mfrSrc = m => { const s = ms0(m); return /^assets\/manufacturers\/[\w-]+\.png$/.test(s) ? s.slice(0, -4) + '.webp' : s; }; }
 })();
 
 /* Help framework (W6). Articles are registered with helpAdd({key, group, screen, tab, title, sub, purpose, who, see[], howto[{t,steps[]}], rules[],
