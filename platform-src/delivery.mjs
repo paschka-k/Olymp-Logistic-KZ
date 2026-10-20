@@ -21,7 +21,7 @@ export function whatsNewData(root) {
     const title = head.replace(/^([A-Z]\d+)\s*[—·:\-–]?\s*/, '').replace(/\s*\(files? `.*$/, '').replace(/`/g, '').trim();
     const rows = body.split('\n').filter(l => /^\|/.test(l) && !/^\|\s*-/.test(l)).length - (body.match(/^\|\s*-/gm) || []).length;   // table rows minus one header per table
     const frs = [...new Set(body.match(/FR-\d+/g) || [])].sort((a, b) => a.slice(3) - b.slice(3));
-    const rel0 = cfg.releases.find(r => (r.prefixes || []).includes(key.slice(0, 1))) || cfg.releases.find(r => r.v === 'next');
+    const rel0 = cfg.releases.find(r => (r.prefixes || []).some(px => key.startsWith(px))) || cfg.releases.find(r => r.v === 'next');
     return { k: key, h: title, rows: Math.max(0, rows), frs, v: rel0.v };
   });
   return { releases: cfg.releases.map(r => ({ v: r.v, date: r.date || '' })), streams };

@@ -1,5 +1,5 @@
 {
- "version": "6.2.1",
+ "version": "6.3.0",
  "budget": {
   "_": "FR-196 weight budget per page, checked by build-v6.mjs (exit code 1 when exceeded) and by the delivery tests. Lower page_kb when FR-191 (per-language build) lands.",
   "page_kb": 4400,
@@ -8,10 +8,10 @@
   "asset_file_kb": 12
  },
  "pages": {
-  "index.html": 3911416,
-  "de.html": 3800652,
-  "en.html": 3782826,
-  "kk.html": 3911416,
+  "index.html": 3912475,
+  "de.html": 3801711,
+  "en.html": 3783885,
+  "kk.html": 3912475,
   "tests.html": 558557
  },
  "assets_bytes": 15176,
