@@ -218,7 +218,7 @@ const alertsCount = () => S.loads.filter(l => tempState(l) === 'breach' && isAct
 
 function shell() {
   const sc = SCREENS[S.route];
-  const nav = navItems().map(n => `<div class="nav-item${n[0] === S.route ? ' active' : ''}" data-act="go" data-v="${n[0]}">${ic(n[1])}<span>${esc(n[2])}</span>${NAV_BADGE[n[0]] && NAV_BADGE[n[0]]() ? `<span class="badge-count nav-n">${NAV_BADGE[n[0]]()}</span>` : ''}</div>`).join('');
+  const nav = navItems().map(n => `<div class="nav-item${n[0] === S.route ? ' active' : ''}" data-act="go" data-v="${n[0]}" role="link" tabindex="0"${n[0] === S.route ? ' aria-current="page"' : ''}>${ic(n[1])}<span>${esc(n[2])}</span>${NAV_BADGE[n[0]] && NAV_BADGE[n[0]]() ? `<span class="badge-count nav-n">${NAV_BADGE[n[0]]()}</span>` : ''}</div>`).join('');
   const ver = `<div class="ver"><a data-act="go" data-v="changes">v${VERSION}</a> · ${esc(BUILD)}</div>`;
   const lang = ['ru', 'de', 'en', 'kk'].map(l => `<a href="${fileFor(l)}"${l === LANG ? ' class="on"' : ''}>${l.toUpperCase()}</a>`).join('');
   const body = sc ? screenBody(S.route) : placeholder(S.route);
@@ -244,7 +244,7 @@ ${shellRole ? '' : `<a class="side-link${S.route === 'help' ? ' on' : ''}" data-
 <label class="rolebox" title="${esc(T('Переключить роль: меню и права меняются сразу', 'Rolle wechseln: Menü und Rechte ändern sich sofort', 'Switch the role: menu and permissions change at once', 'Рөлді ауыстыру'))}">${ic('user', 14)}<span>${esc(T('Роль', 'Rolle', 'Role', 'Рөл'))}</span><select id="roleSel" class="select" aria-label="Role" style="height:32px">${ROLES.map(r => `<option value="${r}"${r === S.role ? ' selected' : ''}>${esc(ROLE_NAME[r])}</option>`).join('')}</select></label><button class="btn grey sm design-btn" data-act="setDesign" title="${S.design === 'kokzhol' ? 'Kökzhol → Olymp' : 'Olymp → Kökzhol'}">${S.design === 'olymp' ? '◐' : '◑'}</button></div><button class="btn grey sm help-top" data-act="helpHere" aria-label="Help" title="${esc(T('Справка по этому экрану', 'Hilfe zu diesem Bildschirm', 'Help for this screen', 'Осы экран анықтамасы'))}">?</button><span class="bell">${ic('bell', 18)}${alertsCount() ? `<span class="badge-count">${alertsCount()}</span>` : ''}</span>
 <div class="usr" data-act="go" data-v="account" role="link" tabindex="0" title="${esc(T('Мой аккаунт', 'Mein Konto', 'My account', 'Менің аккаунтым'))}"><b>${esc(usr[0])}</b><small>${esc(ROLE_NAME[S.role])}</small></div><span class="avatar" style="background:var(--primary)">${esc(usr[1])}</span></div></header>
 <div class="page-head"><div>${typeof shellEyebrow === 'function' ? shellEyebrow() : ''}<h1 class="page-title">${esc(title)}</h1>${sc && sc.sub ? `<p class="page-sub">${esc(sc.sub())}</p>` : ''}</div><div class="actions">${sc && sc.actions ? sc.actions() : ''}</div></div>
-<div class="content">${body}</div></main>${S.sideOpen ? '<div class="side-back" data-act="sideTog"></div>' : ''}${typeof shellOverlays === 'function' ? shellOverlays() : ''}${drawerHtml()}${S.toast ? `<div class="toast ${S.toast.kind}">${esc(S.toast.msg)}</div>` : ''}</div>`;
+<div class="content">${body}</div></main>${S.sideOpen ? '<div class="side-back" data-act="sideTog"></div>' : ''}${typeof shellOverlays === 'function' ? shellOverlays() : ''}${drawerHtml()}<div class="toast-live" role="status" aria-live="polite">${S.toast ? `<div class="toast ${S.toast.kind}">${esc(S.toast.msg)}</div>` : ''}</div></div>`;
 }
 function placeholder(id) {
   const ph = NAV.find(n => n[0] === id)[3];
@@ -281,19 +281,40 @@ globalThis.liveTick = liveTick; globalThis.liveBadge = liveBadge;
 if (typeof window !== 'undefined' && !window.frameElement) setInterval(() => { if (S.simOn && !document.hidden) liveTick(); }, 2000);
 
 /* ---------- render + events ---------- */
+/* a11y (R6 · 0.3.9 layout-suite rule "control without accessible name"): a form control without a <label for>, aria-label or title
+   takes its name from the visible label in front of it, else from its placeholder or its row */
+function nameControls(root) {
+  const forIds = new Set([...root.querySelectorAll('label[for]')].map(l => l.htmlFor));
+  root.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(e => {
+    if (e.hasAttribute('aria-label') || e.hasAttribute('aria-labelledby') || e.title || (e.id && forIds.has(e.id))) return;
+    const wrap = e.closest('label'); if (wrap && wrap.textContent.trim()) return;
+    const p = e.previousElementSibling, row = e.closest('tr, li, [data-row], [data-order], .card');
+    const txt = p && p.tagName === 'LABEL' && !p.htmlFor ? p.textContent : e.placeholder || (row ? row.textContent : '');
+    const n = String(txt || '').replace(/\s+/g, ' ').replace(/[:：]\s*$/, '').trim().slice(0, 80); if (n) e.setAttribute('aria-label', n);
+  });
+}
 function render() {
   const keep = { y: ($('main') || {}).scrollTop || 0, f: document.activeElement && document.activeElement.id };
   const pos = document.activeElement && document.activeElement.selectionStart;
   const keepIn = {};   // keep what the user typed in drawer fields across re-renders (e.g. a toast)
   $$('.drawer input[id], .drawer select[id], .drawer textarea[id]').forEach(e => { keepIn[e.id] = e.type === 'checkbox' ? e.checked : e.value; });
-  $('#root').innerHTML = shell();
+  $('#root').innerHTML = shell(); nameControls($('#root'));
   Object.keys(keepIn).forEach(id => { const e = document.getElementById(id); if (e && e.closest('.drawer')) { if (e.type === 'checkbox') e.checked = keepIn[id]; else e.value = keepIn[id]; } });
   const m = $('main'); if (m) m.scrollTop = keep.y;
   if (keep.f) { const e = document.getElementById(keep.f); if (e) { e.focus(); try { e.setSelectionRange(pos, pos); } catch (_) {} } }
 }
 const ACT = {};
+/* keyboard (R6 · 0.3.9 FR-134): Enter / Space on a focused role=link / tab / button element that is not a native control acts like a click */
+document.addEventListener('keydown', e => {
+  if ((e.key !== 'Enter' && e.key !== ' ') || e.defaultPrevented) return;
+  const el = e.target; if (!el || !el.matches || !el.matches('[data-act][tabindex]:not(button):not(a[href]):not(input):not(select):not(textarea)')) return;
+  e.preventDefault(); el.click();
+});
+/* write actions of Orders / Dispatch need their permission (R6 · 0.3.9 FR-82: a read-only role sees the data but cannot act) */
+const ACT_PERM = { create: 'orders:write', saveLoad: 'orders:write', imp: 'orders:write', auto: 'trips:write', doAssign: 'trips:write', adv: 'trips:status', addD: 'drivers:write', saveD: 'drivers:write' };
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-act]'); if (!el) return;
+  const p = ACT_PERM[el.dataset.act]; if (p && !canDo(p)) return toast(T('Нет прав: ', 'Keine Berechtigung: ', 'No permission: ', 'Құқық жоқ: ') + p, 'err');
   const fn = ACT[el.dataset.act]; if (fn) { fn(el.dataset, el, e); }
 });
 document.addEventListener('input', e => {
