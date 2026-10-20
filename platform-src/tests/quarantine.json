@@ -1,0 +1,4 @@
+{
+  "_doc": "FR-210 flaky-test quarantine. Group names (substring, or /regex/flags) whose failure is reported as 'quarantined' instead of failing the run. Every entry needs an owner and a reason; remove it once the group is stable again (the flaky report of the CI run shows which groups needed a retry).",
+  "groups": []
+}

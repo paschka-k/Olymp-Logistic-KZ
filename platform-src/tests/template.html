@@ -1,18 +1,41 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>Kökzhol · platform tests</title>
-<style>body{font:14px/1.5 system-ui,sans-serif;margin:24px;max-width:960px}h1{font-size:20px}.ok{color:#166534}.bad{color:#be123c;font-weight:600}#sum{padding:10px 14px;border-radius:8px;background:#f3f4f6;margin:12px 0}li{margin:2px 0}iframe{display:none}</style></head>
+<style>body{font:14px/1.5 system-ui,sans-serif;margin:24px;max-width:960px}h1{font-size:20px}.ok{color:#166534}.bad{color:#be123c;font-weight:600}.flaky{color:#a16207}.quar{color:#6b21a8}#sum{padding:10px 14px;border-radius:8px;background:#f3f4f6;margin:12px 0}li{margin:2px 0}iframe{display:none}#frames iframe.kept{display:block;border:2px solid #be123c;margin:0 0 16px}#frames .failcap{font-weight:600;color:#be123c;margin-top:16px}</style></head>
 <body><h1>Platform tests</h1><div id="sum">running…</div><ul id="out"></ul><div id="frames"></div>
 <script>
 /* Same contract as tests.html (window.__TESTS) so tools/run-ui-tests.cjs runs it unchanged.
-   Every group loads a fresh copy of platform-v6*.html in a hidden iframe, so tests never share state. */
-window.__TESTS = { total: 0, passed: 0, failed: 0, failures: [], done: false };
+   Every group loads a fresh copy of platform-v6*.html in a hidden iframe, so tests never share state.
+   URL options (CI, FR-205 / FR-209 / FR-210):
+     ?shard=k/n   run only the suite files of shard k of n (greedy split by the recorded suite times, see shard-weights.json)
+     ?retries=N   retry a failed group N times in a fresh iframe (default 1); a group that passes on a retry counts as passed
+                  and is listed in __TESTS.flaky (the flaky report). Groups named in quarantine.json are reported, not failed.
+     ?keepfail=1  keep the iframe of every failed group visible (iframe.kept, in place: moving an iframe reloads it), so the CI runner can screenshot it
+   A group's lang may carry a query for the app page, e.g. 'en?today=2026-11-02' (FR-206 injectable clock). */
+window.__TESTS = { total: 0, passed: 0, failed: 0, failures: [], flaky: [], quarantined: [], suites: {}, shard: null, done: false };
 const LANGS = ['ru', 'de', 'en', 'kk'], file = l => (l === 'ru' ? 'index.html' : l + '.html');
 const out = document.getElementById('out');
-const log = (name, err) => { const R = window.__TESTS; R.total++; if (err) { R.failed++; R.failures.push(name + ' — ' + err); } else R.passed++; const li = document.createElement('li'); li.className = err ? 'bad' : 'ok'; li.textContent = (err ? '✗ ' : '✓ ') + name + (err ? ' — ' + err : ''); out.appendChild(li); };
+const __Q = new URLSearchParams(location.search);
+const __SUITES = /*@@SUITELIST@@*/[];
+const __QUARANTINE = /*@@QUARANTINE@@*/[];
+const __HARNESS = {
+  /* longest-processing-time split: heaviest suite first onto the lightest shard; deterministic for a given suite list */
+  plan(n) { const load = Array(n).fill(0), of = {}; __SUITES.map((s, i) => [s, i]).sort((a, b) => b[0].ms - a[0].ms || a[1] - b[1]).forEach(([s, i]) => { const k = load.indexOf(Math.min(...load)); of[i] = k + 1; load[k] += s.ms; }); return { of, load }; },
+  /* run fn up to 1 + retries times; returns the first error and whether the last attempt passed */
+  async attempts(fn, retries) { const errs = []; for (let i = 0; i <= retries; i++) { try { await fn(i); return { ok: true, errs }; } catch (e) { errs.push(e && e.message || String(e)); } } return { ok: false, errs }; },
+  quarantined: (name, list = __QUARANTINE) => list.some(q => (q.startsWith('/') ? new RegExp(q.slice(1, q.lastIndexOf('/')), q.slice(q.lastIndexOf('/') + 1)).test(name) : name.includes(q))),
+};
+const __SHARD = (() => { const m = /^(\d+)\/(\d+)$/.exec(__Q.get('shard') || ''); if (!m || +m[2] < 1 || +m[1] < 1 || +m[1] > +m[2]) return null; return { k: +m[1], n: +m[2], of: __HARNESS.plan(+m[2]).of }; })();
+const __RETRIES = Math.max(0, Math.min(3, parseInt(__Q.get('retries') == null ? '1' : __Q.get('retries'), 10) || 0)), __KEEPFAIL = __Q.get('keepfail') === '1';
+let __CUR = -1, __T0 = 0;
+const __suite = i => { const t = performance.now(); if (__CUR >= 0 && __runs(__CUR)) window.__TESTS.suites[__SUITES[__CUR].name] = Math.round(t - __T0); __CUR = i; __T0 = t; };
+const __runs = i => !__SHARD || i < 0 || __SHARD.of[i] === __SHARD.k;
+if (__SHARD) window.__TESTS.shard = { k: __SHARD.k, n: __SHARD.n, files: __SUITES.filter((s, i) => __SHARD.of[i] === __SHARD.k).map(s => s.name), of: __SUITES.length };
+const log = (name, err, kind) => { const R = window.__TESTS; R.total++; if (err && kind !== 'quar') { R.failed++; R.failures.push(name + ' — ' + err); } else R.passed++; const li = document.createElement('li'); li.className = kind === 'quar' ? 'quar' : err ? 'bad' : kind === 'flaky' ? 'flaky' : 'ok'; li.textContent = (kind === 'quar' ? '⚠ quarantined: ' : err ? '✗ ' : kind === 'flaky' ? '↻ flaky (passed on retry): ' : '✓ ') + name + (err ? ' — ' + err : ''); out.appendChild(li); };
 const assert = (c, msg) => { if (!c) throw new Error(msg || 'assertion failed'); };
 const eq = (a, b, msg) => assert(a === b, (msg || 'expected equal') + ': ' + JSON.stringify(a) + ' !== ' + JSON.stringify(b));
 async function fresh(lang) {
-  const f = document.createElement('iframe'); f.style.cssText = 'width:1316px;height:760px'; f.src = file(lang); document.getElementById('frames').appendChild(f);
+  const [l, q] = String(lang || 'ru').split('?');
+  const f = document.createElement('iframe'); f.style.cssText = 'width:1316px;height:760px'; f.src = file(l) + (q ? '?' + q : ''); document.getElementById('frames').appendChild(f);
   await new Promise((ok, no) => { f.onload = ok; f.onerror = no; setTimeout(() => no(new Error('iframe timeout')), 20000); });
   const w = f.contentWindow; w.__errs = []; w.addEventListener('error', e => w.__errs.push(e.message));
   /* exports must not reach the browser: a click on <a download> and window.open() are recorded in w.__downloads instead of
@@ -21,14 +44,31 @@ async function fresh(lang) {
   const aClick = w.HTMLAnchorElement.prototype.click;
   w.HTMLAnchorElement.prototype.click = function () { if (this.hasAttribute('download') || /^blob:/.test(this.href)) { w.__downloads.push({ name: this.getAttribute('download') || '', href: this.href }); return; } return aClick.call(this); };
   w.open = (url, target) => { w.__downloads.push({ name: '', href: String(url || ''), target: target || '' }); return null; };
-  return { w, ev: c => w.eval(c), done: () => f.remove() };
+  return { w, f, ev: c => w.eval(c), done: () => f.remove() };
 }
-async function group(name, lang, fn) { let g; try { g = await fresh(lang || 'ru'); } catch (e) { return log(name, 'cannot load: ' + e.message); } try { await fn(g, g.ev, g.w); log(name); } catch (e) { log(name, e.message); } finally { g.done(); } }
+/* keep the failed iframe visible for the CI screenshot (FR-209), at most 12 */
+const keepFail = (g, name, err) => { if (!__KEEPFAIL || !g || document.querySelectorAll('#frames iframe.kept').length >= 12) return false; const cap = document.createElement('div'); cap.className = 'failcap'; cap.textContent = name + ' — ' + err; g.f.before(cap); g.f.dataset.fail = name; g.f.classList.add('kept'); return true; };
+async function group(name, lang, fn) {
+  if (!__runs(__CUR)) return;
+  let last = null;
+  const r = await __HARNESS.attempts(async () => {
+    if (last) { last.g.done(); last = null; }   // drop the iframe of the previous failed attempt
+    let g; try { g = await fresh(lang || 'ru'); } catch (e) { throw new Error('cannot load: ' + e.message); }
+    try { await fn(g, g.ev, g.w); } catch (e) { last = { g }; throw e; }
+    g.done();
+  }, __RETRIES);
+  if (r.ok) { if (r.errs.length) window.__TESTS.flaky.push({ name, attempts: r.errs.length + 1, errors: r.errs }); log(name, null, r.errs.length ? 'flaky' : ''); return; }
+  const err = r.errs[0] + (r.errs.length > 1 ? ' (also failed on ' + (r.errs.length - 1) + ' retr' + (r.errs.length > 2 ? 'ies' : 'y') + ')' : '');
+  const quar = __HARNESS.quarantined(name);
+  if (quar) window.__TESTS.quarantined.push({ name, error: r.errs[0] });
+  if (last && !(!quar && keepFail(last.g, name, r.errs[0]))) last.g.done();
+  log(name, err, quar ? 'quar' : '');
+}
 const clean = (w, where) => { const t = w.document.querySelector('#root').innerText; const m = t.match(/.{0,20}(undefined|NaN|\[object|\bnull\b).{0,20}/); assert(!m, where + ' contains "' + (m && m[0]) + '"'); assert(!w.__errs.length, where + ' threw: ' + w.__errs[0]); };
 
 (async () => {
 /*@@SUITES@@*/
-
-  const R = window.__TESTS; document.getElementById('sum').textContent = R.passed + '/' + R.total + ' passed, ' + R.failed + ' failed'; R.done = true;
+  __suite(-1);
+  const R = window.__TESTS; document.getElementById('sum').textContent = R.passed + '/' + R.total + ' passed, ' + R.failed + ' failed' + (R.flaky.length ? ', ' + R.flaky.length + ' flaky' : '') + (R.quarantined.length ? ', ' + R.quarantined.length + ' quarantined' : '') + (R.shard ? ' · shard ' + R.shard.k + '/' + R.shard.n : ''); R.ms = Math.round(performance.now()); R.done = true;
 })().catch(e => { log('harness', e.message); window.__TESTS.done = true; });
 </script></body></html>
