@@ -1,0 +1,9 @@
+{
+  "name": "olymp-ci-tools",
+  "private": true,
+  "description": "CI-only tooling (FR-198, FR-205, FR-208, FR-209, FR-210): Playwright for the UI suite runner, the performance budget and the visual-regression snapshots. Not part of the site; the platform itself has no dependencies.",
+  "dependencies": {
+    "@playwright/test": "1.56.0",
+    "playwright": "1.56.0"
+  }
+}

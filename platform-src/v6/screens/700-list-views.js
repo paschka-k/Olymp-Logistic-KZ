@@ -64,7 +64,7 @@
     const st = LV[key], L = byKey(key), n = String(name || '').trim();
     if (n.length < 2) return T('Имя вида: минимум 2 знака', 'Name der Ansicht: mindestens 2 Zeichen', 'View name: at least 2 characters', 'Көрініс атауы: кемінде 2 таңба');
     if (allViews(L).some(v => v.name.toLowerCase() === n.toLowerCase())) return T('Вид с таким именем уже есть', 'Eine Ansicht mit diesem Namen gibt es schon', 'A view with this name already exists', 'Бұл атаумен көрініс бар');
-    const v = { id: 'v' + Date.now().toString(36) + st.views.length, name: n, c: Object.assign({}, st.c), s: L.state ? L.state() : null };
+    const v = { id: 'v' + clockNow().getTime().toString(36) + st.views.length, name: n, c: Object.assign({}, st.c), s: L.state ? L.state() : null };
     st.views.push(v); st.cur = v.id; st.name = ''; writeViews();
     audit(T('Списки', 'Listen', 'Lists', 'Тізімдер'), key, T('Вид сохранён', 'Ansicht gespeichert', 'View saved', 'Көрініс сақталды'), n);
     return v;

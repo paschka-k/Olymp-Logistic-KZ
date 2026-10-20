@@ -30,7 +30,14 @@ for (const lang of langs) {
   writeFileSync(file, html);
   console.log(`${lang}: ${file} (${(html.length / 1024).toFixed(0)} KB)`);
 }
-// tests.html = harness + every suite in tests/NN-*.js
-const suites = list('tests', '.js').map(f => rd('tests', f)).join('\n');
-writeFileSync(join(outDir, 'tests.html'), rd('tests', 'template.html').replace('/*@@SUITES@@*/', () => suites));
-console.log(`tests: ${list('tests', '.js').length} suites -> ${join(outDir, 'tests.html')}`);
+// tests.html = harness + every suite in tests/NN-*.js. Each file starts with __suite(i) so the harness can run one shard
+// (FR-205: ?shard=k/n, split by tests/shard-weights.json = recorded ms per file, new files estimated from their size)
+// and skip the groups of the other files; tests/quarantine.json lists group names whose failures are reported, not failed (FR-210).
+const testFiles = list('tests', '.js');
+const readJson = (f, d) => (existsSync(join(here, 'tests', f)) ? JSON.parse(rd('tests', f)) : d);
+const weights = readJson('shard-weights.json', {}).ms || {};
+const suiteList = JSON.stringify(testFiles.map(f => ({ name: f, ms: weights[f] || Math.max(200, Math.round(rd('tests', f).length / 20)) })));
+const quarantine = JSON.stringify(readJson('quarantine.json', { groups: [] }).groups || []);
+const suites = testFiles.map((f, i) => `__suite(${i});   /* ${f} */\n` + rd('tests', f)).join('\n');
+writeFileSync(join(outDir, 'tests.html'), rd('tests', 'template.html').replace('/*@@SUITELIST@@*/[]', () => suiteList).replace('/*@@QUARANTINE@@*/[]', () => quarantine).replace('/*@@SUITES@@*/', () => suites));
+console.log(`tests: ${testFiles.length} suites -> ${join(outDir, 'tests.html')}`);

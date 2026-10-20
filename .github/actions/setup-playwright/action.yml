@@ -1,0 +1,34 @@
+name: Set up Playwright (cached)
+description: >-
+  FR-209 · Node 22 and Playwright + Chromium from tools/ci/package-lock.json, with caches for tools/ci/node_modules and
+  the Playwright browsers (~/.cache/ms-playwright). On a cache hit only the system libraries of Chromium are installed.
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v5
+      with:
+        node-version: 22
+    - name: Cache tools/ci/node_modules
+      id: mods
+      uses: actions/cache@v4
+      with:
+        path: tools/ci/node_modules
+        key: ci-mods-${{ runner.os }}-node22-${{ hashFiles('tools/ci/package-lock.json') }}
+    - name: Cache Playwright browsers
+      id: browsers
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: pw-browsers-${{ runner.os }}-${{ hashFiles('tools/ci/package-lock.json') }}
+    - name: Install Playwright (npm ci)
+      if: steps.mods.outputs.cache-hit != 'true'
+      shell: bash
+      run: npm ci --no-audit --no-fund --prefix tools/ci
+    - name: Install Chromium and its system libraries
+      if: steps.browsers.outputs.cache-hit != 'true'
+      shell: bash
+      run: tools/ci/node_modules/.bin/playwright install --with-deps chromium
+    - name: Install the system libraries of the cached Chromium
+      if: steps.browsers.outputs.cache-hit == 'true'
+      shell: bash
+      run: tools/ci/node_modules/.bin/playwright install-deps chromium

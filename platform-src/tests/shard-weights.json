@@ -1,0 +1,16 @@
+{
+  "_doc": "FR-205 shard plan input: recorded run time (ms) per suite file, from window.__TESTS.suites of a full local run (browser pane, 2026-10-20). The harness splits files over ?shard=k/n by these weights (heaviest first onto the lightest shard); files missing here are estimated from their size. Refresh from the 'Slowest suites' table of the UI-tests job summary when the split drifts.",
+  "ms": {
+    "10-navigation.js": 3049, "20-dispatch.js": 587, "30-chain.js": 447, "40-reports-ai-settings.js": 531, "50-legacy-tabs.js": 786,
+    "60-foundation.js": 971, "61-shell-ext.js": 4141, "62-language-audit.js": 2265, "63-narrow.js": 9450,
+    "70-ops-load.js": 4070, "71-ops-ship.js": 1035, "72-ops-docs.js": 861, "73-ops-dispatch.js": 1011, "74-ops-dashboard.js": 1042,
+    "75-ops-trips.js": 1180, "76-ops-docs.js": 835, "80-res-fleet-staff.js": 948, "81-res-driver-app.js": 1133,
+    "82-res-coverage-lines.js": 1350, "83-res-thermo.js": 871, "84-res-weather.js": 902, "85-res-coverage.js": 1915,
+    "86-res-fleet-ext.js": 1277, "87-res-partners.js": 3018, "88-res-staff-app.js": 1163, "90-rec-records.js": 2493,
+    "a0-por-portals.js": 1760, "b0-eco-economics.js": 1944, "b1-eco-reports-ext.js": 1157, "b2-eco-costs-ext.js": 1484,
+    "c0-help-content.js": 3125, "c1-help-visuals.js": 1756, "c2-notes.js": 2682, "d0-v6-parity.js": 3193,
+    "e1-mirror-ops-a.js": 2411, "e1-mirror-ops-b.js": 1870, "e1-mirror-ops-c.js": 3096, "e1-mirror-ops.js": 5006,
+    "e2-mirror-res.js": 15641, "e3-hub-inbound.js": 1449, "e4-rules-sla.js": 1977, "e5-driver-partner.js": 1798,
+    "f0-ci-infra.js": 3922
+  }
+}

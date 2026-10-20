@@ -266,7 +266,7 @@ const liveBadge = () => `<div class="live-badge" data-live><button type="button"
 let liveSeed = 7;
 const liveRnd = () => (liveSeed = (liveSeed * 1103515245 + 12345) % 2147483648) / 2147483648;
 function liveTick() {
-  S.liveAt = new Date();
+  S.liveAt = clockNow();
   S.loads.forEach(l => {
     if (l.status !== 'in_transit' && l.status !== 'problem') return;
     const z = ZONES[l.zone];

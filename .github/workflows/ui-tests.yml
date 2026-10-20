@@ -1,40 +1,175 @@
 name: UI tests
 
 # FR-18: runs all platform tests in headless Chromium on every push; fails the run if any test fails.
-#  - tests.html    : legacy v5.3 suite (RU scenarios, data validation, DE/EN navigation + i18n)
+#  - tests.html          : legacy v5.3 suite (RU scenarios, data validation, DE/EN navigation + i18n)
 #  - platform/tests.html : v6 platform suite, assembled by platform-src/build-v6.mjs from platform-src/tests/*.js
+# S1 (docs/OPTIMISATION-FR.md, section C):
+#  - FR-205 the v6 suite runs in 4 parallel shards (?shard=k/4, split by platform-src/tests/shard-weights.json)
+#  - FR-209 pinned runner image, Node 22, cached Playwright (.github/actions/setup-playwright), failure screenshots as artifacts
+#  - FR-210 each failed group is retried once; the "report" job publishes the flaky report (groups that passed only on retry)
+#  - FR-198 performance budget (platform-src/perf-budget.json), FR-208 visual regression (tools/ci/visual-baseline/)
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
+    inputs:
+      update_visual:
+        description: 'FR-208: rewrite the visual baselines and upload them as the artifact "visual-baseline"'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
+concurrency:
+  group: ui-tests-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  ui-tests:
+  legacy:
+    name: legacy suite (tests.html)
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 22
-      - name: Playwright
+      - uses: ./.github/actions/setup-playwright
+      - name: Serve site
         run: |
-          npm install --no-audit --no-fund --prefix "$RUNNER_TEMP/pw" playwright@1.56.0
-          npx --prefix "$RUNNER_TEMP/pw" playwright install --with-deps chromium
+          python3 -m http.server 8080 >/dev/null 2>&1 &
+          for i in $(seq 1 30); do curl -fs -o /dev/null http://localhost:8080/tests.html && break; sleep 0.5; done
+      - name: Run tests
+        env:
+          NODE_PATH: ${{ github.workspace }}/tools/ci/node_modules
+        run: node tools/run-ui-tests.cjs http://localhost:8080/tests.html --out ui-results/legacy
+      - name: Upload report and failure screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-legacy
+          path: ui-results/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  v6:
+    name: v6 suite · shard ${{ matrix.shard }}/4
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-playwright
       - name: Build v6 from sources
         run: node platform-src/build-v6.mjs
       - name: Serve site
         run: |
           python3 -m http.server 8080 >/dev/null 2>&1 &
-          sleep 2
-      - name: Run tests
+          for i in $(seq 1 30); do curl -fs -o /dev/null http://localhost:8080/platform/tests.html && break; sleep 0.5; done
+      - name: Run v6 tests (shard ${{ matrix.shard }}/${{ strategy.job-total }}, 1 retry per failed group)
         env:
-          NODE_PATH: ${{ runner.temp }}/pw/node_modules
-        run: node tools/run-ui-tests.cjs http://localhost:8080/tests.html
-      - name: Run v6 tests
+          NODE_PATH: ${{ github.workspace }}/tools/ci/node_modules
+        run: node tools/run-ui-tests.cjs "http://localhost:8080/platform/tests.html?shard=${{ matrix.shard }}/${{ strategy.job-total }}&retries=1&keepfail=1" --out "ui-results/v6-shard-${{ matrix.shard }}"
+      - name: Upload report and failure screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-v6-shard-${{ matrix.shard }}
+          path: ui-results/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  report:
+    name: merged report and flaky checks
+    needs: [legacy, v6]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ui-*
+          path: ui-results
+      - name: Merge shard reports, flaky report
+        run: node tools/ci/ui-report.cjs ui-results --out ui-report
+      - name: Upload flaky report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flaky-report
+          path: ui-report/
+          retention-days: 30
+          if-no-files-found: ignore
+      - name: Fail when a suite job failed
+        if: needs.legacy.result != 'success' || needs.v6.result != 'success'
+        run: |
+          echo "legacy: ${{ needs.legacy.result }}, v6 shards: ${{ needs.v6.result }}"
+          exit 1
+
+  perf:
+    name: performance budget
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-playwright
+      - name: Build v6 from sources
+        run: node platform-src/build-v6.mjs
+      - name: Serve site
+        run: |
+          python3 -m http.server 8080 >/dev/null 2>&1 &
+          for i in $(seq 1 30); do curl -fs -o /dev/null http://localhost:8080/platform/index.html && break; sleep 0.5; done
+      - name: Check page weight, start time, tick and render cost against platform-src/perf-budget.json
+        run: node tools/ci/perf-budget.cjs --base http://localhost:8080/platform/ --out perf-results
+      - name: Upload perf report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-report
+          path: perf-results/
+          retention-days: 30
+          if-no-files-found: ignore
+
+  visual:
+    name: visual regression (1440 / 768 / 375, light / dark)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-playwright
+      - name: Build v6 from sources
+        run: node platform-src/build-v6.mjs
+      - name: Compare with tools/ci/visual-baseline (or write the baselines)
         env:
-          NODE_PATH: ${{ runner.temp }}/pw/node_modules
-        run: node tools/run-ui-tests.cjs http://localhost:8080/platform/tests.html
+          UPDATE_VISUAL: ${{ inputs.update_visual }}
+        run: |
+          CFG=tools/ci/playwright.visual.config.cjs
+          if [ "$UPDATE_VISUAL" = "true" ] || ! ls tools/ci/visual-baseline/*/*.png >/dev/null 2>&1; then
+            echo "::notice title=Visual baselines::Writing baselines (none committed or update requested). Download the artifact 'visual-baseline' and commit it as tools/ci/visual-baseline/."
+            echo "Visual regression: baselines written in this run (artifact **visual-baseline**), nothing compared." >> "$GITHUB_STEP_SUMMARY"
+            tools/ci/node_modules/.bin/playwright test -c "$CFG" --update-snapshots=all
+          else
+            tools/ci/node_modules/.bin/playwright test -c "$CFG"
+          fi
+      - name: Upload baselines
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-baseline
+          path: tools/ci/visual-baseline/
+          retention-days: 30
+          if-no-files-found: ignore
+      - name: Upload diff report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diffs
+          path: visual-results/
+          retention-days: 14
+          if-no-files-found: ignore

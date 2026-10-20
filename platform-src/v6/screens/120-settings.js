@@ -47,7 +47,7 @@
     ['anom', 'receipt', 'green', T('Аномалии ЭСФ и счетов', 'ESF-/Rechnungsanomalien', 'ESF / invoice anomalies', 'ЭШФ және шот ауытқулары'), T('Дубли, расхождения, пропущенные позиции', 'Dubletten, Abweichungen, fehlende Positionen', 'Duplicates, mismatches, missing lines', 'Қайталанулар, айырмашылықтар')]];
   globalThis.CFG = { cur: dup(base), saved: JSON.stringify(base), live: { shift: 9 }, tab: false, auditOpen: false };
   S.audit = [];
-  globalThis.audit = (module, subject, decision, reason) => { const d = new Date(); S.audit.unshift({ t: p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds()), user: 'Sarah Johnson', module, subject, decision, reason: reason || '' }); };
+  globalThis.audit = (module, subject, decision, reason) => { const d = clockNow(); S.audit.unshift({ t: p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds()), user: 'Sarah Johnson', module, subject, decision, reason: reason || '' }); };
   const getp = (p) => p.split('.').reduce((o, k) => o[k], CFG.cur);
   const setp = (p, v) => { const a = p.split('.'), k = a.pop(); a.reduce((o, x) => o[x], CFG.cur)[k] = v; };
   const dirty = () => JSON.stringify(CFG.cur) !== CFG.saved;
@@ -141,7 +141,7 @@ ${prm('params.shift', T('Максимум смены', 'Maximale Schicht', 'Maxi
     siteAdd: () => { const v = ($('#newsite') || {}).value || ''; if (!v.trim()) return toast(T('Укажите название площадки', 'Standortname angeben', 'Enter a site name', 'Алаң атауын көрсетіңіз'), 'err'); CFG.cur.company.sites.push({ n: v.trim(), lic: T('заявка не подана', 'nicht beantragt', 'not applied', 'өтінім берілмеген'), st: 'pending' }); render(); },
     auditToggle: () => { CFG.auditOpen = !CFG.auditOpen; render(); },
     auditCsv: () => dl('audit-log.csv', '﻿' + [['time', 'user', 'module', 'subject', 'decision', 'reason']].concat(S.audit.map(a => [a.t, a.user, a.module, a.subject, a.decision, a.reason])).map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';')).join('\n'), 'text/csv'),
-    cfgExport: () => { dl('olymp-config.json', JSON.stringify({ exportedAt: new Date().toISOString(), lang: LANG, saved: JSON.parse(CFG.saved), unsaved: dirty() ? CFG.cur : null }, null, 2), 'application/json'); },
+    cfgExport: () => { dl('olymp-config.json', JSON.stringify({ exportedAt: clockNow().toISOString(), lang: LANG, saved: JSON.parse(CFG.saved), unsaved: dirty() ? CFG.cur : null }, null, 2), 'application/json'); },
     cfgSave: () => {
       const e = errors(); if (Object.keys(e).length) { toast(T('Исправьте ошибки: ', 'Fehler beheben: ', 'Fix errors first: ', 'Қателерді түзетіңіз: ') + Object.keys(e).length, 'err'); return; }
       if (!dirty()) return toast(T('Нет изменений', 'Keine Änderungen', 'Nothing to save', 'Өзгеріс жоқ'));

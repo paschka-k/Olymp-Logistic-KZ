@@ -1,0 +1,5 @@
+# CI tooling (tools/ci) and its local outputs
+tools/ci/node_modules/
+ui-results/
+perf-results/
+visual-results/

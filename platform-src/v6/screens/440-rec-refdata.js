@@ -121,7 +121,7 @@
     if (kind === 'place' && !/^\d{9}$/.test(nd.kato || '')) nd.verified = false;
     const e = check(kind, key, nd); if (e) return e;
     if (K.f.some(f => f[1] === 'number' && f[0] in nd && !(isFinite(nd[f[0]]) && nd[f[0]] >= 0))) return T('Числовые поля: неотрицательное число', 'Zahlenfelder: nicht negative Zahl', 'Numeric fields: non-negative number', 'Сандық өрістер: теріс емес сан');
-    const ver = { version: Math.max(i.version, ...i.history.map(h => h.version)) + 1, valid_from: valid_from || today, data: nd, changed, status: 'active', by: S.role, at: new Date().toISOString(), approved_by: '' };
+    const ver = { version: Math.max(i.version, ...i.history.map(h => h.version)) + 1, valid_from: valid_from || today, data: nd, changed, status: 'active', by: S.role, at: clockNow().toISOString(), approved_by: '' };
     const crit = K.crit === 'all' ? changed : (K.crit || []).filter(k => changed.includes(k));
     if (isNew) R.items.push(i);
     if (crit.length && (!isNew || K.crit === 'all')) { ver.status = 'pending'; i.pending = ver; audit('Reference data', kind + '/' + key, T('Предложено (4 глаза)', 'Vorgeschlagen (4 Augen)', 'Proposed (four eyes)', 'Ұсынылды (4 көз)'), changed.join(', ')); }
@@ -141,7 +141,7 @@
   globalThis.refLog = (kind, key, data, changed, label) => {
     let i = R.items.find(x => x.kind === kind && x.key === key); if (!i) { i = { kind, key, label: label || key, data: {}, version: 0, valid_from: '', pending: null, next: null, history: [] }; R.items.push(i); }
     const ch = (changed && changed.length ? changed : Object.keys(data)).filter(k => JSON.stringify(data[k]) !== JSON.stringify(i.data[k])); if (!ch.length && i.version) return null;
-    const ver = { version: i.version + 1, valid_from: today, data: Object.assign({}, i.data, data), changed: ch.length ? ch : Object.keys(data), status: 'active', by: S.role, at: new Date().toISOString(), approved_by: '' };
+    const ver = { version: i.version + 1, valid_from: today, data: Object.assign({}, i.data, data), changed: ch.length ? ch : Object.keys(data), status: 'active', by: S.role, at: clockNow().toISOString(), approved_by: '' };
     activate(i, ver); return ver;
   };
   /* M13 manufacturer logo: PNG / WebP ≤ 300 KB, stored as data URL in a new version; the shipments label helper mfrSrc() prefers it */

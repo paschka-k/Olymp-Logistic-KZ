@@ -1,5 +1,23 @@
-/* v6 demo data (Kazakhstan cold chain). Fixed clock so the demo is deterministic. */
-const NOW = new Date('2026-10-18T14:30:00+05:00');
+/* v6 demo data (Kazakhstan cold chain). Fixed clock so the demo is deterministic.
+   FR-206 · one injectable "today" for the demo and the tests: ?today=2026-11-02 or ?today=2026-11-02T09:15 (Astana time, UTC+5)
+   in the page URL, or globalThis.KZ_TODAY set before the bundle runs. NOW is the business instant; clockNow() is NOW plus the
+   time since the page loaded (header clock, audit times, "Live" stamps). Nothing else in the bundle reads the wall clock
+   (test "deterministic clock" checks the source), so neither the demo nor the suite rots with the calendar. Seed data stays
+   on its fixed dates: a shifted today is a time-machine probe, not a new data set. */
+const CLOCK = (() => {
+  const DEF = '2026-10-18T14:30';
+  let q = '';
+  try { q = new URLSearchParams(location.search).get('today') || ''; } catch (_) { /* no location (build / Node) */ }
+  q = q || globalThis.KZ_TODAY || '';
+  const m = /^(\d{4}-\d{2}-\d{2})(?:T(\d{2}:\d{2}))?$/.exec(q);
+  const at = new Date((m ? m[1] + 'T' + (m[2] || '14:30') : DEF) + ':00+05:00');
+  const ok = m && !isNaN(at);
+  const today = ok ? at : new Date(DEF + ':00+05:00'), t0 = Date.now();
+  return { today, injected: !!ok, def: DEF, now: () => new Date(today.getTime() + (Date.now() - t0)) };
+})();
+const NOW = CLOCK.today;
+const clockNow = CLOCK.now;
+globalThis.CLOCK = CLOCK; globalThis.clockNow = clockNow;
 const HUBS = {
   AST: { name: T('Хаб Астана-Север', 'Hub Astana-Nord', 'Astana North Hub', 'Астана-Солтүстік хабы'), city: T('Астана', 'Astana', 'Astana', 'Астана'), x: 330, y: 95 },
   ALA: { name: T('Хаб Алматы-Жетысу', 'Hub Almaty-Zhetysu', 'Almaty Zhetysu Hub', 'Алматы-Жетісу хабы'), city: T('Алматы', 'Almaty', 'Almaty', 'Алматы'), x: 478, y: 262 },

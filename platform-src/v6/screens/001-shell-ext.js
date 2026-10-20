@@ -22,8 +22,8 @@
   const hubSeg = () => `<div class="hubseg" role="group" aria-label="Hub" data-hub="${S.hub}">${[['', T('Все хабы', 'Alle Hubs', 'All hubs', 'Барлық хабтар')]].concat(HUBK().map(h => [h, h])).map(o => `<button type="button" class="hs${S.hub === o[0] ? ' on' : ''}" data-act="hubSet" data-v="${o[0]}" aria-pressed="${S.hub === o[0]}" title="${esc(o[0] ? HUBS[o[0]].name : T('Все экраны: все хабы', 'Alle Bildschirme: alle Hubs', 'All screens: all hubs', 'Барлық экрандар: барлық хабтар'))}">${esc(o[1])}</button>`).join('')}</div>`;
   ACT.hubSet = d => { S.hub = d.v; S.drawer = null; S.f.page = 1; render(); };
 
-  /* ---------- 3. clock (real Kazakhstan time, UTC+5) + business date of the demo, "N active alarms" ---------- */
-  const kzNow = () => { const d = new Date(); return new Date(d.getTime() + (d.getTimezoneOffset() + 300) * 60000); };
+  /* ---------- 3. clock (demo clock, FR-206: business instant NOW + time since load, shown as Kazakhstan time UTC+5) + business date of the demo, "N active alarms" ---------- */
+  const kzNow = () => { const d = clockNow(); return new Date(d.getTime() + (d.getTimezoneOffset() + 300) * 60000); };
   const clockTxt = () => { const d = kzNow(); return p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds()); };
   const bizDate = () => { const WD = T('Пн,Вт,Ср,Чт,Пт,Сб,Вс', 'Mo,Di,Mi,Do,Fr,Sa,So', 'Mon,Tue,Wed,Thu,Fri,Sat,Sun', 'Дс,Сс,Ср,Бс,Жм,Сб,Жс').split(','); return WD[(NOW.getDay() + 6) % 7] + ' ' + fd(NOW); };
   if (typeof window !== 'undefined' && !window.frameElement) setInterval(() => { const e = $('[data-clock]'); if (e && !document.hidden) e.textContent = clockTxt(); }, 1000);

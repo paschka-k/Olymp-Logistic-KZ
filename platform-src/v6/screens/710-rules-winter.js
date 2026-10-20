@@ -49,7 +49,7 @@
     if (set === 'winter' && !(nd.sur2 >= nd.sur1 && nd.pre2 >= nd.pre1)) return T('Уровень 2 не может быть мягче уровня 1', 'Stufe 2 darf nicht milder als Stufe 1 sein', 'Tier 2 cannot be milder than tier 1', '2-деңгей 1-деңгейден жұмсақ болмауы керек');
     const changed = F.map(f => f[0]).filter(k => nd[k] !== s.data[k]); if (!changed.length) return T('Нет изменений', 'Keine Änderungen', 'No changes', 'Өзгеріс жоқ');
     const vf = valid_from || today; if (!/^\d{4}-\d{2}-\d{2}$/.test(vf)) return T('Дата вступления: ГГГГ-ММ-ДД', 'Gültig ab: JJJJ-MM-TT', 'Valid from: YYYY-MM-DD', 'Күшіне енуі: ЖЖЖЖ-АА-КК');
-    s.pending = { version: s.version + 1, valid_from: vf, data: nd, changed, status: 'pending', by: S.role, approved_by: '', at: new Date().toISOString() };
+    s.pending = { version: s.version + 1, valid_from: vf, data: nd, changed, status: 'pending', by: S.role, approved_by: '', at: clockNow().toISOString() };
     audit(RM, set + ' v' + s.pending.version, T('Предложено (4 глаза)', 'Vorgeschlagen (4 Augen)', 'Proposed (four eyes)', 'Ұсынылды (4 көз)'), changed.map(k => k + ' ' + s.data[k] + '→' + nd[k]).join(', '));
     return s.pending;
   };
