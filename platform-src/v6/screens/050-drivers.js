@@ -19,7 +19,7 @@
   const dig = s => String(s || '').replace(/\D/g, '');
   const mIin = s => s ? '••••••••' + dig(s).slice(-4) : '—', mPh = s => dig(s) ? '•••• ' + dig(s).slice(-2) : '—', mLic = s => s ? '•••• ' + String(s).replace(/\s/g, '').slice(-2) : '—';
   let SHOWN = null;   // driver whose personal data is revealed (until another driver is revealed / opened)
-  const pii = (d, k) => (seedPii(d, S.drivers.indexOf(d)), 0) || SHOWN === d.id && canDo('pii:read') ? esc(d[k] || '—') : k === 'iin' ? mIin(d.iin) : k === 'phone' ? mPh(d.phone) : mLic(d.licNo);
+  const pii = (d, k) => (seedPii(d, S.drivers.indexOf(d)), SHOWN === d.id && canDo('pii:read')) ? esc(d[k] || '—') : k === 'iin' ? mIin(d.iin) : k === 'phone' ? mPh(d.phone) : mLic(d.licNo);
   const piiBtn = d => canDo('pii:read') && SHOWN !== d.id ? `<button class="btn sm grey" data-act="drvPii" data-id="${d.id}" data-pii-btn="${d.id}">${esc(T('Показать персональные данные', 'Personendaten anzeigen', 'Show personal data', 'Дербес деректерді көрсету'))}</button>` : '';
   globalThis.driverPiiReveal = id => { if (!canDo('pii:read')) return false; const d = drv(id); if (!d || !d.id) return false; SHOWN = d.id; audit('Drivers', d.code, T('Просмотр персональных данных', 'Personendaten angezeigt', 'Personal data viewed', 'Дербес деректер қаралды'), 'iin,phone,license_no'); return true; };
   globalThis.driverPiiMask = { iin: mIin, phone: mPh };

@@ -1,0 +1,18 @@
+# FR-204 · one editor policy for the whole repository (line endings: LF everywhere, see .gitattributes)
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 2
+trim_trailing_whitespace = true
+
+[*.md]
+trim_trailing_whitespace = false
+
+# generated / frozen artefacts: never reformat (platform/ is written by platform-src/build-v6.mjs, releases/ and platform-v*.html are frozen)
+[{platform/**,releases/**,platform-v*.html,design-preview-*.html}]
+trim_trailing_whitespace = false
+insert_final_newline = unset

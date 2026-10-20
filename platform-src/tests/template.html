@@ -9,6 +9,7 @@
      ?shard=k/n   run only the suite files of shard k of n (greedy split by the recorded suite times, see shard-weights.json)
      ?retries=N   retry a failed group N times in a fresh iframe (default 1); a group that passes on a retry counts as passed
                   and is listed in __TESTS.flaky (the flaky report). Groups named in quarantine.json are reported, not failed.
+     ?suite=a,b   run only the suite files whose name contains a or b (local iteration)
      ?keepfail=1  keep the iframe of every failed group visible (iframe.kept, in place: moving an iframe reloads it), so the CI runner can screenshot it
    A group's lang may carry a query for the app page, e.g. 'en?today=2026-11-02' (FR-206 injectable clock). */
 window.__TESTS = { total: 0, passed: 0, failed: 0, failures: [], flaky: [], quarantined: [], suites: {}, shard: null, done: false };
@@ -28,7 +29,9 @@ const __SHARD = (() => { const m = /^(\d+)\/(\d+)$/.exec(__Q.get('shard') || '')
 const __RETRIES = Math.max(0, Math.min(3, parseInt(__Q.get('retries') == null ? '1' : __Q.get('retries'), 10) || 0)), __KEEPFAIL = __Q.get('keepfail') === '1';
 let __CUR = -1, __T0 = 0;
 const __suite = i => { const t = performance.now(); if (__CUR >= 0 && __runs(__CUR)) window.__TESTS.suites[__SUITES[__CUR].name] = Math.round(t - __T0); __CUR = i; __T0 = t; };
-const __runs = i => !__SHARD || i < 0 || __SHARD.of[i] === __SHARD.k;
+/* ?suite=g4,f0-ci (S4): run only the suite files whose name contains one of the parts (local iteration; CI never sets it) */
+const __ONLY = (__Q.get('suite') || '').split(',').map(s => s.trim()).filter(Boolean);
+const __runs = i => (i < 0 || !__ONLY.length || __ONLY.some(p => __SUITES[i].name.includes(p))) && (!__SHARD || i < 0 || __SHARD.of[i] === __SHARD.k);
 if (__SHARD) window.__TESTS.shard = { k: __SHARD.k, n: __SHARD.n, files: __SUITES.filter((s, i) => __SHARD.of[i] === __SHARD.k).map(s => s.name), of: __SUITES.length };
 const log = (name, err, kind) => { const R = window.__TESTS; R.total++; if (err && kind !== 'quar') { R.failed++; R.failures.push(name + ' — ' + err); } else R.passed++; const li = document.createElement('li'); li.className = kind === 'quar' ? 'quar' : err ? 'bad' : kind === 'flaky' ? 'flaky' : 'ok'; li.textContent = (kind === 'quar' ? '⚠ quarantined: ' : err ? '✗ ' : kind === 'flaky' ? '↻ flaky (passed on retry): ' : '✓ ') + name + (err ? ' — ' + err : ''); out.appendChild(li); };
 const assert = (c, msg) => { if (!c) throw new Error(msg || 'assertion failed'); };

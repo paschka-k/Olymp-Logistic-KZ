@@ -1,0 +1,30 @@
+# FR-204 · Prettier ratchet. Generated and frozen files are never formatted. The legacy v6 sources (long one-line markup
+# helpers, ~2.4 MB) are formatted file by file when their area is next refactored: remove a line below in the same
+# "format only" commit that reformats it, never together with a behaviour change (docs/ARCHITECTURE.md, "Formatting").
+**/node_modules/**
+.npm-cache/
+platform/
+releases/
+*.html
+*.md
+docs/
+platform-src/lang/
+platform-src/shared/
+platform-src/tests/vendor/
+tools/ci/visual-baseline/
+tools/parity-039/
+package-lock.json
+platform-src/v6/role-perms.json
+platform-src/v6/core.js
+platform-src/v6/data.js
+platform-src/v6/roles.js
+platform-src/v6/app.js
+platform-src/v6/app.css
+platform-src/v6/screens/
+platform-src/v6/help/
+platform-src/tests/*.js
+!platform-src/tests/g4-*.js
+platform-src/build.mjs
+platform-src/build-design.mjs
+platform-src/tests/shard-weights.json
+platform-src/manifest.json

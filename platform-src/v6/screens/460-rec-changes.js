@@ -2,7 +2,7 @@
    (190 FR/BUG entries) with filters by type, status, group and date. The build embeds a compact per-language JSON (@@REGISTER@@);
    KK falls back to RU, titles come in RU/DE/EN. */
 (function () {
-  const REG = @@REGISTER@@;
+  const REG = /*@@REGISTER@@*/{};
   const TY = { FR: T('Функция (FR)', 'Funktion (FR)', 'Function (FR)', 'Функция (FR)'), bug: T('Ошибка (BUG)', 'Fehler (BUG)', 'Bug (BUG)', 'Қате (BUG)') };
   const STS = { implemented: ['green', T('реализовано', 'umgesetzt', 'implemented', 'жүзеге асырылды')], implemented_partial: ['yellow', T('частично', 'teilweise', 'partly implemented', 'ішінара')], fixed: ['green', T('исправлено', 'behoben', 'fixed', 'түзетілді')], planned: ['blue', T('в плане', 'geplant', 'planned', 'жоспарда')], open_question: ['red', T('открытый вопрос', 'offene Frage', 'open question', 'ашық сұрақ')], closed: ['gray', T('закрыто', 'geschlossen', 'closed', 'жабық')] };
   globalThis.CHANGES = REG;

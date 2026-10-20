@@ -3,7 +3,7 @@
    Build side: platform-src/delivery.mjs (TRACEABILITY.md -> @@WHATSNEW@@, assets/manifest.json, sw.js). Tests: platform-src/tests/f0-delivery.js. */
 (() => {
   /* ---------- FR-223 What's new: releases and streams generated from docs/TRACEABILITY.md at build time ---------- */
-  const WN = @@WHATSNEW@@;
+  const WN = /*@@WHATSNEW@@*/{};
   const WN_T = {
     W1: T('Операционный поток: погрузка, отгрузки, документы', 'Operativer Ablauf: Beladung, Sendungen, Dokumente', 'Operations flow: loading, shipments, documents', 'Операциялық ағын: тиеу, жөнелтімдер, құжаттар'),
     W2: T('Ресурсы и приложение водителя', 'Ressourcen und Fahrer-App', 'Resources and driver app', 'Ресурстар және жүргізуші қосымшасы'),

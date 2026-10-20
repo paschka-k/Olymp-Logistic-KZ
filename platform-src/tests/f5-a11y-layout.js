@@ -4,7 +4,7 @@
      reachability and activation, a live region for messages, level cues that do not rely on colour, text contrast of the status chips,
      reduced motion, no sideways scroll and no "one letter per line" cells at 1024 and 1500 px. ---- */
   /* 0.3.9 suite-layout.js a11y rules (axe-core serious / critical equivalent) on a v6 window */
-  const r6A11yScan = (w, opt) => {   // eslint-disable-line no-unused-vars
+  const r6A11yScan = (w, opt) => {
     const d = w.document, fails = [], o = opt || {};
     const vis = el => { if (!el || !el.isConnected) return false; const s = w.getComputedStyle(el); if (s.display === 'none' || s.visibility === 'hidden' || +s.opacity === 0) return false; const b = el.getBoundingClientRect(); return b.width > 0 && b.height > 0; };
     const lab = el => el.tagName.toLowerCase() + (el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.') : '') + (el.dataset && el.dataset.act ? '[' + el.dataset.act + ']' : '') + ' «' + (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 30) + '»';
