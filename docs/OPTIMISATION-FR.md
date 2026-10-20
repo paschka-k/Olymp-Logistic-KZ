@@ -1,6 +1,6 @@
 # Optimisation proposals for v6 — FR-191 … FR-225
 
-Status: **proposed, not released** (2026-10-20, basis v6.2.1). Realisation starts only after the product owner releases items; released items are implemented in branch sessions.
+Status: **all 35 released by the product owner on 2026-10-20** ("go ahead and realise all the FR"); implemented in branch sessions in three waves (see "Realisation plan" at the end).
 Numbers continue the change register of the source platform (highest used: FR-190). Effort: S ≤ 1 day · M ≤ 1 week · L > 1 week. Priority: H / M / L.
 
 Facts behind the list (measured on 6.2.1): each language page is about 2.9–3.0 MB and carries the texts of all four languages; every user action re-renders the whole page through one `render()`; a 2-second live tick runs while the simulation is on; 14 screen files carry their own copy of the CSV / file export code; the UI suite has 275 checks and needs about 4 minutes in CI; `build-platform.yml` still runs on Node 20 and `ubuntu-latest`.
@@ -70,5 +70,15 @@ Facts behind the list (measured on 6.2.1): each language page is about 2.9–3.0
 | FR-224 | Print stylesheet | A4 print / PDF for documents, reports and trip sheets: headers, page breaks, no navigation. | Usable paper output. | S | M |
 | FR-225 | Offline demo | Service worker caches the pages and assets. | The demo works without internet at customer sites. | S | M |
 
-## Suggested first release (all H, ~3 weeks of branch work)
-FR-191, FR-193, FR-194, FR-198, FR-200, FR-201, FR-204, FR-205, FR-206, FR-209, FR-212, FR-215, FR-218, FR-221, FR-222.
+## Realisation plan (released 2026-10-20)
+
+The cross-cutting refactors touch almost every file, so they wait until the running feature streams R1–R6 are merged; otherwise every merge would conflict.
+
+| Wave | Branch | FRs | Starts |
+|---|---|---|---|
+| 1 | S1 · CI and test infrastructure | FR-198, FR-205, FR-206, FR-208, FR-209, FR-210 | now |
+| 1 | S2 · Delivery | FR-196, FR-223, FR-224, FR-225 | now |
+| 1 | S3 · Accessibility | FR-215, FR-218, FR-219 | now |
+| 2 | S4 · Architecture | FR-199, FR-200, FR-201, FR-202, FR-203, FR-204, FR-207, FR-220, FR-221 | after R1–R6 and wave 1 are merged |
+| 3 | S5 · Performance | FR-191, FR-192, FR-193, FR-194, FR-195, FR-197 | after S4 is merged |
+| 3 | S6 · User experience | FR-211, FR-212, FR-213, FR-214, FR-216, FR-217, FR-222 | after S4 is merged, in parallel with S5 |
