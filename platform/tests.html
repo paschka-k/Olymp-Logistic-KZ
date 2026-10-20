@@ -3002,7 +3002,7 @@ const clean = (w, where) => { const t = w.document.querySelector('#root').innerT
     for (const p of ['index.html', 'de.html', 'en.html', 'kk.html', 'tests.html']) {
       const n = (await (await w.fetch(p, { cache: 'no-store' })).arrayBuffer()).byteLength;
       assert(n <= (p === 'tests.html' ? B.tests_kb : B.page_kb) * 1024, p + ' is ' + Math.round(n / 1024) + ' KB, over budget');
-      assert(Math.abs(n - man.pages[p]) < 1024, p + ' size differs from the manifest (stale build?)');
+      assert(Math.abs(n - man.pages[p]) <= man.pages[p] * 0.01 + 1024, p + ' size differs from the manifest (stale build?)');   // 1 %: CRLF checkouts
     }
     assert(man.assets_bytes <= B.assets_kb * 1024, 'assets ' + man.assets_bytes + ' B over budget');
     man.assets.forEach(a => assert(a.bytes <= B.asset_file_kb * 1024, a.path + ' over the per-file budget'));
