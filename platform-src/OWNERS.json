@@ -1,0 +1,21 @@
+{
+  "_note": "FR-203 · one folder per menu area under platform-src/v6/screens/<area>/. The folder is the ownership: a branch that works on an area edits files in that folder (plus its tests and help articles). Cross-area edits are reported by tools/check-areas.mjs (CI: lint job). 'shell' and 'shared' are common ground: edits there are always reported, and must be agreed with every running branch.",
+  "numbering": "File name = NNN-kebab-name.js. NNN is the BUILD ORDER of the bundle (names sort as strings, so keep three digits). First digit = layer: 0xx core menu screens, 1xx menu add-ons, 2xx operations (W1/P1/P2), 3xx resources (W2/P3/P4), 4xx records and administration (W3), 5xx commercial and portals (W4), 6xx economics (W5/P5), 7xx rules and report extensions (R4), 9xx delivery. A new file takes the next free number in the layer; it must not move an existing file in the order. Names are unique across all area folders.",
+  "areas": {
+    "shell": { "menu": [], "owner": "shell / platform (P6, S3, S2)", "common": true },
+    "shared": { "menu": [], "owner": "platform", "common": true },
+    "dashboard": { "menu": ["dashboard"], "owner": "monitoring (P3, W3)" },
+    "orders": { "menu": ["orders"], "owner": "operations (W1, P1, P2, W4 commercial)" },
+    "dispatch": { "menu": ["dispatch"], "owner": "dispatch (P2, R1, R4)" },
+    "fleet": { "menu": ["fleet"], "owner": "resources (W2, P4)" },
+    "drivers": { "menu": ["drivers"], "owner": "resources (W2, R5)" },
+    "routes": { "menu": ["routes"], "owner": "tracking (P3, W2)" },
+    "hubs": { "menu": ["hubs"], "owner": "hubs (R3)" },
+    "pod": { "menu": ["pod"], "owner": "proof of delivery and quality" },
+    "billing": { "menu": ["billing"], "owner": "economics (W5, R4)" },
+    "reports": { "menu": ["reports"], "owner": "economics (W5, P5)" },
+    "ai": { "menu": ["ai"], "owner": "assistant" },
+    "settings": { "menu": ["settings", "baseline", "changes"], "owner": "records and administration (W3, W5)" },
+    "portals": { "menu": [], "owner": "portals (W4)" }
+  }
+}

@@ -44,5 +44,10 @@ jobs:
         run: npm run --prefix tools/lint lint
       - name: Prettier
         run: npm run --prefix tools/lint format:check
+      - name: Area folders (FR-203) - structure, numbering rule, build order
+        run: node tools/check-areas.mjs
+      - name: Areas touched by this change (FR-203, report only)
+        if: github.event_name == 'pull_request'
+        run: node tools/check-areas.mjs --base origin/${{ github.base_ref }} | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Build (sources assemble)
         run: node platform-src/build-v6.mjs --out /tmp/v6-build

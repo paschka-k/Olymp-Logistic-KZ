@@ -23,6 +23,17 @@ const list = (dir, ext) =>
         .filter(f => f.endsWith(ext))
         .sort()
     : [];
+// FR-203: screens live in one folder per menu area (v6/screens/<area>/NNN-name.js, ownership: platform-src/OWNERS.json). The BUNDLE ORDER
+// is unchanged: every file of every area folder, sorted by file name (NNN prefix), exactly the order of the former flat folder.
+const screenFiles = () => {
+  const out = [];
+  for (const area of readdirSync(join(here, 'v6', 'screens'), { withFileTypes: true }).filter(d => d.isDirectory()).map(d => d.name)) {
+    for (const f of list(`v6/screens/${area}`, '.js')) out.push([f, `${area}/${f}`]);
+  }
+  const names = out.map(o => o[0]);
+  if (new Set(names).size !== names.length) throw new Error('screens: file names must be unique across area folders (build order is by name)');
+  return out.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)).map(o => o[1]);
+};
 const css =
   ['tokens.css', 'shell.css', 'components.css', 'components-kz.css', 'theme-kokzhol.css'].map(f => rd('shared', 'design', f)).join('\n') +
   '\n' +
@@ -32,7 +43,7 @@ const js = [
   rd('v6', 'core.js'),
   rd('v6', 'roles.js'),
   rd('v6', 'data.js'),
-  ...list('v6/screens', '.js').map(f => rd('v6', 'screens', f)),
+  ...screenFiles().map(f => rd('v6', 'screens', f)),
   ...list('v6/help', '.js').map(f => rd('v6', 'help', f)),
   rd('v6', 'app.js'),
 ].join('\n');

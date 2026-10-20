@@ -119,7 +119,7 @@ await group('S4 FR-199: string tables have the same keys in all four languages, 
   assert(keys.length >= 200, 'shell table has ' + keys.length + ' keys');
   for (const l of ['de', 'en', 'kk']) eq(Object.keys(t[l]).join('|'), keys.join('|'), l + ' keys = ru keys, same order');
   for (const l of ['de', 'en']) for (const k of keys) assert(!/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]/.test(t[l][k]), l + ' key ' + k + ' contains Cyrillic');
-  for (const f of ['core.js', 'roles.js', 'screens/001-shell-ext.js', 'screens/002-a11y.js']) {
+  for (const f of ['core.js', 'roles.js', 'screens/shell/001-shell-ext.js', 'screens/shell/002-a11y.js']) {
     const src = await g4Src('../platform-src/v6/' + f);
     const m = src.match(/[^\w.]T\(\s*['"`][^)]{0,40}/);
     assert(!m, f + ' still has an inline T() tuple: ' + (m && m[0]));
@@ -290,4 +290,33 @@ await group('S4 FR-202: registered actions write the audit log themselves, and o
   w.document.getElementById('g4b').click();
   eq(n(), a, 'a click blocked by the registry permission audits nothing');
   assert(/permission|Berechtigung|Нет прав|Құқық/i.test(ev('S.toast.msg')), 'viewer is refused by the registry permission: ' + ev('S.toast.msg'));
+});
+
+/* FR-203 · area folders and ownership (platform-src/OWNERS.json, tools/check-areas.mjs) */
+await group('S4 FR-203: OWNERS.json covers every menu item; each area has an owner; numbering rule is documented', 'en', async (g, ev) => {
+  const o = JSON.parse(await g4Src('../platform-src/OWNERS.json'));
+  const menus = new Set(Object.values(o.areas).flatMap(a => a.menu));
+  for (const id of ev('NAV.map(n => n[0])')) assert(menus.has(id), 'menu item ' + id + ' has no area in OWNERS.json');
+  for (const [name, a] of Object.entries(o.areas)) assert(a.owner && a.owner.length > 3, 'area ' + name + ' needs an owner');
+  assert(/NNN-kebab-name\.js/.test(o.numbering) && /BUILD ORDER/.test(o.numbering), 'numbering rule');
+  assert(o.areas.shell.common && o.areas.shared.common, 'shell and shared are common ground');
+  const order = (await g4Src('../platform-src/v6/screens/ORDER.txt')).split('\n').filter(l => l && !l.startsWith('#'));
+  eq(order.join() === [...order].sort().join(), true, 'ORDER.txt is in name order');
+  assert(order.length >= 64 && order[0] === '001-shell-ext.js' && order[order.length - 1] === '990-delivery.js', 'first and last file of the bundle order');
+  const wf = await g4Src('../.github/workflows/lint.yml');
+  assert(wf.includes('node tools/check-areas.mjs'), 'CI runs the area check');
+});
+await group('S4 FR-203: the bundle still follows the file-name order (first and last screens, no area-dependent order)', 'ru', async () => {
+  const src = await g4Src('index.html');
+  const at = s => src.indexOf(s);
+  const marks = ['/* P6 · Shell parity', '/* S3 accessibility (docs/OPTIMISATION-FR.md, section E)', '/* Dashboard · Overview', '/* Orders & Loads (spec 5.2)', '/* S2 · Delivery'];
+  const pos = marks.map(at);
+  assert(
+    pos.every(p => p > 0),
+    'markers found: ' + pos.join(),
+  );
+  assert(
+    pos.every((p, i) => !i || p > pos[i - 1]),
+    'screens are assembled in NNN order: ' + pos.join(),
+  );
 });
