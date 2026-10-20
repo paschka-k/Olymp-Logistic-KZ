@@ -3,12 +3,22 @@
   const ALL = T('Все', 'Alle', 'All', 'Барлығы');
   const sel = (key, label, opts) => `<label>${esc(label)}:</label><select class="select" data-f="${key}">${opts.map(o => `<option value="${esc(o[0])}"${S.f[key] === o[0] ? ' selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
   const DRV = { available: T('Свободен', 'Frei', 'Available', 'Бос'), busy: T('В рейсе', 'Im Einsatz', 'On trip', 'Рейсте'), rest: T('Отдых', 'Ruhe', 'Resting', 'Демалыс') };
+  /* R1 · 0.3.9 engine/tripRows: issue tag on the trip card — road (inbox message on the route), weather (3-day hub forecast) or load check, level ≥ 2, level = max; road first when it leads */
+  function issueTag(l) {
+    if (!isActive(l) && l.status !== 'unassigned') return '';
+    const rr = typeof roadRisk === 'function' ? roadRisk(l) : null, road = rr ? rr.lvl : 0;
+    let wx = 0, wxTxt = ''; if (typeof wxFor === 'function') [l.from, l.to].forEach(h => wxFor(h).slice(0, 3).forEach(x => { if (x.risk > wx) { wx = x.risk; wxTxt = wxCond(x) + ' · ' + HUBS[h].city; } }));
+    let ld = 0; try { if (typeof lwCalc === 'function' && typeof ops === 'function' && ops(l).orders.length) ld = Math.max(0, ...lwCalc(l).issues.map(i => i.sev)); } catch (e) { ld = 0; }
+    const lvl = Math.max(road, wx, ld); if (lvl < 2) return '';
+    const txt = road >= 2 && road >= wx && road >= ld ? T('Дорога: ', 'Straße: ', 'Road: ', 'Жол: ') + roadMsgText(rr.msg) : wx >= 2 && wx >= ld ? T('Погода: ', 'Wetter: ', 'Weather: ', 'Ауа райы: ') + wxTxt : T('Загрузка: проверить', 'Beladung: prüfen', 'Load: check', 'Тиеу: тексеру');
+    return `<div class="sub" data-issue="${lvl}">${lvChip(lvl)} ${esc(txt)}</div>`;
+  }
   function card(l) {
     const d = l.driver && drv(l.driver), t = l.truck && trk(l.truck);
     return `<div class="kcard${S.drawer && S.drawer.id === l.id ? ' sel' : ''}" draggable="true" data-id="${l.id}" data-act="open"><div class="r1"><a class="lnk">${l.id}</a>${chip(PRI[l.priority].c, PRI[l.priority].l)}</div>
 <div class="rt">${esc(HUBS[l.from].city)} → ${esc(HUBS[l.to].city)}</div><div class="sub">${zoneChip(l.zone)} ${l.status === 'in_transit' || l.status === 'problem' ? tempChip(l) : ''}</div>
 <div class="sub">ETA ${fdt(l.eta)} · ${l.pallets} ${esc(T('пал.', 'Pal.', 'pal.', 'пал.'))}</div>
-${l.status === 'problem' ? `<div class="prob">${ic('alert', 14)} ${esc(T('Температура вне диапазона', 'Temperatur außerhalb Bereich', 'Temperature out of range', 'Температура диапазоннан тыс'))}</div>` : ''}
+${issueTag(l)}${l.status === 'problem' ? `<div class="prob">${ic('alert', 14)} ${esc(T('Температура вне диапазона', 'Temperatur außerhalb Bereich', 'Temperature out of range', 'Температура диапазоннан тыс'))}</div>` : ''}
 <div class="r2">${d ? `<span class="cell">${avatar(d.ini, 1)}<span>${esc(d.name.split(' ')[0])}</span><small>${esc(t.plate)}</small></span>` : `<span class="faint">${esc(T('не назначен', 'offen', 'unassigned', 'тағайындалмаған'))}</span>`}<b>${kzt(revenue(l))}</b></div></div>`;
   }
   function board() {
