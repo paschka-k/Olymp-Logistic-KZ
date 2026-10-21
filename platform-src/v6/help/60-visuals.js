@@ -18,7 +18,8 @@
   /* ---------- SVG primitives (strings; labels are raw text, escaped here) ---------- */
   function wrapW(s, max) {
     const out = [];
-    String(s).split('\n').forEach(part => { let line = ''; part.split(' ').forEach(w => { if (line && (line + ' ' + w).length > max) { out.push(line); line = w; } else line = line ? line + ' ' + w : w; }); out.push(line); });
+    /* a lone separator (· → + –) stays at the end of its line instead of starting the next one */
+    String(s).split('\n').forEach(part => { let line = ''; part.split(' ').forEach(w => { if (line && (line + ' ' + w).length > max) { if (/^[·→+–]$/.test(w)) { out.push(line + ' ' + w); line = ''; } else { out.push(line); line = w; } } else line = line ? line + ' ' + w : w; }); if (line) out.push(line); });
     return out;
   }
   const Lines = (x, y, s, o) => {
@@ -27,8 +28,9 @@
   };
   const Txt = (x, y, s, o) => { o = o || {}; return `<text x="${f(x)}" y="${f(y)}"${o.anchor ? ` text-anchor="${o.anchor}"` : ''}${o.mid ? ' dominant-baseline="middle"' : ''} font-size="${o.size || 12}" class="hv-t ${o.cls || ''}"${o.attrs || ''}>${esc(s)}</text>`; };
   const Box = o => {
-    /* a sub line that wraps grows upwards, so the last line stays inside the box (the title moves up with it) */
-    const size = o.size || 13, m = o.max || Math.max(6, Math.floor(o.w / (size * 0.56))), sn = o.sub ? wrapW(o.sub, m + 4).length : 0, up = sn > 1 ? (sn - 1) * (size - 2) * 1.25 / 2 : 0;
+    /* 0.66 em per character: room for the wider Linux fonts (DejaVu Sans) of the CI, so labels wrap instead of leaving the box
+       a sub line that wraps grows upwards, so the last line stays inside the box (the title moves up with it) */
+    const size = o.size || 13, m = o.max || Math.max(6, Math.floor(o.w / (size * 0.66))), sn = o.sub ? wrapW(o.sub, m + 4).length : 0, up = sn > 1 ? (sn - 1) * (size - 2) * 1.25 / 2 : 0;
     return `<g class="hv-bx t-${o.tone || 'base'}${o.on ? ' on' : ''}${o.done ? ' done' : ''}${o.cls ? ' ' + o.cls : ''}"${o.attrs || ''}><rect x="${o.x}" y="${o.y}" width="${o.w}" height="${o.h}" rx="8"/>${Lines(o.x + o.w / 2, o.y + o.h / 2 - (o.sub ? 8 : 0) - up, o.label, { max: m, size, cls: 'hv-st' })}${o.sub ? Lines(o.x + o.w / 2, o.y + o.h - 13 - up, o.sub, { max: m + 4, size: size - 2, cls: 'hv-sb' }) : ''}</g>`;
   };
   const Diamond = o => `<g class="hv-bx t-${o.tone || 'accent'}${o.on ? ' on' : ''}${o.cls ? ' ' + o.cls : ''}"><polygon points="${o.cx},${o.cy - o.h / 2} ${o.cx + o.w / 2},${o.cy} ${o.cx},${o.cy + o.h / 2} ${o.cx - o.w / 2},${o.cy}"/>${Lines(o.cx, o.cy, o.label, { max: Math.floor(o.w / ((o.size || 12) * 0.75)), size: o.size || 12, cls: 'hv-st' })}</g>`;
@@ -38,7 +40,7 @@
     const lab = o.label ? Lines(o.lx != null ? o.lx : ((o.x1 || 0) + (o.x2 || 0)) / 2, o.ly != null ? o.ly : ((o.y1 || 0) + (o.y2 || 0)) / 2 - 10, o.label, { max: 22, size: 11, cls: 'hv-sb' }) : '';
     return `<g class="hv-ar2${o.on ? ' on' : ''}${o.tone ? ' t-' + o.tone : ''}${o.dashed ? ' dashed' : ''}"><defs><marker id="${mid}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="hv-hm"/></marker></defs><path d="${d}" marker-end="url(#${mid})"/>${lab}</g>`;
   };
-  const Tag = (x, y, s, tone, size) => { size = size || 11; const w = Math.max(28, String(s).length * size * 0.6 + 14); x = Math.max(w / 2 + 4, Math.min(996 - w / 2, x));   /* long DE / KK tags stay inside the 1000-wide picture */ return `<g class="hv-tag t-${tone || 'accent'}"><rect x="${f(x - w / 2)}" y="${y - size}" width="${f(w)}" height="${size * 2}" rx="${size}"/><text x="${f(x)}" y="${y}" text-anchor="middle" dominant-baseline="middle" font-size="${size}" class="hv-t">${esc(s)}</text></g>`; };
+  const Tag = (x, y, s, tone, size) => { size = size || 11; const w = Math.max(28, String(s).length * size * 0.66 + 14); x = Math.max(w / 2 + 4, Math.min(996 - w / 2, x));   /* long DE / KK tags stay inside the 1000-wide picture */ return `<g class="hv-tag t-${tone || 'accent'}"><rect x="${f(x - w / 2)}" y="${y - size}" width="${f(w)}" height="${size * 2}" rx="${size}"/><text x="${f(x)}" y="${y}" text-anchor="middle" dominant-baseline="middle" font-size="${size}" class="hv-t">${esc(s)}</text></g>`; };
   const Token = (x, y, r, tone) => `<circle class="hv-tok t-${tone || 'accent'}" r="${r || 9}" cx="0" cy="0" style="transform:translate(${f(x)}px,${f(y)}px)"/>`;
   HELP.kit = { Box, Diamond, Arrow, Lines, Txt, Tag, Token, wrapW };   /* shared with the 0.3.9 players in 65-players.js */
   const fmtKg = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
@@ -179,7 +181,8 @@
       let g = `<g class="hv-bx${hi === 'ops' || hi === 'num' ? ' on' : ''}"><rect x="10" y="10" width="520" height="400" rx="10"/></g>` + Lines(270, 34, t(['17 функций операций · ежедневно, живые данные', '17 Betriebsfunktionen · täglich, live', '17 operations functions · daily, live data', '17 операция функциясы · күнделікті, тірі деректер']), { max: 70, size: 14, cls: 'hv-st' });
       SPN.forEach((n, i) => {
         const col = i % 3, row = Math.floor(i / 3), x = 26 + col * 168, y = 56 + row * 57, mine = typeof canSee !== 'function' || canSee(n[1]);
-        g += `<g class="hv-bx${hi === 'num' ? ' on' : ''}${mine ? '' : ' t-muted'}" data-split-screen="${n[0]}"><rect x="${x}" y="${y}" width="158" height="46" rx="6"/>${Txt(x + 10, y + 23, n[0], { mid: true, size: 15, cls: 'hv-st' })}${Txt(x + 38, y + 23, t(n[2]), { mid: true, size: 12.5 })}</g>`;
+        const lab = t(n[2]), ls = f(Math.min(12.5, 112 / (lab.length * 0.66)));   // long names (KK «Бастапқы деректер») get a smaller font, wide Linux fonts included
+        g += `<g class="hv-bx${hi === 'num' ? ' on' : ''}${mine ? '' : ' t-muted'}" data-split-screen="${n[0]}"><rect x="${x}" y="${y}" width="158" height="46" rx="6"/>${Txt(x + 10, y + 23, n[0], { mid: true, size: 15, cls: 'hv-st' })}${Txt(x + 38, y + 23, lab, { mid: true, size: ls })}</g>`;
       });
       g += `<g class="hv-bx t-accent${hi === 'rec' ? ' on' : ''}"><rect x="650" y="10" width="340" height="400" rx="10"/></g>` + Lines(820, 34, t(['Учёт и администрирование · вводится один раз', 'Stammdaten und Verwaltung · einmal erfasst', 'Records and administration · entered once', 'Есеп және әкімшілік · бір рет енгізіледі']), { max: 34, size: 13, cls: 'hv-st' });
       SPR.forEach((r, i) => { g += `<g class="hv-bx"><rect x="666" y="${66 + i * 66}" width="308" height="56" rx="6"/>${Lines(820, 84 + i * 66, t(r[0]), { max: 40, size: 13, cls: 'hv-st' })}${Lines(820, 106 + i * 66, t(r[1]), { max: 46, size: 11, cls: 'hv-sb' })}</g>`; });

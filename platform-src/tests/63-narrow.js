@@ -1,6 +1,6 @@
   /* ---- Q4 narrow-window layout: at 375 and 768 px no screen / tab / load-drawer tab scrolls sideways, the page title never breaks
      word by word, header buttons stay one line, the burger opens and closes the off-canvas menu, search and "⋯" overflow work ---- */
-  const narrow = async (w, px) => { w.frameElement.style.cssText = `display:block;position:absolute;left:-10000px;top:0;width:${px}px;height:760px;border:0`; await new Promise(r => setTimeout(r, 30)); /* not requestAnimationFrame: it never fires in a hidden tab */ eq(w.innerWidth, px, 'iframe width'); };
+  const narrow = async (w, px) => { w.frameElement.style.cssText = `display:block;position:absolute;left:-10000px;top:0;width:${px}px;height:760px;border:0`; await new Promise(r => setTimeout(r, 30)); /* not requestAnimationFrame: it never fires in a hidden tab */ assert(Math.abs(w.innerWidth - px) <= 2, 'iframe width ' + w.innerWidth + ' for ' + px + ' px'); /* ±2: display scaling rounds 768 css px to 767 on some screens */ };
   const sideways = (w, where) => {
     const d = w.document, de = d.documentElement, m = d.querySelector('main');
     assert(de.scrollWidth <= de.clientWidth + 1, where + ': page scrolls sideways ' + de.scrollWidth + ' > ' + de.clientWidth);
