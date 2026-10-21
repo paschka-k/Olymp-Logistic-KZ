@@ -3346,7 +3346,7 @@ class Component extends DCLogic {
       const inp = q('[data-pp-cert]'); const dt = new (W().DataTransfer)(); dt.items.add(file); inp.files = dt.files; inp.dispatchEvent(new (W().Event)('change', { bubbles: true }));
       ok(await sleepFor(() => q('[data-pp-profile] .mono')), 'сертификат не загружен');
       setIn(q('[data-pp-veh]'), '555 ABC 02, 556 ABC 02');
-      const today = new Date(); const iso = d => d.toISOString().slice(0, 10);
+      const today = new Date(Math.min(Date.now(), Date.UTC(2026, 9, 6))); /* audit must not lie after the server's business date (scenario 06.10.2026) */ const iso = d => d.toISOString().slice(0, 10);
       setIn(q('[data-pp-audit]'), iso(new Date(today - 10 * 86400000))); setIn(q('[data-pp-until]'), iso(new Date(+today + 365 * 86400000))); setIn(q('[data-pp-ins]'), iso(new Date(+today + 200 * 86400000)));
       await sleep(200); const b = q('[data-pp-submit]'); ok(b && !b.disabled, 'кнопка отправки неактивна'); b.click();
       const sub = await sleepFor(() => q('[data-pp-sub]')); ok(sub && /ждёт проверки|awaiting|wartet/.test(sub.textContent), 'заявка не в статусе «ждёт проверки»: ' + (sub && sub.textContent));
