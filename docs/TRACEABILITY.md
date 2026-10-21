@@ -602,3 +602,11 @@ Docs: docs/ARCHITECTURE.md (folders, base layer), docs/I18N.md (string tables, K
 | FR-207 | `data-test` hooks, identical in all languages: `nav:<id>`, `tab:<screen>:<key>`, `kpi`, `table`, `filters`, `drawer`, `drawer-close`, `toast`, `role-select`, `lang:<code>`, `help`, `burger`, `brand`, `mark:<code>`, `issue:<code>`; tests that selected by text (marks, other-hub reason, workshop state, "Mine" segment) moved onto them | core.js, base/30-kit.js, screens/orders/210, 220, billing/600, tests/70, b2, e1 | "[lang] S4 FR-207: shell and kit carry data-test hooks …", "S4 FR-207: the hook set is identical in RU, DE, EN and KK" |
 | FR-220 | 96 shortened Kazakh texts completed (keyed table `kkfill`), listed as machine translations in `strings/kk/_review.json`; `kk-review.mjs` export / import workflow (I-26); `?kkreview=1` marks `[MT]`; `scan.mjs --kk` finds gaps; `kk-equal-ok.json` allow-list | v6/strings/*/kkfill.json, tools/i18n/*, base/05-strings.js | "S4 FR-220: completed KK texts are keyed …", "S4 FR-220: ?kkreview=1 marks unreviewed machine translations …" |
 | FR-221 | One locale helper `LF` (numbers, tenge, dates, times, units, temperature) per language; no `toLocaleString` / `replace('.', ',')` left in screens; EN uses the decimal point everywhere | v6/base/10-locale.js, screens/*, core.js | "[lang] S4 FR-221: LF formats numbers …", "S4 FR-221: no screen formats numbers on its own …" |
+
+## H1 — Help figures and sidebar scroll (user report 2026-10-21)
+
+| Item | Change | Test |
+|---|---|---|
+| "A shipment from start to finish" | The 0.3.9 players (shipflow, expresspath, alarmflow) are drawn with the Q1 figure kit: labels wrap inside their boxes, no overlapping boxes, coloured Go/No-Go diamond, No-Go arc inside the picture | `g5-help-figures-scroll.js` |
+| All help figures | Geometry check of every step of every figure in RU/DE/EN/KK; fixes: wrapped sub lines stay inside boxes, truck seesaw inside the picture, tags clamped to the picture, booking / coverage / flow labels clear of arrows, height unit "м" in RU/KK | `g5-help-figures-scroll.js` |
+| Sidebar jumps to the top | `render()` keeps the scroll position of the sidebar (always) and of inner scroll boxes (help menu, drawer, board, wide tables) while the screen stays the same | `g5-help-figures-scroll.js` |

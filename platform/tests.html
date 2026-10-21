@@ -16,7 +16,7 @@ window.__TESTS = { total: 0, passed: 0, failed: 0, failures: [], flaky: [], quar
 const LANGS = ['ru', 'de', 'en', 'kk'], file = l => (l === 'ru' ? 'index.html' : l + '.html');
 const out = document.getElementById('out');
 const __Q = new URLSearchParams(location.search);
-const __SUITES = [{"name":"10-navigation.js","ms":3049},{"name":"20-dispatch.js","ms":587},{"name":"30-chain.js","ms":447},{"name":"40-reports-ai-settings.js","ms":531},{"name":"50-legacy-tabs.js","ms":786},{"name":"60-foundation.js","ms":971},{"name":"61-shell-ext.js","ms":4141},{"name":"62-language-audit.js","ms":2265},{"name":"63-narrow.js","ms":9450},{"name":"70-ops-load.js","ms":4070},{"name":"71-ops-ship.js","ms":1035},{"name":"72-ops-docs.js","ms":861},{"name":"73-ops-dispatch.js","ms":1011},{"name":"74-ops-dashboard.js","ms":1042},{"name":"75-ops-trips.js","ms":1180},{"name":"76-ops-docs.js","ms":835},{"name":"80-res-fleet-staff.js","ms":948},{"name":"81-res-driver-app.js","ms":1133},{"name":"82-res-coverage-lines.js","ms":1350},{"name":"83-res-thermo.js","ms":871},{"name":"84-res-weather.js","ms":902},{"name":"85-res-coverage.js","ms":1915},{"name":"86-res-fleet-ext.js","ms":1277},{"name":"87-res-partners.js","ms":3018},{"name":"88-res-staff-app.js","ms":1163},{"name":"90-rec-records.js","ms":2493},{"name":"a0-por-portals.js","ms":1760},{"name":"b0-eco-economics.js","ms":1944},{"name":"b1-eco-reports-ext.js","ms":1157},{"name":"b2-eco-costs-ext.js","ms":1484},{"name":"c0-help-content.js","ms":3125},{"name":"c1-help-visuals.js","ms":1756},{"name":"c2-notes.js","ms":2682},{"name":"d0-v6-parity.js","ms":3193},{"name":"e1-mirror-ops-a.js","ms":2411},{"name":"e1-mirror-ops-b.js","ms":1870},{"name":"e1-mirror-ops-c.js","ms":3096},{"name":"e1-mirror-ops.js","ms":5006},{"name":"e2-mirror-res.js","ms":15641},{"name":"e3-hub-inbound.js","ms":1449},{"name":"e4-rules-sla.js","ms":1977},{"name":"e5-driver-partner.js","ms":1798},{"name":"f0-a11y.js","ms":915},{"name":"f0-ci-infra.js","ms":3922},{"name":"f0-delivery.js","ms":627},{"name":"f0-shell-parity.js","ms":357},{"name":"f1-data-integrity.js","ms":582},{"name":"f2-ops-fleet.js","ms":200},{"name":"f3-records-portals.js","ms":211},{"name":"f4-economics.js","ms":200},{"name":"f5-a11y-layout.js","ms":742},{"name":"g4-architecture.js","ms":1058}];
+const __SUITES = [{"name":"10-navigation.js","ms":3049},{"name":"20-dispatch.js","ms":587},{"name":"30-chain.js","ms":447},{"name":"40-reports-ai-settings.js","ms":531},{"name":"50-legacy-tabs.js","ms":786},{"name":"60-foundation.js","ms":971},{"name":"61-shell-ext.js","ms":4141},{"name":"62-language-audit.js","ms":2265},{"name":"63-narrow.js","ms":9450},{"name":"70-ops-load.js","ms":4070},{"name":"71-ops-ship.js","ms":1035},{"name":"72-ops-docs.js","ms":861},{"name":"73-ops-dispatch.js","ms":1011},{"name":"74-ops-dashboard.js","ms":1042},{"name":"75-ops-trips.js","ms":1180},{"name":"76-ops-docs.js","ms":835},{"name":"80-res-fleet-staff.js","ms":948},{"name":"81-res-driver-app.js","ms":1133},{"name":"82-res-coverage-lines.js","ms":1350},{"name":"83-res-thermo.js","ms":871},{"name":"84-res-weather.js","ms":902},{"name":"85-res-coverage.js","ms":1915},{"name":"86-res-fleet-ext.js","ms":1277},{"name":"87-res-partners.js","ms":3018},{"name":"88-res-staff-app.js","ms":1163},{"name":"90-rec-records.js","ms":2493},{"name":"a0-por-portals.js","ms":1760},{"name":"b0-eco-economics.js","ms":1944},{"name":"b1-eco-reports-ext.js","ms":1157},{"name":"b2-eco-costs-ext.js","ms":1484},{"name":"c0-help-content.js","ms":3125},{"name":"c1-help-visuals.js","ms":1756},{"name":"c2-notes.js","ms":2682},{"name":"d0-v6-parity.js","ms":3193},{"name":"e1-mirror-ops-a.js","ms":2411},{"name":"e1-mirror-ops-b.js","ms":1870},{"name":"e1-mirror-ops-c.js","ms":3096},{"name":"e1-mirror-ops.js","ms":5006},{"name":"e2-mirror-res.js","ms":15641},{"name":"e3-hub-inbound.js","ms":1449},{"name":"e4-rules-sla.js","ms":1977},{"name":"e5-driver-partner.js","ms":1798},{"name":"f0-a11y.js","ms":915},{"name":"f0-ci-infra.js","ms":3922},{"name":"f0-delivery.js","ms":627},{"name":"f0-shell-parity.js","ms":357},{"name":"f1-data-integrity.js","ms":582},{"name":"f2-ops-fleet.js","ms":200},{"name":"f3-records-portals.js","ms":211},{"name":"f4-economics.js","ms":200},{"name":"f5-a11y-layout.js","ms":742},{"name":"g4-architecture.js","ms":1058},{"name":"g5-help-figures-scroll.js","ms":274}];
 const __QUARANTINE = [];
 const __HARNESS = {
   /* longest-processing-time split: heaviest suite first onto the lightest shard; deterministic for a given suite list */
@@ -4193,6 +4193,70 @@ for (const lang of LANGS)
 await group('S4 FR-207: the hook set is identical in RU, DE, EN and KK', 'ru', async () => {
   for (const l of ['de', 'en', 'kk']) eq(g4Hooks[l], g4Hooks.ru, l + ' hooks = ru hooks');
 });
+
+__suite(52);   /* g5-help-figures-scroll.js */
+  /* ---- 6.4.1: help figures are geometrically clean in every language and step (labels inside their boxes, no overlapping boxes,
+     nothing outside the picture, no unstyled black shapes); inner scroll boxes (sidebar, help menu …) keep their position across re-renders ---- */
+  const show = async (w, h) => { w.frameElement.style.cssText = `display:block;position:absolute;left:-10000px;top:0;width:1316px;height:${h}px;border:0`; await new Promise(r => setTimeout(r, 120)); };
+  const figCheck = () => {
+    const out = [], host = document.createElement('div');
+    host.style.cssText = 'position:absolute;left:0;top:0;width:1060px;background:#fff;z-index:99999';
+    document.body.appendChild(host);
+    const SH = ':scope > rect, :scope > polygon, :scope > path';
+    const inside = (a, b, tol) => a.x >= b.x - tol && a.y >= b.y - tol && a.x + a.width <= b.x + b.width + tol && a.y + a.height <= b.y + b.height + tol;
+    const area = (a, b) => Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
+    for (const id of Object.keys(HELP.visuals)) {
+      const n = HELP.hv.defs[id].steps.length;
+      for (let i = 0; i < n; i++) {
+        S.hv = S.hv || {}; S.hv[id] = { i, run: false };
+        host.innerHTML = HELP.visuals[id]();
+        host.querySelectorAll('svg').forEach(svg => {
+          const vb = svg.viewBox.baseVal;
+          const boxes = [...svg.querySelectorAll('g.hv-bx, g.hv-box')].filter(g => g.querySelector(SH) && !g.closest('.hv-mv'));
+          const bb = boxes.map(g => g.querySelector(SH).getBBox());
+          boxes.forEach((g, k) => {
+            const sh = g.querySelector(SH);
+            if (/rgb\(0, 0, 0\)/.test(getComputedStyle(sh).fill)) out.push(id + ' #' + (i + 1) + ': black shape "' + g.textContent.slice(0, 24) + '"');
+            g.querySelectorAll(':scope > text').forEach(t => { if (t.textContent.trim() && !inside(t.getBBox(), bb[k], 1.5)) out.push(id + ' #' + (i + 1) + ': label outside its box "' + t.textContent.slice(0, 30) + '"'); });
+          });
+          for (let a = 0; a < boxes.length; a++) for (let c = a + 1; c < boxes.length; c++) {
+            if (inside(bb[a], bb[c], 0) || inside(bb[c], bb[a], 0)) continue;   // a frame around other boxes
+            if (area(bb[a], bb[c]) > 4) out.push(id + ' #' + (i + 1) + ': boxes overlap "' + boxes[a].textContent.slice(0, 18) + '" × "' + boxes[c].textContent.slice(0, 18) + '"');
+          }
+          svg.querySelectorAll('g.hv-bx, g.hv-box, text, g.hv-tag').forEach(e => {
+            if (e.closest('.hv-mv') || e.closest('[style*="transform"]') || e.closest('[transform]')) return;   // rotated or moving parts are checked by eye
+            const b = e.getBBox(); if (!b.width) return;
+            if (b.x < vb.x - 1 || b.y < vb.y - 1 || b.x + b.width > vb.x + vb.width + 1 || b.y + b.height > vb.y + vb.height + 1) out.push(id + ' #' + (i + 1) + ': outside the picture "' + (e.textContent || '').slice(0, 24) + '"');
+          });
+        });
+      }
+    }
+    host.remove();
+    return [...new Set(out)];
+  };
+  for (const lang of LANGS) await group('[' + lang + '] help figures 6.4.1: every step of every figure has its labels inside their boxes, no overlapping boxes, nothing cut off, no black shapes', lang, async (g, ev, w) => {
+    await show(w, 760);   // the harness hides its frames; SVG boxes have no geometry without layout
+    const bad = ev('(' + figCheck.toString() + ')()');
+    assert(ev("document.querySelector('.sidebar').clientHeight") > 0, 'frame is laid out');
+    assert(!bad.length, bad.length + ' problems: ' + bad.slice(0, 6).join(' | '));
+  });
+  await group('help figure "A shipment from start to finish" 6.4.1: drawn with the figure kit, Go/No-Go is a coloured diamond, every step highlights one node', 'en', async (g, ev, w) => {
+    ev("ACT.helpGo({k:'start'})"); const d = w.document, pl = () => d.querySelector('.hp[data-player=shipflow]');
+    assert(pl().querySelector('svg.hvk-svg'), 'player draws on the kit');
+    const dia = pl().querySelector('.hv-bx polygon'); assert(dia, 'Go/No-Go diamond'); assert(!/rgb\(0, 0, 0\)/.test(w.getComputedStyle(dia).fill), 'diamond is not black');
+    for (let k = 0; k < 7; k++) { ev(`ACT.hvGo({id:'pl:shipflow', v:${k}})`); eq(pl().querySelectorAll('.pl-on').length, 1, 'one active node at step ' + (k + 1)); }
+    assert(/No-Go/.test(pl().textContent) && /Go/.test(pl().textContent), 'Go and No-Go labels');
+  });
+  await group('sidebar keeps its scroll position across re-renders (clock tick, language links and version at the bottom stay reachable)', 'ru', async (g, ev, w) => {
+    const sb = () => w.document.querySelector('.sidebar');
+    await show(w, 420); ev('render()');
+    const max = sb().scrollHeight - sb().clientHeight; assert(max > 40, 'sidebar scrolls in a low window: ' + max);
+    sb().scrollTop = max; ev('render()'); assert(Math.abs(sb().scrollTop - max) <= 1, 'kept after render: ' + sb().scrollTop + ' / ' + max);
+    ev("toast('x')"); assert(Math.abs(sb().scrollTop - max) <= 1, 'kept after a toast');
+    ev("go('fleet')"); assert(Math.abs(sb().scrollTop - max) <= 1, 'kept after changing the screen');
+    ev("ACT.helpGo({k:'start'})"); const hn = w.document.querySelector('.help-nav');
+    if (hn && hn.scrollHeight > hn.clientHeight + 20) { hn.scrollTop = 80; ev('render()'); eq(w.document.querySelector('.help-nav').scrollTop, 80, 'help menu keeps its position'); }
+  });
 
   __suite(-1);
   const R = window.__TESTS; document.getElementById('sum').textContent = R.passed + '/' + R.total + ' passed, ' + R.failed + ' failed' + (R.flaky.length ? ', ' + R.flaky.length + ' flaky' : '') + (R.quarantined.length ? ', ' + R.quarantined.length + ' quarantined' : '') + (R.shard ? ' · shard ' + R.shard.k + '/' + R.shard.n : ''); R.ms = Math.round(performance.now()); R.done = true;

@@ -1,14 +1,13 @@
 /* Help · animated Schaubilder (port of the 0.3.9 help overlays): a diagram that plays through its steps — ‹ ▶/⏸ › controls,
    "step n of m", the active node highlighted, the step text under the picture, "all steps" as a list. Since Q1 they run on the figure
-   kit of 60-visuals.js (HELP.fig): auto-advance every 4 s only while visible; prefers-reduced-motion starts paused; state S.hv['pl:<id>'].
-   HELP.players[id] = {title, steps[{t}], svg(i)}; rendered through HELP.visuals['pl:<id>'] so articles attach a player like any visual. */
+   kit of 60-visuals.js (HELP.fig; since 6.4.1 also drawn with its Box / Diamond / Arrow, so labels wrap inside their boxes): auto-advance every 4 s only while visible; prefers-reduced-motion starts paused; state S.hv['pl:<id>'].
+   HELP.players[id] = {title, steps[{t}], view, draw(i)}; rendered through HELP.visuals['pl:<id>'] so articles attach a player like any visual. */
 (function () {
   HELP.players = {};
 
-  /* ---------- small SVG kit (uses the hv- classes of 60-visuals) ---------- */
-  const box = (x, y, w, h, l1, l2, on, cls) => `<g class="hv-box hv-${cls || 'a'}${on ? ' pl-on' : ''}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="9"/><text x="${x + w / 2}" y="${y + (l2 ? h / 2 - 3 : h / 2 + 4)}" text-anchor="middle" style="font-weight:600">${esc(l1)}</text>${l2 ? `<text x="${x + w / 2}" y="${y + h / 2 + 13}" text-anchor="middle" style="font-size:10px;opacity:.75">${esc(l2)}</text>` : ''}</g>`;
-  const dia = (cx, cy, rx, ry, l1, on) => `<g class="hv-box hv-b${on ? ' pl-on' : ''}"><path d="M${cx} ${cy - ry} L${cx + rx} ${cy} L${cx} ${cy + ry} L${cx - rx} ${cy} Z" style="stroke-width:1.5"/><text x="${cx}" y="${cy + 4}" text-anchor="middle" style="font-weight:600">${esc(l1)}</text></g>`;
-  const ar = (x1, y1, x2, y2, dash, cls) => { const a = Math.atan2(y2 - y1, x2 - x1), h = 6; return `<g class="${cls || 'hv-ar'}"><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"${dash ? ' stroke-dasharray="5 4"' : ''}/><path d="M${x2} ${y2} L${x2 - h * Math.cos(a - .5)} ${y2 - h * Math.sin(a - .5)} L${x2 - h * Math.cos(a + .5)} ${y2 - h * Math.sin(a + .5)} Z" style="fill:currentColor;stroke:none"/></g>`; };
+  /* ---------- the Q1 figure kit (60-visuals.js): boxes wrap their text, tones and arrows follow the design tokens ---------- */
+  const { Box, Diamond, Arrow, Tag, Txt } = HELP.kit;
+  const num = (x, y, k, on) => `<g class="pl-num${on ? ' pl-on' : ''}"><circle cx="${x}" cy="${y}" r="14"/><text x="${x}" y="${y + 5}" text-anchor="middle">${k + 1}</text></g>`;
 
   /* ---------- player 1: shipment lifecycle (0.3.9 "Sendungsablauf von Anfang bis Ende") ---------- */
   const SF = [
@@ -23,18 +22,18 @@
   HELP.players.shipflow = {
     title: T('Путь отправки от начала до конца', 'Sendungsablauf von Anfang bis Ende', 'A shipment from start to finish', 'Жөнелтімнің басынан аяғына дейінгі жолы'),
     steps: SF.map(x => ({ t: x.t })),
-    svg(i) {
-      const W = 640, bw = 138, bh = 48, y1 = 26, y2 = 120, xs = [10, 176, 342, 0], gx = 540;
-      let g = box(xs[0], y1, bw, bh, SF[0].l, SF[0].s, i === 0) + ar(xs[0] + bw + 2, y1 + bh / 2, xs[1] - 4, y1 + bh / 2, i === 0)
-        + box(xs[1], y1, bw, bh, SF[1].l, SF[1].s, i === 1) + ar(xs[1] + bw + 2, y1 + bh / 2, xs[2] - 4, y1 + bh / 2, i === 1)
-        + box(xs[2], y1, bw, bh, SF[2].l, SF[2].s, i === 2) + ar(xs[2] + bw + 2, y1 + bh / 2, gx - 62, y1 + bh / 2, i === 2)
-        + dia(gx, y1 + bh / 2, 58, 34, 'Go/No-Go', i === 3)
-        + `<g class="pl-nogo"><path d="M${gx - 20} ${y1 - 8} C ${gx - 120} ${-14} ${xs[2] + bw - 20} ${-12} ${xs[2] + 70} ${y1 - 4}" fill="none" stroke-dasharray="5 4"/><path d="M${xs[2] + 70} ${y1 - 4} l8 -5 l-2 8 Z" style="stroke:none;fill:currentColor"/><text x="${gx - 92}" y="2" text-anchor="middle">No-Go</text></g>`
-        + ar(gx, y1 + bh / 2 + 36, gx, y2 - 4, false, i === 3 ? 'hv-ar pl-go' : 'hv-ar')
-        + box(gx - 69, y2, bw, bh, SF[4].l, SF[4].s, i === 4) + ar(gx - 71, y2 + bh / 2, xs[1] + 166 + bw + 4, y2 + bh / 2, i === 4)
-        + box(xs[1] + 166, y2, bw, bh, SF[5].l, SF[5].s, i === 5) + ar(xs[1] + 164, y2 + bh / 2, xs[1] + bw + 4, y2 + bh / 2, i === 5)
-        + box(xs[1] - 70, y2, bw, bh, SF[6].l, SF[6].s, i === 6, 'c');
-      return `<svg viewBox="0 0 ${W} 184" class="hv-svg">${g}</svg>`;
+    /* row 1 left → right: booking, planning, loading, Go/No-Go; row 2 right → left: in transit, delivery, ESF (no box overlaps, every label wraps inside its box) */
+    view: '0 0 1000 300',
+    draw(i) {
+      const P = [{ x: 20, y: 44, w: 196, h: 84 }, { x: 250, y: 44, w: 196, h: 84 }, { x: 480, y: 44, w: 196, h: 84 }, null, { x: 724, y: 204, w: 256, h: 84 }, { x: 454, y: 204, w: 236, h: 84 }, { x: 184, y: 204, w: 236, h: 84 }];
+      const D = { cx: 852, cy: 86, w: 220, h: 112 };
+      const B = k => Box(Object.assign({ label: SF[k].l, sub: SF[k].s, on: i === k, done: k < i, tone: k === 6 ? 'ok' : 'base', size: 13.5, cls: i === k ? 'pl-on' : '', attrs: ` data-pl-step="${k}"` }, P[k]));
+      return Arrow({ x1: 216, y1: 86, x2: 248, y2: 86, on: i === 0 }) + Arrow({ x1: 446, y1: 86, x2: 478, y2: 86, on: i === 1 }) + Arrow({ x1: 676, y1: 86, x2: 740, y2: 86, on: i === 2 })
+        + Arrow({ x1: D.cx, y1: D.cy + D.h / 2, x2: D.cx, y2: 202, on: i === 3, tone: 'ok' }) + Tag(D.cx + 34, 172, 'Go', 'ok')
+        + Arrow({ d: `M${D.cx - 40},${D.cy - 36} C${D.cx - 90},4 640,4 590,42`, tone: 'bad', dashed: true }) + Tag(712, 16, 'No-Go', 'bad')
+        + Arrow({ x1: 724, y1: 246, x2: 692, y2: 246, on: i === 4 }) + Arrow({ x1: 454, y1: 246, x2: 422, y2: 246, on: i === 5 })
+        + [0, 1, 2, 4, 5, 6].map(B).join('')
+        + Diamond(Object.assign({ label: SF[3].l, on: i === 3, cls: i === 3 ? 'pl-on' : '', size: 13 }, D)) + Txt(D.cx - 14, D.cy + 74, SF[3].s, { anchor: 'end', size: 11, cls: 'hv-sb' });
     },
   };
 
@@ -48,16 +47,17 @@
   HELP.players.expresspath = {
     title: T('Где живёт экспресс: эскиз экрана', 'Wo ist Express: Bildschirm-Skizze', 'Where express lives: screen sketch', 'Экспресс қайда тұрады: экран эскизі'),
     steps: EXS.map(t => ({ t })),
-    svg(i) {
-      const row = (y, txt, on) => `<g class="hv-box hv-${on ? 'a' : 'n'}"><rect x="14" y="${y}" width="128" height="22" rx="6"/><text x="22" y="${y + 15}">${esc(txt)}</text></g>`;
-      const n = (x, y, k) => `<g class="pl-num${i === k ? ' pl-on' : ''}"><circle cx="${x}" cy="${y}" r="11"/><text x="${x}" y="${y + 4}" text-anchor="middle">${k + 1}</text></g>`;
-      const card = (y, id, rt, sig, on) => `<g class="hv-box hv-${on ? 'a' : 'n'}"><rect x="170" y="${y}" width="380" height="40" rx="8"/><text x="182" y="${y + 17}" style="font-weight:700">${id}</text><text x="182" y="${y + 32}" style="font-size:10px;opacity:.75">${esc(rt)}</text><text x="408" y="${y + 24}" style="font-size:10px">${esc(sig)}</text></g><g class="hv-box hv-c"><rect x="556" y="${y + 6}" width="72" height="26" rx="7"/><text x="${556 + 36}" y="${y + 23}" text-anchor="middle" style="font-size:10px">${esc(T('К выпуску', 'Zur Freigabe', 'To release', 'Шығаруға'))}</text></g>`;
-      return `<svg viewBox="0 0 650 190" class="hv-svg"><rect x="6" y="6" width="140" height="176" rx="10" style="fill:var(--bg-subtle,#f3f4f6);stroke:var(--border,#e5e7eb)"/>
-${row(16, '01 · ' + navLabel('dashboard'), false)}${row(42, '03 · ' + navLabel('dispatch'), i <= 1)}${row(68, '02 · ' + navLabel('orders'), false)}${row(94, '06 · ' + navLabel('routes'), i === 3)}
-<g class="hv-box hv-e"><rect x="160" y="6" width="484" height="176" rx="10" style="fill:var(--surface,#fff)"/><text x="176" y="30" style="font-weight:700">${esc(T('Экспресс · ждут выпуска (2)', 'Express · warten auf Freigabe (2)', 'Express · waiting for release (2)', 'Экспресс · шығаруды күтуде (2)'))}</text></g>
-${card(44, 'EX-0311', HUBS.ALA.city + ' → ' + HUBS.ATY.city + ' · 18 ' + LF.unit('kg') + ' · 2–8 °C', '1 / 3', i === 1)}${card(94, 'EX-0312', HUBS.AST.city + ' → ' + HUBS.SHY.city + ' · 9 ' + LF.unit('kg') + ' · 15–25 °C', '0 / 3', false)}
-<text x="176" y="166" style="font-size:10px;opacity:.7">${esc(T('Срок приёма 16:00 · подписи: руководитель · экономика · диспетчер', 'Annahmeschluss 16:00 · Unterschriften: Leitung · Wirtschaft · Dispo', 'Cut-off 16:00 · signatures: manager · economics · dispatch', 'Қабылдау мерзімі 16:00 · қолдар: басшы · экономика · диспетчер'))}</text>
-${n(152, 53, 0)}${n(428, 36, 1)}${n(592, 36, 2)}${n(152, 105, 3)}</svg>`;
+    view: '0 0 1000 300',
+    draw(i) {
+      const side = [['01 · ' + navLabel('dashboard'), false], ['03 · ' + navLabel('dispatch'), i <= 1], ['02 · ' + navLabel('orders'), false], ['06 · ' + navLabel('routes'), i === 3]];
+      const card = (y, id, rt, sig, on) => `<g class="hv-bx t-${on ? 'accent' : 'base'}${on ? ' on' : ''}"><rect x="290" y="${y}" width="500" height="64" rx="8"/>${Txt(306, y + 26, id, { size: 15, cls: 'hv-st' })}${Txt(306, y + 48, rt, { size: 12, cls: 'hv-sb' })}${Txt(700, y + 37, sig, { size: 14, cls: 'hv-st', anchor: 'middle' })}</g>`
+        + Box({ x: 812, y: y + 12, w: 170, h: 40, label: T('К выпуску', 'Zur Freigabe', 'To release', 'Шығаруға'), tone: 'ok', size: 13 });
+      return `<g class="hv-bx t-muted"><rect x="10" y="10" width="244" height="280" rx="10"/></g>`
+        + side.map((r, k) => Box({ x: 22, y: 24 + k * 50, w: 220, h: 40, label: r[0], tone: r[1] ? 'accent' : 'base', on: r[1], size: 12.5 })).join('')
+        + `<g class="hv-bx t-base"><rect x="274" y="10" width="716" height="280" rx="10"/></g>` + Txt(290, 42, T('Экспресс · ждут выпуска (2)', 'Express · warten auf Freigabe (2)', 'Express · waiting for release (2)', 'Экспресс · шығаруды күтуде (2)'), { size: 15, cls: 'hv-st' })
+        + card(70, 'EX-0311', HUBS.ALA.city + ' → ' + HUBS.ATY.city + ' · 18 ' + LF.unit('kg') + ' · 2–8 °C', '1 / 3', i === 1) + card(150, 'EX-0312', HUBS.AST.city + ' → ' + HUBS.SHY.city + ' · 9 ' + LF.unit('kg') + ' · 15–25 °C', '0 / 3', false)
+        + Txt(290, 258, T('Срок приёма 16:00 · подписи: руководитель · экономика · диспетчер', 'Annahmeschluss 16:00 · Unterschriften: Leitung · Wirtschaft · Dispo', 'Cut-off 16:00 · signatures: manager · economics · dispatch', 'Қабылдау мерзімі 16:00 · қолдар: басшы · экономика · диспетчер'), { size: 12, cls: 'hv-sb' })
+        + num(264, 94, 0, i === 0) + num(700, 70, 1, i === 1) + num(897, 70, 2, i === 2) + num(264, 194, 3, i === 3);
     },
   };
 
@@ -73,20 +73,21 @@ ${n(152, 53, 0)}${n(428, 36, 1)}${n(592, 36, 2)}${n(152, 105, 3)}</svg>`;
   HELP.players.alarmflow = {
     title: T('Температурная тревога: от датчика до CAPA', 'Temperaturalarm: vom Sensor bis CAPA', 'A temperature alarm: from sensor to CAPA', 'Температура дабылы: датчиктен CAPA-ға дейін'),
     steps: AL.map(x => ({ t: x.t })),
-    svg(i) {
-      const W = 640, bw = 192, bh = 44, per = 3;
+    view: '0 0 1000 230',
+    draw(i) {
+      const bw = 290, bh = 64, pos = k => ({ x: 20 + (k % 3) * 330, y: 20 + Math.floor(k / 3) * 140 });
       let g = '';
       AL.forEach((s, k) => {
-        const r = Math.floor(k / per), c = k % per, x = 10 + c * (bw + 21), y = 14 + r * (bh + 44);
-        g += box(x, y, bw, bh, s.l, '', i === k, k >= 3 ? 'c' : 'a');
-        if (k < AL.length - 1) g += (c < per - 1) ? ar(x + bw + 2, y + bh / 2, x + bw + 19, y + bh / 2, false) : ar(x + bw / 2, y + bh + 2, 10 + bw / 2, y + bh + 42, false);
+        const p = pos(k);
+        if (k < AL.length - 1) g += k % 3 < 2 ? Arrow({ x1: p.x + bw, y1: p.y + bh / 2, x2: p.x + 328, y2: p.y + bh / 2, on: i === k }) : Arrow({ d: `M${p.x + bw / 2},${p.y + bh} L${p.x + bw / 2},${p.y + bh + 38} L${20 + bw / 2},${p.y + bh + 38} L${20 + bw / 2},${p.y + 138}`, on: i === k });
+        g += Box({ x: p.x, y: p.y, w: bw, h: bh, label: s.l, on: i === k, done: k < i, tone: k >= 3 ? 'ok' : 'base', size: 15, cls: i === k ? 'pl-on' : '' });
       });
-      return `<svg viewBox="0 0 ${W} 192" class="hv-svg">${g}</svg>`;
+      return g;
     },
   };
 
   /* ---------- rendering: through the Q1 figure kit of 60-visuals.js (controls, step list, one timer per visible figure, in-place repaint) ---------- */
-  Object.keys(HELP.players).forEach(id => { const p = HELP.players[id]; HELP.fig('pl:' + id, { title: p.title, steps: p.steps.map(s => s.t), svg: i => p.svg(i), ms: 4000, cls: 'hp', attrs: `data-player="${id}"` }); });
+  Object.keys(HELP.players).forEach(id => { const p = HELP.players[id]; HELP.fig('pl:' + id, { title: p.title, steps: p.steps.map(s => s.t), view: p.view, draw: i => p.draw(i), ms: 4000, cls: 'hp', attrs: `data-player="${id}"` }); });
   /* 0.3.9 action names kept as aliases */
   Object.assign(ACT, { hpStep: d => ACT.hvStep({ id: 'pl:' + d.id, v: d.v }), hpTog: d => ACT.hvTog({ id: 'pl:' + d.id }) });
 

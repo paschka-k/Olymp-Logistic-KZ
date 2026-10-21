@@ -518,12 +518,12 @@ html[data-design="kokzhol"] .side-link{color:#c9d8df}html[data-design="kokzhol"]
 .hp-ctl{display:inline-flex;gap:6px;align-items:center}.hp-ctl button{min-width:30px;height:28px;border:1px solid var(--border-input);background:var(--surface,#fff);border-radius:8px;cursor:pointer;font-size:14px;color:var(--text)}
 .hp-txt{margin:8px 0 2px;font-size:13px;min-height:3em}.hp-all summary{cursor:pointer;font-size:12px;color:var(--text-muted)}.hp-all ol{font-size:12px;margin:6px 0 0;padding-left:20px}.hp-all li{margin:3px 0}
 .hv-box.hv-n rect{fill:var(--bg-subtle,#f3f4f6);stroke:var(--border,#d1d5db)}
-.hp .pl-on rect,.hp .pl-on path{stroke-width:2.5;filter:drop-shadow(0 0 3px rgba(37,99,235,.45))}
-@media (prefers-reduced-motion: no-preference){.hp .pl-on rect,.hp .pl-on>path{animation:hp-pulse 1.6s ease-in-out infinite}}
+.hp .pl-on:not(.hv-bx) rect,.hp .pl-on:not(.hv-bx) path{stroke-width:2.5;filter:drop-shadow(0 0 3px rgba(37,99,235,.45))}
+@media (prefers-reduced-motion: no-preference){.hp .pl-on:not(.hv-bx) rect,.hp .pl-on:not(.hv-bx)>path{animation:hp-pulse 1.6s ease-in-out infinite}}
 @keyframes hp-pulse{0%,100%{filter:drop-shadow(0 0 2px rgba(37,99,235,.3))}50%{filter:drop-shadow(0 0 6px rgba(37,99,235,.7))}}
 .hp .hv-ar.pl-go line{stroke:#16a34a;stroke-width:2.4}.hp .hv-ar.pl-go path{fill:#16a34a}
 .hp .pl-nogo{color:#dc2626}.hp .pl-nogo path{stroke:#dc2626}.hp .pl-nogo text{fill:#dc2626;font-size:10px;font-weight:700}
-.hp .pl-num circle{fill:var(--surface,#fff);stroke:var(--primary,#2563eb);stroke-width:2}.hp .pl-num text{fill:var(--primary,#2563eb);font-weight:700;font-size:11px}
+.hp .pl-num circle{fill:var(--surface,#fff);stroke:var(--primary,#2563eb);stroke-width:2}.hp .pl-num text{fill:var(--primary,#2563eb);font-weight:700;font-size:14px}
 .hp .pl-num.pl-on circle{fill:var(--primary,#2563eb)}.hp .pl-num.pl-on text{fill:#fff}
 /* topbar burger + off-canvas sidebar for narrow windows */
 .burger{display:none;border:1px solid var(--border-input);background:var(--surface,#fff);color:var(--text);border-radius:8px;min-width:36px;height:34px;font-size:15px;cursor:pointer;margin-right:10px;flex:none}
@@ -1356,14 +1356,31 @@ function nameControls(root) {
     const n = String(txt || '').replace(/\s+/g, ' ').replace(/[:：]\s*$/, '').trim().slice(0, 80); if (n) e.setAttribute('aria-label', n);
   });
 }
+/* every render rebuilds #root, so scroll positions of inner scroll boxes are carried over: the sidebar always (the clock re-renders every
+   second and the menu jumped back to the top), the others (help menu, drawer, board, wide tables …) while the screen and drawer stay the same */
+const SCROLLERS = ['sidebar', 'help-nav', 'drawer', 'drawer-tabs', 'board', 'tcard', 'card-body', 'gs-list', 'diag-pop', 'a11y-dlg', 'hvk-pic', 'login-layer'];
+let scrollCtx = '';
+function scrollKeep() {
+  const ctx = S.route + '|' + ((S.tab && S.tab[S.route]) || '') + '|' + (S.drawer ? S.drawer.type + ':' + (S.drawer.id || '') : ''), out = { same: ctx === scrollCtx, at: {} };
+  scrollCtx = ctx;
+  SCROLLERS.forEach(c => document.querySelectorAll('#root .' + c).forEach((e, k) => { if (e.scrollTop || e.scrollLeft) out.at[c + ':' + k] = [e.scrollTop, e.scrollLeft]; }));
+  return out;
+}
+function scrollRestore(k) {
+  Object.keys(k.at).forEach(key => {
+    const [c, n] = key.split(':'); if (c !== 'sidebar' && !k.same) return;
+    const e = document.querySelectorAll('#root .' + c)[+n]; if (e) { e.scrollTop = k.at[key][0]; e.scrollLeft = k.at[key][1]; }
+  });
+}
 function render() {
-  const keep = { y: ($('main') || {}).scrollTop || 0, f: document.activeElement && document.activeElement.id };
+  const keep = { y: ($('main') || {}).scrollTop || 0, f: document.activeElement && document.activeElement.id, sc: scrollKeep() };
   const pos = document.activeElement && document.activeElement.selectionStart;
   const keepIn = {};   // keep what the user typed in drawer fields across re-renders (e.g. a toast)
   $$('.drawer input[id], .drawer select[id], .drawer textarea[id]').forEach(e => { keepIn[e.id] = e.type === 'checkbox' ? e.checked : e.value; });
   $('#root').innerHTML = shell(); nameControls($('#root'));
   Object.keys(keepIn).forEach(id => { const e = document.getElementById(id); if (e && e.closest('.drawer')) { if (e.type === 'checkbox') e.checked = keepIn[id]; else e.value = keepIn[id]; } });
   const m = $('main'); if (m) m.scrollTop = keep.y;
+  scrollRestore(keep.sc);
   if (keep.f) { const e = document.getElementById(keep.f); if (e) { e.focus(); try { e.setSelectionRange(pos, pos); } catch (_) {} } }
 }
 const ACT = {};
@@ -1411,7 +1428,7 @@ Object.assign(ACT, {
 
 /* Roles & permissions (FR-14/137): 11 roles, permission matrix generated from the source platform (role-perms.json),
    screen / tab gating, role shells (driver, customer, partner use their own menu), role switcher. */
-const VERSION = '6.4.0', BUILD = '2026-10-21 13:29';
+const VERSION = '6.4.0', BUILD = '2026-10-21 13:56';
 const ROLES = ['admin', 'dispatcher', 'warehouse', 'driver', 'auditor', 'viewer', 'manager', 'finance', 'quality', 'customer', 'partner'];
 const ROLE_NAME = {
   admin: LT('role.administrator'), dispatcher: LT('role.dispatcher'), warehouse: LT('role.warehouse'),
@@ -12098,18 +12115,20 @@ helpAdd({ key: 'faq', group: 'ref', special: 'faq', portal: true,
   };
   const Txt = (x, y, s, o) => { o = o || {}; return `<text x="${f(x)}" y="${f(y)}"${o.anchor ? ` text-anchor="${o.anchor}"` : ''}${o.mid ? ' dominant-baseline="middle"' : ''} font-size="${o.size || 12}" class="hv-t ${o.cls || ''}"${o.attrs || ''}>${esc(s)}</text>`; };
   const Box = o => {
-    const size = o.size || 13, m = o.max || Math.max(6, Math.floor(o.w / (size * 0.56)));
-    return `<g class="hv-bx t-${o.tone || 'base'}${o.on ? ' on' : ''}${o.done ? ' done' : ''}"${o.attrs || ''}><rect x="${o.x}" y="${o.y}" width="${o.w}" height="${o.h}" rx="8"/>${Lines(o.x + o.w / 2, o.y + o.h / 2 - (o.sub ? 8 : 0), o.label, { max: m, size, cls: 'hv-st' })}${o.sub ? Lines(o.x + o.w / 2, o.y + o.h - 13, o.sub, { max: m + 4, size: size - 2, cls: 'hv-sb' }) : ''}</g>`;
+    /* a sub line that wraps grows upwards, so the last line stays inside the box (the title moves up with it) */
+    const size = o.size || 13, m = o.max || Math.max(6, Math.floor(o.w / (size * 0.56))), sn = o.sub ? wrapW(o.sub, m + 4).length : 0, up = sn > 1 ? (sn - 1) * (size - 2) * 1.25 / 2 : 0;
+    return `<g class="hv-bx t-${o.tone || 'base'}${o.on ? ' on' : ''}${o.done ? ' done' : ''}${o.cls ? ' ' + o.cls : ''}"${o.attrs || ''}><rect x="${o.x}" y="${o.y}" width="${o.w}" height="${o.h}" rx="8"/>${Lines(o.x + o.w / 2, o.y + o.h / 2 - (o.sub ? 8 : 0) - up, o.label, { max: m, size, cls: 'hv-st' })}${o.sub ? Lines(o.x + o.w / 2, o.y + o.h - 13 - up, o.sub, { max: m + 4, size: size - 2, cls: 'hv-sb' }) : ''}</g>`;
   };
-  const Diamond = o => `<g class="hv-bx t-${o.tone || 'accent'}${o.on ? ' on' : ''}"><polygon points="${o.cx},${o.cy - o.h / 2} ${o.cx + o.w / 2},${o.cy} ${o.cx},${o.cy + o.h / 2} ${o.cx - o.w / 2},${o.cy}"/>${Lines(o.cx, o.cy, o.label, { max: Math.floor(o.w / ((o.size || 12) * 0.75)), size: o.size || 12, cls: 'hv-st' })}</g>`;
+  const Diamond = o => `<g class="hv-bx t-${o.tone || 'accent'}${o.on ? ' on' : ''}${o.cls ? ' ' + o.cls : ''}"><polygon points="${o.cx},${o.cy - o.h / 2} ${o.cx + o.w / 2},${o.cy} ${o.cx},${o.cy + o.h / 2} ${o.cx - o.w / 2},${o.cy}"/>${Lines(o.cx, o.cy, o.label, { max: Math.floor(o.w / ((o.size || 12) * 0.75)), size: o.size || 12, cls: 'hv-st' })}</g>`;
   let seq = 0, figKey = '';
   const Arrow = o => {
     const mid = 'hva-' + figKey + '-' + (++seq), d = o.d || `M${o.x1},${o.y1} L${o.x2},${o.y2}`;
     const lab = o.label ? Lines(o.lx != null ? o.lx : ((o.x1 || 0) + (o.x2 || 0)) / 2, o.ly != null ? o.ly : ((o.y1 || 0) + (o.y2 || 0)) / 2 - 10, o.label, { max: 22, size: 11, cls: 'hv-sb' }) : '';
     return `<g class="hv-ar2${o.on ? ' on' : ''}${o.tone ? ' t-' + o.tone : ''}${o.dashed ? ' dashed' : ''}"><defs><marker id="${mid}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="hv-hm"/></marker></defs><path d="${d}" marker-end="url(#${mid})"/>${lab}</g>`;
   };
-  const Tag = (x, y, s, tone, size) => { size = size || 11; const w = Math.max(28, String(s).length * size * 0.6 + 14); return `<g class="hv-tag t-${tone || 'accent'}"><rect x="${f(x - w / 2)}" y="${y - size}" width="${f(w)}" height="${size * 2}" rx="${size}"/><text x="${f(x)}" y="${y}" text-anchor="middle" dominant-baseline="middle" font-size="${size}" class="hv-t">${esc(s)}</text></g>`; };
+  const Tag = (x, y, s, tone, size) => { size = size || 11; const w = Math.max(28, String(s).length * size * 0.6 + 14); x = Math.max(w / 2 + 4, Math.min(996 - w / 2, x));   /* long DE / KK tags stay inside the 1000-wide picture */ return `<g class="hv-tag t-${tone || 'accent'}"><rect x="${f(x - w / 2)}" y="${y - size}" width="${f(w)}" height="${size * 2}" rx="${size}"/><text x="${f(x)}" y="${y}" text-anchor="middle" dominant-baseline="middle" font-size="${size}" class="hv-t">${esc(s)}</text></g>`; };
   const Token = (x, y, r, tone) => `<circle class="hv-tok t-${tone || 'accent'}" r="${r || 9}" cx="0" cy="0" style="transform:translate(${f(x)}px,${f(y)}px)"/>`;
+  HELP.kit = { Box, Diamond, Arrow, Lines, Txt, Tag, Token, wrapW };   /* shared with the 0.3.9 players in 65-players.js */
   const fmtKg = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 
   /* ---------- frame + stepper ---------- */
@@ -12214,7 +12233,7 @@ helpAdd({ key: 'faq', group: 'ref', special: 'faq', portal: true,
         + Arrow({ d: `M${FD.cx - 50},${FD.cy - 30} C${FD.cx - 80},-6 640,-6 575,28`, tone: 'bad', dashed: true }) + Tag(705, 16, 'No-Go', 'bad')
         + Arrow({ x1: 710, y1: 243, x2: 662, y2: 243, on: s === 4 }) + Arrow({ x1: 430, y1: 243, x2: 382, y2: 243, on: s === 5 })
         + FS.map((x, i) => i === 3 ? Diamond(Object.assign({ label: t(x.t), on: s === i }, FD)) : Box(Object.assign({ label: t(x.t), sub: t(x.sub), on: s === i, done: i < s, tone: i === 6 ? 'ok' : 'base' }, FP[i]))).join('')
-        + Txt(FD.cx, FD.cy + 76, t(FS[3].sub), { anchor: 'middle', size: 11, cls: 'hv-sb' })
+        + Txt(FD.cx - 12, FD.cy + 76, t(FS[3].sub), { anchor: 'end', size: 11, cls: 'hv-sb' })
         + Token(c.x, s === 3 ? c.y - 40 : c.y - 52);
     },
   });
@@ -12309,7 +12328,7 @@ helpAdd({ key: 'faq', group: 'ref', special: 'faq', portal: true,
       LO.forEach((o, k) => { g += Box({ x: 20, y: 30 + k * 60, w: 250, h: 50, label: '✓ ' + o.id + ' · ' + t(o.c), sub: o.n + ' ' + t(['пал.', 'Pal.', 'pal.', 'пал.']) + ' · ' + (o.z === 'c' ? '2–8 °C' : '15–25 °C'), tone: o.z === 'c' ? 'accent' : 'base', on: s === 0, size: 12.5, attrs: ` data-order="${o.id}"` }); });
       /* bars: places, weight, axles, height (from step 3 on: after the split) */
       const V = LV[s >= 3 ? 1 : 0], unit = t(KGL);
-      [[t(['Мест', 'Plätze', 'Places', 'Орын']), 'pl', ''], [t(['Масса', 'Masse', 'Weight', 'Салмақ']), 'kg', unit], [t(['Пер. ось', 'Vorderachse', 'Front axle', 'Алд. ось']), 'fa', unit], [t(['Задн. ось', 'Hinterachse', 'Rear axle', 'Арт. ось']), 'ra', unit], [t(['Высота', 'Höhe', 'Height', 'Биіктік']), 'h', 'm']].forEach((b, j) => {
+      [[t(['Мест', 'Plätze', 'Places', 'Орын']), 'pl', ''], [t(['Масса', 'Masse', 'Weight', 'Салмақ']), 'kg', unit], [t(['Пер. ось', 'Vorderachse', 'Front axle', 'Алд. ось']), 'fa', unit], [t(['Задн. ось', 'Hinterachse', 'Rear axle', 'Арт. ось']), 'ra', unit], [t(['Высота', 'Höhe', 'Height', 'Биіктік']), 'h', t(['м', 'm', 'm', 'м'])]].forEach((b, j) => {
         const y = 232 + j * 28, v = V[b[1]][0], max = V[b[1]][1], over = s >= 2 && v > max, show = s >= 2, w = show ? 120 * Math.min(1.25, v / max) / 1.25 : 0;
         const dec = n => LF.dec(n, 1), val = b[1] === 'h' ? dec(v) + ' / ' + dec(max) : fmtKg(v) + ' / ' + fmtKg(max);
         g += `<g data-lbar="${b[1]}" data-over="${over ? 1 : 0}">${Txt(20, y + 6, b[0] + (show ? ': ' + val + (b[2] ? ' ' + b[2] : '') : ''), { size: 11.5, cls: show ? '' : 'hv-sb' })}<rect x="170" y="${y - 4}" width="120" height="12" rx="6" class="hf-box hs-line"/><rect x="170" y="${y - 4}" width="${f(w)}" height="12" rx="6" class="hv-mv ${over ? 'hf-bad' : 'hf-ok'}"/><line x1="266" x2="266" y1="${y - 7}" y2="${y + 11}" class="hs-ink" stroke-width="1.5"/></g>`;
@@ -12347,7 +12366,7 @@ helpAdd({ key: 'faq', group: 'ref', special: 'faq', portal: true,
   const BS = [
     { at: [90, 110], cap: ['Клиент вводит место погрузки и доставки: город и улицу (проверка по справочнику улиц), паллеты, вес (кг), температуру, дату.', 'Der Kunde gibt Abhol- und Lieferort ein: Stadt und Straße (Prüfung gegen das Straßenverzeichnis), Paletten, Gewicht (kg), Temperatur, Datum.', 'The customer enters pick-up and destination: city and street (checked against the street directory), pallets, weight (kg), temperature, date.', 'Клиент тиеу және жеткізу орнын енгізеді: қала мен көше (көшелер анықтамалығы бойынша тексеріледі), паллеттер, салмақ (кг), температура, күн.'] },
     { at: [300, 110], cap: ['Сбор: машина хаба забирает груз у клиента и везёт на ближайший хаб (Астана или Алматы).', 'Abholung: ein Hub-Fahrzeug holt die Ware beim Kunden ab und bringt sie zum nächsten Hub (Astana oder Almaty).', 'Collection: a hub vehicle picks the goods up at the customer and brings them to the nearest hub (Astana or Almaty).', 'Жинау: хаб көлігі жүкті клиенттен алып, ең жақын хабқа (Астана немесе Алматы) жеткізеді.'] },
-    { at: [520, 110], cap: ['Есть прямая линия хаба до города назначения → регулярное отправление по расписанию, слоты и цена сразу.', 'Gibt es eine direkte Linie des Hubs zur Zielstadt → reguläre Abfahrt nach Fahrplan, Termine und Preis sofort.', 'A direct line from the hub to the destination city → regular departure on schedule, slots and price at once.', 'Хабтан баратын қалаға тікелей желі бар → кесте бойынша тұрақты жөнелту, слоттар мен баға бірден.'] },
+    { at: [540, 110], cap: ['Есть прямая линия хаба до города назначения → регулярное отправление по расписанию, слоты и цена сразу.', 'Gibt es eine direkte Linie des Hubs zur Zielstadt → reguläre Abfahrt nach Fahrplan, Termine und Preis sofort.', 'A direct line from the hub to the destination city → regular departure on schedule, slots and price at once.', 'Хабтан баратын қалаға тікелей желі бар → кесте бойынша тұрақты жөнелту, слоттар мен баға бірден.'] },
     { at: [520, 300], cap: ['Нет прямой линии → маршрут через второй хаб (перевалка): система никогда не отказывает, а показывает +1–2 рабочих дня и сбор за обработку.', 'Keine direkte Linie → Route über den zweiten Hub (Umschlag): das System lehnt nie ab, sondern zeigt +1–2 Werktage und eine Umschlaggebühr.', 'No direct line → route through the second hub (transshipment): the system never refuses, it shows +1–2 business days and a handling fee.', 'Тікелей желі жоқ → екінші хаб арқылы маршрут (қайта тиеу): жүйе ешқашан бас тартпайды, +1–2 жұмыс күні мен өңдеу алымын көрсетеді.'] },
     { at: [890, 110], cap: ['Доставка до улицы получателя. Срок считается в рабочих днях РК: праздник на пути добавляет день; клиент видит дату и этапы в отслеживании.', 'Zustellung bis zur Straße des Empfängers. Die Laufzeit zählt in kasachischen Werktagen: ein Feiertag unterwegs fügt einen Tag hinzu; der Kunde sieht Datum und Etappen im Tracking.', 'Delivery to the consignee\'s street. Lead time counts in Kazakh business days: a holiday on the way adds a day; the customer sees the date and legs in tracking.', 'Алушының көшесіне дейін жеткізу. Мерзім ҚР жұмыс күндерімен есептеледі: жолдағы мереке бір күн қосады; клиент бақылауда күн мен кезеңдерді көреді.'] },
   ];
@@ -12358,11 +12377,11 @@ helpAdd({ key: 'faq', group: 'ref', special: 'faq', portal: true,
       const via = s === 3, p = BS[s].at;
       return Box({ x: 20, y: 70, w: 150, h: 80, label: t(['Место погрузки', 'Abholort', 'Pick-up', 'Тиеу орны']), sub: t(['город + улица', 'Stadt + Straße', 'city + street', 'қала + көше']), on: s === 0 })
         + Box({ x: 230, y: 70, w: 150, h: 80, label: t(['Хаб A', 'Hub A', 'Hub A', 'А хабы']), sub: t(['сбор · склад', 'Abholung · Lager', 'collection · warehouse', 'жинау · қойма']), tone: 'accent', on: s === 1 })
-        + Box({ x: 440, y: 70, w: 170, h: 80, label: t(['Линия', 'Linie', 'Line', 'Желі']), sub: t(['расписание · слоты', 'Fahrplan · Termine', 'schedule · slots', 'кесте · слоттар']), on: s === 2 })
+        + Box({ x: 460, y: 70, w: 160, h: 80, label: t(['Линия', 'Linie', 'Line', 'Желі']), sub: t(['расписание · слоты', 'Fahrplan · Termine', 'schedule · slots', 'кесте · слоттар']), on: s === 2 })
         + Box({ x: 820, y: 70, w: 150, h: 80, label: t(['Место доставки', 'Lieferort', 'Destination', 'Жеткізу орны']), sub: t(['город + улица', 'Stadt + Straße', 'city + street', 'қала + көше']), tone: 'ok', on: s === 4 })
         + Box({ x: 430, y: 260, w: 190, h: 80, label: t(['Хаб B · перевалка', 'Hub B · Umschlag', 'Hub B · transshipment', 'B хабы · қайта тиеу']), sub: t(['+1–2 рабочих дня', '+1–2 Werktage', '+1–2 business days', '+1–2 жұмыс күні']), tone: via ? 'warn' : 'base', on: via })
-        + Arrow({ x1: 170, y1: 110, x2: 228, y2: 110, on: s === 1 }) + Arrow({ x1: 380, y1: 110, x2: 438, y2: 110, on: s === 2, label: t(['прямая линия', 'direkte Linie', 'direct line', 'тікелей желі']) })
-        + Arrow({ x1: 610, y1: 110, x2: 818, y2: 110, on: s === 2 || s === 4 })
+        + Arrow({ x1: 170, y1: 110, x2: 228, y2: 110, on: s === 1 }) + Arrow({ x1: 380, y1: 110, x2: 458, y2: 110, on: s === 2, label: t(['прямая линия', 'direkte Linie', 'direct line', 'тікелей желі']), lx: 419, ly: 96 })
+        + Arrow({ x1: 620, y1: 110, x2: 818, y2: 110, on: s === 2 || s === 4 })
         + Arrow({ d: 'M305,150 C305,300 360,300 428,300', on: via, dashed: !via, label: t(['нет линии', 'keine Linie', 'no line', 'желі жоқ']), lx: 330, ly: 250 })
         + Arrow({ d: 'M620,300 C760,300 850,260 890,152', on: via, dashed: !via, label: t(['линия хаба B', 'Linie von Hub B', 'line of hub B', 'B хабының желісі']), lx: 790, ly: 250 })
         + (via ? Tag(525, 238, t(['никогда «нет связи»', 'nie „keine Verbindung“', 'never "no connection"', 'ешқашан «байланыс жоқ» емес']), 'warn') : '')
@@ -12460,7 +12479,7 @@ helpAdd({ key: 'faq', group: 'ref', special: 'faq', portal: true,
     steps: TC.map(c => c.cap), view: '0 0 1000 400', ms: 2600,
     draw(s) {
       const ax = HELP.truckAxles(s), pos = ax.pos, sum = pos.reduce((a, p) => a + p, 0), xg = pos.length ? sum / pos.length : 3.1, tilt = Math.max(-12, Math.min(12, (xg - 3.1) * 7));
-      const PX = 58, CX = 790, CY = 175, bx = m => CX + (m - 3.1) * PX, bar = (v, max) => Math.min(1.25, v / max);
+      const PX = 52, CX = 780, CY = 175, bx = m => CX + (m - 3.1) * PX, bar = (v, max) => Math.min(1.25, v / max);
       let g = '';
       TC.forEach((c, j) => { g += `<rect x="${150 + j * 46}" y="22" width="44" height="30" rx="4" class="${j === s ? 'hf-soft' : 'hf-box'}"/>` + Txt(172 + j * 46, 37, t(c.h), { anchor: 'middle', mid: true, size: 10.5, cls: 'hv-st' }); });
       TCD.forEach((c, i) => {
@@ -12514,7 +12533,7 @@ helpAdd({ key: 'faq', group: 'ref', special: 'faq', portal: true,
         + Box({ x: 400, y: 180, w: 200, h: 80, label: t(['Монитор контакта', 'Kontaktmonitor', 'Contact monitor', 'Байланыс мониторы']), sub: s < 2 ? t(['норма', 'normal', 'normal', 'қалыпты']) : s === 4 ? t(['уровень 2 → 3', 'Stufe 2 → 3', 'level 2 → 3', '2 → 3-деңгей']) : t(['уровень 1 / 2', 'Stufe 1 / 2', 'level 1 / 2', '1 / 2-деңгей']), on: s === 1 || s === 2 || s === 4, tone: s === 4 ? 'bad' : s >= 2 && s < 5 ? 'warn' : 'base' })
         + Box({ x: 740, y: 180, w: 220, h: 80, label: t(['Диспетчер', 'Disponent', 'Dispatcher', 'Диспетчер']), sub: s === 3 ? 'MS → STOP · CHKT · WAIT' : s === 4 ? t(['Входящие + задача CRM', 'Eingang + CRM-Aufgabe', 'Inbox + CRM task', 'Кіріс + CRM тапсырмасы']) : t(['маршруты · покрытие', 'Routen · Netz', 'routes · coverage', 'маршруттар · байланыс']), on: s === 3 || s === 4, tone: s === 4 ? 'bad' : 'base' })
         + Arrow({ x1: 240, y1: 220, x2: 398, y2: 220, on: s === 0 || s === 2 || s === 5, label: sms ? 'SMS' : t(['данные', 'Daten', 'data', 'деректер']) }) + Arrow({ x1: 600, y1: 220, x2: 738, y2: 220, on: s === 2 || s === 4 })
-        + Arrow({ d: 'M850,262 C850,320 140,320 140,264', on: s === 3, dashed: s !== 3, label: t(['SMS-инструкция → подтверждение AK', 'SMS-Anweisung → Bestätigung AK', 'SMS instruction → acknowledgement AK', 'SMS нұсқау → AK растауы']), lx: 500, ly: 300 })
+        + Arrow({ d: 'M850,262 C850,320 140,320 140,264', on: s === 3, dashed: s !== 3, label: t(['SMS-инструкция → подтверждение AK', 'SMS-Anweisung → Bestätigung AK', 'SMS instruction → acknowledgement AK', 'SMS нұсқау → AK растауы']), lx: 500, ly: 324 })
         + Lines(500, 152, t(['ни одного персонального данного в SMS: рейс, машина, код события, время, MAC', 'keine Personendaten in der SMS: Tour, Fahrzeug, Ereigniscode, Zeit, MAC', 'no personal data in the SMS: trip, vehicle, event code, time, MAC', 'SMS-те жеке деректер жоқ: рейс, көлік, оқиға коды, уақыт, MAC']), { max: 110, size: 11, cls: 'hv-sb' });
     },
   });
@@ -12588,7 +12607,7 @@ helpAdd({ key: 'faq', group: 'ref', special: 'faq', portal: true,
 
   /* (12) where express is: annotated mock of the Dispatch Board (0.3.10 dispatchMock.tsx) */
   const DN = [
-    { at: [196, 66], cap: ['Значок у пункта «Диспетчерская»: столько экспресс-заявок ждут подписи вашей функции (CEO, аналитика, закупки).', 'Zähler am Menüpunkt „Disposition“: so viele Express-Anfragen warten auf die Unterschrift Ihrer Funktion (CEO, Analytik, Einkauf).', 'Badge on "Dispatch": how many express requests await the signature of your function (CEO, analytics, purchasing).', '«Диспетчерлік» белгісі: сіздің функцияңыздың (CEO, талдау, сатып алу) қолын күтетін экспресс-өтінімдер саны.'] },
+    { at: [218, 88], cap: ['Значок у пункта «Диспетчерская»: столько экспресс-заявок ждут подписи вашей функции (CEO, аналитика, закупки).', 'Zähler am Menüpunkt „Disposition“: so viele Express-Anfragen warten auf die Unterschrift Ihrer Funktion (CEO, Analytik, Einkauf).', 'Badge on "Dispatch": how many express requests await the signature of your function (CEO, analytics, purchasing).', '«Диспетчерлік» белгісі: сіздің функцияңыздың (CEO, талдау, сатып алу) қолын күтетін экспресс-өтінімдер саны.'] },
     { at: [560, 98], cap: ['На доске вкладка «Экспресс» — открытые заявки: маршрут, груз, подписи 0–3 из 3, срок (отсечка).', 'Auf der Tafel der Reiter „Express“ — offene Anfragen: Strecke, Ware, Unterschriften 0–3 von 3, Frist (Annahmeschluss).', 'On the board the "Express" tab — open requests: route, goods, signatures 0–3 of 3, deadline (cut-off).', 'Тақтада «Экспресс» қойындысы — ашық өтінімдер: маршрут, жүк, 3-тен 0–3 қолтаңба, мерзім (кесу).'] },
     { at: [778, 143], cap: ['Подписи по слотам: ✓ — подписано (другим пользователем), «ваш» — подпись ждёт вас.', 'Unterschriften je Slot: ✓ — unterschrieben (von einem anderen Benutzer), „Ihr“ — die Unterschrift wartet auf Sie.', 'Signatures per slot: ✓ — signed (by another user), "yours" — the signature waits for you.', 'Слоттар бойынша қолтаңбалар: ✓ — қол қойылды (басқа пайдаланушы), «сіздің» — қолтаңба сізді күтуде.'] },
     { at: [873, 178], cap: ['Кнопка ведёт к согласованию (17 · «Исходные данные» → «Экспресс»), где ставится подпись или отказ.', 'Die Schaltfläche führt zur Freigabe (17 · „Ausgangsdaten“ → „Express“), wo unterschrieben oder abgelehnt wird.', 'The button leads to the approval (17 · "Baseline data" → "Express"), where you sign or reject.', 'Батырма келісуге апарады (17 · «Бастапқы деректер» → «Экспресс»), онда қол қойылады немесе бас тартылады.'] },
@@ -12625,15 +12644,14 @@ helpAdd({ key: 'faq', group: 'ref', special: 'faq', portal: true,
 
 /* Help · animated Schaubilder (port of the 0.3.9 help overlays): a diagram that plays through its steps — ‹ ▶/⏸ › controls,
    "step n of m", the active node highlighted, the step text under the picture, "all steps" as a list. Since Q1 they run on the figure
-   kit of 60-visuals.js (HELP.fig): auto-advance every 4 s only while visible; prefers-reduced-motion starts paused; state S.hv['pl:<id>'].
-   HELP.players[id] = {title, steps[{t}], svg(i)}; rendered through HELP.visuals['pl:<id>'] so articles attach a player like any visual. */
+   kit of 60-visuals.js (HELP.fig; since 6.4.1 also drawn with its Box / Diamond / Arrow, so labels wrap inside their boxes): auto-advance every 4 s only while visible; prefers-reduced-motion starts paused; state S.hv['pl:<id>'].
+   HELP.players[id] = {title, steps[{t}], view, draw(i)}; rendered through HELP.visuals['pl:<id>'] so articles attach a player like any visual. */
 (function () {
   HELP.players = {};
 
-  /* ---------- small SVG kit (uses the hv- classes of 60-visuals) ---------- */
-  const box = (x, y, w, h, l1, l2, on, cls) => `<g class="hv-box hv-${cls || 'a'}${on ? ' pl-on' : ''}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="9"/><text x="${x + w / 2}" y="${y + (l2 ? h / 2 - 3 : h / 2 + 4)}" text-anchor="middle" style="font-weight:600">${esc(l1)}</text>${l2 ? `<text x="${x + w / 2}" y="${y + h / 2 + 13}" text-anchor="middle" style="font-size:10px;opacity:.75">${esc(l2)}</text>` : ''}</g>`;
-  const dia = (cx, cy, rx, ry, l1, on) => `<g class="hv-box hv-b${on ? ' pl-on' : ''}"><path d="M${cx} ${cy - ry} L${cx + rx} ${cy} L${cx} ${cy + ry} L${cx - rx} ${cy} Z" style="stroke-width:1.5"/><text x="${cx}" y="${cy + 4}" text-anchor="middle" style="font-weight:600">${esc(l1)}</text></g>`;
-  const ar = (x1, y1, x2, y2, dash, cls) => { const a = Math.atan2(y2 - y1, x2 - x1), h = 6; return `<g class="${cls || 'hv-ar'}"><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"${dash ? ' stroke-dasharray="5 4"' : ''}/><path d="M${x2} ${y2} L${x2 - h * Math.cos(a - .5)} ${y2 - h * Math.sin(a - .5)} L${x2 - h * Math.cos(a + .5)} ${y2 - h * Math.sin(a + .5)} Z" style="fill:currentColor;stroke:none"/></g>`; };
+  /* ---------- the Q1 figure kit (60-visuals.js): boxes wrap their text, tones and arrows follow the design tokens ---------- */
+  const { Box, Diamond, Arrow, Tag, Txt } = HELP.kit;
+  const num = (x, y, k, on) => `<g class="pl-num${on ? ' pl-on' : ''}"><circle cx="${x}" cy="${y}" r="14"/><text x="${x}" y="${y + 5}" text-anchor="middle">${k + 1}</text></g>`;
 
   /* ---------- player 1: shipment lifecycle (0.3.9 "Sendungsablauf von Anfang bis Ende") ---------- */
   const SF = [
@@ -12648,18 +12666,18 @@ helpAdd({ key: 'faq', group: 'ref', special: 'faq', portal: true,
   HELP.players.shipflow = {
     title: T('Путь отправки от начала до конца', 'Sendungsablauf von Anfang bis Ende', 'A shipment from start to finish', 'Жөнелтімнің басынан аяғына дейінгі жолы'),
     steps: SF.map(x => ({ t: x.t })),
-    svg(i) {
-      const W = 640, bw = 138, bh = 48, y1 = 26, y2 = 120, xs = [10, 176, 342, 0], gx = 540;
-      let g = box(xs[0], y1, bw, bh, SF[0].l, SF[0].s, i === 0) + ar(xs[0] + bw + 2, y1 + bh / 2, xs[1] - 4, y1 + bh / 2, i === 0)
-        + box(xs[1], y1, bw, bh, SF[1].l, SF[1].s, i === 1) + ar(xs[1] + bw + 2, y1 + bh / 2, xs[2] - 4, y1 + bh / 2, i === 1)
-        + box(xs[2], y1, bw, bh, SF[2].l, SF[2].s, i === 2) + ar(xs[2] + bw + 2, y1 + bh / 2, gx - 62, y1 + bh / 2, i === 2)
-        + dia(gx, y1 + bh / 2, 58, 34, 'Go/No-Go', i === 3)
-        + `<g class="pl-nogo"><path d="M${gx - 20} ${y1 - 8} C ${gx - 120} ${-14} ${xs[2] + bw - 20} ${-12} ${xs[2] + 70} ${y1 - 4}" fill="none" stroke-dasharray="5 4"/><path d="M${xs[2] + 70} ${y1 - 4} l8 -5 l-2 8 Z" style="stroke:none;fill:currentColor"/><text x="${gx - 92}" y="2" text-anchor="middle">No-Go</text></g>`
-        + ar(gx, y1 + bh / 2 + 36, gx, y2 - 4, false, i === 3 ? 'hv-ar pl-go' : 'hv-ar')
-        + box(gx - 69, y2, bw, bh, SF[4].l, SF[4].s, i === 4) + ar(gx - 71, y2 + bh / 2, xs[1] + 166 + bw + 4, y2 + bh / 2, i === 4)
-        + box(xs[1] + 166, y2, bw, bh, SF[5].l, SF[5].s, i === 5) + ar(xs[1] + 164, y2 + bh / 2, xs[1] + bw + 4, y2 + bh / 2, i === 5)
-        + box(xs[1] - 70, y2, bw, bh, SF[6].l, SF[6].s, i === 6, 'c');
-      return `<svg viewBox="0 0 ${W} 184" class="hv-svg">${g}</svg>`;
+    /* row 1 left → right: booking, planning, loading, Go/No-Go; row 2 right → left: in transit, delivery, ESF (no box overlaps, every label wraps inside its box) */
+    view: '0 0 1000 300',
+    draw(i) {
+      const P = [{ x: 20, y: 44, w: 196, h: 84 }, { x: 250, y: 44, w: 196, h: 84 }, { x: 480, y: 44, w: 196, h: 84 }, null, { x: 724, y: 204, w: 256, h: 84 }, { x: 454, y: 204, w: 236, h: 84 }, { x: 184, y: 204, w: 236, h: 84 }];
+      const D = { cx: 852, cy: 86, w: 220, h: 112 };
+      const B = k => Box(Object.assign({ label: SF[k].l, sub: SF[k].s, on: i === k, done: k < i, tone: k === 6 ? 'ok' : 'base', size: 13.5, cls: i === k ? 'pl-on' : '', attrs: ` data-pl-step="${k}"` }, P[k]));
+      return Arrow({ x1: 216, y1: 86, x2: 248, y2: 86, on: i === 0 }) + Arrow({ x1: 446, y1: 86, x2: 478, y2: 86, on: i === 1 }) + Arrow({ x1: 676, y1: 86, x2: 740, y2: 86, on: i === 2 })
+        + Arrow({ x1: D.cx, y1: D.cy + D.h / 2, x2: D.cx, y2: 202, on: i === 3, tone: 'ok' }) + Tag(D.cx + 34, 172, 'Go', 'ok')
+        + Arrow({ d: `M${D.cx - 40},${D.cy - 36} C${D.cx - 90},4 640,4 590,42`, tone: 'bad', dashed: true }) + Tag(712, 16, 'No-Go', 'bad')
+        + Arrow({ x1: 724, y1: 246, x2: 692, y2: 246, on: i === 4 }) + Arrow({ x1: 454, y1: 246, x2: 422, y2: 246, on: i === 5 })
+        + [0, 1, 2, 4, 5, 6].map(B).join('')
+        + Diamond(Object.assign({ label: SF[3].l, on: i === 3, cls: i === 3 ? 'pl-on' : '', size: 13 }, D)) + Txt(D.cx - 14, D.cy + 74, SF[3].s, { anchor: 'end', size: 11, cls: 'hv-sb' });
     },
   };
 
@@ -12673,16 +12691,17 @@ helpAdd({ key: 'faq', group: 'ref', special: 'faq', portal: true,
   HELP.players.expresspath = {
     title: T('Где живёт экспресс: эскиз экрана', 'Wo ist Express: Bildschirm-Skizze', 'Where express lives: screen sketch', 'Экспресс қайда тұрады: экран эскизі'),
     steps: EXS.map(t => ({ t })),
-    svg(i) {
-      const row = (y, txt, on) => `<g class="hv-box hv-${on ? 'a' : 'n'}"><rect x="14" y="${y}" width="128" height="22" rx="6"/><text x="22" y="${y + 15}">${esc(txt)}</text></g>`;
-      const n = (x, y, k) => `<g class="pl-num${i === k ? ' pl-on' : ''}"><circle cx="${x}" cy="${y}" r="11"/><text x="${x}" y="${y + 4}" text-anchor="middle">${k + 1}</text></g>`;
-      const card = (y, id, rt, sig, on) => `<g class="hv-box hv-${on ? 'a' : 'n'}"><rect x="170" y="${y}" width="380" height="40" rx="8"/><text x="182" y="${y + 17}" style="font-weight:700">${id}</text><text x="182" y="${y + 32}" style="font-size:10px;opacity:.75">${esc(rt)}</text><text x="408" y="${y + 24}" style="font-size:10px">${esc(sig)}</text></g><g class="hv-box hv-c"><rect x="556" y="${y + 6}" width="72" height="26" rx="7"/><text x="${556 + 36}" y="${y + 23}" text-anchor="middle" style="font-size:10px">${esc(T('К выпуску', 'Zur Freigabe', 'To release', 'Шығаруға'))}</text></g>`;
-      return `<svg viewBox="0 0 650 190" class="hv-svg"><rect x="6" y="6" width="140" height="176" rx="10" style="fill:var(--bg-subtle,#f3f4f6);stroke:var(--border,#e5e7eb)"/>
-${row(16, '01 · ' + navLabel('dashboard'), false)}${row(42, '03 · ' + navLabel('dispatch'), i <= 1)}${row(68, '02 · ' + navLabel('orders'), false)}${row(94, '06 · ' + navLabel('routes'), i === 3)}
-<g class="hv-box hv-e"><rect x="160" y="6" width="484" height="176" rx="10" style="fill:var(--surface,#fff)"/><text x="176" y="30" style="font-weight:700">${esc(T('Экспресс · ждут выпуска (2)', 'Express · warten auf Freigabe (2)', 'Express · waiting for release (2)', 'Экспресс · шығаруды күтуде (2)'))}</text></g>
-${card(44, 'EX-0311', HUBS.ALA.city + ' → ' + HUBS.ATY.city + ' · 18 ' + LF.unit('kg') + ' · 2–8 °C', '1 / 3', i === 1)}${card(94, 'EX-0312', HUBS.AST.city + ' → ' + HUBS.SHY.city + ' · 9 ' + LF.unit('kg') + ' · 15–25 °C', '0 / 3', false)}
-<text x="176" y="166" style="font-size:10px;opacity:.7">${esc(T('Срок приёма 16:00 · подписи: руководитель · экономика · диспетчер', 'Annahmeschluss 16:00 · Unterschriften: Leitung · Wirtschaft · Dispo', 'Cut-off 16:00 · signatures: manager · economics · dispatch', 'Қабылдау мерзімі 16:00 · қолдар: басшы · экономика · диспетчер'))}</text>
-${n(152, 53, 0)}${n(428, 36, 1)}${n(592, 36, 2)}${n(152, 105, 3)}</svg>`;
+    view: '0 0 1000 300',
+    draw(i) {
+      const side = [['01 · ' + navLabel('dashboard'), false], ['03 · ' + navLabel('dispatch'), i <= 1], ['02 · ' + navLabel('orders'), false], ['06 · ' + navLabel('routes'), i === 3]];
+      const card = (y, id, rt, sig, on) => `<g class="hv-bx t-${on ? 'accent' : 'base'}${on ? ' on' : ''}"><rect x="290" y="${y}" width="500" height="64" rx="8"/>${Txt(306, y + 26, id, { size: 15, cls: 'hv-st' })}${Txt(306, y + 48, rt, { size: 12, cls: 'hv-sb' })}${Txt(700, y + 37, sig, { size: 14, cls: 'hv-st', anchor: 'middle' })}</g>`
+        + Box({ x: 812, y: y + 12, w: 170, h: 40, label: T('К выпуску', 'Zur Freigabe', 'To release', 'Шығаруға'), tone: 'ok', size: 13 });
+      return `<g class="hv-bx t-muted"><rect x="10" y="10" width="244" height="280" rx="10"/></g>`
+        + side.map((r, k) => Box({ x: 22, y: 24 + k * 50, w: 220, h: 40, label: r[0], tone: r[1] ? 'accent' : 'base', on: r[1], size: 12.5 })).join('')
+        + `<g class="hv-bx t-base"><rect x="274" y="10" width="716" height="280" rx="10"/></g>` + Txt(290, 42, T('Экспресс · ждут выпуска (2)', 'Express · warten auf Freigabe (2)', 'Express · waiting for release (2)', 'Экспресс · шығаруды күтуде (2)'), { size: 15, cls: 'hv-st' })
+        + card(70, 'EX-0311', HUBS.ALA.city + ' → ' + HUBS.ATY.city + ' · 18 ' + LF.unit('kg') + ' · 2–8 °C', '1 / 3', i === 1) + card(150, 'EX-0312', HUBS.AST.city + ' → ' + HUBS.SHY.city + ' · 9 ' + LF.unit('kg') + ' · 15–25 °C', '0 / 3', false)
+        + Txt(290, 258, T('Срок приёма 16:00 · подписи: руководитель · экономика · диспетчер', 'Annahmeschluss 16:00 · Unterschriften: Leitung · Wirtschaft · Dispo', 'Cut-off 16:00 · signatures: manager · economics · dispatch', 'Қабылдау мерзімі 16:00 · қолдар: басшы · экономика · диспетчер'), { size: 12, cls: 'hv-sb' })
+        + num(264, 94, 0, i === 0) + num(700, 70, 1, i === 1) + num(897, 70, 2, i === 2) + num(264, 194, 3, i === 3);
     },
   };
 
@@ -12698,20 +12717,21 @@ ${n(152, 53, 0)}${n(428, 36, 1)}${n(592, 36, 2)}${n(152, 105, 3)}</svg>`;
   HELP.players.alarmflow = {
     title: T('Температурная тревога: от датчика до CAPA', 'Temperaturalarm: vom Sensor bis CAPA', 'A temperature alarm: from sensor to CAPA', 'Температура дабылы: датчиктен CAPA-ға дейін'),
     steps: AL.map(x => ({ t: x.t })),
-    svg(i) {
-      const W = 640, bw = 192, bh = 44, per = 3;
+    view: '0 0 1000 230',
+    draw(i) {
+      const bw = 290, bh = 64, pos = k => ({ x: 20 + (k % 3) * 330, y: 20 + Math.floor(k / 3) * 140 });
       let g = '';
       AL.forEach((s, k) => {
-        const r = Math.floor(k / per), c = k % per, x = 10 + c * (bw + 21), y = 14 + r * (bh + 44);
-        g += box(x, y, bw, bh, s.l, '', i === k, k >= 3 ? 'c' : 'a');
-        if (k < AL.length - 1) g += (c < per - 1) ? ar(x + bw + 2, y + bh / 2, x + bw + 19, y + bh / 2, false) : ar(x + bw / 2, y + bh + 2, 10 + bw / 2, y + bh + 42, false);
+        const p = pos(k);
+        if (k < AL.length - 1) g += k % 3 < 2 ? Arrow({ x1: p.x + bw, y1: p.y + bh / 2, x2: p.x + 328, y2: p.y + bh / 2, on: i === k }) : Arrow({ d: `M${p.x + bw / 2},${p.y + bh} L${p.x + bw / 2},${p.y + bh + 38} L${20 + bw / 2},${p.y + bh + 38} L${20 + bw / 2},${p.y + 138}`, on: i === k });
+        g += Box({ x: p.x, y: p.y, w: bw, h: bh, label: s.l, on: i === k, done: k < i, tone: k >= 3 ? 'ok' : 'base', size: 15, cls: i === k ? 'pl-on' : '' });
       });
-      return `<svg viewBox="0 0 ${W} 192" class="hv-svg">${g}</svg>`;
+      return g;
     },
   };
 
   /* ---------- rendering: through the Q1 figure kit of 60-visuals.js (controls, step list, one timer per visible figure, in-place repaint) ---------- */
-  Object.keys(HELP.players).forEach(id => { const p = HELP.players[id]; HELP.fig('pl:' + id, { title: p.title, steps: p.steps.map(s => s.t), svg: i => p.svg(i), ms: 4000, cls: 'hp', attrs: `data-player="${id}"` }); });
+  Object.keys(HELP.players).forEach(id => { const p = HELP.players[id]; HELP.fig('pl:' + id, { title: p.title, steps: p.steps.map(s => s.t), view: p.view, draw: i => p.draw(i), ms: 4000, cls: 'hp', attrs: `data-player="${id}"` }); });
   /* 0.3.9 action names kept as aliases */
   Object.assign(ACT, { hpStep: d => ACT.hvStep({ id: 'pl:' + d.id, v: d.v }), hpTog: d => ACT.hvTog({ id: 'pl:' + d.id }) });
 

@@ -148,12 +148,12 @@ html[data-design="kokzhol"] .side-link{color:#c9d8df}html[data-design="kokzhol"]
 .hp-ctl{display:inline-flex;gap:6px;align-items:center}.hp-ctl button{min-width:30px;height:28px;border:1px solid var(--border-input);background:var(--surface,#fff);border-radius:8px;cursor:pointer;font-size:14px;color:var(--text)}
 .hp-txt{margin:8px 0 2px;font-size:13px;min-height:3em}.hp-all summary{cursor:pointer;font-size:12px;color:var(--text-muted)}.hp-all ol{font-size:12px;margin:6px 0 0;padding-left:20px}.hp-all li{margin:3px 0}
 .hv-box.hv-n rect{fill:var(--bg-subtle,#f3f4f6);stroke:var(--border,#d1d5db)}
-.hp .pl-on rect,.hp .pl-on path{stroke-width:2.5;filter:drop-shadow(0 0 3px rgba(37,99,235,.45))}
-@media (prefers-reduced-motion: no-preference){.hp .pl-on rect,.hp .pl-on>path{animation:hp-pulse 1.6s ease-in-out infinite}}
+.hp .pl-on:not(.hv-bx) rect,.hp .pl-on:not(.hv-bx) path{stroke-width:2.5;filter:drop-shadow(0 0 3px rgba(37,99,235,.45))}
+@media (prefers-reduced-motion: no-preference){.hp .pl-on:not(.hv-bx) rect,.hp .pl-on:not(.hv-bx)>path{animation:hp-pulse 1.6s ease-in-out infinite}}
 @keyframes hp-pulse{0%,100%{filter:drop-shadow(0 0 2px rgba(37,99,235,.3))}50%{filter:drop-shadow(0 0 6px rgba(37,99,235,.7))}}
 .hp .hv-ar.pl-go line{stroke:#16a34a;stroke-width:2.4}.hp .hv-ar.pl-go path{fill:#16a34a}
 .hp .pl-nogo{color:#dc2626}.hp .pl-nogo path{stroke:#dc2626}.hp .pl-nogo text{fill:#dc2626;font-size:10px;font-weight:700}
-.hp .pl-num circle{fill:var(--surface,#fff);stroke:var(--primary,#2563eb);stroke-width:2}.hp .pl-num text{fill:var(--primary,#2563eb);font-weight:700;font-size:11px}
+.hp .pl-num circle{fill:var(--surface,#fff);stroke:var(--primary,#2563eb);stroke-width:2}.hp .pl-num text{fill:var(--primary,#2563eb);font-weight:700;font-size:14px}
 .hp .pl-num.pl-on circle{fill:var(--primary,#2563eb)}.hp .pl-num.pl-on text{fill:#fff}
 /* topbar burger + off-canvas sidebar for narrow windows */
 .burger{display:none;border:1px solid var(--border-input);background:var(--surface,#fff);color:var(--text);border-radius:8px;min-width:36px;height:34px;font-size:15px;cursor:pointer;margin-right:10px;flex:none}

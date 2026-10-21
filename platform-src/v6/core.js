@@ -290,14 +290,31 @@ function nameControls(root) {
     const n = String(txt || '').replace(/\s+/g, ' ').replace(/[:：]\s*$/, '').trim().slice(0, 80); if (n) e.setAttribute('aria-label', n);
   });
 }
+/* every render rebuilds #root, so scroll positions of inner scroll boxes are carried over: the sidebar always (the clock re-renders every
+   second and the menu jumped back to the top), the others (help menu, drawer, board, wide tables …) while the screen and drawer stay the same */
+const SCROLLERS = ['sidebar', 'help-nav', 'drawer', 'drawer-tabs', 'board', 'tcard', 'card-body', 'gs-list', 'diag-pop', 'a11y-dlg', 'hvk-pic', 'login-layer'];
+let scrollCtx = '';
+function scrollKeep() {
+  const ctx = S.route + '|' + ((S.tab && S.tab[S.route]) || '') + '|' + (S.drawer ? S.drawer.type + ':' + (S.drawer.id || '') : ''), out = { same: ctx === scrollCtx, at: {} };
+  scrollCtx = ctx;
+  SCROLLERS.forEach(c => document.querySelectorAll('#root .' + c).forEach((e, k) => { if (e.scrollTop || e.scrollLeft) out.at[c + ':' + k] = [e.scrollTop, e.scrollLeft]; }));
+  return out;
+}
+function scrollRestore(k) {
+  Object.keys(k.at).forEach(key => {
+    const [c, n] = key.split(':'); if (c !== 'sidebar' && !k.same) return;
+    const e = document.querySelectorAll('#root .' + c)[+n]; if (e) { e.scrollTop = k.at[key][0]; e.scrollLeft = k.at[key][1]; }
+  });
+}
 function render() {
-  const keep = { y: ($('main') || {}).scrollTop || 0, f: document.activeElement && document.activeElement.id };
+  const keep = { y: ($('main') || {}).scrollTop || 0, f: document.activeElement && document.activeElement.id, sc: scrollKeep() };
   const pos = document.activeElement && document.activeElement.selectionStart;
   const keepIn = {};   // keep what the user typed in drawer fields across re-renders (e.g. a toast)
   $$('.drawer input[id], .drawer select[id], .drawer textarea[id]').forEach(e => { keepIn[e.id] = e.type === 'checkbox' ? e.checked : e.value; });
   $('#root').innerHTML = shell(); nameControls($('#root'));
   Object.keys(keepIn).forEach(id => { const e = document.getElementById(id); if (e && e.closest('.drawer')) { if (e.type === 'checkbox') e.checked = keepIn[id]; else e.value = keepIn[id]; } });
   const m = $('main'); if (m) m.scrollTop = keep.y;
+  scrollRestore(keep.sc);
   if (keep.f) { const e = document.getElementById(keep.f); if (e) { e.focus(); try { e.setSelectionRange(pos, pos); } catch (_) {} } }
 }
 const ACT = {};

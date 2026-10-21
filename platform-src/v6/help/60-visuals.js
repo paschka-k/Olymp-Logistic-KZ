@@ -27,18 +27,20 @@
   };
   const Txt = (x, y, s, o) => { o = o || {}; return `<text x="${f(x)}" y="${f(y)}"${o.anchor ? ` text-anchor="${o.anchor}"` : ''}${o.mid ? ' dominant-baseline="middle"' : ''} font-size="${o.size || 12}" class="hv-t ${o.cls || ''}"${o.attrs || ''}>${esc(s)}</text>`; };
   const Box = o => {
-    const size = o.size || 13, m = o.max || Math.max(6, Math.floor(o.w / (size * 0.56)));
-    return `<g class="hv-bx t-${o.tone || 'base'}${o.on ? ' on' : ''}${o.done ? ' done' : ''}"${o.attrs || ''}><rect x="${o.x}" y="${o.y}" width="${o.w}" height="${o.h}" rx="8"/>${Lines(o.x + o.w / 2, o.y + o.h / 2 - (o.sub ? 8 : 0), o.label, { max: m, size, cls: 'hv-st' })}${o.sub ? Lines(o.x + o.w / 2, o.y + o.h - 13, o.sub, { max: m + 4, size: size - 2, cls: 'hv-sb' }) : ''}</g>`;
+    /* a sub line that wraps grows upwards, so the last line stays inside the box (the title moves up with it) */
+    const size = o.size || 13, m = o.max || Math.max(6, Math.floor(o.w / (size * 0.56))), sn = o.sub ? wrapW(o.sub, m + 4).length : 0, up = sn > 1 ? (sn - 1) * (size - 2) * 1.25 / 2 : 0;
+    return `<g class="hv-bx t-${o.tone || 'base'}${o.on ? ' on' : ''}${o.done ? ' done' : ''}${o.cls ? ' ' + o.cls : ''}"${o.attrs || ''}><rect x="${o.x}" y="${o.y}" width="${o.w}" height="${o.h}" rx="8"/>${Lines(o.x + o.w / 2, o.y + o.h / 2 - (o.sub ? 8 : 0) - up, o.label, { max: m, size, cls: 'hv-st' })}${o.sub ? Lines(o.x + o.w / 2, o.y + o.h - 13 - up, o.sub, { max: m + 4, size: size - 2, cls: 'hv-sb' }) : ''}</g>`;
   };
-  const Diamond = o => `<g class="hv-bx t-${o.tone || 'accent'}${o.on ? ' on' : ''}"><polygon points="${o.cx},${o.cy - o.h / 2} ${o.cx + o.w / 2},${o.cy} ${o.cx},${o.cy + o.h / 2} ${o.cx - o.w / 2},${o.cy}"/>${Lines(o.cx, o.cy, o.label, { max: Math.floor(o.w / ((o.size || 12) * 0.75)), size: o.size || 12, cls: 'hv-st' })}</g>`;
+  const Diamond = o => `<g class="hv-bx t-${o.tone || 'accent'}${o.on ? ' on' : ''}${o.cls ? ' ' + o.cls : ''}"><polygon points="${o.cx},${o.cy - o.h / 2} ${o.cx + o.w / 2},${o.cy} ${o.cx},${o.cy + o.h / 2} ${o.cx - o.w / 2},${o.cy}"/>${Lines(o.cx, o.cy, o.label, { max: Math.floor(o.w / ((o.size || 12) * 0.75)), size: o.size || 12, cls: 'hv-st' })}</g>`;
   let seq = 0, figKey = '';
   const Arrow = o => {
     const mid = 'hva-' + figKey + '-' + (++seq), d = o.d || `M${o.x1},${o.y1} L${o.x2},${o.y2}`;
     const lab = o.label ? Lines(o.lx != null ? o.lx : ((o.x1 || 0) + (o.x2 || 0)) / 2, o.ly != null ? o.ly : ((o.y1 || 0) + (o.y2 || 0)) / 2 - 10, o.label, { max: 22, size: 11, cls: 'hv-sb' }) : '';
     return `<g class="hv-ar2${o.on ? ' on' : ''}${o.tone ? ' t-' + o.tone : ''}${o.dashed ? ' dashed' : ''}"><defs><marker id="${mid}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="hv-hm"/></marker></defs><path d="${d}" marker-end="url(#${mid})"/>${lab}</g>`;
   };
-  const Tag = (x, y, s, tone, size) => { size = size || 11; const w = Math.max(28, String(s).length * size * 0.6 + 14); return `<g class="hv-tag t-${tone || 'accent'}"><rect x="${f(x - w / 2)}" y="${y - size}" width="${f(w)}" height="${size * 2}" rx="${size}"/><text x="${f(x)}" y="${y}" text-anchor="middle" dominant-baseline="middle" font-size="${size}" class="hv-t">${esc(s)}</text></g>`; };
+  const Tag = (x, y, s, tone, size) => { size = size || 11; const w = Math.max(28, String(s).length * size * 0.6 + 14); x = Math.max(w / 2 + 4, Math.min(996 - w / 2, x));   /* long DE / KK tags stay inside the 1000-wide picture */ return `<g class="hv-tag t-${tone || 'accent'}"><rect x="${f(x - w / 2)}" y="${y - size}" width="${f(w)}" height="${size * 2}" rx="${size}"/><text x="${f(x)}" y="${y}" text-anchor="middle" dominant-baseline="middle" font-size="${size}" class="hv-t">${esc(s)}</text></g>`; };
   const Token = (x, y, r, tone) => `<circle class="hv-tok t-${tone || 'accent'}" r="${r || 9}" cx="0" cy="0" style="transform:translate(${f(x)}px,${f(y)}px)"/>`;
+  HELP.kit = { Box, Diamond, Arrow, Lines, Txt, Tag, Token, wrapW };   /* shared with the 0.3.9 players in 65-players.js */
   const fmtKg = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 
   /* ---------- frame + stepper ---------- */
@@ -143,7 +145,7 @@
         + Arrow({ d: `M${FD.cx - 50},${FD.cy - 30} C${FD.cx - 80},-6 640,-6 575,28`, tone: 'bad', dashed: true }) + Tag(705, 16, 'No-Go', 'bad')
         + Arrow({ x1: 710, y1: 243, x2: 662, y2: 243, on: s === 4 }) + Arrow({ x1: 430, y1: 243, x2: 382, y2: 243, on: s === 5 })
         + FS.map((x, i) => i === 3 ? Diamond(Object.assign({ label: t(x.t), on: s === i }, FD)) : Box(Object.assign({ label: t(x.t), sub: t(x.sub), on: s === i, done: i < s, tone: i === 6 ? 'ok' : 'base' }, FP[i]))).join('')
-        + Txt(FD.cx, FD.cy + 76, t(FS[3].sub), { anchor: 'middle', size: 11, cls: 'hv-sb' })
+        + Txt(FD.cx - 12, FD.cy + 76, t(FS[3].sub), { anchor: 'end', size: 11, cls: 'hv-sb' })
         + Token(c.x, s === 3 ? c.y - 40 : c.y - 52);
     },
   });
@@ -238,7 +240,7 @@
       LO.forEach((o, k) => { g += Box({ x: 20, y: 30 + k * 60, w: 250, h: 50, label: '✓ ' + o.id + ' · ' + t(o.c), sub: o.n + ' ' + t(['пал.', 'Pal.', 'pal.', 'пал.']) + ' · ' + (o.z === 'c' ? '2–8 °C' : '15–25 °C'), tone: o.z === 'c' ? 'accent' : 'base', on: s === 0, size: 12.5, attrs: ` data-order="${o.id}"` }); });
       /* bars: places, weight, axles, height (from step 3 on: after the split) */
       const V = LV[s >= 3 ? 1 : 0], unit = t(KGL);
-      [[t(['Мест', 'Plätze', 'Places', 'Орын']), 'pl', ''], [t(['Масса', 'Masse', 'Weight', 'Салмақ']), 'kg', unit], [t(['Пер. ось', 'Vorderachse', 'Front axle', 'Алд. ось']), 'fa', unit], [t(['Задн. ось', 'Hinterachse', 'Rear axle', 'Арт. ось']), 'ra', unit], [t(['Высота', 'Höhe', 'Height', 'Биіктік']), 'h', 'm']].forEach((b, j) => {
+      [[t(['Мест', 'Plätze', 'Places', 'Орын']), 'pl', ''], [t(['Масса', 'Masse', 'Weight', 'Салмақ']), 'kg', unit], [t(['Пер. ось', 'Vorderachse', 'Front axle', 'Алд. ось']), 'fa', unit], [t(['Задн. ось', 'Hinterachse', 'Rear axle', 'Арт. ось']), 'ra', unit], [t(['Высота', 'Höhe', 'Height', 'Биіктік']), 'h', t(['м', 'm', 'm', 'м'])]].forEach((b, j) => {
         const y = 232 + j * 28, v = V[b[1]][0], max = V[b[1]][1], over = s >= 2 && v > max, show = s >= 2, w = show ? 120 * Math.min(1.25, v / max) / 1.25 : 0;
         const dec = n => LF.dec(n, 1), val = b[1] === 'h' ? dec(v) + ' / ' + dec(max) : fmtKg(v) + ' / ' + fmtKg(max);
         g += `<g data-lbar="${b[1]}" data-over="${over ? 1 : 0}">${Txt(20, y + 6, b[0] + (show ? ': ' + val + (b[2] ? ' ' + b[2] : '') : ''), { size: 11.5, cls: show ? '' : 'hv-sb' })}<rect x="170" y="${y - 4}" width="120" height="12" rx="6" class="hf-box hs-line"/><rect x="170" y="${y - 4}" width="${f(w)}" height="12" rx="6" class="hv-mv ${over ? 'hf-bad' : 'hf-ok'}"/><line x1="266" x2="266" y1="${y - 7}" y2="${y + 11}" class="hs-ink" stroke-width="1.5"/></g>`;
@@ -276,7 +278,7 @@
   const BS = [
     { at: [90, 110], cap: ['Клиент вводит место погрузки и доставки: город и улицу (проверка по справочнику улиц), паллеты, вес (кг), температуру, дату.', 'Der Kunde gibt Abhol- und Lieferort ein: Stadt und Straße (Prüfung gegen das Straßenverzeichnis), Paletten, Gewicht (kg), Temperatur, Datum.', 'The customer enters pick-up and destination: city and street (checked against the street directory), pallets, weight (kg), temperature, date.', 'Клиент тиеу және жеткізу орнын енгізеді: қала мен көше (көшелер анықтамалығы бойынша тексеріледі), паллеттер, салмақ (кг), температура, күн.'] },
     { at: [300, 110], cap: ['Сбор: машина хаба забирает груз у клиента и везёт на ближайший хаб (Астана или Алматы).', 'Abholung: ein Hub-Fahrzeug holt die Ware beim Kunden ab und bringt sie zum nächsten Hub (Astana oder Almaty).', 'Collection: a hub vehicle picks the goods up at the customer and brings them to the nearest hub (Astana or Almaty).', 'Жинау: хаб көлігі жүкті клиенттен алып, ең жақын хабқа (Астана немесе Алматы) жеткізеді.'] },
-    { at: [520, 110], cap: ['Есть прямая линия хаба до города назначения → регулярное отправление по расписанию, слоты и цена сразу.', 'Gibt es eine direkte Linie des Hubs zur Zielstadt → reguläre Abfahrt nach Fahrplan, Termine und Preis sofort.', 'A direct line from the hub to the destination city → regular departure on schedule, slots and price at once.', 'Хабтан баратын қалаға тікелей желі бар → кесте бойынша тұрақты жөнелту, слоттар мен баға бірден.'] },
+    { at: [540, 110], cap: ['Есть прямая линия хаба до города назначения → регулярное отправление по расписанию, слоты и цена сразу.', 'Gibt es eine direkte Linie des Hubs zur Zielstadt → reguläre Abfahrt nach Fahrplan, Termine und Preis sofort.', 'A direct line from the hub to the destination city → regular departure on schedule, slots and price at once.', 'Хабтан баратын қалаға тікелей желі бар → кесте бойынша тұрақты жөнелту, слоттар мен баға бірден.'] },
     { at: [520, 300], cap: ['Нет прямой линии → маршрут через второй хаб (перевалка): система никогда не отказывает, а показывает +1–2 рабочих дня и сбор за обработку.', 'Keine direkte Linie → Route über den zweiten Hub (Umschlag): das System lehnt nie ab, sondern zeigt +1–2 Werktage und eine Umschlaggebühr.', 'No direct line → route through the second hub (transshipment): the system never refuses, it shows +1–2 business days and a handling fee.', 'Тікелей желі жоқ → екінші хаб арқылы маршрут (қайта тиеу): жүйе ешқашан бас тартпайды, +1–2 жұмыс күні мен өңдеу алымын көрсетеді.'] },
     { at: [890, 110], cap: ['Доставка до улицы получателя. Срок считается в рабочих днях РК: праздник на пути добавляет день; клиент видит дату и этапы в отслеживании.', 'Zustellung bis zur Straße des Empfängers. Die Laufzeit zählt in kasachischen Werktagen: ein Feiertag unterwegs fügt einen Tag hinzu; der Kunde sieht Datum und Etappen im Tracking.', 'Delivery to the consignee\'s street. Lead time counts in Kazakh business days: a holiday on the way adds a day; the customer sees the date and legs in tracking.', 'Алушының көшесіне дейін жеткізу. Мерзім ҚР жұмыс күндерімен есептеледі: жолдағы мереке бір күн қосады; клиент бақылауда күн мен кезеңдерді көреді.'] },
   ];
@@ -287,11 +289,11 @@
       const via = s === 3, p = BS[s].at;
       return Box({ x: 20, y: 70, w: 150, h: 80, label: t(['Место погрузки', 'Abholort', 'Pick-up', 'Тиеу орны']), sub: t(['город + улица', 'Stadt + Straße', 'city + street', 'қала + көше']), on: s === 0 })
         + Box({ x: 230, y: 70, w: 150, h: 80, label: t(['Хаб A', 'Hub A', 'Hub A', 'А хабы']), sub: t(['сбор · склад', 'Abholung · Lager', 'collection · warehouse', 'жинау · қойма']), tone: 'accent', on: s === 1 })
-        + Box({ x: 440, y: 70, w: 170, h: 80, label: t(['Линия', 'Linie', 'Line', 'Желі']), sub: t(['расписание · слоты', 'Fahrplan · Termine', 'schedule · slots', 'кесте · слоттар']), on: s === 2 })
+        + Box({ x: 460, y: 70, w: 160, h: 80, label: t(['Линия', 'Linie', 'Line', 'Желі']), sub: t(['расписание · слоты', 'Fahrplan · Termine', 'schedule · slots', 'кесте · слоттар']), on: s === 2 })
         + Box({ x: 820, y: 70, w: 150, h: 80, label: t(['Место доставки', 'Lieferort', 'Destination', 'Жеткізу орны']), sub: t(['город + улица', 'Stadt + Straße', 'city + street', 'қала + көше']), tone: 'ok', on: s === 4 })
         + Box({ x: 430, y: 260, w: 190, h: 80, label: t(['Хаб B · перевалка', 'Hub B · Umschlag', 'Hub B · transshipment', 'B хабы · қайта тиеу']), sub: t(['+1–2 рабочих дня', '+1–2 Werktage', '+1–2 business days', '+1–2 жұмыс күні']), tone: via ? 'warn' : 'base', on: via })
-        + Arrow({ x1: 170, y1: 110, x2: 228, y2: 110, on: s === 1 }) + Arrow({ x1: 380, y1: 110, x2: 438, y2: 110, on: s === 2, label: t(['прямая линия', 'direkte Linie', 'direct line', 'тікелей желі']) })
-        + Arrow({ x1: 610, y1: 110, x2: 818, y2: 110, on: s === 2 || s === 4 })
+        + Arrow({ x1: 170, y1: 110, x2: 228, y2: 110, on: s === 1 }) + Arrow({ x1: 380, y1: 110, x2: 458, y2: 110, on: s === 2, label: t(['прямая линия', 'direkte Linie', 'direct line', 'тікелей желі']), lx: 419, ly: 96 })
+        + Arrow({ x1: 620, y1: 110, x2: 818, y2: 110, on: s === 2 || s === 4 })
         + Arrow({ d: 'M305,150 C305,300 360,300 428,300', on: via, dashed: !via, label: t(['нет линии', 'keine Linie', 'no line', 'желі жоқ']), lx: 330, ly: 250 })
         + Arrow({ d: 'M620,300 C760,300 850,260 890,152', on: via, dashed: !via, label: t(['линия хаба B', 'Linie von Hub B', 'line of hub B', 'B хабының желісі']), lx: 790, ly: 250 })
         + (via ? Tag(525, 238, t(['никогда «нет связи»', 'nie „keine Verbindung“', 'never "no connection"', 'ешқашан «байланыс жоқ» емес']), 'warn') : '')
@@ -389,7 +391,7 @@
     steps: TC.map(c => c.cap), view: '0 0 1000 400', ms: 2600,
     draw(s) {
       const ax = HELP.truckAxles(s), pos = ax.pos, sum = pos.reduce((a, p) => a + p, 0), xg = pos.length ? sum / pos.length : 3.1, tilt = Math.max(-12, Math.min(12, (xg - 3.1) * 7));
-      const PX = 58, CX = 790, CY = 175, bx = m => CX + (m - 3.1) * PX, bar = (v, max) => Math.min(1.25, v / max);
+      const PX = 52, CX = 780, CY = 175, bx = m => CX + (m - 3.1) * PX, bar = (v, max) => Math.min(1.25, v / max);
       let g = '';
       TC.forEach((c, j) => { g += `<rect x="${150 + j * 46}" y="22" width="44" height="30" rx="4" class="${j === s ? 'hf-soft' : 'hf-box'}"/>` + Txt(172 + j * 46, 37, t(c.h), { anchor: 'middle', mid: true, size: 10.5, cls: 'hv-st' }); });
       TCD.forEach((c, i) => {
@@ -443,7 +445,7 @@
         + Box({ x: 400, y: 180, w: 200, h: 80, label: t(['Монитор контакта', 'Kontaktmonitor', 'Contact monitor', 'Байланыс мониторы']), sub: s < 2 ? t(['норма', 'normal', 'normal', 'қалыпты']) : s === 4 ? t(['уровень 2 → 3', 'Stufe 2 → 3', 'level 2 → 3', '2 → 3-деңгей']) : t(['уровень 1 / 2', 'Stufe 1 / 2', 'level 1 / 2', '1 / 2-деңгей']), on: s === 1 || s === 2 || s === 4, tone: s === 4 ? 'bad' : s >= 2 && s < 5 ? 'warn' : 'base' })
         + Box({ x: 740, y: 180, w: 220, h: 80, label: t(['Диспетчер', 'Disponent', 'Dispatcher', 'Диспетчер']), sub: s === 3 ? 'MS → STOP · CHKT · WAIT' : s === 4 ? t(['Входящие + задача CRM', 'Eingang + CRM-Aufgabe', 'Inbox + CRM task', 'Кіріс + CRM тапсырмасы']) : t(['маршруты · покрытие', 'Routen · Netz', 'routes · coverage', 'маршруттар · байланыс']), on: s === 3 || s === 4, tone: s === 4 ? 'bad' : 'base' })
         + Arrow({ x1: 240, y1: 220, x2: 398, y2: 220, on: s === 0 || s === 2 || s === 5, label: sms ? 'SMS' : t(['данные', 'Daten', 'data', 'деректер']) }) + Arrow({ x1: 600, y1: 220, x2: 738, y2: 220, on: s === 2 || s === 4 })
-        + Arrow({ d: 'M850,262 C850,320 140,320 140,264', on: s === 3, dashed: s !== 3, label: t(['SMS-инструкция → подтверждение AK', 'SMS-Anweisung → Bestätigung AK', 'SMS instruction → acknowledgement AK', 'SMS нұсқау → AK растауы']), lx: 500, ly: 300 })
+        + Arrow({ d: 'M850,262 C850,320 140,320 140,264', on: s === 3, dashed: s !== 3, label: t(['SMS-инструкция → подтверждение AK', 'SMS-Anweisung → Bestätigung AK', 'SMS instruction → acknowledgement AK', 'SMS нұсқау → AK растауы']), lx: 500, ly: 324 })
         + Lines(500, 152, t(['ни одного персонального данного в SMS: рейс, машина, код события, время, MAC', 'keine Personendaten in der SMS: Tour, Fahrzeug, Ereigniscode, Zeit, MAC', 'no personal data in the SMS: trip, vehicle, event code, time, MAC', 'SMS-те жеке деректер жоқ: рейс, көлік, оқиға коды, уақыт, MAC']), { max: 110, size: 11, cls: 'hv-sb' });
     },
   });
@@ -517,7 +519,7 @@
 
   /* (12) where express is: annotated mock of the Dispatch Board (0.3.10 dispatchMock.tsx) */
   const DN = [
-    { at: [196, 66], cap: ['Значок у пункта «Диспетчерская»: столько экспресс-заявок ждут подписи вашей функции (CEO, аналитика, закупки).', 'Zähler am Menüpunkt „Disposition“: so viele Express-Anfragen warten auf die Unterschrift Ihrer Funktion (CEO, Analytik, Einkauf).', 'Badge on "Dispatch": how many express requests await the signature of your function (CEO, analytics, purchasing).', '«Диспетчерлік» белгісі: сіздің функцияңыздың (CEO, талдау, сатып алу) қолын күтетін экспресс-өтінімдер саны.'] },
+    { at: [218, 88], cap: ['Значок у пункта «Диспетчерская»: столько экспресс-заявок ждут подписи вашей функции (CEO, аналитика, закупки).', 'Zähler am Menüpunkt „Disposition“: so viele Express-Anfragen warten auf die Unterschrift Ihrer Funktion (CEO, Analytik, Einkauf).', 'Badge on "Dispatch": how many express requests await the signature of your function (CEO, analytics, purchasing).', '«Диспетчерлік» белгісі: сіздің функцияңыздың (CEO, талдау, сатып алу) қолын күтетін экспресс-өтінімдер саны.'] },
     { at: [560, 98], cap: ['На доске вкладка «Экспресс» — открытые заявки: маршрут, груз, подписи 0–3 из 3, срок (отсечка).', 'Auf der Tafel der Reiter „Express“ — offene Anfragen: Strecke, Ware, Unterschriften 0–3 von 3, Frist (Annahmeschluss).', 'On the board the "Express" tab — open requests: route, goods, signatures 0–3 of 3, deadline (cut-off).', 'Тақтада «Экспресс» қойындысы — ашық өтінімдер: маршрут, жүк, 3-тен 0–3 қолтаңба, мерзім (кесу).'] },
     { at: [778, 143], cap: ['Подписи по слотам: ✓ — подписано (другим пользователем), «ваш» — подпись ждёт вас.', 'Unterschriften je Slot: ✓ — unterschrieben (von einem anderen Benutzer), „Ihr“ — die Unterschrift wartet auf Sie.', 'Signatures per slot: ✓ — signed (by another user), "yours" — the signature waits for you.', 'Слоттар бойынша қолтаңбалар: ✓ — қол қойылды (басқа пайдаланушы), «сіздің» — қолтаңба сізді күтуде.'] },
     { at: [873, 178], cap: ['Кнопка ведёт к согласованию (17 · «Исходные данные» → «Экспресс»), где ставится подпись или отказ.', 'Die Schaltfläche führt zur Freigabe (17 · „Ausgangsdaten“ → „Express“), wo unterschrieben oder abgelehnt wird.', 'The button leads to the approval (17 · "Baseline data" → "Express"), where you sign or reject.', 'Батырма келісуге апарады (17 · «Бастапқы деректер» → «Экспресс»), онда қол қойылады немесе бас тартылады.'] },
