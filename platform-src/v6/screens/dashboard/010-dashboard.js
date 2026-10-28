@@ -12,16 +12,16 @@
   const kpi = KIT.kpiDelta;
   const dec = s => LF.dec(s);
   function map() {
-    const pathD = l => KZMAP.hubPath(l.from, l.to).pts.map((q, i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' ');
+    const pathD = l => KZNET.hubPath(l.from, l.to).pts.map((q, i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' ');
     const lines = S.loads.filter(l => isActive(l) && l.status !== 'assigned').map(l => `<path d="${pathD(l)}" fill="none" stroke="#173a5e" stroke-opacity=".55" stroke-width="2.5" stroke-dasharray="2 7" stroke-linecap="round"/>`).join('');
     const mk = S.loads.filter(l => l.status === 'in_transit' || l.status === 'problem').map(l => {
-      const [x, y] = KZMAP.along(KZMAP.hubPath(l.from, l.to), l.progress), ts = tempState(l);
+      const [x, y] = KZNET.along(KZNET.hubPath(l.from, l.to), l.progress), ts = tempState(l);
       const col = ts === 'breach' ? 'var(--mk-red)' : ts === 'warn' ? 'var(--mk-status-yellow)' : 'var(--mk-green)', t = trk(l.truck);
       return `<g class="mk" data-act="open" data-id="${l.id}" transform="translate(${x},${y}) scale(1.5)"><circle r="14" fill="${col}"/><path d="M-7 -3h9v6h-9zM2 -1h4l3 3v2h-7z" fill="#fff"/><circle cx="10" cy="-10" r="4.5" fill="${ts === 'ok' ? 'var(--mk-status-green)' : ts === 'warn' ? 'var(--mk-status-yellow)' : 'var(--red)'}" stroke="#fff" stroke-width="1.5"/><rect x="-44" y="18" width="88" height="17" rx="6" fill="#fff" stroke="var(--border-input)"/><text x="0" y="30" text-anchor="middle" class="maplbl sm">${esc(t ? t.plate.slice(0, 10) : '')} · ${l.temp > 0 ? '+' : ''}${LF.dec(l.temp)}°</text></g>`;
     }).join('');
     const free = S.trucks.filter(t => t.status === 'available').length, act = S.loads.filter(isActive).length;
     return `<div class="card mapcard"><div class="card-head">${esc(T('Живые операции', 'Live-Betrieb', 'Live Operations', 'Тікелей операциялар'))}</div><div class="mapwrap">
-<svg viewBox="0 0 ${KZMAP.W} ${KZMAP.H}" class="kzmap">${KZMAP.base()}${lines}${mk}</svg>${KZMAP.legend()}
+<svg viewBox="0 0 ${KZNET.W} ${KZNET.H}" class="kzmap">${KZNET.base(1.2)}${lines}${mk}</svg>${KZNET.legend(false)}
 <div class="legend card"><b>${esc(T('Состояние ТС', 'Fahrzeugstatus', 'Vehicle status', 'КҚ күйі'))}</b><div><i style="background:var(--mk-status-green)"></i>${esc(T('В норме', 'In Ordnung', 'On time', 'Қалыпты'))}</div><div><i style="background:var(--mk-status-yellow)"></i>${esc(T('Близко к границе', 'Nahe Grenzwert', 'Near limit', 'Шекке жақын'))}</div><div><i style="background:var(--red)"></i>${esc(T('Темп. тревога', 'Temp.-Alarm', 'Temp. alarm', 'Темп. дабыл'))}</div></div>
 <div class="statstrip card"><span><b>${S.trucks.length}</b> ${esc(T('ТС всего', 'Fahrzeuge', 'Total vehicles', 'КҚ барлығы'))}</span><span><b class="g">${free}</b> ${esc(T('свободно', 'frei', 'available', 'бос'))}</span><span><b class="b">${act}</b> ${esc(T('активных рейсов', 'aktive Fahrten', 'active loads', 'белсенді рейс'))}</span></div></div></div>`;
   }

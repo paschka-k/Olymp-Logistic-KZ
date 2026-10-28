@@ -8,14 +8,14 @@
   const sel = KIT.filterSelect('data-rf', () => F);
   const tk = KIT.kpi;
   function map() {
-    const k = 1 / zoom, W = KZMAP.W / zoom, H = KZMAP.H / zoom, cx = KZMAP.W / 2, cy = KZMAP.H / 2, vb = `${cx - W / 2} ${cy - H / 2} ${W} ${H}`;
+    const k = 1 / zoom, W = KZNET.W / zoom, H = KZNET.H / zoom, cx = KZNET.W / 2, cy = KZNET.H / 2, vb = `${cx - W / 2} ${cy - H / 2} ${W} ${H}`;
     const ls = live();
-    const lines = ls.map(l => { const sel = S.drawer && S.drawer.id === l.id, d = KZMAP.hubPath(l.from, l.to).pts.map((q, i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' ');
+    const lines = ls.map(l => { const sel = S.drawer && S.drawer.id === l.id, d = KZNET.hubPath(l.from, l.to).pts.map((q, i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' ');
       return `<path d="${d}" fill="none" stroke="#173a5e" stroke-opacity="${sel ? .9 : .45}" stroke-width="${(sel ? 3.5 : 2.5) * k}" stroke-dasharray="${2 * k} ${7 * k}" stroke-linecap="round"/>`; }).join('');
-    const mk = ls.map(l => { const [x, y] = KZMAP.along(KZMAP.hubPath(l.from, l.to), l.progress), rs = rstate(l), t = trk(l.truck), sel = S.drawer && S.drawer.id === l.id, sc = (sel ? 2 : 1.6) * k;
+    const mk = ls.map(l => { const [x, y] = KZNET.along(KZNET.hubPath(l.from, l.to), l.progress), rs = rstate(l), t = trk(l.truck), sel = S.drawer && S.drawer.id === l.id, sc = (sel ? 2 : 1.6) * k;
       const col = rs === 'critical' ? 'var(--mk-red)' : rs === 'at_risk' ? 'var(--mk-status-yellow)' : 'var(--mk-green)';
       return `<g class="mk" data-act="openR" data-id="${l.id}" transform="translate(${x},${y}) scale(${sc})">${sel ? '<circle r="22" fill="var(--primary)" fill-opacity=".15"/>' : ''}<circle r="14" fill="${col}"/><path d="M-7 -3h9v6h-9zM2 -1h4l3 3v2h-7z" fill="#fff"/><rect x="-48" y="18" width="96" height="17" rx="6" fill="#fff" stroke="var(--border-input)"/><text x="0" y="30" text-anchor="middle" class="maplbl sm">${esc(t.plate)} · ${l.temp > 0 ? '+' : ''}${LF.dec(l.temp)}°</text></g>`; }).join('');
-    return `<div class="mapfull"><svg viewBox="${vb}" class="kzmap">${KZMAP.base(k)}${lines}${mk}</svg>${KZMAP.legend()}<div class="zoom"><button data-act="zoom" data-v="1">+</button><button data-act="zoom" data-v="-1">−</button></div></div>`;
+    return `<div class="mapfull"><svg viewBox="${vb}" class="kzmap">${KZNET.base(k, { classes: true })}${lines}${mk}</svg>${KZNET.legend(true)}<div class="zoom"><button data-act="zoom" data-v="1">+</button><button data-act="zoom" data-v="-1">−</button></div></div>`;
   }
   SCREENS.routes = {
     title: () => navLabel('routes'),

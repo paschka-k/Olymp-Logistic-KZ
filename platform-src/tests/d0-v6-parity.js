@@ -1,17 +1,18 @@
-  /* ---- 0.3.9 parity: network map (23 cities), manufacturer registry, Baseline data section, help Schaubilder players ---- */
-  await group('map: dashboard and routes draw the full network — 23 cities, coverage-coloured roads, legend', 'ru', async (g, ev, w) => {
+  /* ---- 0.3.9 parity: network map (24 cities incl. the offline Makinsk), manufacturer registry, Baseline data section, help Schaubilder players ---- */
+  await group('map: dashboard draws the schematic network (24 cities incl. the offline Makinsk, hubs, legend); Routes adds coverage colours', 'ru', async (g, ev, w) => {
     ev("go('dashboard')");
-    eq(w.document.querySelectorAll('.mapcard .kzcity').length, 23, 'dashboard cities');
-    assert(w.document.querySelectorAll('.mapcard svg line[stroke]').length >= 23, 'coverage-coloured road stretches');
+    eq(w.document.querySelectorAll('.mapcard .kzcity').length, 24, 'dashboard cities');
+    assert(w.document.querySelectorAll('.mapcard svg line[stroke]').length >= 23, 'road stretches on the schematic');
     assert(w.document.querySelector('.mapcard .kzlegend'), 'dashboard legend');
     assert(w.document.querySelectorAll('.mapcard .mk').length >= 1, 'live truck markers');
     ev("go('routes')");
-    eq(w.document.querySelectorAll('.mapfull .kzcity').length, 23, 'routes cities');
+    eq(w.document.querySelectorAll('.mapfull .kzcity').length, 24, 'routes cities');
     assert(w.document.querySelector('.mapfull .kzlegend'), 'routes legend');
+    assert(w.document.querySelectorAll('.mapfull svg line[stroke="#2e9e5b"]').length >= 1, 'routes roads coloured by 4G class');
     const vb0 = w.document.querySelector('.mapfull svg').getAttribute('viewBox');
     w.document.querySelector('[data-act=zoom][data-v="1"]').click();
     assert(w.document.querySelector('.mapfull svg').getAttribute('viewBox') !== vb0, 'zoom changes the viewBox');
-    eq(w.document.querySelectorAll('.mapfull .kzcity').length, 23, 'cities survive the zoom');
+    eq(w.document.querySelectorAll('.mapfull .kzcity').length, 24, 'cities survive the zoom');
   });
   await group('map: a truck marker travels along the road path, not the straight hub line', 'ru', async (g, ev) => {
     assert(ev("KZMAP.hubPath('AST','ALA').pts.length") >= 3, 'Astana–Almaty runs via Karaganda');

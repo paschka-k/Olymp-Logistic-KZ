@@ -55,6 +55,79 @@
     return `<polygon points="${pts}" fill="#eef3fa" stroke="#c4cedb" stroke-width="${1.2 * k}" stroke-dasharray="${4 * k} ${3 * k}"/>${roads}${cities}`;
   }
   const legend = () => `<div class="kzlegend">${[['4g', '4G'], ['3g', '3G'], ['2g', T('2G: голос/SMS', '2G: Sprache/SMS', '2G: voice/SMS', '2G: дауыс/SMS')], ['none', T('нет сети', 'kein Netz', 'no network', 'байланыс жоқ')]].map(x => `<span><i style="background:${CLS[x[0]]}"></i>${esc(x[1])}</span>`).join('')}</div>`;
+  /* ---- schematic network (hybrid map: Dashboard + Routes & Tracking): hubs as gold dots with «ХАБ» tags, trunk / regional / offline roads,
+     offline cities as hollow red rings. Positions are schematic, in picture units (1103 x 662), not to scale. The picture is fitted to the
+     geographic outline (KZMAP) by least squares over these cities, so the country silhouette sits behind the network. ---- */
+  const NW = 1103, NH = 662, NCOL = '#1b6b7a', OFF = '#d0312d', HUBC = '#c9962f';
+  const NN = {   /* city ru -> [x, y] (+ 1 = no mobile network) */
+    'Астана': [665, 203], 'Алматы': [839, 499], 'Петропавловск': [604, 59], 'Кокшетау': [611, 121], 'Макинск': [637, 146, 1],
+    'Костанай': [475, 123], 'Павлодар': [795, 146], 'Аксу': [796, 156], 'Семей': [886, 206], 'Усть-Каменогорск': [948, 213],
+    'Караганда': [710, 253], 'Жезказган': [573, 339, 1], 'Уральск': [171, 163], 'Актобе': [308, 225], 'Хромтау': [340, 230],
+    'Атырау': [153, 326], 'Актау': [105, 455], 'Кызылорда': [513, 454], 'Туркестан': [591, 515], 'Шымкент': [631, 552],
+    'Тараз': [681, 527], 'Сарыагаш': [619, 588], 'Каскелен': [805, 514], 'Талдыкорган': [871, 424] };
+  /* [a, b, kind]: s solid regional · d dashed regional · t trunk · o no network (dotted red) */
+  const NE = [['Астана', 'Кокшетау', 's'], ['Кокшетау', 'Петропавловск', 's'], ['Петропавловск', 'Костанай', 'd'], ['Астана', 'Костанай', 's'],
+    ['Костанай', 'Актобе', 'd'], ['Актобе', 'Хромтау', 'd'], ['Хромтау', 'Астана', 'd'], ['Актобе', 'Уральск', 'd'], ['Уральск', 'Атырау', 'd'],
+    ['Атырау', 'Актау', 's'], ['Актобе', 'Атырау', 'd'], ['Астана', 'Караганда', 't'], ['Караганда', 'Алматы', 't'], ['Караганда', 'Жезказган', 'o'],
+    ['Астана', 'Павлодар', 'd'], ['Павлодар', 'Аксу', 'd'], ['Аксу', 'Семей', 'd'], ['Павлодар', 'Семей', 'd'], ['Астана', 'Семей', 'd'],
+    ['Семей', 'Усть-Каменогорск', 's'], ['Кызылорда', 'Туркестан', 's'], ['Туркестан', 'Шымкент', 'd'], ['Шымкент', 'Тараз', 'd'],
+    ['Тараз', 'Каскелен', 'd'], ['Каскелен', 'Алматы', 'd'], ['Алматы', 'Талдыкорган', 'd'], ['Шымкент', 'Сарыагаш', 'd']];
+  /* label offsets [dx, dy, anchor] */
+  const NLAB = { 'Астана': [14, -8, 'start'], 'Алматы': [14, -8, 'start'], 'Караганда': [10, 18, 'start'], 'Костанай': [-8, -6, 'end'], 'Актобе': [-8, -6, 'end'],
+    'Уральск': [-8, -6, 'end'], 'Атырау': [-8, -6, 'end'], 'Актау': [-8, 4, 'end'], 'Кызылорда': [-8, -6, 'end'], 'Туркестан': [-8, -6, 'end'],
+    'Шымкент': [-8, 14, 'end'], 'Тараз': [-8, 16, 'end'], 'Каскелен': [-6, 20, 'end'], 'Сарыагаш': [8, 12, 'start'], 'Жезказган': [-8, -6, 'end'],
+    'Семей': [-8, -8, 'end'], 'Аксу': [8, 12, 'start'], 'Усть-Каменогорск': [8, 4, 'start'], 'Талдыкорган': [8, -4, 'start'] };
+  const nm = ru => { const row = CITY.find(c => c[0] === ru); return row ? cname(row) : T(ru, 'Makinsk', 'Makinsk', ru); };
+  const hubTag = ru => ru === 'Астана' ? T('ХАБ «СЕВЕР»', 'HUB «NORD»', 'HUB NORTH', 'ХАБ «СОЛТҮСТІК»') : T('ХАБ «ЮГ»', 'HUB «SÜD»', 'HUB SOUTH', 'ХАБ «ОҢТҮСТІК»');
+  const dist = (a, b) => Math.hypot(NN[a][0] - NN[b][0], NN[a][1] - NN[b][1]);
+  /* least squares fit of the picture to the geographic projection: outline + roads sit behind the cities */
+  const fit = (u, v) => { const n = u.length, mu = u.reduce((s, x) => s + x, 0) / n, mv = v.reduce((s, x) => s + x, 0) / n;
+    let num = 0, den = 0; u.forEach((x, i) => { num += (x - mu) * (v[i] - mv); den += (x - mu) * (x - mu); }); const b = num / den; return x => mv + b * (x - mu); };
+  const fitPairs = Object.keys(NN).filter(r => CITY.some(c => c[0] === r));
+  const fx = fit(fitPairs.map(r => xy(r)[0]), fitPairs.map(r => NN[r][0])), fy = fit(fitPairs.map(r => xy(r)[1]), fitPairs.map(r => NN[r][1]));
+  const toNet = p => [fx(p[0]), fy(p[1])];
+  const SILH = OUTLINE.map(([lo, la]) => toNet(proj(la, lo)).map(v => v.toFixed(1)).join(',')).join(' ');
+  /* road class of an edge: dominant class of the matching SEG stretch (coverage reference), default 4G */
+  const segMemo = {};
+  function segClass(a, b) { const key = [a, b].sort().join('|'); if (segMemo[key]) return segMemo[key];
+    const km = {}; SEG.filter(s => (s[1] === a && s[2] === b) || (s[1] === b && s[2] === a)).forEach(s => s[4].forEach(st => { km[st[2]] = (km[st[2]] || 0) + st[1] - st[0]; }));
+    return (segMemo[key] = Object.keys(km).sort((x, y) => km[y] - km[x])[0] || '4g'); }
+  const nadj = {}; NE.forEach(([a, b]) => { (nadj[a] = nadj[a] || []).push([b, dist(a, b)]); (nadj[b] = nadj[b] || []).push([a, dist(a, b)]); });
+  const pmemo = {};
+  /* shortest path over the schematic graph -> {pts, cum, total, names}, same shape as KZMAP.roadPath */
+  function netPath(a, b) {
+    const key = a + '>' + b; if (pmemo[key]) return pmemo[key];
+    const d = { [a]: 0 }, prev = {}, todo = new Set(Object.keys(nadj));
+    while (todo.size) { let u = null; todo.forEach(k => { if (d[k] !== undefined && (u === null || d[k] < d[u])) u = k; }); if (u === null || u === b) break; todo.delete(u);
+      (nadj[u] || []).forEach(([v, km]) => { if (d[v] === undefined || d[u] + km < d[v]) { d[v] = d[u] + km; prev[v] = u; } }); }
+    const names = [b]; while (names[0] !== a && prev[names[0]]) names.unshift(prev[names[0]]);
+    const pts = names.map(n => NN[n].slice(0, 2)), cum = [0]; for (let i = 1; i < names.length; i++) cum.push(cum[i - 1] + dist(names[i - 1], names[i]));
+    return (pmemo[key] = { pts, cum, total: cum[cum.length - 1] || 1, names });
+  }
+  function netAlong(path, p) {
+    const t = path.total * Math.max(0, Math.min(1, p));
+    for (let i = 1; i < path.pts.length; i++) if (t <= path.cum[i] || i === path.pts.length - 1) { const span = path.cum[i] - path.cum[i - 1] || 1, f = Math.max(0, Math.min(1, (t - path.cum[i - 1]) / span)); return [path.pts[i - 1][0] + (path.pts[i][0] - path.pts[i - 1][0]) * f, path.pts[i - 1][1] + (path.pts[i][1] - path.pts[i - 1][1]) * f]; }
+    return path.pts[0];
+  }
+  const netHubPath = (a, b) => netPath(HUB_CITY[a], HUB_CITY[b]);
+  /* o.classes: roads coloured by mobile-coverage class (Routes); otherwise one network colour (Dashboard) */
+  function netBase(k, o) {
+    k = k || 1; o = o || {};
+    const roads = NE.map(([a, b, kind]) => { const p = NN[a], q = NN[b], off = kind === 'o';
+      const col = o.classes ? CLS[off ? 'none' : segClass(a, b)] : off ? OFF : NCOL, w = kind === 't' ? 7 : off ? 2.6 : 3.6;
+      const dash = kind === 'd' ? `${6 * k} ${5 * k}` : off ? `${1.5 * k} ${6 * k}` : '';
+      return `<line x1="${p[0]}" y1="${p[1]}" x2="${q[0]}" y2="${q[1]}" stroke="${col}" stroke-width="${w * k}" stroke-linecap="round"${dash ? ` stroke-dasharray="${dash}"` : ''}/>`; }).join('');
+    const cities = Object.keys(NN).map(ru => { const [x, y, off] = NN[ru], hub = ru === 'Астана' || ru === 'Алматы', lab = NLAB[ru] || [8, -6, 'start'];
+      const dot = hub ? `<circle cx="${x}" cy="${y}" r="${9 * k}" fill="${HUBC}" stroke="#fff" stroke-width="${2 * k}"/>`
+        : off ? `<circle cx="${x}" cy="${y}" r="${5.5 * k}" fill="#fff" stroke="${OFF}" stroke-width="${2.4 * k}"/>`
+          : `<circle cx="${x}" cy="${y}" r="${4.5 * k}" fill="#fff" stroke="${NCOL}" stroke-width="${2 * k}"/>`;
+      const tag = hub ? `<text x="${x + lab[0] * k}" y="${y + lab[1] * k + 14 * k}" text-anchor="${lab[2]}" font-size="${10 * k}" font-weight="700" fill="#b07d2b">${esc(hubTag(ru))}</text>` : '';
+      return `<g class="kzcity" data-city="${esc(ru)}">${dot}<text x="${x + lab[0] * k}" y="${y + lab[1] * k}" text-anchor="${lab[2]}" font-size="${(hub ? 14 : 12) * k}" font-weight="${hub ? 700 : 500}" fill="#173a5e">${esc(nm(ru))}</text>${tag}</g>`; }).join('');
+    return `<polygon points="${SILH}" fill="#eef3fa" stroke="#c4cedb" stroke-width="${1.2 * k}" stroke-dasharray="${4 * k} ${3 * k}"/>${roads}${cities}`;
+  }
+  /* legend: coverage classes (Routes) or the schematic key (Dashboard) */
+  const netLegend = classes => classes ? legend() : `<div class="kzlegend"><span><i style="background:${HUBC};height:10px;width:10px;border-radius:50%"></i>${esc(T('хаб', 'Hub', 'hub', 'хаб'))}</span><span><i style="background:${NCOL}"></i>${esc(T('маршрут', 'Strecke', 'route', 'бағыт'))}</span><span><i style="background:#fff;border:2px solid ${OFF};height:8px;width:8px;border-radius:50%"></i>${esc(T('нет сети', 'kein Netz', 'no network', 'байланыс жоқ'))}</span></div>`;
+  window.KZNET = { W: NW, H: NH, base: netBase, hubPath: netHubPath, along: netAlong, legend: netLegend, CLS };
   /* SEG / CITY / xy / cname / roadPath / HUB_CITY are exported for the Coverage tab (FR-111), which draws its own road layer on the same base */
   window.KZMAP = { W, H, proj, base: kzmapBase, hubXY, hubPath, along, legend, CLS, SEG, CITY, xy, cname, roadPath, HUB_CITY };
 })();
