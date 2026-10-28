@@ -2,6 +2,7 @@
   "_": "FR-223 What's new: maps the stream key prefix of each docs/TRACEABILITY.md section to the release that shipped it. Streams without a release land in \"next\". On a version bump add the release here (newest first) and move the prefix (a prefix matches the start of the stream key, e.g. S1 or R).",
   "releases": [
     { "v": "next", "prefixes": [] },
+    { "v": "6.4.3", "date": "2026-10-28", "prefixes": [] },
     { "v": "6.4.2", "date": "2026-10-28", "prefixes": [] },
     { "v": "6.4.1", "date": "2026-10-21", "prefixes": ["H"] },
     { "v": "6.4.0", "date": "2026-10-21", "prefixes": ["S4"] },

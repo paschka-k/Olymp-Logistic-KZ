@@ -436,14 +436,14 @@
 
   /* ---- R2 section e ---- */
   /* ---- R2 letter e: 0.3.9 parity of the booking form, My bookings, booking desk, insurance and public tracking ---- */
-  const bkPortal = "ACT.setRole({v:'customer'});go('book');ACT.bkReset();";
+  const bkPortal = "ACT.setRole({v:'customer'});go('book');ACT.bkReset();BK.kg=1600;";
   await group('R2 D1/D2/D3/P10: portal booking KST → TAR opens on the desk, price equals the portal total, confirm creates a hub load', 'ru', async (g, ev, w) => {
-    ev(bkPortal + "Object.assign(BK,{pCity:'KST',pStreet:'Абая',pHouse:'5',dCity:'TAR',dStreet:'Абая',dHouse:'9'});BK.slot=slotsFor('KST','TAR',4,1600)[0].date;render()");
+    ev(bkPortal + "Object.assign(BK,{pCity:'KST',pStreet:'Абая',pHouse:'5',dCity:'TAR',dStreet:'Неизвестная',dHouse:'9'});BK.slot=slotsFor('KST','TAR',4,1600)[0].date;render()");
     ev('ACT.bkSend()'); const b = ev('S.bookings[0]'); assert(Array.isArray(b.hist), 'hist missing'); eq(b.load, null); eq(b.by, 'customer');
     ev("ACT.setRole({v:'dispatcher'});go('orders');ACT.stab({s:'orders',v:'bookings'})"); assert(w.document.querySelector(`[data-bk-row="${b.id}"]`), 'row'); clean(w, 'desk');
     ev(`ACT.bkOpen({id:'${b.id}'})`); clean(w, 'drawer'); eq(w.document.querySelector('[data-bk-total]').innerText.replace(/\D/g, ''), String(b.gross), 'desk price = portal total');
     eq(ev(`bookingPrice(S.bookings[0]).total`), b.gross); eq(ev("bookingPrice({from:'AST',to:'ALA',zone:'pharma',pallets:4,kg:1600}).vat"), ev("priceFor({from:'AST',to:'ALA',zone:'pharma',pallets:4,kg:1600}).vat"), 'VAT 16 % everywhere');
-    eq(b.addrCheck, 'manual', 'no street directory for Taraz'); eq(ev(`bookingAddrReview('${b.id}','адрес подтверждён по телефону')`), null); const n = ev('S.loads.length'); eq(ev(`bookingConfirm('${b.id}')`), null); eq(ev('S.loads.length'), n + 1); const l = ev('load(S.bookings[0].load)'); eq(l.from, 'AST'); eq(l.to, 'SHY'); eq(l.booking, b.id); assert(/Тараз/.test(l.city), 'city on the order');
+    eq(b.addrCheck, 'manual', 'unknown street → manual'); eq(ev(`bookingAddrReview('${b.id}','адрес подтверждён по телефону')`), null); const n = ev('S.loads.length'); eq(ev(`bookingConfirm('${b.id}')`), null); eq(ev('S.loads.length'), n + 1); const l = ev('load(S.bookings[0].load)'); eq(l.from, 'AST'); eq(l.to, 'SHY'); eq(l.booking, b.id); assert(/Тараз/.test(l.city), 'city on the order');
     ev(`ACT.bkOpen({id:'${b.id}'})`); clean(w, 'drawer confirmed'); eq(ev(`bookingCancel('${b.id}','клиент передумал')`), null); eq(ev('S.bookings[0].status'), 'cancelled');
   });
   await group('R2 P1/P2/P7: pick-up window, incompatible goods, LOT on the booking and the order', 'ru', async (g, ev, w) => {
@@ -521,7 +521,7 @@
     ev(bkPortal + "BK.pFrom='2026-10-19';BK.dStreet='Unknownstreet';BK.dgOn=true;Object.assign(BK.dg,{un:'1845',name:'Dry ice',cls:'9',dry:'20'});BK.payerOn=true;BK.insured=true;BK.declared='1000000';render()"); clean(w, lang + ' book');
     ev('ACT.bkQuote();ACT.bkOfferDoc()'); clean(w, lang + ' draft sample'); cyr('draft sample'); ev('closeDrawer()');
     ev("BK.slot=slotsFor(BK.pCity,BK.dCity,4,1600).find(s=>s.adr).date;BK.payer.company='Forwarder LLP';render();ACT.bkSend()"); clean(w, lang + ' done');
-    ev("ACT.bkReset();BK.express=true;BK.deliverBy='2026-10-21';render();ACT.bkSend();go('mybookings')"); clean(w, lang + ' mybookings');
+    ev("ACT.bkReset();BK.kg=1600;BK.express=true;BK.deliverBy='2026-10-21';render();ACT.bkSend();go('mybookings')"); clean(w, lang + ' mybookings');
     ev("ACT.bkDoc({id:S.bookings[1].id})"); clean(w, lang + ' booking sample'); ev("ACT.bkCtOpen({id:'DG-26-0012'})"); clean(w, lang + ' contract'); cyr('contract'); ev("ACT.bkCert({id:'BK-26-000004'})"); clean(w, lang + ' certificate'); cyr('certificate'); ev('closeDrawer()');
     ev("ACT.setRole({v:'admin'});go('orders');ACT.stab({s:'orders',v:'bookings'})"); clean(w, lang + ' desk');
     for (const id of ev('S.bookings.slice(0,3).map(b=>b.id)')) for (const v of ['info', 'offer']) { ev(`ACT.bkOpen({id:'${id}'});ACT.bkView({v:'${v}'})`); clean(w, lang + ' drawer ' + id + ' ' + v); cyr('drawer ' + v); }

@@ -44,6 +44,6 @@
     eq(ev("drv('d1').name"), lat ? 'Yerlan Seitkali' : 'Ерлан Сейтқали', 'driver name'); eq(ev("drv('d1').ini"), lat ? 'YS' : 'ЕС', 'initials');
     eq(ev("cust('c1').name"), lat ? 'Apteka Service LLP' : 'ТОО «Аптека Сервис»', 'customer'); eq(ev("nm('Казгидромет')"), lat ? 'Kazhydromet' : 'Казгидромет', 'agency');
     eq(ev("nm('Ерубаева')"), lat ? 'Yerubayeva' : 'Ерубаева', 'street transliteration');
-    eq(ev("addrCheck('AST','ул. Туран','5').st"), 'ok', 'Cyrillic street'); if (lat) { eq(ev("addrCheck('AST','Turan St','5').st"), 'ok', 'romanised street'); eq(ev("addrCheck('AST','Turan','5').street"), 'Turan', 'street shown romanised'); }
+    eq(ev("addrCheck('AST','ул. Туран','5').st"), 'ok', 'Cyrillic street'); if (lat) { eq(ev("addrCheck('AST','Turan St','5').st"), 'ok', 'romanised street'); eq(ev("addrCheck('AST','Turan','5').street"), 'Turan Ave', 'street shown romanised'); }
     eq(ev("S.inbox.find(m=>m.kind==='weather_warning').src"), lat ? 'Kazhydromet' : 'Казгидромет', 'inbox source');
   });
