@@ -26,7 +26,7 @@
   });
   await group('portal booking: weight per pallet above 1 200 kg blocks the price with a message, 1 200 kg passes; an address-book entry fills the pickup address (0.3.9 BUG-29 / FR-185 / FR-150)', 'ru', async (g, ev, w) => {
     const d = w.document; ev("ACT.setRole({v:'customer'});go('book')");
-    ev("BK.pCity='TAR';BK.pStreet='Абая';BK.pHouse='5';BK.dCity='KST';BK.dStreet='Космонавтов';BK.dHouse='9';BK.goods=['vaccines'];BK.zone='pharma';BK.pallets=2;BK.kg=2600;render()");
+    ev("BK.pCity='TAR';BK.pStreet='Абая';BK.pHouse='5';BK.dCity='KST';BK.dStreet='Космонавтов';BK.dHouse='9';BK.dManual=true;BK.goods=['vaccines'];BK.zone='pharma';BK.pallets=2;BK.kg=2600;render()");
     const err = () => (d.querySelector('#bk_price ul') || { innerText: '' }).innerText;
     assert(/1 200/.test(err()), 'over 1 200 kg per pallet named: ' + err());
     ev('BK.kg=2400;render()'); assert(!/1 200/.test(err()), '1 200 kg per pallet accepted: ' + err());

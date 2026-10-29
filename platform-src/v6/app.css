@@ -384,3 +384,5 @@ html[data-motion="reduce"] *,html[data-motion="reduce"] *::before,html[data-moti
 html[data-design="kokzhol"] .sidebar .ver{color:#9fb6c2} .hs{min-width:24px;min-height:24px}
 /* a long crumb link ran under the hub filter (axe target-size, WCAG 2.5.8): the crumb is a flex row, the current page ellipsises */
 .crumb{min-width:0;white-space:nowrap;overflow:hidden} @media (min-width:701px){.crumb{display:flex;align-items:center;gap:4px}} .crumb .lnk{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:0 1 auto} .crumb .lnk:first-child{flex:none}
+/* 0.3.11 booking-form.css: form rows are an auto-fill grid of 200-px fields, so a 5-character field is never half the page */
+.bk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px 14px;align-items:end} .bk-grid>*{min-width:0;margin:0} .bk-grid>.span-all{grid-column:1/-1}

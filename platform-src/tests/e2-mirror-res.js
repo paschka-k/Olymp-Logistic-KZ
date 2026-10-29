@@ -438,7 +438,7 @@
   /* ---- R2 letter e: 0.3.9 parity of the booking form, My bookings, booking desk, insurance and public tracking ---- */
   const bkPortal = "ACT.setRole({v:'customer'});go('book');ACT.bkReset();BK.kg=1600;";
   await group('R2 D1/D2/D3/P10: portal booking KST → TAR opens on the desk, price equals the portal total, confirm creates a hub load', 'ru', async (g, ev, w) => {
-    ev(bkPortal + "Object.assign(BK,{pCity:'KST',pStreet:'Абая',pHouse:'5',dCity:'TAR',dStreet:'Неизвестная',dHouse:'9'});BK.slot=slotsFor('KST','TAR',4,1600)[0].date;render()");
+    ev(bkPortal + "Object.assign(BK,{pCity:'KST',pStreet:'Абая',pHouse:'5',dCity:'TAR',dStreet:'Неизвестная',dHouse:'9',dManual:true});BK.slot=slotsFor('KST','TAR',4,1600)[0].date;render()");
     ev('ACT.bkSend()'); const b = ev('S.bookings[0]'); assert(Array.isArray(b.hist), 'hist missing'); eq(b.load, null); eq(b.by, 'customer');
     ev("ACT.setRole({v:'dispatcher'});go('orders');ACT.stab({s:'orders',v:'bookings'})"); assert(w.document.querySelector(`[data-bk-row="${b.id}"]`), 'row'); clean(w, 'desk');
     ev(`ACT.bkOpen({id:'${b.id}'})`); clean(w, 'drawer'); eq(w.document.querySelector('[data-bk-total]').innerText.replace(/\D/g, ''), String(b.gross), 'desk price = portal total');
@@ -497,7 +497,7 @@
     ev("closeDrawer();S.custId='c4';render()"); assert(w.document.querySelector('[data-no-ct]') && w.document.querySelector('[data-no-fw]'), 'empty contracts / no framework');
   });
   await group('R2 P11: address review four-eyes on the desk', 'ru', async (g, ev, w) => {
-    ev(bkPortal + "Object.assign(BK,{dStreet:'Неизвестная',dHouse:'2'});BK.slot=slotsFor(BK.pCity,BK.dCity,4,1600)[0].date;render();ACT.bkSend()"); const id = ev('S.bookings[0].id'); eq(ev('S.bookings[0].addrCheck'), 'manual');
+    ev(bkPortal + "Object.assign(BK,{dStreet:'Неизвестная',dHouse:'2',dManual:true});BK.slot=slotsFor(BK.pCity,BK.dCity,4,1600)[0].date;render();ACT.bkSend()"); const id = ev('S.bookings[0].id'); eq(ev('S.bookings[0].addrCheck'), 'manual');
     ev(`ACT.setRole({v:'dispatcher'});go('orders');ACT.stab({s:'orders',v:'bookings'});ACT.bkOpen({id:'${id}'})`); assert(w.document.querySelector('[data-addr-review]'), 'review section'); assert(w.document.querySelector('[data-act=bkConfirm]').disabled, 'confirm disabled');
     w.document.querySelector('#bk_rev').value = 'ok'; ev(`ACT.bkAddrOk({id:'${id}'})`); assert(w.document.querySelector('#bk_reverr').textContent, 'short note refused');
     w.document.querySelector('#bk_rev').value = 'улица есть на карте'; ev(`ACT.bkAddrOk({id:'${id}'})`); eq(ev('S.bookings[0].addrCheck'), 'reviewed'); eq(ev('S.bookings[0].addrReview.by'), 'dispatcher'); assert(!w.document.querySelector('[data-act=bkConfirm]').disabled, 'confirm enabled'); clean(w, 'reviewed');
