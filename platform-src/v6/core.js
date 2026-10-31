@@ -208,7 +208,10 @@ const screenBody = id => { const sc = SCREENS[id]; if (!sc.tabs) return sc.body(
 const navLabel = id => (NAV.find(n => n[0] === id) || [])[2] || ((SCREENS[id] && SCREENS[id].title) ? SCREENS[id].title() : id);
 
 function toast(msg, kind) { S.toast = { msg, kind: kind || 'ok' }; render(); clearTimeout(toast.t); toast.t = setTimeout(() => { S.toast = null; render(); }, 3200); }
-function go(r) { if (!canSee(r)) return toast(LT('core.no_access_for_role') + ROLE_NAME[S.role], 'err'); S.route = r; S.sideOpen = false; S.tbMore = false; S.drawer = null; S.f.page = 1; render(); const m = $('main'); if (m) m.scrollTop = 0; }
+function go(r) { if (!canSee(r)) return toast(LT('core.no_access_for_role') + ROLE_NAME[S.role], 'err'); S.route = r; S.sideOpen = false; S.tbMore = false; S.drawer = null; S.f.page = 1; if (S.gs) { S.gs.q = ''; S.gs.idx = 0; S.gsOpen = false; } render(); const m = $('main'); if (m) m.scrollTop = 0; }
+/* 0.3.11 Layout.tsx: below the off-canvas breakpoint the closed sidebar is out of the tab order and the accessibility tree (inert + aria-hidden) */
+const NARROW_MQ = '(max-width:1100px)';
+const isNarrow = () => typeof matchMedia === 'function' && matchMedia(NARROW_MQ).matches;
 function openDrawer(d) { S.drawer = d; render(); }
 const closeDrawer = () => { S.drawer = null; render(); };
 const alertsCount = () => S.loads.filter(l => tempState(l) === 'breach' && isActive(l)).length + S.drivers.filter(d => d.rto < 4 && d.status === 'available').length;
@@ -234,12 +237,14 @@ ${S.role !== 'driver' ? `<a class="side-link" data-act="setRole" data-v="driver"
 ${shellRole ? '' : `<a class="side-link${S.route === 'help' ? ' on' : ''}" data-act="go" data-v="help">${ic('spark', 14)}<span>${esc(LT('core.help'))}</span></a>`}${typeof a11ySideLink === 'function' ? a11ySideLink() : ''}</div>`;
   const USER = { admin: ['Sarah Johnson', 'SJ'], dispatcher: [nm('Айгерим Сапарова'), nm('АС')], warehouse: [nm('Болат Ермеков'), nm('БЕ')], driver: [nm('Ерлан Сейтқали'), nm('ЕС')], auditor: ['Olga Berg', 'OB'], viewer: ['Timur Akhmetov', 'TA'], manager: ['Max Keller', 'MK'], finance: [nm('Дана Жумабаева'), nm('ДЖ')], quality: ['Anna Schulz', 'AS'], customer: [nm('ТОО «Аптека Сервис»'), nm('АС')], partner: [nm('ТОО «ТрансХолод»'), nm('ТХ')] };
   const usr = USER[S.role] || USER.admin;
-  return `<div class="app"><aside class="sidebar${S.sideOpen ? ' open' : ''}" role="navigation" aria-label="${esc(LT('core.main_menu'))}">${brand}${nav}${tools}${typeof shellSideExtra === 'function' ? shellSideExtra() : ''}${liveBadge()}<div class="langs">${lang}</div>${ver}</aside>
-<main id="main-content">${typeof printHead === 'function' ? printHead() : ''}<header class="topbar"><button class="burger" data-test="burger" data-act="sideTog" aria-label="Menu" aria-expanded="${S.sideOpen ? 'true' : 'false'}">☰</button><span class="crumb"><a class="lnk" data-act="go" data-v="${homeRoute()}" role="link" tabindex="0">${esc(navLabel(homeRoute()))}</a> › <a class="lnk" data-act="crumb" role="link" tabindex="0"><b>${esc(navLabel(S.route))}</b></a></span>
+  const hidden = isNarrow() && !S.sideOpen;
+  const recordsNav = typeof recordsNavHtml === 'function' ? recordsNavHtml() : '';
+  return `<div class="app"><aside class="sidebar${S.sideOpen ? ' open' : ''}" id="side-nav" role="navigation" aria-label="${esc(LT('core.main_menu'))}"${hidden ? ' inert aria-hidden="true"' : ''}>${brand}${nav}${recordsNav}${tools}${typeof shellSideExtra === 'function' ? shellSideExtra() : ''}${liveBadge()}<div class="langs">${lang}</div>${ver}</aside>
+<main id="main-content">${typeof printHead === 'function' ? printHead() : ''}<header class="topbar"><button class="burger" data-test="burger" data-act="sideTog" aria-controls="side-nav" aria-label="${esc(S.sideOpen ? LT('shell.close_menu') : LT('shell.open_menu'))}" aria-expanded="${S.sideOpen ? 'true' : 'false'}">☰</button><span class="crumb"><a class="lnk" data-act="go" data-v="${homeRoute()}" role="link" tabindex="0">${esc(navLabel(homeRoute()))}</a> › <a class="lnk" data-act="crumb" role="link" tabindex="0"><b>${esc(navLabel(S.route))}</b></a></span>
 <div class="who">${typeof shellSearchBox === 'function' ? shellSearchBox() : `<label class="searchbox">${ic('search', 14)}<input id="gsearch" placeholder="${esc(LT('core.search_loads_trucks_drivers'))}" value="${esc(S.f.q)}"></label>`}${typeof shellTopExtra === 'function' ? shellTopExtra() : ''}
 <button type="button" class="btn grey sm tb-morebtn" data-act="tbMore" aria-expanded="${S.tbMore ? 'true' : 'false'}" aria-label="${esc(LT('core.more_hub_time_role_theme'))}">⋯</button><div class="tb-x${S.tbMore ? ' open' : ''}">${typeof shellTopMore === 'function' ? shellTopMore() : ''}
 <label class="rolebox" title="${esc(LT('core.switch_the_role_menu_and_permissions'))}">${ic('user', 14)}<span>${esc(LT('core.role'))}</span><select id="roleSel" data-test="role-select" class="select" aria-label="Role" style="height:32px">${ROLES.map(r => `<option value="${r}"${r === S.role ? ' selected' : ''}>${esc(ROLE_NAME[r])}</option>`).join('')}</select></label><button class="btn grey sm design-btn" data-act="setDesign" title="${S.design === 'kokzhol' ? 'Kökzhol → Olymp' : 'Olymp → Kökzhol'}">${S.design === 'olymp' ? '◐' : '◑'}</button>${typeof printBtn === 'function' ? printBtn() : ''}</div><button class="btn grey sm help-top" data-test="help" data-act="helpHere" aria-label="Help" title="${esc(LT('core.help_for_this_screen'))}">?</button><span class="bell">${ic('bell', 18)}${alertsCount() ? `<span class="badge-count">${alertsCount()}</span>` : ''}</span>
-<div class="usr" data-act="go" data-v="account" role="link" tabindex="0" title="${esc(LT('core.my_account'))}"><b>${esc(usr[0])}</b><small>${esc(ROLE_NAME[S.role])}</small></div><span class="avatar" style="background:var(--primary)">${esc(usr[1])}</span></div></header>
+<div class="usr" data-act="go" data-v="account" role="link" tabindex="0" title="${esc(LT('core.my_account'))}"><b>${esc(usr[0])}</b><small>${esc(ROLE_NAME[S.role])}</small></div><span class="avatar" style="background:var(--primary)">${esc(usr[1])}</span>${ACT.signOut ? `<button type="button" class="btn grey sm signout-btn" data-act="signOut" data-test="signout" title="${esc(LT('shell.sign_out_2'))}" aria-label="${esc(LT('shell.sign_out_2'))}">⎋</button>` : ''}</div></header>
 <div class="page-head"><div>${typeof shellEyebrow === 'function' ? shellEyebrow() : ''}<h1 class="page-title">${esc(title)}</h1>${sc && sc.sub ? `<p class="page-sub">${esc(sc.sub())}</p>` : ''}</div><div class="actions">${sc && sc.actions ? sc.actions() : ''}</div></div>
 <div class="content">${body}</div></main>${S.sideOpen ? '<div class="side-back" data-act="sideTog"></div>' : ''}${typeof shellOverlays === 'function' ? shellOverlays() : ''}${drawerHtml()}${typeof a11yOverlay === 'function' ? a11yOverlay() : ''}<div class="toast-live" role="status" aria-live="polite">${S.toast ? `<div class="toast ${S.toast.kind}" data-test="toast">${esc(S.toast.msg)}</div>` : ''}</div></div>`;
 }
@@ -259,7 +264,7 @@ const DRAWERS = {};
    get no automatic tick — liveTick() stays callable. SIMULATION toggles the pause. */
 S.simOn = true; S.liveAt = null;
 const p2c = n => String(n).padStart(2, '0');
-const liveBadge = () => `<div class="live-badge" data-live><button type="button" class="simchip${S.simOn ? '' : ' off'}" data-act="simTog" aria-pressed="${S.simOn ? 'true' : 'false'}" title="${esc(LT('core.pause_start_the_telemetry_simulation'))}">SIMULATION</button><span class="live-note">${esc(LT('core.telemetry_every_2_s'))}</span><span class="live-line"><i class="live-dot${S.simOn ? ' on' : ''}"></i>${S.simOn ? 'Live' : esc(LT('core.paused'))} · <span data-live-at>${S.liveAt ? p2c(S.liveAt.getHours()) + ':' + p2c(S.liveAt.getMinutes()) + ':' + p2c(S.liveAt.getSeconds()) : '—'}</span></span></div>`;
+const liveBadge = () => `<div class="live-badge" data-live><button type="button" class="simchip${S.simOn ? '' : ' off'}" data-act="simTog" aria-pressed="${S.simOn ? 'true' : 'false'}" title="${esc(LT('core.pause_start_the_telemetry_simulation'))}">SIMULATION</button><span class="live-note">${esc(LT('core.telemetry_every_2_s'))}</span><span class="live-line"><i class="live-dot${S.simOn ? ' on' : ''}"></i>${S.simOn ? 'Live' : esc(LT('core.paused'))} · <span data-live-at>${S.liveAt ? LF.time(S.liveAt) : '—'}</span></span></div>`;
 let liveSeed = 7;
 const liveRnd = () => (liveSeed = (liveSeed * 1103515245 + 12345) % 2147483648) / 2147483648;
 function liveTick() {
@@ -272,7 +277,7 @@ function liveTick() {
   });
   const LIVE = { dashboard: 1, routes: 1, hubs: 1 };
   if (LIVE[S.route] && !document.hidden && !S.drawer) render();
-  else { const b = $('[data-live-at]'); if (b) b.textContent = p2c(S.liveAt.getHours()) + ':' + p2c(S.liveAt.getMinutes()) + ':' + p2c(S.liveAt.getSeconds()); }
+  else { const b = $('[data-live-at]'); if (b) b.textContent = LF.time(S.liveAt); }
 }
 globalThis.liveTick = liveTick; globalThis.liveBadge = liveBadge;
 if (typeof window !== 'undefined' && !window.frameElement) setInterval(() => { if (S.simOn && !document.hidden) liveTick(); }, 2000);

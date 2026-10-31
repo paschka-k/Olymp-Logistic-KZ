@@ -24,7 +24,9 @@
     const l = d.load && load(d.load); if (!l || typeof ops !== 'function') return [];
     return ops(l).orders.map(o => { const out = o.out || (d.decision === 'release' ? 'released' : d.decision === 'quarantine' ? 'quarantine' : 'hold'); return { no: o.id, out, hold: out === 'hold' || out === 'quarantine' }; });
   };
-  const claimable = d => /^DEV-/.test(d.id) && canSee('billing') && canDo('quality:write');
+  const claimable = d => /^DEV-/.test(d.id) && canSee('billing');   // E-54: the insurance page decides, not the QA right
+  /* E-61 / B-75 (FR-103): an order is on quality hold while an open deviation of its load has no decision for it */
+  globalThis.devHold = oid => S.devs.some(d => d.step < 7 && devOrders(d).some(o => o.no === oid && o.out === 'hold'));
   const ordersH = d => { const os = devOrders(d); if (!os.length) return ''; const cl = claimable(d);
     return `<div class="card-body" style="padding:8px 0 4px" data-dev-orders="${d.id}">${os.map(o => `<div class="docrow ${o.hold ? 'soon' : 'valid'}" data-dev-order="${o.no}"><span><b>${esc(o.no)}</b> <span class="faint">${esc(OUTL[o.out] || o.out)}</span></span><span style="display:flex;gap:6px;align-items:center">${o.hold ? chip('yellow', T('удержание', 'Sperre', 'hold', 'ұстау')) : ''}${cl ? `<button class="btn sm grey" data-act="qClaim" data-id="${d.id}" data-o="${o.no}">${esc(T('Страховой случай', 'Schadenfall', 'Insurance claim', 'Сақтандыру жағдайы'))}</button>` : ''}</span></div>`).join('')}</div>`; };
   const selId = () => F.dev || ((S.devs.slice().sort((a, b) => b.lvl - a.lvl).find(x => !done(x))) || {}).id;
@@ -48,8 +50,17 @@
   Object.assign(ACT, {
     qDev: d => { F.dev = d.id; render(); },
     qClaim: d => { const x = S.devs.find(v => v.id === d.id); if (!x || !claimable(x)) return; go('billing'); S.tab.billing = 'insurance'; openDrawer({ type: 'claimNew', dev: x.id, order: d.o || '' }); audit('QA', x.id, T('Переход к страховому случаю', 'Zum Schadenfall', 'To insurance claim', 'Сақтандыру жағдайына өту'), d.o || ''); },
-    qNext: d => { if (needRight('quality:write')) return; const x = S.devs.find(v => v.id === d.id); x.step++; audit('QA', x.id, STEPS[x.step - 1], ''); render(); },
-    qDec: d => { if (needRight('quality:write')) return; const x = S.devs.find(v => v.id === d.id); x.decision = d.v; x.step = 4; const l = x.load && load(x.load); if (l) l.qa = d.v === 'quarantine' ? 'quarantine' : 'released'; audit('QA', x.id, d.v === 'release' ? 'Release' : 'Quarantine', ''); toast(d.v === 'release' ? T('Товар допущен', 'Ware freigegeben', 'Goods released', 'Тауарға рұқсат') : T('Товар в карантине', 'Ware in Quarantäne', 'Goods quarantined', 'Тауар карантинде')); },
+    qNext: d => { if (needRight('quality:write')) return; const x = S.devs.find(v => v.id === d.id); if (!x || x.step >= 7) return; x.step++; audit('QA', x.id, STEPS[x.step - 1], ''); render(); },
+    qDec: d => { if (needRight('quality:write')) return; const x = S.devs.find(v => v.id === d.id); x.decision = d.v; x.step = 5; x.by = S.role; const l = x.load && load(x.load);   // E-59: the decision completes step 5 and stores the decider
+      if (l) {
+        l.qa = d.v === 'quarantine' ? 'quarantine' : 'released';
+        if (typeof ops === 'function') {   // E-60 (coldchain/quality.py): block → orders "returned" + customer event, release → hold cleared (events only; the hold itself is derived from the decision)
+          const fin = ['delivered', 'partially_delivered', 'refused', 'returned', 'handed_over', 'cancelled', 'quarantine'], t0 = NOW.toISOString();
+          ops(l).orders.forEach(o => { (o.events = o.events || []).push({ t: t0, kind: d.v === 'quarantine' ? 'returned' : 'released' }); if (d.v === 'quarantine' && !fin.includes(o.outcome)) { o.outcome = 'returned'; o.reason = T('Решение по качеству', 'Qualitätsentscheidung', 'Quality decision', 'Сапа шешімі'); o.outAt = fdt(NOW).slice(-5); } });
+        }
+        l.notes.push({ who: 'System', t: fdt(NOW).slice(-5), text: x.id + ' · ' + (d.v === 'release' ? T('товар допущен', 'Ware freigegeben', 'goods released', 'тауарға рұқсат') : T('товар заблокирован (карантин), заказы возвращены', 'Ware gesperrt (Quarantäne), Aufträge zurück', 'goods blocked (quarantine), orders returned', 'тауар бұғатталды, тапсырыстар қайтарылды')) });
+      }
+      audit('QA', x.id, d.v === 'release' ? 'Release' : 'Quarantine', ''); toast(d.v === 'release' ? T('Товар допущен', 'Ware freigegeben', 'Goods released', 'Тауарға рұқсат') : T('Товар в карантине', 'Ware in Quarantäne', 'Goods quarantined', 'Тауар карантинде')); },
     qCal: d => { if (needRight('quality:write')) return; const t = trk(d.id); t.docs.calib = '2027-10-18'; audit('QA', t.plate, 'Calibration', ''); toast(T('Поверка обновлена до 18.10.2027', 'Kalibrierung bis 18.10.2027 erneuert', 'Calibration renewed until 18.10.2027', 'Поверка 18.10.2027 дейін жаңартылды')); },
   });
 })();

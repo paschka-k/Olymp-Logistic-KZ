@@ -2,11 +2,15 @@
   await group('W2 coverage: escalation L1/L2/L3 by expected zone, window and cold cargo (FR-109)', 'ru', async (g, ev, w) => {
     ev("go('routes');ACT.stab({s:'routes',v:'coverage'})"); assert(w.document.querySelector('#cov_contacts'), 'contacts'); clean(w, 'coverage');
     const l = ev("S.loads.find(l=>l.status==='in_transit'&&l.zone!=='ambient').id"); eq(ev(`RES.covSet('${l}',10).lvl`), 0, 'on line'); eq(ev(`RES.covSet('${l}',40).lvl`) >= 1, true);
-    eq(ev(`RES.covSet('${l}',75).lvl`), 3, 'cold cargo > 60 min'); assert(ev(`S.inc.some(i=>i.id==='COV-${l}3')`), 'incident created');
+    const zmin = ev(`(RES.deadWindow(load('${l}'))||{seg:{min:0}}).seg.min`), nearZone = ev(`!!(RES.deadWindow(load('${l}'))&&(RES.deadWindow(load('${l}')).now||RES.deadWindow(load('${l}')).startIn<=9))`);
+    if (nearZone && zmin >= 70) eq(ev(`RES.covSet('${l}',65).lvl`), 1, 'C-37: cold cargo inside an expected, not exceeded window stays L1');
+    eq(ev(`RES.covSet('${l}',${zmin + 90}).lvl`), 3, 'cold cargo > 60 min beyond the window'); assert(ev(`S.inc.some(i=>i.id==='COV-${l}3')`), 'incident created');
+    eq(ev(`RES.covSet('${l}',${zmin + 90},30).lvl`), 2, 'C-37: an SMS heartbeat within hbMin + 5 = 35 min keeps L2');
   });
   await group('W2 coverage: dispatcher SMS delivery status, timeout and retry (FR-110)', 'ru', async (g, ev) => {
     const l = ev("S.loads.find(l=>l.status==='in_transit').id"); const r = ev(`RES.smsSend('${l}','test')`); eq(ev(`S.res.cov.sms[0].st`), 'sent'); ev('RES.smsTick(2)'); assert(['sent', 'delivered'].includes(ev('S.res.cov.sms[0].st')), 'delivering');
-    ev('RES.smsTick(10)'); eq(ev('S.res.cov.sms[0].st'), 'no_ack', 'timeout'); ev(`RES.smsRetry('${r.ok}')`); eq(ev('S.res.cov.sms[0].tries'), 2); eq(ev('S.res.cov.sms[0].st'), 'sent'); ev(`RES.smsAck('${r.ok}')`); eq(ev('S.res.cov.sms[0].st'), 'acked');
+    ev('RES.smsTick(10)'); eq(ev('S.res.cov.sms[0].st'), 'no_ack', 'timeout'); ev(`RES.smsRetry('${r.ok}')`); eq(ev('S.res.cov.sms[0].tries'), 2); eq(ev('S.res.cov.sms[0].st'), 'sent'); eq(ev('S.res.cov.sms[0].re'), r.ok, 'C-48: retry keeps the failed record and sends a new one «resend of»'); eq(ev(`S.res.cov.sms.find(x=>x.id==='${r.ok}').st`), 'no_ack'); ev(`RES.smsAck(S.res.cov.sms[0].id)`); eq(ev('S.res.cov.sms[0].st'), 'acked');
+    const pl = ev("S.res.cov.sms[0].plate"); ev(`RES.smsSend('${l}','CONT')`); ev(`RES.smsSend('${l}','CONT')`); ev(`RES.smsSend('${l}','CONT')`); assert(/3 SMS/.test(ev(`RES.smsSend('${l}','CONT')`)), 'C-46: rate limit 3 SMS / vehicle / 10 min'); eq(ev("S.res.cov.sms[0].ackMin"), 0, 'CONT needs no acknowledgement');
   });
   await group('W2 coverage: dead zones from telematics gaps need 3 passes and analyst decision (FR-111)', 'ru', async (g, ev) => {
     const n = ev('RES.covProposals().length'); assert(n >= 2, 'seeded proposals'); const seg = 'ALA-SHY'; assert(!ev(`RES.covProposals().some(p=>p.seg.id==='${seg}')`), 'one gap -> no proposal'); ev(`RES.covGapAdd('${seg}',30);RES.covGapAdd('${seg}',25)`); assert(ev(`RES.covProposals().some(p=>p.seg.id==='${seg}')`), 'three passes -> proposal');

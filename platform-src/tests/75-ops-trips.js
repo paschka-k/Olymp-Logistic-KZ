@@ -12,7 +12,8 @@
   });
   await group('stops and outcomes (FR-98): arrival, outside window, delivered / partially / refused with reason, order outcome after the fact, unassign order', 'ru', async (g, ev, w) => {
     const st = ev("tripStops(load('LD-2026-001848'))"), u = st.filter(s => s.kind === 'unload'); assert(st[0].kind === 'pickup' && u.length >= 2, 'stops: pickup + one unloading stop per order'); const k = u[0].key;
-    assert(typeof ev(`stopDeliver('LD-2026-001848', '${k}', {}, '')`) === 'string', 'deliver needs the arrival'); eq(ev(`stopArrive('LD-2026-001848', '${k}')`), null); assert(ev(`tripStops(load('LD-2026-001848')).find(s => s.key === '${k}').arrived`), 'arrival time stored');
+    const k47 = ev("tripStops(load('LD-2026-001847'))").filter(s => s.kind === 'unload')[0].key, k51 = ev("tripStops(load('LD-2026-001851'))").filter(s => s.kind === 'unload')[0].key;
+    assert(typeof ev(`stopDeliver('LD-2026-001851', '${k51}', {}, '')`) === 'string', 'delivery needs a trip under way'); eq(ev(`stopDeliver('LD-2026-001847', '${k47}', {}, '')`), null, 'B-74: the office confirms a delivery without a prior arrival'); assert(ev(`tripStops(load('LD-2026-001847')).find(s => s.key === '${k47}').arrived`), 'arrival recorded with the delivery'); eq(ev(`stopArrive('LD-2026-001848', '${k}')`), null); assert(ev(`tripStops(load('LD-2026-001848')).find(s => s.key === '${k}').arrived`), 'arrival time stored');
     const oid = u[0].orders[0].id; assert(typeof ev(`stopDeliver('LD-2026-001848', '${k}', {'${oid}':'refused'}, '')`) === 'string', 'refusal needs a reason'); eq(ev(`stopDeliver('LD-2026-001848', '${k}', {'${oid}':'partially_delivered'}, 'two pallets damaged')`), null); eq(ev(`findOrder('${oid}').o.outcome`), 'partially_delivered');
     assert(typeof ev(`orderOutcome('LD-2026-001848', '${oid}', 'returned', '')`) === 'string', 'return needs a reason'); eq(ev(`orderOutcome('LD-2026-001848', '${oid}', 'returned', 'returned to hub')`), null); const o2 = u[1].orders[0].id; assert(typeof ev(`orderOutcome('LD-2026-001848', '${o2}', 'returned', 'x')`) === 'string', 'returned only after refused / partial');
     ev("ACT.open({id:'LD-2026-001848'}); ACT.tab({v:'stops'})"); assert(w.document.querySelector('[data-stops-panel]') && w.document.querySelector('[data-trip-order]'), 'stops tab'); clean(w, 'stops tab');
@@ -36,4 +37,23 @@
   });
   await group('trips and orders views render in every language without undefined / NaN', 'ru', async () => {
     for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("go('orders'); ACT.stab({s:'orders',v:'rec'}); ACT.orNew()"); clean(gg.w, lang + ' orders'); gg.ev("ACT.open({id:'LD-2026-001848'}); ACT.tab({v:'stops'})"); clean(gg.w, lang + ' stops'); gg.ev("closeDrawer(); ACT.open({id:'LD-2026-001847'})"); clean(gg.w, lang + ' abort form'); } finally { gg.done(); } }
+  });
+
+  /* ---- operations parity pass (docs/parity-0311/operations.md): B-64, E-61, E-101, E-89, B-59 / B-63, B-21, B-72 ---- */
+  await group('parity pass: delivered only with all stops done, the last stop closes the trip, quality hold at delivery, order cancel (FR-95), LOT charset, driver scope, replan / edit guards', 'en', async (g, ev, w) => {
+    const L = 'LD-2026-001847', n = ev("tripStops(load('" + L + "')).filter(s => s.kind === 'unload').length"), key = i => ev("tripStops(load('" + L + "')).filter(s => s.kind === 'unload')[" + i + "].key");
+    assert(/Not all stops/.test(ev("canMove(load('" + L + "'), 'delivered')")), 'B-64: delivered with open stops is refused'); assert(n >= 2, 'several stops');
+    for (let i = 0; i < n; i++) eq(ev("stopDeliver('" + L + "', '" + key(i) + "', {}, '')"), null, 'stop ' + i + ' delivered (the arrival is recorded with it)');
+    eq(ev("load('" + L + "').status"), 'delivered', 'B-64: delivering the last stop closes the trip');
+    const H = 'LD-2026-001849', hs = ev("tripStops(load('" + H + "')).filter(s => s.kind === 'unload')[0]"), hoid = hs.orders[0].id;
+    assert(ev("devHold('" + hoid + "')"), 'E-61: an order of a deviating load is on quality hold');
+    assert(/hold|Qualit|качества/i.test(ev("stopDeliver('" + H + "', '" + hs.key + "', {}, '')")), 'E-61: delivery of a held order is refused');
+    eq(ev("stopDeliver('" + H + "', '" + hs.key + "', {'" + hoid + "':'quarantine'}, '')"), null, 'E-61: delivered in quarantine'); eq(ev("findOrder('" + hoid + "').o.outcome"), 'quarantine');
+    assert(typeof ev("orderCreate({site:'kos', goods:'Reagent', lot:'ЛОТ-1', pal:1, kg:100})") === 'string', 'E-89: LOT only Latin letters, digits and - _ / .');
+    const P1 = 'LD-2026-001851', oc = ev("ops(load('" + P1 + "')).orders[0].id"), p0 = ev("load('" + P1 + "').pallets"), pal = ev("findOrder('" + oc + "').o.pal");
+    eq(ev("orderCancel('" + oc + "', 'customer withdrew the order')"), null); eq(ev("load('" + P1 + "').pallets"), Math.round((p0 - pal) * 10) / 10, 'E-101: the capacity of the trip is freed'); assert(ev("tripStops(load('" + P1 + "')).every(s => !s.orders || s.orders.every(o => o.id !== '" + oc + "'))"), 'E-101: the stop of the order drops out of the trip');
+    assert(/already left/.test(ev("orderCancel(ops(load('LD-2026-001848')).orders[0].id, '')")), 'E-101: no cancel on a trip that already left');
+    assert(/unchanged/i.test(ev("replan('" + P1 + "', load('" + P1 + "').eta, 'weather')")), 'B-21: Departure unchanged'); assert(/Nothing changed/.test(ev("tripEdit('LD-2026-001856', {driver:'d3', truck:'t1'})")), 'B-72: Nothing changed');
+    ev("ACT.setRole({v:'driver'}); S.da.drv = 'd4'"); assert(ev("ownLoads(S.loads).length") > 0 && ev("ownLoads(S.loads).every(l => l.driver === 'd4')"), 'B-59: a driver sees only own loads');
+    ev("ACT.adv({id:'LD-2026-001848', to:'problem'})"); eq(ev("load('LD-2026-001848').status"), 'in_transit', 'B-63: a driver cannot report a problem / go back'); assert(typeof ev("tripCancel('LD-2026-001856', 'driver tries to cancel')") === 'string', 'B-63: a driver cannot cancel a trip'); ev("ACT.setRole({v:'admin'})");
   });

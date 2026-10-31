@@ -94,3 +94,10 @@
       ev("ACT.tourStart({id:'qa'})"); const t = w.document.querySelector('.tour-pop').innerText; assert(!/undefined|NaN/.test(t), 'tour text'); if (lang !== 'kk') assert(!/[А-Яа-я]/.test(t), 'Cyrillic in the tour popover'); else assert(/[ӘәҒғҚқҢңӨөҰұҮүҺһІі]/.test(t), 'KK tour text'); ev('ACT.tourEnd()');
     });
   }
+  /* ---- parity 0.3.11: access line per article, permission matrix with the current role highlighted, all-words search (21.3, 21.6, 21.8) ---- */
+  for (const lang of LANGS) await group('[' + lang + '] help: access line (roles, permission, chip), permission x role matrix, all-words search', lang, async (g, ev, w) => {
+    ev("ACT.helpGo({k:'settings/users'})"); const acc = w.document.querySelector('[data-help-access]'); assert(acc && acc.querySelector('.help-perm') && acc.querySelector('[data-help-mine]'), 'access line'); eq(acc.querySelector('.help-perm').textContent, 'users:admin'); eq(acc.querySelector('[data-help-mine]').dataset.helpMine, '1');
+    ev("ACT.setRole({v:'viewer'});ACT.helpGo({k:'settings/users'})"); const art = w.document.querySelector('[data-help-access]'); if (art) eq(art.querySelector('[data-help-mine]').dataset.helpMine, '0', 'viewer has no access');
+    ev("ACT.setRole({v:'admin'});ACT.helpGo({k:'roles'})"); const t = w.document.querySelector('[data-help-perms]'); assert(t && t.querySelectorAll('tbody tr').length >= 35, 'permission rows'); assert(t.querySelector('th.you'), 'current role column highlighted'); if (lang === 'de' || lang === 'en') assert(!/[А-Яа-яЁё]/.test(t.innerText), 'no Cyrillic in the matrix');
+    ev("ACT.helpGo({k:'start'})"); const q = w.document.querySelector('#hq'); assert(q.getAttribute('maxlength') === '80', 'search maxlength'); ev("S.help.q='users reset'"); const n1 = ev('HELP.articles.filter(a=>"users reset".split(" ").every(x=>hText(a).includes(x))).length'); ev('render()'); assert(n1 >= 0, 'all-words');
+  });

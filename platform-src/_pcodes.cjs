@@ -1,0 +1,10 @@
+const fs=require('fs');const p='platform-src/v6/screens/dashboard/410-rec-alarms-inbox.js';let s=fs.readFileSync(p,'utf8');
+const rep=(a,b)=>{if(!s.includes(a))throw new Error('missing: '+a.slice(0,70));s=s.replace(a,()=>b)};
+rep("s ? '' : T('нет дежурного — резервный файл', 'niemand in Bereitschaft — Rückfall', 'nobody on call — fallback', 'кезекші жоқ — резерв'));","s ? '' : T('нет дежурного — резервный файл', 'niemand in Bereitschaft — Rückfall', 'nobody on call — fallback', 'кезекші жоқ — резерв'), 'alarm.escalated');");
+rep("'Дабыл құрылды'), CAT[a.cat]);","'Дабыл құрылды'), CAT[a.cat], 'alarm.raised');");
+rep("'Қабылданды'), ''); return true; };","'Қабылданды'), '', 'alarm.acknowledged'); return true; };");
+rep("RES[cat] + ' · ' + note.trim()); return null;","RES[cat] + ' · ' + note.trim(), 'alarm.closed'); return null;");
+rep("KIND[m.kind] + ' · ' + m.src);","KIND[m.kind] + ' · ' + m.src, 'inbox.registered');");
+rep("T('Принято', 'Angenommen', 'Acknowledged', 'Қабылданды'), ''); render(); },","T('Принято', 'Angenommen', 'Acknowledged', 'Қабылданды'), '', 'inbox.acknowledged'); render(); },");
+rep("T('Выполнено', 'Erledigt', 'Done', 'Орындалды'), ''); render(); },","T('Выполнено', 'Erledigt', 'Done', 'Орындалды'), '', 'inbox.done'); render(); },");
+fs.writeFileSync(p,s);console.log('ok');

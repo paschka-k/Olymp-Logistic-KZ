@@ -15,3 +15,10 @@
     for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("go('routes');ACT.stab({s:'routes',v:'wx'})"); clean(gg.w, lang + ' routes/wx');
       if (lang === 'de' || lang === 'en') { const txt = gg.ev("document.querySelector('.content').innerText"); const cyr = txt.match(/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүІі]+/g) || []; assert(!cyr.length, lang + ' Cyrillic: ' + cyr.slice(0, 5)); } } finally { gg.done(); } }
   });
+
+  /* ---- operations parity pass: D-61 forecast level rule, D-58 stale forecast in the Go/No-Go gate ---- */
+  await group('parity pass: weather level rule of forecast.level() (buran 3, snow 2, frost / wind 1) and the stale forecast in the Go/No-Go gate', 'en', async (g, ev) => {
+    const lv = c => ev('WEATHER.risk(' + JSON.stringify(c) + ')');
+    eq(lv({ min: -5, max: 2, wind: 5, snow: false }), 1, 'frost'); eq(lv({ min: 3, max: 9, wind: 16, snow: false }), 1, 'wind >= 15'); eq(lv({ min: 1, max: 5, wind: 5, snow: true }), 2, 'snow'); eq(lv({ min: -3, max: 1, wind: 22, snow: true }), 3, 'buran'); eq(lv({ min: -41, max: -30, wind: 3, snow: false }), 3, 'critical cold'); eq(lv({ min: -26, max: -20, wind: 3, snow: false }), 2, 'severe cold'); eq(lv({ min: 5, max: 12, wind: 3, snow: false }), 0, 'calm');
+    assert(ev('WEATHER.stale()'), 'stale at the start'); const wx = ev("gate(load('LD-2026-001851')).find(x => x.key === 'wx')"); assert(!wx.pass || /6 h|older than 6/.test(wx.text), 'D-58: a stale forecast is an amber manual decision, not a green gate');
+  });

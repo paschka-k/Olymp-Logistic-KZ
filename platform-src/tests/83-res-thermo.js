@@ -11,7 +11,7 @@
     const t = ev("S.loads.find(l=>l.status==='in_transit').truck"); ev(`S.thermo.sel='${t}';THERMO.hist(trk('${t}'))`); const last0 = ev(`THERMO.hist(trk('${t}')).cold.slice(-1)[0]`);
     ev('liveTick()'); eq(ev(`THERMO.hist(trk('${t}')).cold.length`), 48, 'window stays 48'); eq(ev(`THERMO.hist(trk('${t}')).cold.slice(-1)[0]`), ev(`trk('${t}') && S.loads.find(l=>l.truck==='${t}'&&l.status!=='delivered').temp`), 'last point = live temp');
     assert(last0 !== undefined, 'had a reading'); ev(`ACT.thDoor({id:'${t}'})`); assert(ev('S.thermo.door') && ev('S.thermo.door.truck') === t, 'door open'); const l = ev(`S.loads.find(l=>l.truck==='${t}'&&l.status!=='delivered').id`);
-    for (let i = 0; i < 95; i++) ev('THERMO.tick()'); assert(ev('S.thermo.door.sec') >= 180, 'timer counts'); eq(ev(`load('${l}').status`), 'problem', 'alarm after 3 min'); assert(ev("S.audit.some(a=>/3 min/.test(a.reason))"), 'audited');
+    for (let i = 0; i < 95; i++) ev('THERMO.tick()'); assert(ev('S.thermo.door.sec') >= 180, 'timer counts'); assert(ev(`S.alarms.some(a => a.load === '${l}' && a.cat === 'door' && a.lvl === 2 && a.status !== 'closed')`), 'D-29: a level-2 door alarm after 3 min'); assert(ev(`load('${l}').status`) !== 'problem', 'D-29: the door alarm does not force the load to problem'); assert(ev("S.audit.some(a=>/3 min/.test(a.reason))"), 'audited');
     ev(`ACT.thDoor({id:'${t}'})`); assert(!ev('S.thermo.door'), 'door closed');
   });
   await group('P3 temperature log: record reading, out-of-range opens a deviation, sensor mapping, thermochron CSV feeds the thermochron log', 'ru', async (g, ev, w) => {
@@ -26,4 +26,15 @@
   await group('P3: temperature tabs render in 4 languages, DE/EN without Cyrillic', 'ru', async (g, ev) => {
     for (const lang of LANGS) { const gg = await fresh(lang); try { for (const k of ['temp', 'templog']) { gg.ev(`go('routes');ACT.stab({s:'routes',v:'${k}'})`); clean(gg.w, lang + ' routes/' + k);
       if (lang === 'de' || lang === 'en') { let txt = gg.ev("document.querySelector('.content').innerText"); const known = gg.ev("S.drivers.flatMap(d=>[d.name,d.ini]).concat(CUSTOMERS.flatMap(c=>[c.name,c.ini]))"); known.forEach(n => { txt = txt.split(n).join(''); }); const cyr = txt.match(/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүІі]+/g) || []; assert(!cyr.length, lang + ' Cyrillic in ' + k + ': ' + cyr.slice(0, 5)); } } } finally { gg.done(); } }
+  });
+
+  /* ---- operations parity pass: D-41 reading raises an alarm, D-76 one alarm store in Security, D-39 / D-43 / D-50 log rules ---- */
+  await group('parity pass: a manual out-of-range reading raises an alarm, Security lists the alarm store, chamber / duplicate / line errors of the temperature log', 'en', async (g, ev, w) => {
+    const l = ev("S.loads.find(l => l.status === 'in_transit' && l.zone === 'pharma')"), t = l.truck;
+    eq(ev("THERMO.rec({truck:'" + t + "', cls:'pharma', val:12}).ok"), false);
+    const a = ev("S.alarms.find(a => a.load === '" + l.id + "' && a.cat === 'temperature' && a.status !== 'closed')"); assert(a && a.lvl === 3, 'D-41: the reading raised a level-3 alarm (>= 2 K outside)');
+    ev("go('routes'); ACT.stab({s:'routes',v:'sec'})"); assert(w.document.querySelector('[data-inc="' + a.id + '"]'), 'D-76: Security lists the alarms of the Dashboard store');
+    const miss = ev("['frozen','chilled','pharma','ambient'].find(z => !trk('" + t + "').zones.includes(z))"); if (miss) assert(ev("THERMO.rec({truck:'" + t + "', cls:'" + miss + "', val:5}).err"), 'D-39: a class the vehicle has no chamber for is refused');
+    const csv = "time;C\\n08:00;5.1\\n08:05;5.4"; ev("THERMO.csv({truck:'" + t + "', cls:'pharma', logger:'LG-902', text:'" + csv + "'})"); eq(ev("THERMO.csv({truck:'" + t + "', cls:'pharma', logger:'LG-902', text:'" + csv + "'}).dups"), 2, 'D-43: a re-upload is de-duplicated');
+    assert(/\b2\b/.test(ev("THERMO.csv({truck:'" + t + "', cls:'pharma', text:'08:00;5.1\\n08:05;abc'}).err")), 'D-50: the first bad line is named');
   });

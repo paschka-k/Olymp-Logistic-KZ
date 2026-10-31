@@ -134,3 +134,29 @@ ${KIT.table([T('Рейс', 'Fahrt', 'Trip', 'Рейс'), T('Уровень', 'St
     wPre: d => { const e = winterPreconfirm(d.id); if (e) return toast(e, 'err'); toast(T('Предкондиционирование подтверждено', 'Vorkonditionierung bestätigt', 'Pre-conditioning confirmed', 'Алдын ала дайындау расталды')); },
   });
 })();
+
+/* Operations parity glue (0.3.11): a new alarm withdraws the release of its trip (E-44), a temperature alarm opens the deviation and puts the orders on hold (E-62),
+   and the board button "To trip" checks hub / temperature class / capacity / ADR before an ERP order joins a trip (B-27). Loaded after 410 and 475, so the globals exist. */
+(function () {
+  const r0 = globalThis.raiseAlarm;
+  if (r0 && !r0.opsWrapped) {
+    globalThis.raiseAlarm = function (o) {
+      const n0 = (S.alarms || []).length, a = r0.apply(this, arguments);
+      if (a && (S.alarms || []).length > n0) {
+        if (a.lvl >= 3 && typeof alarmRevoke === 'function') alarmRevoke(a);
+        const l = a.cat === 'temperature' && a.load ? load(a.load) : null;
+        if (l && typeof openDeviation === 'function') {
+          openDeviation(l, T('Выход за диапазон ', 'Bereichsverletzung ', 'Out of range ', 'Диапазоннан шығу ') + ZONES[l.zone].label + ' · ' + (trk(l.truck) || { plate: '—' }).plate, l.id + ' · ' + String(a.text || ''));
+          if (typeof ops === 'function') ops(l).orders.forEach(x => { (x.events = x.events || []).push({ t: NOW.toISOString(), kind: 'quality_hold' }); });
+        }
+      }
+      return a;
+    };
+    globalThis.raiseAlarm.opsWrapped = true;
+  }
+  const t0 = ACT.ooTrip;
+  if (t0 && !t0.opsWrapped) {
+    ACT.ooTrip = function (d) { if (typeof orderAttachCheck === 'function' && canDo('trips:write')) { const e = orderAttachCheck(d.l, d.id); if (e) return toast(e, 'err'); } return t0.apply(this, arguments); };
+    ACT.ooTrip.opsWrapped = true;
+  }
+})();

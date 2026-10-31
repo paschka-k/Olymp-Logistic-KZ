@@ -34,12 +34,12 @@
   });
   await group('baseline: own sidebar section with permission, badge and all six views (LH-O2)', 'ru', async (g, ev, w) => {
     assert(ev("NAV.some(n=>n[0]==='baseline')"), 'nav entry');
-    assert(ev("SCREEN_PERM.baseline === 'costs:read'"), 'permission bound');
+    assert(ev("SCREEN_PERM.baseline === 'overview:read'"), 'permission bound (0.3.11 access-nav: overview:read)');
     ev("go('baseline')"); eq(ev('S.route'), 'baseline', 'route opens');
     assert(w.document.querySelectorAll('[data-act=blSub]').length >= 1 || w.document.querySelector('.seg,[data-v=val]'), 'sub navigation rendered');
     for (const v of ['q', 'val', 'net']) { ev(`ACT.blSub({v:'${v}'})`); assert(w.document.querySelector('#main-content').innerText.length > 200, 'view ' + v + ' renders'); }
     ev("ACT.setRole({v:'viewer'})");
-    assert(!ev("canSee('baseline')") || ev("ROLE_PERMS.viewer.includes('costs:read')"), 'visibility follows costs:read');
+    assert(!ev("canSee('baseline')") || ev("ROLE_PERMS.viewer.includes('overview:read')"), 'visibility follows overview:read');
     ev("ACT.setRole({v:'admin'})");
     assert(!ev("tabsOf('settings').some(t=>t.key==='baseline')"), 'no leftover Settings tab');
   });

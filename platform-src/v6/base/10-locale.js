@@ -24,8 +24,22 @@ const LF = (() => {
     c: ['°C', '°C', '°C', '°C'],
     l: ['л', 'l', 'l', 'л'],
   };
+  /* 0.3.11 fmtDate formats every timestamp in Asia/Almaty (UTC+5, no DST): the instant is shifted so the local getters read KZ wall time.
+     A user in Berlin sees the same "14:30" as the dispatcher in Astana and the header clock. */
+  const KZ_OFF = 300;
+  const kz = iso => { const d = iso instanceof Date ? iso : new Date(iso); return new Date(d.getTime() + (d.getTimezoneOffset() + KZ_OFF) * 60000); };
   const lc = {
     profile: P,
+    /** time zone of every formatted timestamp (FR-221 / 0.3.11 fmtDate): Asia/Almaty, UTC+5 */
+    tz: 'Asia/Almaty',
+    /** Date shifted so that getHours() etc. read Kazakhstan wall time: LF.kz(iso).getHours() */
+    kz,
+    /** yyyy-mm-ddThh:mm in Kazakhstan time (value of a datetime-local input) */
+    local: iso => { const d = kz(iso); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes()); },
+    /** hh:mm:ss in Kazakhstan time (header clock, audit stamps) */
+    time: iso => { const d = kz(iso); return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()); },
+    /** dd.mm.yyyy hh:mm in Kazakhstan time (records tables) */
+    dtFull: iso => { const d = kz(iso); return pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.' + d.getFullYear() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); },
     /** grouped number (no-break space groups, decimals as the number has them, separator of the language): 12 345 */
     n: v => Number(v).toLocaleString(P.num).replace(',', P.dec),
     /** rounded integer, grouped: LF.int(12345.6) = "12 346" */
@@ -38,12 +52,12 @@ const LF = (() => {
     kzt: v => Math.round(v).toLocaleString(P.num).replace(/[  ]/g, ' ') + ' ₸',
     /** dd.mm.yyyy */
     date: iso => {
-      const d = new Date(iso);
+      const d = kz(iso);
       return pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.' + d.getFullYear();
     },
     /** dd.mm, hh:mm */
     dt: iso => {
-      const d = new Date(iso);
+      const d = kz(iso);
       return pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + ', ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
     },
     /** minutes of the day -> hh:mm (wraps at 24 h) */

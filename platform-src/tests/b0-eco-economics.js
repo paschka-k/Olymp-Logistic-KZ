@@ -37,7 +37,7 @@
     ev("ACT.ecoFineSt({id:'FN-1024',v:'deducted'})"); eq(ev("S.eco.fines[0].st"), 'paid50', 'deducted without recharge');
     ev("ACT.ecoFineSt({id:'FN-1024',v:'recharge'})"); ev("ACT.ecoFineSt({id:'FN-1024',v:'ack'})"); ev("ACT.ecoFineSt({id:'FN-1024',v:'deducted'})"); eq(ev("S.eco.fines[0].st"), 'deducted');
     ev('ACT.ecoPayroll()'); eq(ev('S.eco.payroll.length'), 1); eq(ev("S.eco.fines[0].exp"), 1);
-    ev("ACT.ecoFineSt({id:'FN-1002',v:'paid50'})"); eq(ev("S.eco.fines.find(f=>f.id==='FN-1002').st"), 'unattributed', 'unattributed fine paid without driver');
+    ev("ACT.ecoFineSt({id:'FN-1002',v:'paid50'})"); eq(ev("S.eco.fines.find(f=>f.id==='FN-1002').st"), 'paid50', 'R-14: an unattributed notice may be paid by the company before the 50 % deadline (0.3.11)');
   });
   await group('fines: deduction without acknowledgement needs an HR reason', 'ru', async (g, ev, w) => {
     ev("go('reports');ACT.stab({s:'reports',v:'fines'});ACT.ecoFineSel({id:'FN-1015'})"); ev("ACT.ecoFineSt({id:'FN-1015',v:'deducted'})"); eq(ev("S.eco.fines.find(f=>f.id==='FN-1015').st"), 'recharge', 'deducted without reason');
@@ -46,7 +46,7 @@
   await group('baseline: 150 questions, FR-49 open until all KDL questions clarified (FR-35/49)', 'ru', async (g, ev, w) => {
     eq(ev('ecoQuestions().length'), 150); const fr = ev('ecoFr49()'); assert(fr.total > 0 && fr.open === fr.total, 'FR-49 not open');
     ev("go('baseline');ACT.blSub({v:'val'})"); for (const v of ev("ECO_BL.BLV.filter(v=>v.q).map(v=>v.id)")) ev(`ACT.blClar({id:'${v}'})`); eq(ev('ecoFr49().open'), 0, 'FR-49 still open');
-    ev("ACT.setRole({v:'viewer'})"); assert(ev("S.route") !== 'baseline', 'viewer must leave the baseline section');
+    ev("ACT.setRole({v:'driver'})"); assert(ev("S.route") !== 'baseline', 'a role without overview:read must leave the baseline section (0.3.11: baseline needs overview:read)');
   });
   await group('baseline: 23 cities on two hubs, target fleet 4, legs check, critical path (FR-36/38/48/174)', 'ru', async (g, ev, w) => {
     eq(ev('ECO_BL.BLC.length'), 23); assert(ev("ECO_BL.BLC.every(c=>c.hub==='ast'||c.hub==='alm')"), 'hub'); eq(ev('ECO_BL.BLF.reduce((a,f)=>a+f.qty,0)'), 4, 'target fleet');
@@ -55,4 +55,9 @@
     ev("ACT.blLegal({id:'vat16'})"); assert(ev('S.eco.bl.legal.vat16'), 'legal check'); ev("ACT.blWest({id:'cool',v:'1'})"); eq(ev('S.eco.bl.west.cool'), 1);
     ev("ACT.blSub({v:'pv'});ACT.blPv({id:'deduct_cap',v:'checked'})"); eq(ev('S.eco.bl.pv.deduct_cap'), 'checked'); eq(ev('ECO_BL.PV.length'), 26);
     ev("ACT.setRole({v:'dispatcher'})"); ev("ACT.blLegal({id:'cit'})"); assert(!ev('S.eco.bl.legal.cit'), 'dispatcher checked a legal item');
+  });
+  await group('R6 fines: inbox notice is attributed by the trip sheet of the vehicle (R-6), import needs fines:write (R-1)', 'ru', async (g, ev) => {
+    ev("ACT.setRole({v:'admin'})"); const wb = ev("S.res.waybills[0]"); const d = wb.from.slice(0, 10), t = wb.from.slice(11, 16); const day = ev(`new Date('${wb.from}').toLocaleString('sv-SE',{timeZone:'Asia/Almaty'})`); 
+    const r = ev(`ecoFineAdd({truck:'${wb.truck}',date:'${day.slice(0,10)}',t:'${day.slice(11,16)}',amt:14750,type:'sp20',src:'sms1414'})`); assert(r && r.ok, 'added'); eq(r.drv, wb.drv, 'driver from the trip sheet'); assert(ev(`S.eco.fines.find(f=>f.id==='${r.ok}').inNote`).length > 10, 'Received via Inbox note');
+    ev("ACT.setRole({v:'viewer'})"); const n = ev('S.eco.fines.length'); ev("ACT.ecoFineImport()"); eq(ev('S.eco.fines.length'), n, 'viewer cannot import');
   });

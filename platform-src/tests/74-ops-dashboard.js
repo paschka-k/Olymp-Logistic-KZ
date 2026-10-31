@@ -30,9 +30,14 @@
     const dep = d.querySelector('[data-act=pnDep]'); if (dep) { const n = ev('S.loads.length'); dep.click(); eq(ev('S.loads.length'), n + 1, 'trip for departure creates a load'); }
     ev("S.ops.plan.truck = 't4'; S.ops.plan.drv = 'd5'; S.ops.plan.dep = '2026-10-20T07:00'; S.ops.plan.eta = '2026-10-20T18:00'; S.ops.plan.note = 'test'; render()"); const n1 = ev('S.loads.length'); d.querySelector('[data-act=pnCreate]').click();
     eq(ev('S.loads.length'), n1 + 1, 'load created'); const l = ev("S.loads[0]"); eq(l.status, 'assigned', 'driver and truck assigned'); eq(ev("ops(S.loads[0]).orders.length"), 2, 'orders attached with places'); assert(ev("ops(S.loads[0]).orders.every(o => o.places.length === o.pal)"), 'places per pallet'); eq(ev("S.orders.some(o => o.id === 'O-26-0102')"), false, 'orders left the pool');
-    ev("S.ops.plan.sel = ['O-26-0105']; S.ops.plan.truck = 't1'; S.ops.plan.drv = 'd3'; S.ops.plan.dep = ''"); assert(typeof ev('planCreate()') === 'string', 'departure missing is refused'); clean(w, 'planning');
+    ev("S.ops.plan.sel = ['O-26-0105']; S.ops.plan.truck = 't1'; S.ops.plan.drv = 'd3'; S.ops.plan.dep = '2026-10-20T10:00'; S.ops.plan.eta = '2026-10-20T08:00'"); assert(typeof ev('planCreate()') === 'string', 'ETA before the departure is refused'); ev("S.ops.plan.truck = ''; S.ops.plan.drv = 'd3'"); assert(typeof ev('planCreate()') === 'string', 'a vehicle without a driver is refused (B-45)'); clean(w, 'planning');
   });
   await group('dashboard, aside and planning render in every language without undefined / NaN; DE / EN without Cyrillic in the new blocks', 'ru', async () => {
     for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("go('dashboard')"); clean(gg.w, lang + ' dashboard'); gg.ev("ACT.open({id:'LD-2026-001847'})"); clean(gg.w, lang + ' aside'); gg.ev("closeDrawer(); go('dispatch'); ACT.stab({s:'dispatch',v:'planning'})"); clean(gg.w, lang + ' planning');
       if (lang === 'de' || lang === 'en') { for (const sel of ['[data-ov-kpis]', '[data-alert-list=risks]', '.wx-tiles', '[data-plan-form]']) { const el = gg.w.document.querySelector(sel); if (el) { const t = el.innerText; assert(!/[А-Яа-яЁё]/.test(t.replace(/.*(?:ТОО|Астана).*/g, '')), lang + ' Cyrillic in ' + sel); } } } } finally { gg.done(); } }
+  });
+
+  /* ---- operations parity pass: A-33 weather tiles follow the hub segment, A-30 compact inbox ---- */
+  await group('parity pass: the hub segment filters the dashboard weather tiles', 'en', async (g, ev, w) => {
+    ev("S.hub = 'AST'; go('dashboard'); render()"); const d = w.document, tiles = [...d.querySelectorAll('[data-wx]')]; assert(tiles.length === 3 && tiles.every(x => x.dataset.wx.startsWith('AST-')), 'A-33: only the tiles of the chosen hub'); ev("S.hub = ''; render()");
   });

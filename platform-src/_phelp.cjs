@@ -1,0 +1,45 @@
+const fs=require('fs');const p='platform-src/v6/help/00-framework.js';let s=fs.readFileSync(p,'utf8');
+const rep=(a,b)=>{if(!s.includes(a))throw new Error('missing: '+a.slice(0,70));s=s.replace(a,()=>b)};
+const PERMS=[
+['overview:read','Обзор, сводки, планирование, отчёты, исходные данные, входящие','Übersicht, Auswertungen, Planung, Berichte, Ausgangsdaten, Eingang','Overview, summaries, planning, reports, baseline data, inbox'],
+['orders:read','Видеть заказы и отправки (SSCC)','Aufträge und Sendungen (SSCC) sehen','See orders and shipments (SSCC)'],
+['orders:write','Создавать и отменять заказы, отмечать заказы к загрузке, досканировать места','Aufträge anlegen und stornieren, Aufträge zur Beladung markieren, Packstücke nachscannen','Create and cancel orders, tick orders for loading, rescan packages'],
+['trips:read','Видеть рейсы, диспетчер, загрузку, погоду, документы, партнёров','Touren, Disponent, Beladung, Wetter, Dokumente, Partner sehen','See trips, dispatcher, load, weather, documents, partners'],
+['trips:write','Создавать рейсы, отправлять путевой лист, переносить рейс, планировать тип ТС','Touren anlegen, Fahrauftrag senden, Tour verschieben, Fahrzeugtyp planen','Create trips, send trip sheet, replan trip, plan vehicle type'],
+['trips:status','Менять статус рейса и точки доставки','Status von Tour und Stopp ändern','Change trip and stop status'],
+['fleet:read','Видеть автопарк','Fuhrpark sehen','See the fleet'],
+['fleet:write','Изменять данные ТС','Fahrzeugdaten ändern','Change vehicle data'],
+['drivers:read','Видеть водителей и персонал (данные замаскированы)','Fahrer und Personal sehen (Daten maskiert)','See drivers and staff (data masked)'],
+['drivers:write','Назначать срочный рейс, записывать на продление документов','Eilfahrt zuweisen, zur Dokumentverlängerung anmelden','Assign urgent trip, book document renewal'],
+['pii:read','Открывать персональные данные (ИИН, телефон) — каждое открытие в журнале аудита','Personendaten öffnen (IIN, Telefon) — jede Anzeige im Audit-Protokoll','Reveal personal data (IIN, phone) — every reveal is audited'],
+['temperature:read','Видеть температуру, термостатус, качество','Temperatur, Thermostatus, Qualität sehen','See temperature, thermo status, quality'],
+['temperature:write','Записывать показания, импортировать термохроны','Messwerte erfassen, Thermochrone importieren','Record readings, import thermochrons'],
+['alarms:read','Видеть тревоги и безопасность','Alarme und Sicherheit sehen','See alarms and security'],
+['alarms:write','Принимать, эскалировать и закрывать тревоги и инциденты','Alarme und Vorfälle annehmen, eskalieren, schließen','Acknowledge, escalate and close alarms and incidents'],
+['users:admin','Управлять пользователями, ролями, 2FA','Benutzer, Rollen, 2FA verwalten','Manage users, roles, 2FA'],
+['audit:read','Читать журнал аудита и проверять цепочку','Audit-Protokoll lesen und Kette prüfen','Read the audit log and verify the chain'],
+['crm:read','Видеть заявки, клиентов, задачи','Anfragen, Kunden, Aufgaben sehen','See leads, customers, tasks'],
+['crm:write','Вести заявки, клиентов, задачи, тендеры','Anfragen, Kunden, Aufgaben, Ausschreibungen bearbeiten','Work on leads, customers, tasks, tenders'],
+['data:export','Полная выгрузка всех данных (в журнале аудита)','Vollständiger Datenexport (im Audit-Protokoll)','Full data export (audited)'],
+['portal','Портал клиента: бронирование и свои бронирования','Kundenportal: Buchen und eigene Buchungen','Customer portal: book and own bookings'],
+['bookings:manage','Подтверждать / отклонять бронирования, видеть линии и тарифы','Buchungen bestätigen / ablehnen, Linien und Tarife sehen','Confirm / reject bookings, see lines and tariffs'],
+['planning:admin','Изменять линии и тарифы','Linien und Tarife ändern','Change lines and tariffs'],
+['integrations:admin','Интеграции, API-ключи, webhooks','Integrationen, API-Schlüssel, Webhooks','Integrations, API keys, webhooks'],
+['documents:sign','Документы РК: формировать, подписывать ЭЦП, выпуск Go/No-Go','KZ-Dokumente: erstellen, EDS-Signatur, Go/No-Go-Freigabe','KZ documents: generate, e-sign, Go/No-Go release'],
+['quality:write','Отклонения, CAPA, решение по карантину','Abweichungen, CAPA, Quarantäne-Entscheidung','Deviations, CAPA, quarantine decision'],
+['partners:write','Передача партнёру, вызов сервиса, договоры','Übergabe an Partner, Serviceeinsatz, Verträge','Partner hand-over, service call, contracts'],
+['fines:write','Штрафы: импорт, оплата, удержание, оспаривание','Bußgelder: Import, Zahlung, Abzug, Einspruch','Fines: import, pay, deduct, dispute'],
+['costs:read','Видеть затраты','Kosten sehen','See costs'],
+['costs:approve','Подпись решения «свой / внешний» (2 подписи)','Unterschrift Eigen-/Fremd-Entscheidung (2 Unterschriften)','Sign own-vs-external decision (2 signatures)'],
+['approvals:sign','Подпись руководства: экспресс (3 подписи)','Unterschrift der Leitung: Express (3 Unterschriften)','Management signature: express (3 signatures)'],
+['driver:app','Приложение водителя: чек-лист, путевой лист, ePOD, смена, SOS','Fahrer-App: Checkliste, Fahrauftrag, ePOD, Schicht, SOS','Driver app: checklist, trip sheet, ePOD, shift, SOS'],
+['partner:portal','Портал партнёра-перевозчика: свои передачи и загрузка ePOD','Portal des Partner-Frachtführers: eigene Übergaben und ePOD-Upload','Partner carrier portal: own hand-overs and ePOD upload'],
+['trips:override_release','Отправить рейс без действующего выпуска Go/No-Go (с причиной, в журнал аудита)','Tour ohne gültige Go/No-Go-Freigabe abfahren lassen (mit Begründung, im Audit-Protokoll)','Let a trip depart without a valid Go/No-Go release (with a reason, audited)'],
+['trips:override_load','Запланировать загрузку сверх лимитов ТС (с причиной, в журнал аудита)','Beladung über den Fahrzeuggrenzen planen (mit Begründung, im Audit-Protokoll)','Plan a load above the vehicle limits (with a reason, audited)'],
+];
+rep("function rolesTable() {","/* 0.3.11 help/roles.ts PERMS: description of every permission (RU / DE / EN; KK reads the Russian text) */\nHELP.permDesc = "+JSON.stringify(PERMS)+";\nfunction permTable() {\n  return `<div style=\"overflow:auto\"><table class=\"help-perms\" data-help-perms><thead><tr><th>${esc(T('Право', 'Recht', 'Permission', 'Құқық'))}</th><th>${esc(T('Что даёт', 'Was es erlaubt', 'What it allows', 'Не береді'))}</th>${ROLES.map(r => `<th${r === S.role ? ' class=\"you\" data-you=\"1\"' : ''}>${esc(ROLE_NAME[r])}</th>`).join('')}</tr></thead><tbody>${HELP.permDesc.map(p => `<tr><td><code>${p[0]}</code></td><td>${esc(tx([p[1], p[2], p[3]]))}</td>${ROLES.map(r => `<td${r === S.role ? ' class=\"you\"' : ''}>${(ROLE_PERMS[r] || []).includes(p[0]) ? '✓' : '·'}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;\n}\n/* access line of an article (0.3.11 Help.tsx): roles that may open the screen / tab, the permission and whether the signed-in role may */\nconst helpPermOf = a => { if (!a.screen || !SCREENS[a.screen]) return null; const t = (SCREENS[a.screen].tabs || []).find(x => x.key === a.tab); return (t && t.perm) || SCREEN_PERM[a.screen] || (ALWAYS.includes(a.screen) ? null : 'overview:read'); };\nconst helpRoleCan = (r, a) => { const sn = SHELL_NAV[r]; if (sn) return ALWAYS.includes(a.screen) || sn.some(n => n[0] === a.screen); const p = helpPermOf(a); return !p || (ROLE_PERMS[r] || []).includes(p); };\nfunction accessLine(a) {\n  if (!a.screen || !SCREENS[a.screen]) return '';\n  const perm = helpPermOf(a), roles = ROLES.filter(r => helpRoleCan(r, a)), mine = canSee(a.screen) && (!perm || canDo(perm) || !!SHELL_NAV[S.role]);\n  return `<div class=\"help-access small\" data-help-access>${esc(T('Доступ: ', 'Zugriff: ', 'Access: ', 'Қолжетімділік: '))}${roles.length === ROLES.length ? esc(T('все роли', 'alle Rollen', 'all roles', 'барлық рөлдер')) : esc(roles.map(r => ROLE_NAME[r]).join(', '))}${perm ? ` <code class=\"help-perm\">${perm}</code>` : ''} <span class=\"chip ${mine ? 'green' : 'gray'}\" data-help-mine=\"${mine ? 1 : 0}\">${esc(mine ? T('у вас есть доступ', 'Sie haben Zugriff', 'you have access', 'сізде қолжетімділік бар') : T('нет доступа у вашей роли', 'Ihre Rolle hat keinen Zugriff', 'your role has no access', 'рөліңізде қолжетімділік жоқ'))}</span></div>`;\n}\nfunction rolesTable() {");
+rep("<p class=\"help-links\">${a.screen","${accessLine(a)}<p class=\"help-links\">${a.screen");
+rep("${rolesTable()}<h4>${esc(T('Описание ролей'","${rolesTable()}<h4>${esc(T('Права и роли', 'Rechte und Rollen', 'Permissions by role', 'Құқықтар мен рөлдер'))}</h4>${permTable()}<h4>${esc(T('Описание ролей'");
+rep("const q = S.help.q.trim().toLowerCase(), vis = HELP.articles.filter(a => (!a.screen || canSee(a.screen) || a.portal) && (!q || hText(a).includes(q)));","const q = S.help.q.trim().toLowerCase(), words = q.split(/\\s+/).filter(Boolean), vis = HELP.articles.filter(a => (!a.screen || canSee(a.screen) || a.portal) && (!q || words.every(w => hText(a).includes(w))));   // 0.3.11: every word must match");
+rep("id=\"hq\" placeholder=","id=\"hq\" maxlength=\"80\" placeholder=");
+fs.writeFileSync(p,s);console.log('ok');

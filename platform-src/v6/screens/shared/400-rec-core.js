@@ -12,15 +12,19 @@
   globalThis.translit = s => String(s).replace(/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі«»]/g, ch => { const lo = ch.toLowerCase(), t = TL[lo] == null ? '' : TL[lo]; return ch !== lo && t ? t[0].toUpperCase() + t.slice(1) : t; });
   /* free text from an external source (connector, SMS, phone note): RU/KK as is, DE/EN transliterated with the original on hover */
   globalThis.xt = s => (LI === 1 || LI === 2) ? translit(s) : String(s);
-  globalThis.ext = s => (LI === 1 || LI === 2) && hasCyr(s) ? `<span class="xt" title="${esc(s)}">${esc(translit(s))}</span>` : esc(s);
+  const XT_LABEL = T('', 'Originaltext (Russisch, nicht übersetzt) – oben in lateinischer Transliteration: ', 'Original text (Russian, not translated) – shown above in Latin transliteration: ', '');
+  globalThis.ext = s => (LI === 1 || LI === 2) && hasCyr(s) ? `<span class="xt" data-ext="ext" title="${esc(XT_LABEL + s)}">${esc(translit(s))}</span>` : esc(s);
 
   /* ---------- tamper-evident audit chain (LH-Q3): every entry carries seq, prev hash and its own hash ---------- */
   const h32 = s => { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0; return h.toString(16).padStart(8, '0'); };
-  const sig = e => h32([e.prev, e.seq, e.t, e.user, e.role, e.module, e.subject, e.decision, e.reason].join('|'));
+  const sig = e => h32([e.prev, e.seq, e.t, e.user, e.role, e.module, e.subject, e.decision, e.reason, e.action || '', e.ip || ''].join('|'));
   globalThis.auditHash = sig;
   const REC = globalThis.REC = { seq: 0 };
   const audit0 = globalThis.audit;
-  globalThis.audit = (module, subject, decision, reason) => { audit0(module, subject, decision, reason); const e = S.audit[0]; e.seq = ++REC.seq; e.role = S.role; e.prev = S.audit[1] ? S.audit[1].hash : '00000000'; e.hash = sig(e); return e; };
+  /* 0.3.11 audit.py: stable dotted action code (auth.login_failed, user.created ...) and the client IP; the demo has one address per user */
+  const slug = x => String(x || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+  globalThis.auditIp = role => '10.20.4.' + (10 + ROLES.indexOf(role || S.role) * 3 + 4);
+  globalThis.audit = (module, subject, decision, reason, code) => { audit0(module, subject, decision, reason); const e = S.audit[0]; e.seq = ++REC.seq; e.role = S.role; e.action = String(code || slug(module) + '.event').slice(0, 64); e.ip = auditIp(S.role); e.prev = S.audit[1] ? S.audit[1].hash : '00000000'; e.hash = sig(e); return e; };
   /* verify oldest -> newest: {ok, checked, brokenAt} */
   globalThis.auditVerify = () => { const rows = S.audit.slice().reverse(); let prev = '00000000'; for (let i = 0; i < rows.length; i++) { const e = rows[i]; if (e.prev !== prev || sig(e) !== e.hash) return { ok: false, checked: i, brokenAt: e.seq }; prev = e.hash; } return { ok: true, checked: rows.length, brokenAt: null }; };
 
@@ -34,7 +38,7 @@
   globalThis.fval = id => { const e = document.getElementById(id); return e ? (e.type === 'checkbox' ? e.checked : e.value) : ''; };
   globalThis.ALLT = T('Все', 'Alle', 'All', 'Барлығы');
   globalThis.YES = T('Да', 'Ja', 'Yes', 'Иә'); globalThis.NO = T('Нет', 'Nein', 'No', 'Жоқ');
-  globalThis.fdtKZ = iso => { const d = new Date(iso); return p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '.' + d.getFullYear() + ' ' + p2(d.getHours()) + ':' + p2(d.getMinutes()); };
+  globalThis.fdtKZ = iso => LF.dtFull(iso);   // Asia/Almaty, not the browser zone (0.3.11 fmtDate)
   globalThis.plusH = (h, base) => new Date((base || NOW).getTime() + h * 3600e3).toISOString();
   globalThis.noteOk = (s, n) => String(s || '').trim().length >= (n || 10);
   IC.mail = '<path d="M3 5h18v14H3z"/><path d="M3 7l9 6 9-6"/>'; IC.shield = '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>'; IC.key = '<circle cx="8" cy="14" r="4"/><path d="M11 11l9-8M16 6l2 2M18 4l2 2"/>'; IC.book = '<path d="M4 4h12a2 2 0 012 2v14H6a2 2 0 01-2-2z"/><path d="M4 18a2 2 0 012-2h12"/>'; IC.phone = '<path d="M5 3h4l2 5-2.5 1.5a11 11 0 006 6L16 13l5 2v4a2 2 0 01-2 2A17 17 0 013 5a2 2 0 012-2z"/>'; IC.clock = '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'; IC.list = '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>';

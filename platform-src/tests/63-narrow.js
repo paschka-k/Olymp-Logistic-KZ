@@ -34,8 +34,8 @@
   for (const px of [375, 768]) await group('narrow ' + px + ' px: burger opens and closes the menu, breadcrumb one line or hidden, search and "⋯" overflow, alarms stay', 'ru', async (g, ev, w) => {
     await narrow(w, px); const d = w.document, vis = s => { const e = d.querySelector(s); return !!(e && e.offsetParent && e.getBoundingClientRect().width > 0); };
     ev("go('routes')");
-    assert(vis('.burger'), 'burger visible'); assert(d.querySelector('.sidebar').getBoundingClientRect().right <= 0, 'menu off-canvas while closed');
-    d.querySelector('.burger').click(); assert(ev('S.sideOpen'), 'burger opens'); assert(d.querySelector('.sidebar.open') && d.querySelector('.side-back'), 'menu + backdrop');
+    assert(vis('.burger'), 'burger visible'); assert(d.querySelector('.sidebar').getBoundingClientRect().right <= 0, 'menu off-canvas while closed'); assert(d.querySelector('.sidebar').hasAttribute('inert') && d.querySelector('.sidebar').getAttribute('aria-hidden') === 'true', 'closed menu is inert + aria-hidden (out of the tab order)');
+    d.querySelector('.burger').click(); assert(ev('S.sideOpen'), 'burger opens'); assert(!d.querySelector('.sidebar').hasAttribute('inert'), 'open menu is reachable'); assert(d.querySelector('.sidebar.open') && d.querySelector('.side-back'), 'menu + backdrop');
     d.querySelector('.side-back').click(); assert(!ev('S.sideOpen') && !d.querySelector('.sidebar.open'), 'backdrop closes');
     d.querySelector('.burger').click(); d.querySelector('.sidebar .nav-item[data-v="fleet"]').click(); eq(ev('S.route'), 'fleet', 'menu item navigates'); assert(!ev('S.sideOpen'), 'menu closes after navigation');
     assert(vis('[data-alarms]'), 'alarms button stays'); const tb = d.querySelector('.topbar'); assert(tb.scrollWidth <= tb.clientWidth + 1, 'topbar fits');

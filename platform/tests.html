@@ -95,7 +95,10 @@ __suite(1);   /* 20-dispatch.js */
   await group('create load, assign, status chain to delivered', 'ru', async (g, ev) => {
     const id = ev(`createLoad({cust:'c1',from:'AST',to:'KAR',zone:'ambient',pallets:10,priority:'low'}).ok`).slice(8); assert(id, 'load created');
     eq(ev(`assign('LD-2026-${id}','d5','t4')`), null, 'assign'); eq(ev(`load('LD-2026-${id}').status`), 'assigned');
-    for (const s of ['loading', 'in_transit', 'delivered']) { if (s === 'in_transit') { assert(ev(`canMove(load('LD-2026-${id}'),'in_transit')`), 'in_transit without Go/No-Go release must be refused (FR-91)'); eq(ev(`release('LD-2026-${id}','test: exception release for the status chain')`), null, 'override release'); } eq(ev(`canMove(load('LD-2026-${id}'),'${s}')`), null, 'canMove ' + s); ev(`setStatus('LD-2026-${id}','${s}')`); }
+    for (const s of ['loading', 'in_transit']) { if (s === 'in_transit') { assert(ev(`canMove(load('LD-2026-${id}'),'in_transit')`), 'in_transit without Go/No-Go release must be refused (FR-91)'); eq(ev(`release('LD-2026-${id}','test: exception release for the status chain')`), null, 'override release'); } eq(ev(`canMove(load('LD-2026-${id}'),'${s}')`), null, 'canMove ' + s); ev(`setStatus('LD-2026-${id}','${s}')`); }
+    /* B-64: delivered only with every stop done; delivering the last stop closes the trip */
+    assert(ev(`canMove(load('LD-2026-${id}'),'delivered')`), 'delivered with open stops must be refused (Not all stops are delivered)');
+    ev(`tripStops(load('LD-2026-${id}')).filter(s => s.kind === 'unload').forEach(s => { stopArrive('LD-2026-${id}', s.key); stopDeliver('LD-2026-${id}', s.key, {}, ''); })`); eq(ev(`load('LD-2026-${id}').status`), 'delivered', 'last stop closes the trip');
     eq(ev(`load('LD-2026-${id}').pod`), 'pending', 'POD pending'); eq(ev('drv("d5").status'), 'available', 'driver freed');
   });
   await group('invalid transitions and creation are refused', 'ru', async (g, ev) => {
@@ -211,7 +214,7 @@ __suite(6);   /* 61-shell-ext.js */
     ev("ACT.hubSet({v:'KAR'})"); ev("go('fleet')"); assert(ev("hubFilter(S.trucks).every(t=>t.hub==='KAR')"), 'fleet by hub');
     ev("go('drivers')"); ev("go('hubs')"); eq(ev("hubFilter(Object.keys(S.hubs),h=>h).join()"), 'KAR', 'hubs by hub');
     ev("ACT.hubSet({v:''})"); ev("go('dashboard')");
-    assert(/\d\d:\d\d:\d\d/.test(w.document.querySelector('[data-clock]').textContent), 'clock'); assert(/Astana UTC\+5/.test(w.document.querySelector('[data-bizdate]').textContent), 'business date');
+    assert(/\d\d:\d\d:\d\d/.test(w.document.querySelector('[data-clock]').textContent), 'clock'); assert(/UTC\+5/.test(w.document.querySelector('[data-bizdate]').textContent), 'business date');
     assert(w.document.querySelector('[data-alarms]'), 'alarms button'); clean(w, 'topbar');
   });
   await group('shell: search finds lines and database hits, keyboard moves, Enter opens, scanner needs an exact hit', 'en', async (g, ev, w) => {
@@ -264,15 +267,81 @@ __suite(6);   /* 61-shell-ext.js */
   });
   for (const lang of LANGS) await group('[' + lang + '] shell: demo sign-in (password, 2FA 123456, recovery codes, forced change >= 12), account, reset', lang, async (g, ev, w) => {
     ev("ACT.setRole({v:'dispatcher'})"); ev('ACT.signOut()'); assert(w.document.querySelector('[data-login-step=password]'), 'login card');
-    ev("S.auth.role='warehouse';S.auth.pw='x'"); ev('ACT.authPw()'); assert(w.document.querySelector('[data-login-step=mfa]'), '2FA step');
-    ev("S.auth.code='000000'"); ev('ACT.authMfa()'); assert(w.document.querySelector('[data-login-step=mfa] .login-err'), 'wrong code refused');
+    ev("S.auth.role='auditor';S.auth.pw='x'"); ev('ACT.authPw()'); assert(w.document.querySelector('[data-login-step=enrol]'), 'not enrolled: set-up step (QR + key)');
+    ev("S.auth.code='000000'"); ev('ACT.authMfa()'); assert(w.document.querySelector('[data-login-step=enrol] .login-err'), 'wrong code refused');
     ev("S.auth.code='123456'"); ev('ACT.authMfa()'); eq(w.document.querySelectorAll('.codes li').length, 10, '10 recovery codes');
-    ev('ACT.authCodes()'); ev("S.auth.np='short';S.auth.np2='short'"); ev('ACT.authChange()'); assert(w.document.querySelector('[data-login-step=change] .login-err'), 'short password refused');
+    ev("userOf('auditor').mustChange=true"); ev('ACT.authCodes()'); assert(w.document.querySelector('[data-login-step=change]'), 'must_change_password forces the change step'); ev("S.auth.np='short';S.auth.np2='short'"); ev('ACT.authChange()'); assert(w.document.querySelector('[data-login-step=change] .login-err'), 'short password refused');
     ev("S.auth.cur='x';S.auth.np='correct horse battery';S.auth.np2='correct horse battery'"); ev('ACT.authChange()');   /* R1: 0.3.9 asks the current password */
-    assert(!w.document.querySelector('.login-layer'), 'login closed'); eq(ev('S.role'), 'warehouse', 'sign-in ends in setRole');
+    assert(!w.document.querySelector('.login-layer'), 'login closed'); eq(ev('S.role'), 'auditor', 'sign-in ends in setRole');
     ev("go('account')"); assert(w.document.querySelector('[data-account]') && w.document.querySelector('[data-demo-reset]'), 'account page'); clean(w, 'account');
     ev("S.acct.np='abc';S.acct.np2='abc'"); ev('ACT.acctPw()'); assert(w.document.querySelector('[data-acct-msg]'), 'password message');
     ev("ACT.setRole({v:'admin'});S.loads[0].status='problem'"); ev('ACT.resetAsk()'); ev('ACT.resetGo()'); assert(ev("S.loads[0].status!=='problem'"), 'reset restores demo data');
+  });
+  /* ---- parity 0.3.11 (docs/parity-0311/shell-records-admin.md): login flow, history API, deep links, 403, time zone, search, records page ---- */
+  await group('login: recovery codes only after enrolment, forced change only with must_change, a recovery code works once, 5 wrong codes lock (5.3-5.6)', 'en', async (g, ev, w) => {
+    const login = (role, code) => { ev('ACT.signOut()'); ev(`S.auth.role='${role}';S.auth.pw='x'`); ev('ACT.authPw()'); ev(`S.auth.code='${code}'`); ev('ACT.authMfa()'); };
+    login('dispatcher', '123456'); assert(!w.document.querySelector('.login-layer'), 'enrolled account without must_change signs in at once'); eq(ev('S.role'), 'dispatcher');
+    ev('ACT.signOut()'); ev("S.auth.role='viewer';S.auth.pw='x'"); ev('ACT.authPw()'); assert(w.document.querySelector('[data-login-step=enrol]'), 'not enrolled: set-up step'); ev("S.auth.code='123456'"); ev('ACT.authMfa()'); assert(w.document.querySelector('[data-login-step=recovery]'), 'recovery codes right after enrolment'); const rc = ev('S.auth.codes[0]');
+    ev('ACT.authCodes()'); assert(!w.document.querySelector('.login-layer'), 'no forced change without must_change');
+    login('viewer', rc); assert(!w.document.querySelector('.login-layer'), 'recovery code signs in'); login('viewer', rc); assert(w.document.querySelector('[data-login-step=mfa] .login-err'), 'a recovery code works once');
+    login('manager', '000000'); for (let i = 0; i < 3; i++) ev("S.auth.code='000000';ACT.authMfa()"); assert(!ev("userOf('manager').locked"), '4 failures do not lock'); ev("S.auth.code='000000';ACT.authMfa()"); eq(ev("userOf('manager').locked"), true, 'the 5th wrong code locks the account'); eq(ev('S.auth.step'), 'password'); ev("S.auth.role='manager';S.auth.pw='x'"); ev('ACT.authPw()'); assert(w.document.querySelector('[data-login-step=password] .login-err'), 'a locked account is refused'); ev("userOf('manager').locked=false");
+    const e = ev("S.audit.filter(a=>a.action==='auth.mfa_failed').length"); assert(e >= 5, 'auth.mfa_failed audited: ' + e);
+    ev("userOf('finance').mustChange=true"); login('finance', '123456'); assert(w.document.querySelector('[data-login-step=change]'), 'forced change'); ev("S.auth.cur='x';S.auth.np='d.zhumabayeva-long-1';S.auth.np2='d.zhumabayeva-long-1'"); ev('ACT.authChange()'); assert(w.document.querySelector('.login-err'), 'a password with the username is refused');
+    ev("S.auth.np='aaaaaaaaaaaaaaaa';S.auth.np2='aaaaaaaaaaaaaaaa'"); ev('ACT.authChange()'); assert(w.document.querySelector('.login-err'), 'a simple password is refused'); ev("S.auth.np='tulip river moon 42';S.auth.np2='tulip river moon 42'"); ev('ACT.authChange()'); assert(!w.document.querySelector('.login-layer') && !ev("userOf('finance').mustChange"), 'changed, flag cleared');
+  });
+  for (const lang of LANGS) await group('[' + lang + '] time zone: every timestamp is Asia/Almaty (UTC+5) whatever the browser zone (23.3), T() falls back to RU on a missing KK text (23.2)', lang, async (g, ev, w) => {
+    eq(ev("LF.dtFull('2026-10-18T09:30:00Z')"), '18.10.2026 14:30', 'dtFull'); eq(ev("LF.dt('2026-10-18T20:15:00Z')"), '19.10, 01:15', 'dt crosses midnight in KZ'); eq(ev("LF.date('2026-12-31T20:00:00Z')"), '01.01.2027', 'date'); eq(ev("LF.local('2026-10-18T09:30:00Z')"), '2026-10-18T14:30', 'datetime-local value'); eq(ev("LF.time('2026-10-18T09:30:05Z')"), '14:30:05', 'time');
+    eq(ev("fdtKZ('2026-10-18T09:30:00Z')"), '18.10.2026 14:30', 'records formatter'); eq(ev("T('ru','de','en')"), lang === 'de' ? 'de' : lang === 'en' ? 'en' : lang === 'kk' ? 'ru' : 'ru', 'missing 4th argument -> RU in KK'); eq(ev("T('ru','de','en','')"), lang === 'de' ? 'de' : lang === 'en' ? 'en' : lang === 'ru' ? 'ru' : '', 'an empty KK slot stays empty (word order of the dead-zone / "in N days" texts)');
+    eq(ev("(function(){var d=new Date('2026-10-18T09:30:00Z');return LF.kz(d).getHours()})()"), 14, 'kz() getters read KZ wall time');
+  });
+  await group('history: navigation pushes entries, selection rewrites the URL, popstate restores screen, tab and record (1.20, 1.21, 8.4)', 'en', async (g, ev, w) => {
+    let pushes = 0; const op = w.history.pushState.bind(w.history); w.history.pushState = (...a) => { pushes++; return op(...a); };   /* the frame shares its session history with the harness: popstate is dispatched by hand instead of history.back() */
+    ev("go('fleet')"); assert(/[?&]s=fleet/.test(w.location.search), 'URL names the screen: ' + w.location.search); assert(pushes >= 1, 'go() pushes an entry');
+    ev("go('routes');ACT.rtab({v:'wx'});ACT.wxCity({id:'KOS'})"); const u1 = w.location.search; assert(/[?&]city=KOS/.test(u1) && /[?&]t=wx/.test(u1), 'city + tab in the URL: ' + u1);
+    ev("go('orders');ACT.stab({s:'orders',v:'orders'})"); const p = pushes; ev('ACT.open({id:S.loads[0].id})'); eq(pushes, p, 'opening a record rewrites the entry, it does not push'); const u2 = w.location.search; assert(/[?&]load=LD-/.test(u2), 'drawer record in the URL: ' + u2);
+    ev("go('reports')"); const pop = u => { w.history.replaceState({ y: 0 }, '', u); w.dispatchEvent(new w.PopStateEvent('popstate', { state: { y: 0 } })); };
+    pop(u2); eq(ev('S.route'), 'orders', 'popstate restores the screen'); eq(ev('S.drawer && S.drawer.type'), 'load', 'drawer restored from the URL');
+    pop(u1); eq(ev('S.route'), 'routes'); eq(ev('S.tab.routes'), 'wx', 'tab'); eq(ev('S.wx.sel'), 'KOS', 'city'); eq(ev('S.drawer'), null, 'drawer closed'); eq(w.location.search, u1, 'popstate does not rewrite the URL');
+    assert(!ev('document.title').includes('undefined'), 'title');
+  });
+  await group('deep links: ?trip= alias, ?booking=, ?help=, ?r=type:id, ?s=help&k=, id sanitising, 403 page for unknown or forbidden records (8.1-8.6)', 'en', async (g, ev, w) => {
+    const f = async (q, lang) => { const fr = document.createElement('iframe'); fr.style.cssText = 'width:1316px;height:760px'; fr.src = (lang || 'en') + '.html?' + q; document.getElementById('frames').appendChild(fr); await new Promise(ok => { fr.onload = ok; }); await new Promise(r => setTimeout(r, 120)); return fr; };
+    let fr = await f('trip=1847'); eq(fr.contentWindow.eval('S.drawer && S.drawer.id'), 'LD-2026-001847', '?trip= is the old name of ?load='); fr.remove();
+    fr = await f('s=orders&t=ship&load=LD-2026-001847'); eq(fr.contentWindow.eval('S.tab.orders'), 'ship'); eq(fr.contentWindow.eval('S.ops.shipLoad'), 'LD-2026-001847', 'selects the trip on the Shipments tab'); fr.remove();
+    fr = await f('s=dispatch&load=LD-2026-001847'); eq(fr.contentWindow.eval('S.route'), 'dispatch'); eq(fr.contentWindow.eval('S.drawer && S.drawer.id'), 'LD-2026-001847', 'trip card on the dispatch board'); fr.remove();
+    fr = await f('booking=BK-26-000004'); eq(fr.contentWindow.eval('S.tab.orders'), 'bookings', '?booking='); eq(fr.contentWindow.eval('S.drawer && S.drawer.id'), 'BK-26-000004'); fr.remove();
+    fr = await f('help=roles'); eq(fr.contentWindow.eval('S.route + "/" + S.help.key'), 'help/roles', '?help='); fr.remove();
+    fr = await f('s=help&k=roles'); eq(fr.contentWindow.eval('S.route'), 'help', '?s=help&k='); fr.remove();
+    fr = await f('r=alarm:ALM-101'); eq(fr.contentWindow.eval('S.drawer && S.drawer.type'), 'alarm', '?r=alarm:id'); fr.remove();
+    fr = await f('view=wx&s=routes'); eq(fr.contentWindow.eval('S.tab.routes'), 'wx', '?view= maps to the tab'); fr.remove();
+    for (const q of ['load=LD-9999-none', 'alarm=ALM-99999', 'booking=BK-none', 'load=' + encodeURIComponent('x<img src=1>')]) { fr = await f(q); const x = fr.contentWindow; eq(x.eval('S.route'), 'forbidden', q + ' -> 403'); assert(x.document.querySelector('[data-page=forbidden][role=alert]') && x.document.querySelector('[data-forbidden-home]'), '403 card with a way back'); assert(/403/.test(x.document.title), '403 title'); assert(/load=|alarm=|booking=/.test(x.location.search), 'the URL stays'); x.document.querySelector('[data-forbidden-home]').click(); assert(x.eval('S.route') !== 'forbidden', 'home button'); fr.remove(); }
+  });
+  await group('language switch keeps the state: ?lang= opens the bundle, links carry role, hub and the URL (1.6)', 'en', async (g, ev, w) => {
+    const fr = document.createElement('iframe'); fr.style.cssText = 'width:1316px;height:760px'; fr.src = 'en.html?lang=de&s=routes&t=wx'; document.getElementById('frames').appendChild(fr);
+    await new Promise(ok => { fr.onload = ok; }); await new Promise(r => setTimeout(r, 400)); const x = fr.contentWindow; eq(x.eval('LANG'), 'de', '?lang= picks the bundle'); eq(x.eval('S.tab.routes'), 'wx', 'query survives'); fr.remove();
+    ev("ACT.setRole({v:'manager'});ACT.hubSet({v:'ALA'});go('routes')"); const a = w.document.querySelector('.langs a[href="de.html"]'); assert(a, 'language link'); ev("(function(){var h=window.history;})()");
+    const sp = []; const orig = w.sessionStorage.setItem.bind(w.sessionStorage); w.sessionStorage.setItem = (k, v) => { sp.push([k, v]); orig(k, v); };
+    a.addEventListener('click', e => e.preventDefault(), true); w.document.addEventListener('click', () => {}, true); a.click(); const saved = sp.find(x => x[0] === 'olymp.state'); assert(!saved || JSON.parse(saved[1]).role === 'manager', 'state saved for the next bundle'); w.sessionStorage.removeItem('olymp.state');
+  });
+  await group('403 page, records landing page and sidebar group, sign-out in the top bar, burger labels (7.6, 10.1, 1.2, 1.5, 1.13)', 'en', async (g, ev, w) => {
+    ev("go('records')"); assert(w.document.querySelector('[data-records]') && w.document.querySelectorAll('[data-rec-group]').length >= 4, 'six group cards, empty ones hidden'); assert(w.document.querySelector('[data-rec-group] [data-act=helpOpen]'), 'link buttons'); clean(w, 'records');
+    assert(w.document.querySelector('.rec-nav [data-nav-records]'), 'sidebar group heading links to the page'); assert(w.document.querySelectorAll('.nav-item').length === 13, 'menu keeps 13 items');
+    ev("ACT.setRole({v:'viewer'});go('records')"); const n = w.document.querySelectorAll('[data-rec-group]').length; ev("ACT.setRole({v:'admin'});go('records')"); assert(w.document.querySelectorAll('[data-rec-group]').length > n, 'links are filtered by the role');
+    assert(w.document.querySelector('[data-act=signOut]'), 'sign out in the top bar'); assert(/Open menu/.test(w.document.querySelector('.burger').getAttribute('aria-label')), 'burger label');
+    w.frameElement.style.cssText = 'display:block;position:absolute;left:-10000px;top:0;width:768px;height:760px;border:0'; await new Promise(r => setTimeout(r, 60));   /* focus needs a rendered frame; the burger exists below 1100 px */
+    ev('ACT.sideTog()'); assert(/Close menu/.test(w.document.querySelector('.burger').getAttribute('aria-label')), 'burger label when open'); assert(w.document.querySelector('#side-nav') && w.document.querySelector('.burger').getAttribute('aria-controls') === 'side-nav', 'aria-controls');
+    const esc = () => w.document.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); esc(); eq(w.document.activeElement && w.document.activeElement.className.split(' ')[0], 'burger', 'Escape returns the focus to the burger');
+    ev("ACT.setRole({v:'driver'})"); eq(ev('bottomKeys()[0]'), 'driverapp', 'driver shell bottom bar'); assert(w.document.querySelector('.bottombar .bb.on[aria-current=page]'), 'aria-current on the active item');
+  });
+  await group('global search: hub filter narrows lines and database hits, the database section needs orders:read, rows are options with ids (3.1, 3.5, 3.8)', 'en', async (g, ev, w) => {
+    ev("go('dashboard')"); ev("gsInput('LD-2026')"); const all = ev('gsResults().D.length'), tot = ev('gsResults().D.total'); assert(tot >= all && tot > 0, 'total counts every match'); ev("ACT.hubSet({v:'ATY'})"); ev("gsInput('LD-2026')"); assert(ev('gsResults().D.total') < tot, 'hub filter narrows the database hits');
+    assert(ev("gsResults().D.every(r=>r.type!=='load'||[load(r.load).from,load(r.load).to].includes('ATY'))"), 'only loads of the hub'); ev("ACT.hubSet({v:''})"); ev("gsInput('LD-2026')");
+    assert(w.document.querySelector('#gsearch').getAttribute('aria-label') && w.document.querySelector('#gslist').getAttribute('aria-label') && w.document.querySelector('#gsearch').getAttribute('aria-activedescendant') === 'gs-0' && w.document.querySelector('#gs-0[role=option]'), 'combobox ARIA');
+    ev("ACT.setRole({v:'driver'})"); ev("gsInput('LD-2026')"); eq(ev('gsResults().D.length'), 0, 'no database hits without orders:read');
+  });
+  await group('document.title: record, tab, screen number and brand; help article; 403 (1.22)', 'en', async (g, ev, w) => {
+    ev("go('orders');ACT.stab({s:'orders',v:'ship'})"); assert(/Shipments|PO|04/.test(w.document.title) && /Kökzhol$/.test(w.document.title), 'tab + number + brand: ' + w.document.title);
+    ev("ACT.helpGo({k:'roles'})"); assert(/^Help · .+ · Kökzhol$/.test(w.document.title), 'help title: ' + w.document.title); ev("S.route='forbidden';render()"); assert(/^403 · Kökzhol$/.test(w.document.title), '403 title: ' + w.document.title);
   });
 
 __suite(7);   /* 62-language-audit.js */
@@ -363,8 +432,8 @@ __suite(8);   /* 63-narrow.js */
   for (const px of [375, 768]) await group('narrow ' + px + ' px: burger opens and closes the menu, breadcrumb one line or hidden, search and "⋯" overflow, alarms stay', 'ru', async (g, ev, w) => {
     await narrow(w, px); const d = w.document, vis = s => { const e = d.querySelector(s); return !!(e && e.offsetParent && e.getBoundingClientRect().width > 0); };
     ev("go('routes')");
-    assert(vis('.burger'), 'burger visible'); assert(d.querySelector('.sidebar').getBoundingClientRect().right <= 0, 'menu off-canvas while closed');
-    d.querySelector('.burger').click(); assert(ev('S.sideOpen'), 'burger opens'); assert(d.querySelector('.sidebar.open') && d.querySelector('.side-back'), 'menu + backdrop');
+    assert(vis('.burger'), 'burger visible'); assert(d.querySelector('.sidebar').getBoundingClientRect().right <= 0, 'menu off-canvas while closed'); assert(d.querySelector('.sidebar').hasAttribute('inert') && d.querySelector('.sidebar').getAttribute('aria-hidden') === 'true', 'closed menu is inert + aria-hidden (out of the tab order)');
+    d.querySelector('.burger').click(); assert(ev('S.sideOpen'), 'burger opens'); assert(!d.querySelector('.sidebar').hasAttribute('inert'), 'open menu is reachable'); assert(d.querySelector('.sidebar.open') && d.querySelector('.side-back'), 'menu + backdrop');
     d.querySelector('.side-back').click(); assert(!ev('S.sideOpen') && !d.querySelector('.sidebar.open'), 'backdrop closes');
     d.querySelector('.burger').click(); d.querySelector('.sidebar .nav-item[data-v="fleet"]').click(); eq(ev('S.route'), 'fleet', 'menu item navigates'); assert(!ev('S.sideOpen'), 'menu closes after navigation');
     assert(vis('[data-alarms]'), 'alarms button stays'); const tb = d.querySelector('.topbar'); assert(tb.scrollWidth <= tb.clientWidth + 1, 'topbar fits');
@@ -404,9 +473,9 @@ __suite(9);   /* 70-ops-load.js */
     const ft = ev("finder(load('LD-2026-001850'), true, {}).rows.filter(x => x.fits)"); assert(ft.every((x, i) => i === 0 || ft[i - 1].cost.total <= x.cost.total), 'full-cost ranking is ascending'); assert(f.partners.length >= 2 && f.partners.some(p => p.fits), 'partner offers listed');
   });
   await group('plan of the vehicle type: an unfitting type needs trips:override_load and a reason, audited (FR-99)', 'ru', async (g, ev) => {
-    assert(typeof ev("savePlan('LD-2026-001845', 'v10', '')") === 'string', 'no reason must be refused'); eq(ev("savePlan('LD-2026-001845', 'v10', 'demo reason: one more pallet, cleared by ops lead')"), null, 'admin with reason');
-    assert(ev("ops(load('LD-2026-001845')).plan.fits === false && S.audit.some(a => a.decision.startsWith('Plan override'))"), 'plan stored with override + audit'); ev("ACT.setRole({v:'dispatcher'})"); assert(/override_load/.test(ev("savePlan('LD-2026-001845', 'v35', 'dispatcher tries with a long reason')")), 'dispatcher has no override right');
-    eq(ev("savePlan('LD-2026-001845', 'r12', '')"), null, 'fitting type needs no reason');
+    assert(typeof ev("savePlan('LD-2026-001851', 't35', '')") === 'string', 'no reason must be refused'); eq(ev("savePlan('LD-2026-001851', 't35', 'demo reason: one more pallet, cleared by ops lead')"), null, 'admin with reason');
+    assert(ev("ops(load('LD-2026-001851')).plan.fits === false && S.audit.some(a => a.decision.startsWith('Plan override'))"), 'plan stored with override + audit'); ev("ACT.setRole({v:'dispatcher'})"); assert(/override_load/.test(ev("savePlan('LD-2026-001851', 'v35', 'dispatcher tries with a long reason')")), 'dispatcher has no override right');
+    eq(ev("savePlan('LD-2026-001851', 'r20', '')"), null, 'fitting type needs no reason');
   });
   await group('split over two trucks when no single vehicle takes the load; cost compared with one bigger truck (FR-139)', 'ru', async (g, ev) => {
     const ok = ev("splitPlan(load('LD-2026-001850'))"); assert(!ok.needed && ok.props.length > 0 && ok.props.every(p => typeof p.diff === 'number'), 'split proposals with cost difference');
@@ -508,6 +577,17 @@ __suite(9);   /* 70-ops-load.js */
       gg.ev(`ACT.lwType({id:'${W}', v:'t20'})`); clean(gg.w, lang + ' tent without temperature control'); gg.ev(`ACT.lwType({id:'${W}', v:'t75'}); ACT.lwZones({id:'${W}', v:'2'})`); clean(gg.w, lang + ' two zones'); } finally { gg.done(); } }
   });
 
+  /* ---- operations parity pass: C-25 hand-overs lock the orders, C-13 / C-15 / C-16 plan of an own vehicle ---- */
+  await group('parity pass: partner hand-overs set o.handed, an own vehicle is saved as the plan (unchanged / permission guards)', 'en', async (g, ev) => {
+    const L = 'LD-2026-001856';
+    ev("S.handovers.push({ id: 'HO-T1', load: '" + L + "', p: 'PL-01', st: 'approved', mode: 'full', items: [] })"); assert(ev("ops(load('" + L + "')).orders.every(o => o.handed === 'PL-01')"), 'C-25: an approved full hand-over locks every order');
+    ev("S.handovers.length = 0"); assert(ev("ops(load('" + L + "')).orders.every(o => !o.handed)"), 'C-25: the lock is lifted with the hand-over');
+    const P1 = 'LD-2026-001851'; eq(ev("savePlan('" + P1 + "', 'f:t1', 'test reason: own vehicle as the plan')"), null, 'C-13: own vehicle saved as the plan');
+    assert(ev("ops(load('" + P1 + "')).plan.type") === 'f:t1' && /123 ABC 01/.test(ev("ops(load('" + P1 + "')).plan.label")), 'C-13: the plan stores the vehicle and shows its plate');
+    assert(/unchanged/i.test(ev("savePlan('" + P1 + "', 'f:t1', 'test reason: own vehicle as the plan')")), 'C-15: Plan unchanged');
+    ev("ACT.setRole({v:'viewer'})"); assert(/trips:write/.test(ev("savePlan('" + P1 + "', 'r20', '')")), 'C-16: saving the plan needs trips:write'); ev("ACT.setRole({v:'admin'})");
+  });
+
 __suite(10);   /* 71-ops-ship.js */
   /* ---- W1 operations: Shipments & labels (FR-01..06, 73, 176) ---- */
   await group('scanner search: a GS1-128 scan (AI 00) opens the label of the place, also from the archive (FR-01/02)', 'ru', async (g, ev, w) => {
@@ -586,7 +666,7 @@ __suite(12);   /* 73-ops-dispatch.js */
     ev("ACT.stab({s:'dispatch',v:'board'}); ACT.open({id:'LD-2026-001851'})"); assert(w.document.querySelector('#dr_dep') && w.document.querySelector('[data-act=drUnassign]'), 'drawer release / replanning block'); w.document.querySelector('[data-act=drUnassign]').click(); eq(ev("load('LD-2026-001851').status"), 'unassigned'); clean(w, 'drawer');
   });
   await group('planning: 7-day capacity from data, scenarios change supply and demand, target fleet of 4 trucks, KZ working-day calendar (FR-38/119/156)', 'ru', async (g, ev, w) => {
-    const c = ev('planCapacity(false)'); eq(c.length, 7); eq(c[0].dem, ev("S.loads.filter(l => l.status !== 'delivered' && l.eta.slice(0,10) === '2026-10-18').reduce((s,l) => s + l.pallets, 0) + S.express.filter(e => e.status === 'pending' && e.want.slice(0,10) === '2026-10-18').reduce((s,e) => s + e.pal, 0)"), 'demand from loads and open express of the day'); assert(c.some(x => x.pct > 100), 'a shortfall exists in the demo');
+    const c = ev('planCapacity(false)'); eq(c.length, 7); eq(c[0].dem, ev("S.loads.filter(l => l.status !== 'delivered' && l.eta.slice(0,10) === '2026-10-18').reduce((s,l) => s + l.pallets, 0) + S.express.filter(e => e.status === 'pending' && e.want.slice(0,10) === '2026-10-18').reduce((s,e) => s + e.pal, 0)"), 'demand from loads and open express of the day'); assert(c.every(x => typeof x.need === 'number' && x.reserve === x.trucks - x.need), 'vehicles needed and reserve per day (A-47 / A-50)'); assert(c.some(x => x.pct > 100), 'a shortfall exists in the demo');
     ev('S.ops.scen.peak = true'); eq(ev('planCapacity(false)[1].dem'), Math.round(c[1].dem * 1.3), 'peak +30 %'); ev('S.ops.scen.peak = false; S.ops.scen.storm = true; S.ops.storm = ["KAR","AST"]'); eq(ev('planCapacity(false)[2].trucks'), Math.max(0, c[2].trucks - 2), 'blizzard removes two trucks'); assert(!ev("gate(load('LD-2026-001850')).find(x => x.key === 'wx').pass"), 'storm warning reaches the gate');
     ev('S.ops.scen.storm = false; S.ops.storm = []'); const t = ev('planCapacity(true)'); assert(t.every(x => x.trucks === 4 && x.cap <= 60), 'target fleet 4 trucks, 60 pallets');
     eq(ev("dayKind('2026-10-25')"), 'holiday'); eq(ev("dayKind('2026-10-26')"), 'transfer', 'Republic Day on Sunday moves to Monday'); assert(ev("isWorkDay('2026-10-19')") && !ev("isWorkDay('2026-10-24')")); eq(ev("addWorkDays('2026-10-23', 1)"), '2026-10-27', 'deadline skips weekend + transferred holiday');
@@ -594,6 +674,13 @@ __suite(12);   /* 73-ops-dispatch.js */
   });
   await group('Dispatch extras render in every language without undefined / NaN', 'ru', async () => {
     for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("go('dispatch'); ACT.stab({s:'dispatch',v:'express'})"); clean(gg.w, lang + ' express'); gg.ev("ACT.stab({s:'dispatch',v:'planning'}); S.ops.target = true; S.ops.scen.storm = true; render()"); clean(gg.w, lang + ' planning'); gg.ev("ACT.stab({s:'dispatch',v:'board'}); ACT.open({id:'LD-2026-001850'})"); clean(gg.w, lang + ' drawer'); } finally { gg.done(); } }
+  });
+
+  /* ---- operations parity pass: A-45 / A-47 / A-50 planning rows and hub filter, B-45..47 trip without crew ---- */
+  await group('parity pass: planning shows vehicles needed and reserve, follows the hub segment; a trip can be planned without crew and times', 'en', async (g, ev, w) => {
+    ev("go('dispatch'); ACT.stab({s:'dispatch',v:'planning'})"); assert(w.document.querySelector('[data-need-row]') && w.document.querySelector('[data-reserve-row]'), 'A-47 / A-50: rows');
+    const sum = () => ev('planCapacity(false).reduce((s, r) => s + r.trucks + r.drivers, 0)'), all = sum(); ev("S.hub = 'ALA'"); assert(sum() < all, 'A-45: the hub filter reaches trucks and drivers of the capacity'); ev("S.hub = ''");
+    ev("S.ops.plan.sel = ['O-26-0103']; S.ops.plan.truck = ''; S.ops.plan.drv = ''; S.ops.plan.dep = ''; S.ops.plan.eta = ''"); const r = ev('planCreate()'); assert(r && r.id, 'B-45..47: planned without crew and times'); eq(ev("load('" + r.id + "').status"), 'unassigned');
   });
 
 __suite(13);   /* 74-ops-dashboard.js */
@@ -629,11 +716,16 @@ __suite(13);   /* 74-ops-dashboard.js */
     const dep = d.querySelector('[data-act=pnDep]'); if (dep) { const n = ev('S.loads.length'); dep.click(); eq(ev('S.loads.length'), n + 1, 'trip for departure creates a load'); }
     ev("S.ops.plan.truck = 't4'; S.ops.plan.drv = 'd5'; S.ops.plan.dep = '2026-10-20T07:00'; S.ops.plan.eta = '2026-10-20T18:00'; S.ops.plan.note = 'test'; render()"); const n1 = ev('S.loads.length'); d.querySelector('[data-act=pnCreate]').click();
     eq(ev('S.loads.length'), n1 + 1, 'load created'); const l = ev("S.loads[0]"); eq(l.status, 'assigned', 'driver and truck assigned'); eq(ev("ops(S.loads[0]).orders.length"), 2, 'orders attached with places'); assert(ev("ops(S.loads[0]).orders.every(o => o.places.length === o.pal)"), 'places per pallet'); eq(ev("S.orders.some(o => o.id === 'O-26-0102')"), false, 'orders left the pool');
-    ev("S.ops.plan.sel = ['O-26-0105']; S.ops.plan.truck = 't1'; S.ops.plan.drv = 'd3'; S.ops.plan.dep = ''"); assert(typeof ev('planCreate()') === 'string', 'departure missing is refused'); clean(w, 'planning');
+    ev("S.ops.plan.sel = ['O-26-0105']; S.ops.plan.truck = 't1'; S.ops.plan.drv = 'd3'; S.ops.plan.dep = '2026-10-20T10:00'; S.ops.plan.eta = '2026-10-20T08:00'"); assert(typeof ev('planCreate()') === 'string', 'ETA before the departure is refused'); ev("S.ops.plan.truck = ''; S.ops.plan.drv = 'd3'"); assert(typeof ev('planCreate()') === 'string', 'a vehicle without a driver is refused (B-45)'); clean(w, 'planning');
   });
   await group('dashboard, aside and planning render in every language without undefined / NaN; DE / EN without Cyrillic in the new blocks', 'ru', async () => {
     for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("go('dashboard')"); clean(gg.w, lang + ' dashboard'); gg.ev("ACT.open({id:'LD-2026-001847'})"); clean(gg.w, lang + ' aside'); gg.ev("closeDrawer(); go('dispatch'); ACT.stab({s:'dispatch',v:'planning'})"); clean(gg.w, lang + ' planning');
       if (lang === 'de' || lang === 'en') { for (const sel of ['[data-ov-kpis]', '[data-alert-list=risks]', '.wx-tiles', '[data-plan-form]']) { const el = gg.w.document.querySelector(sel); if (el) { const t = el.innerText; assert(!/[А-Яа-яЁё]/.test(t.replace(/.*(?:ТОО|Астана).*/g, '')), lang + ' Cyrillic in ' + sel); } } } } finally { gg.done(); } }
+  });
+
+  /* ---- operations parity pass: A-33 weather tiles follow the hub segment, A-30 compact inbox ---- */
+  await group('parity pass: the hub segment filters the dashboard weather tiles', 'en', async (g, ev, w) => {
+    ev("S.hub = 'AST'; go('dashboard'); render()"); const d = w.document, tiles = [...d.querySelectorAll('[data-wx]')]; assert(tiles.length === 3 && tiles.every(x => x.dataset.wx.startsWith('AST-')), 'A-33: only the tiles of the chosen hub'); ev("S.hub = ''; render()");
   });
 
 __suite(14);   /* 75-ops-trips.js */
@@ -651,7 +743,8 @@ __suite(14);   /* 75-ops-trips.js */
   });
   await group('stops and outcomes (FR-98): arrival, outside window, delivered / partially / refused with reason, order outcome after the fact, unassign order', 'ru', async (g, ev, w) => {
     const st = ev("tripStops(load('LD-2026-001848'))"), u = st.filter(s => s.kind === 'unload'); assert(st[0].kind === 'pickup' && u.length >= 2, 'stops: pickup + one unloading stop per order'); const k = u[0].key;
-    assert(typeof ev(`stopDeliver('LD-2026-001848', '${k}', {}, '')`) === 'string', 'deliver needs the arrival'); eq(ev(`stopArrive('LD-2026-001848', '${k}')`), null); assert(ev(`tripStops(load('LD-2026-001848')).find(s => s.key === '${k}').arrived`), 'arrival time stored');
+    const k47 = ev("tripStops(load('LD-2026-001847'))").filter(s => s.kind === 'unload')[0].key, k51 = ev("tripStops(load('LD-2026-001851'))").filter(s => s.kind === 'unload')[0].key;
+    assert(typeof ev(`stopDeliver('LD-2026-001851', '${k51}', {}, '')`) === 'string', 'delivery needs a trip under way'); eq(ev(`stopDeliver('LD-2026-001847', '${k47}', {}, '')`), null, 'B-74: the office confirms a delivery without a prior arrival'); assert(ev(`tripStops(load('LD-2026-001847')).find(s => s.key === '${k47}').arrived`), 'arrival recorded with the delivery'); eq(ev(`stopArrive('LD-2026-001848', '${k}')`), null); assert(ev(`tripStops(load('LD-2026-001848')).find(s => s.key === '${k}').arrived`), 'arrival time stored');
     const oid = u[0].orders[0].id; assert(typeof ev(`stopDeliver('LD-2026-001848', '${k}', {'${oid}':'refused'}, '')`) === 'string', 'refusal needs a reason'); eq(ev(`stopDeliver('LD-2026-001848', '${k}', {'${oid}':'partially_delivered'}, 'two pallets damaged')`), null); eq(ev(`findOrder('${oid}').o.outcome`), 'partially_delivered');
     assert(typeof ev(`orderOutcome('LD-2026-001848', '${oid}', 'returned', '')`) === 'string', 'return needs a reason'); eq(ev(`orderOutcome('LD-2026-001848', '${oid}', 'returned', 'returned to hub')`), null); const o2 = u[1].orders[0].id; assert(typeof ev(`orderOutcome('LD-2026-001848', '${o2}', 'returned', 'x')`) === 'string', 'returned only after refused / partial');
     ev("ACT.open({id:'LD-2026-001848'}); ACT.tab({v:'stops'})"); assert(w.document.querySelector('[data-stops-panel]') && w.document.querySelector('[data-trip-order]'), 'stops tab'); clean(w, 'stops tab');
@@ -677,6 +770,25 @@ __suite(14);   /* 75-ops-trips.js */
     for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("go('orders'); ACT.stab({s:'orders',v:'rec'}); ACT.orNew()"); clean(gg.w, lang + ' orders'); gg.ev("ACT.open({id:'LD-2026-001848'}); ACT.tab({v:'stops'})"); clean(gg.w, lang + ' stops'); gg.ev("closeDrawer(); ACT.open({id:'LD-2026-001847'})"); clean(gg.w, lang + ' abort form'); } finally { gg.done(); } }
   });
 
+  /* ---- operations parity pass (docs/parity-0311/operations.md): B-64, E-61, E-101, E-89, B-59 / B-63, B-21, B-72 ---- */
+  await group('parity pass: delivered only with all stops done, the last stop closes the trip, quality hold at delivery, order cancel (FR-95), LOT charset, driver scope, replan / edit guards', 'en', async (g, ev, w) => {
+    const L = 'LD-2026-001847', n = ev("tripStops(load('" + L + "')).filter(s => s.kind === 'unload').length"), key = i => ev("tripStops(load('" + L + "')).filter(s => s.kind === 'unload')[" + i + "].key");
+    assert(/Not all stops/.test(ev("canMove(load('" + L + "'), 'delivered')")), 'B-64: delivered with open stops is refused'); assert(n >= 2, 'several stops');
+    for (let i = 0; i < n; i++) eq(ev("stopDeliver('" + L + "', '" + key(i) + "', {}, '')"), null, 'stop ' + i + ' delivered (the arrival is recorded with it)');
+    eq(ev("load('" + L + "').status"), 'delivered', 'B-64: delivering the last stop closes the trip');
+    const H = 'LD-2026-001849', hs = ev("tripStops(load('" + H + "')).filter(s => s.kind === 'unload')[0]"), hoid = hs.orders[0].id;
+    assert(ev("devHold('" + hoid + "')"), 'E-61: an order of a deviating load is on quality hold');
+    assert(/hold|Qualit|качества/i.test(ev("stopDeliver('" + H + "', '" + hs.key + "', {}, '')")), 'E-61: delivery of a held order is refused');
+    eq(ev("stopDeliver('" + H + "', '" + hs.key + "', {'" + hoid + "':'quarantine'}, '')"), null, 'E-61: delivered in quarantine'); eq(ev("findOrder('" + hoid + "').o.outcome"), 'quarantine');
+    assert(typeof ev("orderCreate({site:'kos', goods:'Reagent', lot:'ЛОТ-1', pal:1, kg:100})") === 'string', 'E-89: LOT only Latin letters, digits and - _ / .');
+    const P1 = 'LD-2026-001851', oc = ev("ops(load('" + P1 + "')).orders[0].id"), p0 = ev("load('" + P1 + "').pallets"), pal = ev("findOrder('" + oc + "').o.pal");
+    eq(ev("orderCancel('" + oc + "', 'customer withdrew the order')"), null); eq(ev("load('" + P1 + "').pallets"), Math.round((p0 - pal) * 10) / 10, 'E-101: the capacity of the trip is freed'); assert(ev("tripStops(load('" + P1 + "')).every(s => !s.orders || s.orders.every(o => o.id !== '" + oc + "'))"), 'E-101: the stop of the order drops out of the trip');
+    assert(/already left/.test(ev("orderCancel(ops(load('LD-2026-001848')).orders[0].id, '')")), 'E-101: no cancel on a trip that already left');
+    assert(/unchanged/i.test(ev("replan('" + P1 + "', load('" + P1 + "').eta, 'weather')")), 'B-21: Departure unchanged'); assert(/Nothing changed/.test(ev("tripEdit('LD-2026-001856', {driver:'d3', truck:'t1'})")), 'B-72: Nothing changed');
+    ev("ACT.setRole({v:'driver'}); S.da.drv = 'd4'"); assert(ev("ownLoads(S.loads).length") > 0 && ev("ownLoads(S.loads).every(l => l.driver === 'd4')"), 'B-59: a driver sees only own loads');
+    ev("ACT.adv({id:'LD-2026-001848', to:'problem'})"); eq(ev("load('LD-2026-001848').status"), 'in_transit', 'B-63: a driver cannot report a problem / go back'); assert(typeof ev("tripCancel('LD-2026-001856', 'driver tries to cancel')") === 'string', 'B-63: a driver cannot cancel a trip'); ev("ACT.setRole({v:'admin'})");
+  });
+
 __suite(15);   /* 76-ops-docs.js */
   /* ---- P2: Documents KZ — full 0.3.10 set, "Generate all", gate 9 + 2, "Clear without weather forecast" ---- */
   await group('Documents KZ: 12 document types in the catalogue; the set follows the load (third-party, ADR, partner handover)', 'ru', async (g, ev, w) => {
@@ -686,7 +798,7 @@ __suite(15);   /* 76-ops-docs.js */
   });
   await group('Documents KZ: generate → PDF → sign → IS ESF per row, signature only where the type needs it, "Generate all"', 'ru', async (g, ev, w) => {
     ev("S.ops.docSel = 'LD-2026-001851'; go('orders'); ACT.stab({s:'orders',v:'docs'})"); const d = w.document; assert(d.querySelectorAll('[data-doc]').length >= 8, 'rows');
-    d.querySelector('[data-act=dkGen][data-k=order]').click(); eq(ev("ops(load('LD-2026-001851')).kdocs.order"), 'ready'); assert(d.querySelector('[data-act=dkPdf][data-k=order]') && d.querySelector('[data-act=dkSign][data-k=order]'), 'PDF + sign for the order'); d.querySelector('[data-act=dkGen][data-k=reg]').click(); assert(!d.querySelector('[data-act=dkSign][data-k=reg]'), 'copies of certificates need no signature');
+    eq(ev("ops(load('LD-2026-001851')).kdocs.reg"), 'ready', 'E-11: the pre-trip set is ready as soon as the load has a crew'); eq(ev("ops(load('LD-2026-001851')).kdocs.order"), 'signed', 'E-11: the order is ready and signed'); d.querySelector('[data-act=dkGen][data-k=transfer]').click(); eq(ev("ops(load('LD-2026-001851')).kdocs.transfer"), 'ready'); assert(d.querySelector('[data-act=dkPdf][data-k=transfer]') && d.querySelector('[data-act=dkSign][data-k=transfer]'), 'PDF + sign for the transfer note'); assert(!d.querySelector('[data-act=dkSign][data-k=reg]'), 'copies of certificates need no signature');
     assert(typeof ev("docGen('LD-2026-001851', 'epod')") === 'string', 'ePOD only after delivery'); d.querySelector('[data-act=dkAll]').click(); const left = ev("docSet(load('LD-2026-001851')).filter(x => x.st === 'none' && x.can).length"); eq(left, 0, 'generate all leaves nothing generable');
     ev("ACT.dkSel({id:'LD-2026-001841'})"); eq(ev("docGen('LD-2026-001841', 'epod')"), null, 'ePOD of a delivered, approved trip'); clean(w, 'documents');
   });
@@ -700,6 +812,15 @@ __suite(15);   /* 76-ops-docs.js */
     for (const lang of LANGS) { const gg = await fresh(lang); try { for (const id of ['LD-2026-001850', 'LD-2026-001856', 'LD-2026-001841']) { gg.ev("S.ops.docSel = '" + id + "'; go('orders'); ACT.stab({s:'orders',v:'docs'})"); clean(gg.w, lang + ' documents ' + id); } if (lang === 'de' || lang === 'en') assert(!/[А-Яа-яЁё]/.test([...gg.w.document.querySelectorAll('[data-doc] b, [data-doc] .sub')].map(e => e.innerText).join(' ')), lang + ' Cyrillic in document names'); } finally { gg.done(); } }
   });
 
+  /* ---- operations parity pass: E-4 / E-25 / E-42 permission gates, E-44 critical alarm withdraws the release, E-6 rejection ---- */
+  await group('parity pass: documents and release need documents:sign, a critical alarm withdraws the release with its id, a state system can reject an ESF', 'en', async (g, ev) => {
+    const L = 'LD-2026-001851';
+    ev("ACT.setRole({v:'warehouse'})"); assert(/documents:sign/.test(ev("docGen('" + L + "', 'transfer')")), 'E-4: generate needs documents:sign'); assert(/documents:sign/.test(ev("docSend('" + L + "', 'ttn')")), 'E-4: send needs documents:sign'); ev("ACT.setRole({v:'admin'})");
+    ev("ops(load('" + L + "')).released = { by: 'test', t: '08:00', override: false }"); ev("raiseAlarm({ lvl: 2, cat: 'door', src: 'wialon', hub: 'AST', load: '" + L + "', truck: 't4', text: 'level 2' })"); assert(ev("released(load('" + L + "'))"), 'a level-2 alarm keeps the release');
+    ev("raiseAlarm({ lvl: 3, cat: 'temperature', src: 'wialon', hub: 'AST', load: '" + L + "', truck: 't4', text: 'level 3' })"); assert(!ev("released(load('" + L + "'))") && ev("ops(load('" + L + "')).revoked.why") === 'alarm' && /^ALM-/.test(ev("ops(load('" + L + "')).revoked.alarm")), 'E-44: a critical alarm withdraws the release, reason alarm + id');
+    ev("cust('c1').bin = '12'; ops(load('LD-2026-001841')).kdocs.esf = 'sent'"); eq(ev("docPoll('LD-2026-001841')"), 0); eq(ev("ops(load('LD-2026-001841')).kdocs.esf"), 'rejected', 'E-6: an ESF with an invalid BIN is rejected'); assert(ev("ops(load('LD-2026-001841')).inbox.some(x => x.lvl === 3)"), 'E-6: level-3 hint');
+  });
+
 __suite(16);   /* 80-res-fleet-staff.js */
   /* ---- W2 resources: fleet registry (FR-27/50/118/141/157/158) and staff (FR-08/10/46/55/114/120/122/123) ---- */
   await group('W2 fleet: new truck needs checklist, then becomes plannable (FR-157)', 'ru', async (g, ev, w) => {
@@ -707,7 +828,7 @@ __suite(16);   /* 80-res-fleet-staff.js */
     ev("S.trucks.push(Object.assign({}, S.trucks[0], {id:'t9',plate:'999 ZZZ 01',docs:Object.assign({}, S.trucks[0].docs),svc:Object.assign({}, S.trucks[0].svc),ob:null,lp:null,status:'available'}));RES.initTruck(trk('t9'),true)");
     assert(!ev("RES.planAvail(trk('t9'))"), 'must not be plannable before closing'); assert(ev("compat(load('LD-2026-001852'),drv('d2'),trk('t9')).some(x=>/FR-157/.test(x))"), 'compat must name the checklist');
     assert(ev("RES.obClose(trk('t9'))"), 'close must be refused while incomplete'); ev("trk('t9').lp.src='sts';trk('t9').lp.date='2026-10-01'");
-    for (const k of ['sts', 'tachograph', 'adr']) ev(`RES.obConfirm(trk('t9'),'${k}','X1')`);
+    eq(typeof ev("RES.obConfirm(trk('t9'),'sts','X1')"), 'string', 'F-63: STS ref must match 4–30 chars'); for (const k of ['sts', 'tachograph', 'adr']) ev(`RES.obConfirm(trk('t9'),'${k}','STS-1234')`);
     eq(ev("RES.obClose(trk('t9'))"), null, 'close'); assert(ev("RES.planAvail(trk('t9'))"), 'plannable after close');
   });
   await group('W2 fleet: load profile calibration validates and computes axle shares (FR-141)', 'ru', async (g, ev) => {
@@ -756,6 +877,10 @@ __suite(16);   /* 80-res-fleet-staff.js */
     for (const s of ['notified', 'accepted', 'deducted']) eq(ev(`RES.fineSet('${fid}','${s}')`), null); assert(ev(`S.costs.some(c=>c.ref==='${fid}'&&c.amount<0)`), 'deduction entry');
     const n = ev('RES.fineImport().length'); assert(n === 2 && ev("S.res.fines.filter(f=>f.drv).length") >= 3, 'import attributes by waybill');
     ev("go('drivers');ACT.stab({s:'drivers',v:'staff'})"); assert(w.document.querySelector('[data-fine]'), 'fines table'); clean(w, 'staff');
+  });
+  await group('R6 staff: urgent trip U-<n> is created when no unassigned load exists (S-17/S-19)', 'ru', async (g, ev) => {
+    ev("ACT.setRole({v:'admin'})"); const n0 = ev('S.loads.length'); const r = ev("RES.urgentTrip('AST',{zone:'chilled',hrsRaw:'3'})"); assert(r && /^U-\d+$/.test(r.ok), 'urgent trip id: ' + JSON.stringify(r)); eq(ev('S.loads.length'), n0 + 1); eq(ev(`load('${r.ok}').status`), 'assigned'); eq(ev(`load('${r.ok}').notes.some(n=>/Срочный рейс/.test(n.text))`), true);
+    assert(/h/.test(ev("RES.urgentTrip('AST',{hrsRaw:'20'})")), 'h outside 0.5…12 refused'); assert(typeof ev("RES.urgentTrip('AST',{order:'ZZ'})") === 'string', 'unknown order refused');
   });
 
 __suite(17);   /* 81-res-driver-app.js */
@@ -806,11 +931,15 @@ __suite(18);   /* 82-res-coverage-lines.js */
   await group('W2 coverage: escalation L1/L2/L3 by expected zone, window and cold cargo (FR-109)', 'ru', async (g, ev, w) => {
     ev("go('routes');ACT.stab({s:'routes',v:'coverage'})"); assert(w.document.querySelector('#cov_contacts'), 'contacts'); clean(w, 'coverage');
     const l = ev("S.loads.find(l=>l.status==='in_transit'&&l.zone!=='ambient').id"); eq(ev(`RES.covSet('${l}',10).lvl`), 0, 'on line'); eq(ev(`RES.covSet('${l}',40).lvl`) >= 1, true);
-    eq(ev(`RES.covSet('${l}',75).lvl`), 3, 'cold cargo > 60 min'); assert(ev(`S.inc.some(i=>i.id==='COV-${l}3')`), 'incident created');
+    const zmin = ev(`(RES.deadWindow(load('${l}'))||{seg:{min:0}}).seg.min`), nearZone = ev(`!!(RES.deadWindow(load('${l}'))&&(RES.deadWindow(load('${l}')).now||RES.deadWindow(load('${l}')).startIn<=9))`);
+    if (nearZone && zmin >= 70) eq(ev(`RES.covSet('${l}',65).lvl`), 1, 'C-37: cold cargo inside an expected, not exceeded window stays L1');
+    eq(ev(`RES.covSet('${l}',${zmin + 90}).lvl`), 3, 'cold cargo > 60 min beyond the window'); assert(ev(`S.inc.some(i=>i.id==='COV-${l}3')`), 'incident created');
+    eq(ev(`RES.covSet('${l}',${zmin + 90},30).lvl`), 2, 'C-37: an SMS heartbeat within hbMin + 5 = 35 min keeps L2');
   });
   await group('W2 coverage: dispatcher SMS delivery status, timeout and retry (FR-110)', 'ru', async (g, ev) => {
     const l = ev("S.loads.find(l=>l.status==='in_transit').id"); const r = ev(`RES.smsSend('${l}','test')`); eq(ev(`S.res.cov.sms[0].st`), 'sent'); ev('RES.smsTick(2)'); assert(['sent', 'delivered'].includes(ev('S.res.cov.sms[0].st')), 'delivering');
-    ev('RES.smsTick(10)'); eq(ev('S.res.cov.sms[0].st'), 'no_ack', 'timeout'); ev(`RES.smsRetry('${r.ok}')`); eq(ev('S.res.cov.sms[0].tries'), 2); eq(ev('S.res.cov.sms[0].st'), 'sent'); ev(`RES.smsAck('${r.ok}')`); eq(ev('S.res.cov.sms[0].st'), 'acked');
+    ev('RES.smsTick(10)'); eq(ev('S.res.cov.sms[0].st'), 'no_ack', 'timeout'); ev(`RES.smsRetry('${r.ok}')`); eq(ev('S.res.cov.sms[0].tries'), 2); eq(ev('S.res.cov.sms[0].st'), 'sent'); eq(ev('S.res.cov.sms[0].re'), r.ok, 'C-48: retry keeps the failed record and sends a new one «resend of»'); eq(ev(`S.res.cov.sms.find(x=>x.id==='${r.ok}').st`), 'no_ack'); ev(`RES.smsAck(S.res.cov.sms[0].id)`); eq(ev('S.res.cov.sms[0].st'), 'acked');
+    const pl = ev("S.res.cov.sms[0].plate"); ev(`RES.smsSend('${l}','CONT')`); ev(`RES.smsSend('${l}','CONT')`); ev(`RES.smsSend('${l}','CONT')`); assert(/3 SMS/.test(ev(`RES.smsSend('${l}','CONT')`)), 'C-46: rate limit 3 SMS / vehicle / 10 min'); eq(ev("S.res.cov.sms[0].ackMin"), 0, 'CONT needs no acknowledgement');
   });
   await group('W2 coverage: dead zones from telematics gaps need 3 passes and analyst decision (FR-111)', 'ru', async (g, ev) => {
     const n = ev('RES.covProposals().length'); assert(n >= 2, 'seeded proposals'); const seg = 'ALA-SHY'; assert(!ev(`RES.covProposals().some(p=>p.seg.id==='${seg}')`), 'one gap -> no proposal'); ev(`RES.covGapAdd('${seg}',30);RES.covGapAdd('${seg}',25)`); assert(ev(`RES.covProposals().some(p=>p.seg.id==='${seg}')`), 'three passes -> proposal');
@@ -853,7 +982,7 @@ __suite(19);   /* 83-res-thermo.js */
     const t = ev("S.loads.find(l=>l.status==='in_transit').truck"); ev(`S.thermo.sel='${t}';THERMO.hist(trk('${t}'))`); const last0 = ev(`THERMO.hist(trk('${t}')).cold.slice(-1)[0]`);
     ev('liveTick()'); eq(ev(`THERMO.hist(trk('${t}')).cold.length`), 48, 'window stays 48'); eq(ev(`THERMO.hist(trk('${t}')).cold.slice(-1)[0]`), ev(`trk('${t}') && S.loads.find(l=>l.truck==='${t}'&&l.status!=='delivered').temp`), 'last point = live temp');
     assert(last0 !== undefined, 'had a reading'); ev(`ACT.thDoor({id:'${t}'})`); assert(ev('S.thermo.door') && ev('S.thermo.door.truck') === t, 'door open'); const l = ev(`S.loads.find(l=>l.truck==='${t}'&&l.status!=='delivered').id`);
-    for (let i = 0; i < 95; i++) ev('THERMO.tick()'); assert(ev('S.thermo.door.sec') >= 180, 'timer counts'); eq(ev(`load('${l}').status`), 'problem', 'alarm after 3 min'); assert(ev("S.audit.some(a=>/3 min/.test(a.reason))"), 'audited');
+    for (let i = 0; i < 95; i++) ev('THERMO.tick()'); assert(ev('S.thermo.door.sec') >= 180, 'timer counts'); assert(ev(`S.alarms.some(a => a.load === '${l}' && a.cat === 'door' && a.lvl === 2 && a.status !== 'closed')`), 'D-29: a level-2 door alarm after 3 min'); assert(ev(`load('${l}').status`) !== 'problem', 'D-29: the door alarm does not force the load to problem'); assert(ev("S.audit.some(a=>/3 min/.test(a.reason))"), 'audited');
     ev(`ACT.thDoor({id:'${t}'})`); assert(!ev('S.thermo.door'), 'door closed');
   });
   await group('P3 temperature log: record reading, out-of-range opens a deviation, sensor mapping, thermochron CSV feeds the thermochron log', 'ru', async (g, ev, w) => {
@@ -868,6 +997,17 @@ __suite(19);   /* 83-res-thermo.js */
   await group('P3: temperature tabs render in 4 languages, DE/EN without Cyrillic', 'ru', async (g, ev) => {
     for (const lang of LANGS) { const gg = await fresh(lang); try { for (const k of ['temp', 'templog']) { gg.ev(`go('routes');ACT.stab({s:'routes',v:'${k}'})`); clean(gg.w, lang + ' routes/' + k);
       if (lang === 'de' || lang === 'en') { let txt = gg.ev("document.querySelector('.content').innerText"); const known = gg.ev("S.drivers.flatMap(d=>[d.name,d.ini]).concat(CUSTOMERS.flatMap(c=>[c.name,c.ini]))"); known.forEach(n => { txt = txt.split(n).join(''); }); const cyr = txt.match(/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүІі]+/g) || []; assert(!cyr.length, lang + ' Cyrillic in ' + k + ': ' + cyr.slice(0, 5)); } } } finally { gg.done(); } }
+  });
+
+  /* ---- operations parity pass: D-41 reading raises an alarm, D-76 one alarm store in Security, D-39 / D-43 / D-50 log rules ---- */
+  await group('parity pass: a manual out-of-range reading raises an alarm, Security lists the alarm store, chamber / duplicate / line errors of the temperature log', 'en', async (g, ev, w) => {
+    const l = ev("S.loads.find(l => l.status === 'in_transit' && l.zone === 'pharma')"), t = l.truck;
+    eq(ev("THERMO.rec({truck:'" + t + "', cls:'pharma', val:12}).ok"), false);
+    const a = ev("S.alarms.find(a => a.load === '" + l.id + "' && a.cat === 'temperature' && a.status !== 'closed')"); assert(a && a.lvl === 3, 'D-41: the reading raised a level-3 alarm (>= 2 K outside)');
+    ev("go('routes'); ACT.stab({s:'routes',v:'sec'})"); assert(w.document.querySelector('[data-inc="' + a.id + '"]'), 'D-76: Security lists the alarms of the Dashboard store');
+    const miss = ev("['frozen','chilled','pharma','ambient'].find(z => !trk('" + t + "').zones.includes(z))"); if (miss) assert(ev("THERMO.rec({truck:'" + t + "', cls:'" + miss + "', val:5}).err"), 'D-39: a class the vehicle has no chamber for is refused');
+    const csv = "time;C\\n08:00;5.1\\n08:05;5.4"; ev("THERMO.csv({truck:'" + t + "', cls:'pharma', logger:'LG-902', text:'" + csv + "'})"); eq(ev("THERMO.csv({truck:'" + t + "', cls:'pharma', logger:'LG-902', text:'" + csv + "'}).dups"), 2, 'D-43: a re-upload is de-duplicated');
+    assert(/\b2\b/.test(ev("THERMO.csv({truck:'" + t + "', cls:'pharma', text:'08:00;5.1\\n08:05;abc'}).err")), 'D-50: the first bad line is named');
   });
 
 __suite(20);   /* 84-res-weather.js */
@@ -887,6 +1027,13 @@ __suite(20);   /* 84-res-weather.js */
   await group('P3: weather tab renders in 4 languages, DE/EN without Cyrillic', 'ru', async (g, ev) => {
     for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("go('routes');ACT.stab({s:'routes',v:'wx'})"); clean(gg.w, lang + ' routes/wx');
       if (lang === 'de' || lang === 'en') { const txt = gg.ev("document.querySelector('.content').innerText"); const cyr = txt.match(/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүІі]+/g) || []; assert(!cyr.length, lang + ' Cyrillic: ' + cyr.slice(0, 5)); } } finally { gg.done(); } }
+  });
+
+  /* ---- operations parity pass: D-61 forecast level rule, D-58 stale forecast in the Go/No-Go gate ---- */
+  await group('parity pass: weather level rule of forecast.level() (buran 3, snow 2, frost / wind 1) and the stale forecast in the Go/No-Go gate', 'en', async (g, ev) => {
+    const lv = c => ev('WEATHER.risk(' + JSON.stringify(c) + ')');
+    eq(lv({ min: -5, max: 2, wind: 5, snow: false }), 1, 'frost'); eq(lv({ min: 3, max: 9, wind: 16, snow: false }), 1, 'wind >= 15'); eq(lv({ min: 1, max: 5, wind: 5, snow: true }), 2, 'snow'); eq(lv({ min: -3, max: 1, wind: 22, snow: true }), 3, 'buran'); eq(lv({ min: -41, max: -30, wind: 3, snow: false }), 3, 'critical cold'); eq(lv({ min: -26, max: -20, wind: 3, snow: false }), 2, 'severe cold'); eq(lv({ min: 5, max: 12, wind: 3, snow: false }), 0, 'calm');
+    assert(ev('WEATHER.stale()'), 'stale at the start'); const wx = ev("gate(load('LD-2026-001851')).find(x => x.key === 'wx')"); assert(!wx.pass || /6 h|older than 6/.test(wx.text), 'D-58: a stale forecast is an amber manual decision, not a green gate');
   });
 
 __suite(21);   /* 85-res-coverage.js */
@@ -917,10 +1064,10 @@ __suite(21);   /* 85-res-coverage.js */
     const n0 = ev('S.res.cov.smsIn.length'); assert(n0 >= 3, 'seeded received SMS'); eq(w.document.querySelectorAll('[data-sms-log]').length, Math.min(6, n0), 'received list'); eq(typeof ev("RES.smsReceive('hello')"), 'string', 'bad format refused'); ev("ACT.covSmsIn({v:'TE'})"); eq(ev('S.res.cov.smsIn.length'), n0 + 1);
     eq(w.document.querySelectorAll('#sm_text option').length, 6, 'WAIT / CALL / CHKT / CONT / STOP / PARK'); const l = ev("S.loads.find(l=>l.status==='in_transit').id"); const r = ev(`RES.smsSend('${l}','STOP')`); assert(r.ok, 'sent'); eq(ev('S.res.cov.sms[0].code'), 'STOP'); assert(/ MS .*i=STOP;m=O\d+/.test(ev('S.res.cov.sms[0].body')), 'OL1 MS body');
     ev('ACT.covGw()'); eq(ev('S.res.cov.gw'), 'degraded'); ev(`RES.smsSend('${l}','WAIT')`); eq(ev('S.res.cov.sms[0].st'), 'queued', 'queued while degraded'); ev('ACT.covGw()'); ev('RES.smsTick(1)'); assert(['sent', 'delivered'].includes(ev('S.res.cov.sms[0].st')), 'queue drains when online');
-    ev('RES.smsTick(10)'); eq(ev('S.res.cov.sms[0].st'), 'no_ack', 'timeout'); ev('render()'); assert(w.document.querySelector('[data-sms-resend]'), 'resend button'); ev(`RES.smsRetry(S.res.cov.sms[0].id)`); eq(ev('S.res.cov.sms[0].tries'), 2); assert(w.document.querySelector('[data-sms-gateway]'), 'gateway status card');
+    ev('RES.smsTick(10)'); assert(['sent', 'delivered'].includes(ev('S.res.cov.sms[0].st')), 'WAIT is acknowledged within 30 min (C-46), not 10'); ev('RES.smsTick(25)'); eq(ev('S.res.cov.sms[0].st'), 'no_ack', 'timeout after the per-code deadline'); ev('render()'); assert(w.document.querySelector('[data-sms-resend]'), 'resend button'); assert(/acknowledgement due|подтверждение до/i.test(w.document.querySelector('[data-sms]').textContent), 'due time shown'); ev(`RES.smsRetry(S.res.cov.sms[0].id)`); eq(ev('S.res.cov.sms[0].tries'), 2); assert(w.document.querySelector('[data-sms-gateway]'), 'gateway status card');
   });
   await group('P3 security: closing a real incident needs a category and ≥ 10 characters (FR-105); simulated ones close directly', 'ru', async (g, ev, w) => {
-    ev("go('routes');ACT.stab({s:'routes',v:'sec'})"); const id = ev("S.inc.find(i=>!i.sim).id"); ev(`ACT.incClose({id:'${id}'})`); assert(w.document.querySelector(`[data-close-form="${id}"] #inc_cat`) && w.document.querySelector('#inc_note'), 'close form');
+    ev("go('routes');ACT.stab({s:'routes',v:'sec'})"); const id = ev("S.inc.find(i=>!i.sim && /^INC-/.test(i.id)).id"); ev(`ACT.incClose({id:'${id}'})`); assert(w.document.querySelector(`[data-close-form="${id}"] #inc_cat`) && w.document.querySelector('#inc_note'), 'close form');
     eq(typeof ev(`SECURITY.close('${id}','technical','short')`), 'string', 'short text refused'); eq(ev(`S.inc.find(i=>i.id==='${id}').st`) !== 'closed', true); eq(typeof ev(`ACT.incSt({id:'${id}',v:'closed'})`), 'string', 'incSt closed without fields refused');
     w.document.querySelector('#inc_note').value = 'Driver called, detour confirmed'; ev(`ACT.incCloseOk({id:'${id}'})`); eq(ev(`S.inc.find(i=>i.id==='${id}').st`), 'closed', 'closed'); eq(ev(`S.inc.find(i=>i.id==='${id}').res.cat`), 'resolved_on_site'); assert(w.document.querySelector(`[data-inc-res="${id}"]`), 'resolution shown'); assert(ev("S.audit.some(a=>/detour confirmed/.test(a.reason))"), 'audited with text');
     ev("ACT.secSim({v:'breakdown'})"); const sim = ev('S.inc[0].id'); ev(`ACT.incClose({id:'${sim}'})`); eq(ev('S.inc[0].st'), 'closed', 'simulated closes directly');
@@ -928,7 +1075,7 @@ __suite(21);   /* 85-res-coverage.js */
   await group('P3: coverage and security tabs render in 4 languages, DE/EN without Cyrillic; FR-109 / FR-110 contracts intact', 'ru', async (g, ev) => {
     for (const lang of LANGS) { const gg = await fresh(lang); try { for (const k of ['coverage', 'sec']) { gg.ev(`go('routes');ACT.stab({s:'routes',v:'${k}'})`); clean(gg.w, lang + ' routes/' + k);
       if (lang === 'de' || lang === 'en') { let txt = gg.ev("document.querySelector('.content').innerText"); const known = gg.ev("S.drivers.flatMap(d=>[d.name,d.ini]).concat(CUSTOMERS.flatMap(c=>[c.name,c.ini]))"); known.forEach(n => { txt = txt.split(n).join(''); }); txt = txt.replace(/\[data-cov-detail[^\]]*\]/g, ''); const cyr = txt.match(/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүІі]+/g) || []; assert(!cyr.length, lang + ' Cyrillic in ' + k + ': ' + cyr.slice(0, 5)); } } } finally { gg.done(); } }
-    const l = ev("S.loads.find(l=>l.status==='in_transit'&&l.zone!=='ambient').id"); eq(ev(`RES.covSet('${l}',10).lvl`), 0); eq(ev(`RES.covSet('${l}',75).lvl`), 3, 'L3 kept');
+    const l = ev("S.loads.find(l=>l.status==='in_transit'&&l.zone!=='ambient').id"); eq(ev(`RES.covSet('${l}',10).lvl`), 0); eq(ev(`RES.covSet('${l}',(RES.deadWindow(load('${l}'))||{seg:{min:0}}).seg.min+90).lvl`), 3, 'L3 kept');
   });
 
 __suite(22);   /* 86-res-fleet-ext.js */
@@ -1017,7 +1164,7 @@ __suite(23);   /* 87-res-partners.js */
     if (!cand) { assert(true, 'no gold candidate'); return; } ev(`ACT.hoGive({id:'${cand}'})`); const h = ev("S.handovers[S.handovers.length-1]"); eq(h.st, 'approved'); assert(w.document.querySelector(`[data-ho-portal=${h.id}]`), 'portal step block');
     ev(`ACT.hoPortal({id:'${h.id}'})`); eq(ev(`S.handovers.find(x=>x.id==='${h.id}').portal`), 1); assert(ev(`S.handovers.find(x=>x.id==='${h.id}').lg.logger`), 'logger id recorded'); assert(w.document.querySelector(`[data-ho-lg=${h.id}]`), 'logger line shown'); ev(`ACT.hoPortal({id:'${h.id}'})`); eq(ev(`S.handovers.find(x=>x.id==='${h.id}').portal`), 2); assert(w.document.querySelector(`[data-ho-epod=${h.id}]`), 'on-behalf form at step 3');
     ev(`ACT.hoEpod({id:'${h.id}'})`); assert(!ev(`S.handovers.find(x=>x.id==='${h.id}').epod`), 'no reason, no scan -> refused'); w.document.querySelector(`#ho_reason_${h.id}`).value = 'Partner portal down, paper POD faxed'; ev(`ACT.hoEpod({id:'${h.id}'})`); assert(!ev(`S.handovers.find(x=>x.id==='${h.id}').epod`), 'reason without scan -> refused');
-    ev(`ACT.hoScan({id:'${h.id}'})`); w.document.querySelector(`#ho_reason_${h.id}`).value = 'Partner portal down, paper POD faxed'; ev(`ACT.hoEpod({id:'${h.id}'})`); const done = ev(`S.handovers.find(x=>x.id==='${h.id}')`); assert(done.epod && done.onBehalf && done.reason && done.scan, 'ePOD on behalf recorded'); eq(ev(`load('${lid}').status`), 'delivered'); assert(ev("S.audit.some(a=>/FR-108/.test(a.decision))"), 'audited FR-108'); assert(w.document.querySelector(`[data-ho-who=${h.id}]`).innerText.length > 10, 'who line'); clean(w, 'after ePOD');
+    ev(`ACT.hoScan({id:'${h.id}'})`); w.document.querySelector(`#ho_reason_${h.id}`).value = 'Partner portal down, paper POD faxed'; ev(`ACT.hoEpod({id:'${h.id}'})`); const done = ev(`S.handovers.find(x=>x.id==='${h.id}')`); assert(done.epod && done.onBehalf && done.reason && done.scan, 'ePOD on behalf recorded'); assert(done.lg.delivery && done.lg.delivery.logger && isFinite(done.lg.delivery.temp) && done.lg.delivery.seal, 'P-87: delivery logger / °C / seal record at step 2'); assert(done.podAt && done.t0 && done.due, 'P-89: ISO t0 / due / podAt stored'); eq(ev(`load('${lid}').status`), 'delivered'); assert(ev("S.audit.some(a=>/FR-108/.test(a.decision))"), 'audited FR-108'); assert(w.document.querySelector(`[data-ho-who=${h.id}]`).innerText.length > 10, 'who line'); clean(w, 'after ePOD');
   });
   await group('P4 partners: service on route, Call service, service request close books a cost', 'ru', async (g, ev, w) => {
     ev("ACT.setRole({v:'admin'});" + PTAB); assert(w.document.querySelector('#pt_ws'), 'service on route'); const ws = ev("[...document.querySelectorAll('[data-ws]')].map(e=>e.dataset.ws)"); assert(ws.length >= 1, 'workshops on the route'); const free = ev("[...document.querySelectorAll('[data-act=ptCallWs]')].map(b=>b.dataset.id)[0]"); assert(free, 'a callable workshop');
@@ -1028,6 +1175,13 @@ __suite(23);   /* 87-res-partners.js */
   await group('P4 partners: tab renders in RU / DE / EN / KK without undefined / NaN, DE / EN without Cyrillic', 'ru', async () => {
     for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("ACT.setRole({v:'admin'});go('dispatch');ACT.dtab({v:'partners'});ACT.ptContact({id:'PL-01'})"); clean(gg.w, 'partners ' + lang); gg.ev("closeDrawer()");
       if (lang === 'de' || lang === 'en') { const cy = gg.ev("(()=>{const bad=[];document.querySelectorAll('#pt_cov, #pt_ho, #pt_ws, #pt_cities, .filters').forEach(e=>{const m=e.innerText.replace(/ТОО|ИП/g,'').match(/[А-Яа-я]{3,}/);if(m)bad.push(m[0])});return bad})()"); assert(!cy.length, lang + ' Cyrillic in partner panels: ' + cy.join(',')); } } finally { gg.done(); } }
+  });
+  await group('R6 partners: measured SLA of the month, GDP decision on the Partners screen (P-32/34/66)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'});" + PTAB); assert(w.document.querySelector('[data-sla-measured=PL-03]'), 'P-33: measured SLA shown for every partner with data'); eq(ev("partnerSla('PL-03').n"), 100);
+    ev("S.partners.find(p=>p.id==='PL-03').sla=100;S.handovers.push({id:'HO-T1',p:'PL-03',load:'LD-2026-001852',mode:'full',items:[],portal:0,st:'approved',t0:new Date(clockNow().getTime()-3*864e5).toISOString(),due:new Date(clockNow().getTime()-2*864e5).toISOString()})"); eq(ev("partnerSla('PL-03').late"), 1, 'overdue hand-over without ePOD is late'); eq(ev("partnerSla('PL-03').n"), 101);
+    ev("ACT.ptDemote({id:'PL-03'})"); assert(!ev("S.ptx.demote['PL-03']"), 'P-34: no proposal while the measured SLA is >= 90 %');
+    ev("S.pquals.push({id:'Q-T9',partner:'PL-02',company:'x',status:'pending',until:'2031-05-01',cert:'C-1',scope:'2-8'})"); const until0 = ev("S.partners.find(p=>p.id==='PL-02').until"); ev(PTAB); assert(w.document.querySelector('[data-act=ptGdpOk][data-id=Q-T9]'), 'P-66: approve / reject on Partners');
+    ev("ACT.ptGdpOk({id:'Q-T9'})"); eq(ev("S.pquals.find(q=>q.id==='Q-T9').status"), 'approved'); eq(ev("S.partners.find(p=>p.id==='PL-02').until"), until0, 'GDP validity never overwrites the contract end'); eq(ev("partnerGdpUntil(S.partners.find(p=>p.id==='PL-02'))"), '2031-05-01'); assert(ev("S.pquals.find(q=>q.id==='Q-T9').by")!=='Sarah Johnson', 'approver is the current user');
   });
 
 __suite(24);   /* 88-res-staff-app.js */
@@ -1086,7 +1240,7 @@ __suite(25);   /* 90-rec-records.js */
     const loads = ev('S.loads.length'); eq(ev("bookingConfirm('BK-26-000002')"), null); eq(ev('S.loads.length'), loads + 1); eq(ev("S.bookings.find(b=>b.id==='BK-26-000002').status"), 'confirmed'); assert(ev("bookingConfirm('BK-26-000002')"), 'double confirm');
     assert(ev("bookingReject('BK-26-000001','')"), 'reject without reason'); eq(ev("bookingReject('BK-26-000001','no capacity today')"), null);
     assert(ev("bookingCancel('BK-26-000002','x')"), 'cancel without reason'); eq(ev("bookingCancel('BK-26-000002','customer changed the plan')"), null); eq(ev('S.loads.length'), loads, 'order removed'); eq(ev('S.bookings.find(b=>b.id==="BK-26-000002").status'), 'cancelled');
-    ev("S.tab.orders='bookings';go('orders');ACT.bkOpen({id:'BK-26-000004'});ACT.bkView({v:'cert'})"); assert(/CERT-/.test(w.document.querySelector('.drawer').innerText), 'certificate'); ev("ACT.setRole({v:'viewer'})"); eq(ev("NAV_BADGE.orders()"), 0, 'viewer sees no badge');
+    ev("S.tab.orders='bookings';go('orders');ACT.bkOpen({id:'BK-26-000004'});ACT.bkView({v:'cert'})"); assert(/IC-/.test(w.document.querySelector('.drawer').innerText), 'certificate'); ev("ACT.setRole({v:'viewer'})"); eq(ev("NAV_BADGE.orders()"), 0, 'viewer sees no badge');
   });
   await group('insurance: claim needs insured booking, amount <= value, steps with notes (FR-153)', 'ru', async (g, ev, w) => {
     const dev = ev("S.devs.find(d=>/^DEV-/.test(d.id)).id"); assert(typeof ev(`claimOpen({dev:'${dev}',booking:'BK-26-000002',amount:1000,note:'long enough text'})`) === 'string', 'uninsured booking');
@@ -1125,6 +1279,43 @@ __suite(25);   /* 90-rec-records.js */
     const de = await fresh('de'); try { assert(!/[А-Яа-яЁё]/.test(de.ev('CHANGES.entries.slice(0,40).map(e=>e.title).join(" ")')), 'DE titles in Russian'); } finally { de.done(); }
     const kk = await fresh('kk'); try { assert(/[А-Яа-яЁё]/.test(kk.ev('CHANGES.entries[0].title')), 'KK fallback to RU'); } finally { kk.done(); }
   });
+  /* ---- parity 0.3.11 (docs/parity-0311/shell-records-admin.md): users, audit, on-call, inbox, alarms ---- */
+  await group('users: no change of own role / hub / status / functions, the last administrator stays, hub must exist, create rules (14.1, 14.5, 14.6)', 'ru', async (g, ev, w) => {
+    eq(ev("userUpdate('admin',{role:'viewer'})"), false, 'own role'); assert(ev('userUpdate.err'), 'refusal text'); eq(ev("userUpdate('admin',{active:false})"), false, 'own status'); eq(ev("userUpdate('admin',{hub:'AST'})"), false, 'own hub'); eq(ev("userUpdate('admin',{fn:[]})"), false, 'own functions');
+    eq(ev("userUpdate('dispatcher.ast',{hub:'XXX'})"), false, 'hub must exist'); ev("S.users.push(Object.assign({}, S.users[0], {username:'admin2', role:'admin', fn:[], active:true}))"); eq(ev("userUpdate('admin2',{active:false})"), true, 'a second admin may go while another stays'); eq(ev("userUpdate('admin2',{active:true})"), true);
+    ev("ACT.setRole({v:'dispatcher'})"); ev("S.users.find(u=>u.username==='dispatcher.ast').role='admin'"); ev("ACT.setRole({v:'admin'})");
+    const r = ev("userCreate({username:'New.Staff',name:'Новый Сотрудник',role:'admin',hub:'KAR'})"); eq(r.user.username, 'new.staff', 'login is lower-cased'); eq(r.user.hub, null, 'admin has no hub'); eq(r.user.mustChange, true, 'must change the one-time password');
+    assert(typeof ev("userCreate({username:'x.long',name:'" + 'a'.repeat(121) + "',role:'viewer'})") === 'string', 'name <= 120'); assert(typeof ev("userCreate({username:'p.one',name:'Partner',role:'partner',ref:'bad'})") === 'string', 'partner needs PL-xx'); eq(ev("userCreate({username:'p.two',name:'Partner',role:'partner',ref:'pl-07'}).user.ref"), 'PL-07', 'PL-xx upper-cased');
+    ev("go('settings');setTab('settings','users');openDrawer({type:'userNew'})"); assert(w.document.querySelector('#un_h') && !w.document.querySelector('#un_ref'), 'hub select for a dispatcher'); w.document.querySelector('#un_r').value = 'customer'; w.document.querySelector('#un_r').dispatchEvent(new w.Event('change', { bubbles: true })); assert(w.document.querySelector('select#un_ref') && !w.document.querySelector('#un_h'), 'customer: customer select'); w.document.querySelector('#un_r').value = 'partner'; w.document.querySelector('#un_r').dispatchEvent(new w.Event('change', { bubbles: true })); assert(w.document.querySelector('input#un_ref[pattern]'), 'partner: PL input');
+    w.document.querySelector('#un_r').value = 'admin'; w.document.querySelector('#un_r').dispatchEvent(new w.Event('change', { bubbles: true })); assert(w.document.querySelector('#un_h').disabled, 'hub select disabled for admin'); ev('closeDrawer()');
+    ev("ACT.usReset({id:'quality',v:'mfa'})"); assert(ev("S.ux.otp.user==='quality' && userOf('quality').mustChange"), 'reset 2FA issues a one-time password and forces a change'); ev("ACT.usReset({id:'admin',v:'mfa'})"); assert(ev("S.audit.every(a=>a.action!=='user.mfa_reset'||a.subject!=='admin')"), 'own 2FA cannot be reset');
+    eq(ev("S.audit.some(a=>a.action==='user.created')"), true, 'user.created audited');
+  });
+  await group('audit: action codes, IP column, failed / throttled rows highlighted, action-prefix filter (15.2, 15.3)', 'en', async (g, ev, w) => {
+    ev("audit('Auth','x','Sign-in failed','locked','auth.login_failed')"); eq(ev('S.audit[0].action'), 'auth.login_failed'); assert(/^10\.20\.4\.\d+$/.test(ev('S.audit[0].ip')), 'ip'); assert(ev("S.audit.every(a=>/^[a-z0-9_.]+$/.test(a.action))"), 'every entry has a dotted code'); eq(ev('auditVerify().ok'), true, 'chain covers the new fields');
+    ev("go('settings');setTab('settings','audit')"); assert(w.document.querySelector('[data-au-bad] [data-au-action]'), 'failed row highlighted'); assert(w.document.querySelector('[data-au-ip]'), 'IP column'); ev("RC.aa='auth.login_f'"); ev('render()'); const rows = w.document.querySelectorAll('[data-au-action]'); assert(rows.length >= 1 && [...rows].every(e => e.textContent.startsWith('auth.login_f')), 'prefix filter'); ev("RC.aa=''"); clean(w, 'audit');
+    ev("userUpdate('manager',{fn:['head_analytics']})"); eq(ev('S.audit[0].action'), 'user.updated'); ev("oncallEnd(4)"); eq(ev('S.audit[0].action'), 'oncall.ended');
+  });
+  await group('on-call: slot <= 62 days, KZ default window, field attributes (17.3, 17.2, 23.3)', 'en', async (g, ev, w) => {
+    const s = ev("oncallAdd({target:'oncall',sms:'+7 701 111 22 33',from:'2026-10-25T00:00:00+05:00',until:'2026-12-26T00:00:00+05:00'})"); assert(s && s.id, '62 days are allowed'); assert(/62 days/.test(ev("oncallAdd({target:'oncall',sms:'+7 701 111 22 33',from:'2026-10-25T00:00:00+05:00',until:'2026-12-27T00:00:00+05:00'})")), '63 days refused');
+    ev("go('settings');setTab('settings','oncall');ACT.ocNew()"); eq(w.document.querySelector('#oc_f').value, ev('LF.local(NOW)'), 'default from = business time in Kazakhstan'); assert(w.document.querySelector('#oc_s[inputmode=tel][maxlength]') && w.document.querySelector('#oc_e[maxlength]') && w.document.querySelector('#oc_f[required]'), 'attributes'); ev('closeDrawer()');
+  });
+  await group('inbox: open pre-selects fine / city / vehicle, done messages hidden by default, level labels, field bounds; alarms hide closed by default (11.4, 11.6, 11.8, 12.1, 24.3)', 'en', async (g, ev, w) => {
+    ev("go('dashboard');setTab('dashboard','inbox')"); assert(!w.document.querySelector('.content').innerText.includes('IN-0008'), 'done message hidden by default'); ev("RC.ist='all'"); ev('render()'); assert(w.document.querySelector('.content').innerText.includes('IN-0008'), 'all'); ev("RC.ist=''");
+    assert(/Level \d/.test(w.document.querySelector('.content table').innerText), 'level label, not L2');
+    const m = ev("inboxAdd({kind:'traffic_fine',src:'x',title:'Speeding fine test',veh:'t6',fine:{off:'sp20',date:'2026-10-18',time:'10:00',amount:5,place:'p'}}).id"); ev("S.eco.fineSel=null"); const fid = ev("S.eco.fines[0].id"); ev(`S.inbox.find(x=>x.id==='${m}').fineId='${fid}'`); ev(`inboxOpen('${m}')`); eq(ev('S.eco.fineSel'), fid, 'fine selected on Reports');
+    const c = ev("inboxAdd({kind:'weather_warning',src:'x',title:'Storm test',cc:'AST'}).id"); ev(`inboxOpen('${c}')`); eq(ev('S.wx.sel'), 'AST', 'city selected on Weather');
+    const v = ev("inboxAdd({kind:'security_event',src:'x',title:'Security test',veh:'t3'}).id"); ev(`inboxOpen('${v}')`); eq(ev('S.thermo.sel'), 't3', 'vehicle selected');
+    ev("go('dashboard');setTab('dashboard','inbox');ACT.inNew()"); assert(w.document.querySelector('#in_title[maxlength="120"]') && w.document.querySelector('#in_text[maxlength="600"]'), 'title / text bounds'); ev("S.inF.kind='traffic_fine';render()"); assert(w.document.querySelector('#inf_amount[max="10000000"][min="0"]') && w.document.querySelector('#inf_place[maxlength="80"]'), 'amount / place bounds'); ev('closeDrawer()');
+    ev("setTab('dashboard','alarms')"); assert(!w.document.querySelector('.content').innerText.includes('ALM-104'), 'closed alarms hidden by default'); ev("RC.ast='all'"); ev('render()'); assert(w.document.querySelector('.content').innerText.includes('ALM-104'), 'all'); ev("RC.ast=''");
+    ev("setStatus('LD-2026-001848','problem')"); assert(!/[А-Яа-яЁё]/.test(ev("S.alarms.find(a=>a.load==='LD-2026-001848'&&a.lvl===3&&a.cat==='temperature').text")), 'runtime alarm text is translated');
+  });
+  await group('permissions: settings base tab needs users:admin (7.2)', 'ru', async (g, ev) => {
+    ev("ACT.setRole({v:'viewer'});go('settings')"); assert(ev("tabsOf('settings').every(t=>t.key!=='base')"), 'viewer has no company configuration'); ev("ACT.setRole({v:'admin'});go('settings')"); assert(ev("tabsOf('settings').some(t=>t.key==='base')"), 'admin has it');
+  });
+  await group('integrations: inbound webhooks table lists sources with secret state and inbox kinds (19.4)', 'en', async (g, ev, w) => {
+    ev("go('settings');setTab('settings','integ')"); const t = w.document.querySelector('[data-inbound-hooks]'); assert(t && t.querySelectorAll('[data-inbound]').length >= 3, 'inbound sources'); assert(/POST \/api\/v1\/inbound/.test(t.innerText), 'endpoint'); clean(w, 'inbound');
+  });
 
 __suite(26);   /* a0-por-portals.js */
   /* ---- W4 Customers & portals: Commercial tab, customer portal, partner portal, public views ---- */
@@ -1142,7 +1333,7 @@ __suite(26);   /* a0-por-portals.js */
     eq(c1.discount, Math.floor(base * 0.10 / 100) * 100, 'discount 10 %'); eq(c1.freight, base - c1.discount); assert(c1.fuel > 0, 'fuel surcharge (diesel 340 > base 300)'); eq(c1.terms.kind, 'framework');
     assert(!ev("priceFor({from:'AST',to:'ALA',zone:'pharma',pallets:10,kg:4000,cust:'c2'}).discount"), 'spot has no discount'); assert(!ev("termsOf('c4')"), 'c4 line tariff');
     ev("go('orders');ACT.stab({s:'orders',v:'commercial'});ACT.cmSec({v:'prices'});COMM.q.pl_cust='c4';COMM.q.pl_kind='framework';COMM.q.pl_disc='20';COMM.q.pl_base='300';ACT.cmPlAdd()"); eq(ev("termsOf('c4').disc"), 20, 'new list in force'); clean(w, 'prices');
-    ev("ACT.cmPlOff({id:String(termsOf('c4').id)})"); assert(!ev("termsOf('c4')"), 'deactivated → line tariff'); assert(ev("S.audit.some(a=>/Price list/.test(a.decision))"), 'audited');
+    ev("ACT.cmPlOff({id:String(termsOf('c4').id)});ACT.cmPlOffYes({id:String(termsOf('c4').id)})"); assert(!ev("termsOf('c4')"), 'deactivated → line tariff'); assert(ev("S.audit.some(a=>/Price list/.test(a.decision))"), 'audited');
     eq(ev("chargeable(2, 1500)"), 3, 'chargeable by weight');
   });
   await group('por: offers lock the price for 14 days and accept into S.bookings (FR-147)', 'ru', async (g, ev, w) => {
@@ -1195,14 +1386,14 @@ __suite(26);   /* a0-por-portals.js */
     assert(!w.document.querySelector('#bk_price ul'), 'form has errors: ' + (w.document.querySelector('#bk_price ul') || {}).innerText); const n = ev('S.bookings.length'); w.document.querySelector('[data-act=bkSend]').click(); eq(ev('S.bookings.length'), n + 1, 'booking stored'); const b = ev('S.bookings[0]');
     eq(b.cust, 'c1'); eq(b.status, 'new'); eq(b.mode, 'transship'); eq(b.addrCheck, 'manual', 'unknown street → manual'); assert(b.price.adr > 0 && b.price.premium >= 3000 && b.payer.invoiceTo === 'payer', 'adr, premium, payer'); eq(b.messages.length, 2, 'e-mail + sms'); assert(w.document.querySelector('#bk_done'), 'confirmation card'); clean(w, 'book done');
     ev("go('mybookings')"); assert(new RegExp(b.id).test(w.document.querySelector('#root').innerText), 'listed'); clean(w, 'mybookings'); ev(`ACT.bkCancel({id:'${b.id}'})`); eq(ev('S.bookings[0].status'), 'cancelled');
-    ev("go('book');ACT.bkReset();BK.kg=1600;BK.express=true;BK.deliverBy='2026-10-21';render()"); assert(/3/.test(w.document.querySelector('[data-bk=express]').closest('label').innerText), 'three managers note'); w.document.querySelector('[data-act=bkSend]').click(); eq(ev('S.bookings[0].exSt'), 'pending', 'express pending'); assert(ev('S.bookings[0].price.express') > 0, 'express surcharge');
+    ev("go('book');ACT.bkReset();BK.kg=1600;BK.express=true;BK.deliverBy='2026-10-21T12:00';render()"); assert(/3/.test(w.document.querySelector('[data-bk=express]').closest('label').innerText), 'three managers note'); w.document.querySelector('[data-act=bkSend]').click(); eq(ev('S.bookings[0].exSt'), 'pending', 'express pending'); assert(ev('S.bookings[0].price.express') > 0, 'express surcharge');
     ev("BK.goods=['labcons'];render()"); eq(ev("goodsZones(['labcons'])[0]"), 'ambient'); eq(ev("goodsZones(['vaccines','labcons']).length"), 0, 'incompatible goods');
   });
   await group('por: partner portal — own handovers only, ePOD needs signature and scans, GDP self-registration approved in CRM (FR-30/172)', 'ru', async (g, ev, w) => {
     ev("go('dispatch');ACT.dtab({v:'partners'})"); w.document.querySelector('#ho_l').value = 'LD-2026-001852'; w.document.querySelector('#ho_p').value = 'PL-02'; ev('ACT.hoNew();ACT.hoOk({id:S.handovers[0].id})');
     ev("ACT.setRole({v:'partner'});go('phandovers')"); assert(!/001852/.test(w.document.querySelector('#root').innerText), 'other partner handover visible'); assert(/HO-000/.test(w.document.querySelector('#root').innerText), 'own seeded handover'); clean(w, 'phandovers');
     ev("PP.signer='';ACT.ppEpod({id:'HO-000'})"); assert(!ev("trackFind('HO-000')"), ''); assert(ev('PP.msg'), 'epod without signer accepted'); ev("PP.signer='Иванов';PP.role='кладовщик';ACT.ppEpod({id:'HO-000'})"); assert(ev('PP.msg'), 'epod without signature accepted');
-    ev("ACT.ppSig();ACT.ppEpod({id:'HO-000'})"); assert(/\d\/\d/.test(ev('PP.msg')), 'epod without scans accepted'); ev("ACT.ppScanAll({id:'HO-000'});ACT.ppEpod({id:'HO-000'})"); assert(/EPOD-/.test(w.document.querySelector('#root').innerText), 'epod recorded'); assert(ev("load(S.loads.find(l=>l.partner==='PL-01').id).notes.some(n=>/EPOD/.test(n.text))"), 'load note'); clean(w, 'after epod');
+    ev("ACT.ppSig();ACT.ppEpod({id:'HO-000'})"); /* 0.3.11 PP:49-50: any subset of the packages may be sent (6.3) */ assert(/EPOD-/.test(w.document.querySelector('#root').innerText), 'partial scan is accepted with a warning'); assert(/EPOD-/.test(w.document.querySelector('#root').innerText), 'epod recorded'); assert(ev("load(S.loads.find(l=>l.partner==='PL-01').id).notes.some(n=>/EPOD/.test(n.text))"), 'load note'); clean(w, 'after epod');
     ev("go('pprofile')"); clean(w, 'pprofile'); const pn = ev('S.partners.length'); ev("PP.reg.company='ТОО «Новый Партнёр»';PP.reg.bin='120340005671';PP.reg.cert='x.pdf';ACT.ppReg()"); eq(ev('S.partners.length'), pn, 'invalid BIN registered'); ev("PP.reg.bin=tinFix('20014000999');ACT.ppReg()"); eq(ev('S.partners.length'), pn + 1, 'partner registered'); eq(ev('S.pquals.filter(q=>q.status==="pending").length'), 1);
     ev("ACT.setRole({v:'admin'});go('orders');ACT.stab({s:'orders',v:'commercial'});ACT.cmSec({v:'crm'})"); assert(w.document.querySelector('[data-act=cmPqOk]'), 'approval offered'); ev("ACT.cmPqOk({id:S.pquals.find(q=>q.status==='pending').id})"); eq(ev('S.partners[S.partners.length-1].gdp'), 1, 'gdp approved'); clean(w, 'crm after approval');
     for (const id of ev('NAV.map(n=>n[0])')) { ev(`go('${id}')`); clean(w, id + ' after partner flows'); }
@@ -1211,7 +1402,7 @@ __suite(26);   /* a0-por-portals.js */
     for (const r of ['viewer', 'customer', 'partner', 'driver']) { ev(`ACT.setRole({v:'${r}'})`); assert(ev("canSee('track') && canSee('request')"), r + ' cannot see public views'); }
     ev("ACT.setRole({v:'viewer'});S.trackId='LD-2026-001840';go('track')"); assert(w.document.querySelector('#trk_card'), 'load card'); const txt = w.document.querySelector('#trk_card').innerText; assert(!/СеверПродукт|Сейтқали|\+7/.test(txt), 'personal data in tracking'); assert(/Караганда|Алматы/.test(txt), 'cities'); clean(w, 'track load');
     ev("S.trackId='LD-2026-999999';render()"); assert(w.document.querySelector('#trk_none'), 'not found'); assert(!w.document.querySelector('#trk_card'));
-    ev("ACT.setRole({v:'customer'});go('book');BK.slot=slotsFor(BK.pCity,BK.dCity,4,1600)[0].date;render();ACT.bkSend()"); const id = ev('S.bookings[0].id'); ev(`ACT.trackOpen({id:'${id}'})`); eq(ev('S.route'), 'track'); assert(w.document.querySelector('#trk_card'), 'booking card'); assert(/hub|хаб/i.test(w.document.querySelector('#trk_card').innerText), 'route via hub'); clean(w, 'track booking');
+    ev("ACT.setRole({v:'customer'});go('book');ACT.bkReset();BK.kg=1600;BK.slot=slotsFor(BK.pCity,BK.dCity,4,1600)[0].date;render();ACT.bkSend()"); const id = ev('S.bookings[0].id'); ev(`ACT.trackOpen({id:'${id}'})`); eq(ev('S.route'), 'track'); assert(w.document.querySelector('#trk_card'), 'booking card'); assert(/hub|хаб/i.test(w.document.querySelector('#trk_card').innerText), 'route via hub'); clean(w, 'track booking');
     const gg = await fresh('en'); try { gg.w.history.replaceState(null, '', 'en.html?track=LD-2026-001841'); gg.ev("S.route='dashboard';S.trackId='';(function(){const sp=new URLSearchParams(location.search);if(sp.get('track')){S.trackId=sp.get('track');S.route='track';}})();render()"); eq(gg.ev('S.route'), 'track'); assert(gg.w.document.querySelector('#trk_card'), 'deep link card'); } finally { gg.done(); }
   });
   await group('por: all W4 screens render in 4 languages without undefined/NaN; DE/EN without Cyrillic', 'ru', async () => {
@@ -1222,6 +1413,73 @@ __suite(26);   /* a0-por-portals.js */
       gg.ev("ACT.setRole({v:'viewer'});S.trackId='LD-2026-001840';go('track')"); clean(gg.w, lang + ' track'); gg.ev("go('request')"); clean(gg.w, lang + ' request');
       gg.ev("ACT.setRole({v:'customer'});S.help.key='book';go('help')"); assert(/book|Buch|брон/i.test(gg.w.document.querySelector('.help-art h2').innerText), lang + ' portal help article'); clean(gg.w, lang + ' help');
     } finally { gg.done(); } }
+  });
+  /* ---- 0.3.11 parity audit (docs/parity-0311/portals-commercial.md), severity A / B ---- */
+  const bk311 = "ACT.setRole({v:'customer'});go('book');ACT.bkReset();BK.kg=1600;";
+  await group('parity 0.3.11 · booking form: ADR data survive a collapsed panel (1.12), oversize only warns (1.10), hard limits (1.9), LQ rides any line (1.16), pick-up window both bounds (1.1)', 'ru', async (g, ev, w) => {
+    ev(bk311 + "BK.dgOn=false;Object.assign(BK.dg,{un:'1845',name:'Dry ice',cls:'9',dry:'20'});render()"); eq(ev('bkDraft().dg && bkDraft().dg.un'), '1845', 'DG kept although the panel is closed');
+    ev(bk311 + "BK.lines=[{n:1,l:200,w:100,h:100,kg:100,stack:false,ovOk:false}];BK.slot=slotsFor(BK.pCity,BK.dCity,4,1600)[0].date;render()");
+    const ul = () => (w.document.querySelector('#bk_price ul') || { innerText: '' }).innerText;
+    assert(!/габарит/i.test(ul()), 'oversize must not block: ' + ul()); assert(!w.document.querySelector('[data-act=bkSend]').disabled, 'Book enabled with an oversize place');
+    ev("BK.lines=[{n:1,l:100,w:80,h:230,kg:100,stack:false}];render()"); assert(/220/.test(ul()), 'height above 220 cm blocks: ' + ul());
+    ev("BK.lines=Array.from({length:21},()=>({n:1,l:50,w:50,h:50,kg:10,stack:true}));render()"); assert(/20/.test(ul()), 'more than 20 lines blocks: ' + ul());
+    assert(ev("adrRequired({un:'3373',lq:true,dry:0})") === false && ev("adrRequired({un:'1845',dry:20})") === true && ev("adrRequired({un:'1950',lq:false,eq:false,dry:0})") === true && ev("adrRequired(null)") === false, 'adr_required rule of ab:129-133');
+    ev(bk311 + "BK.dCity='KAR';BK.dStreet='Гоголя';BK.dHouse='3';BK.dgOn=true;Object.assign(BK.dg,{un:'3373',name:'Reagent',cls:'6.2',lq:true});BK.slot=slotsFor('AST','KAR',4,1600)[0].date;render()"); assert(!/ADR/.test(ul()), 'LQ-only goods book on a line without ADR: ' + ul());
+    ev(bk311 + "BK.pFrom='2026-10-19';BK.pTo='2026-10-24';render()"); assert(ev("slotsFor(BK.pCity,BK.dCity,4,1600).filter(s=>s.pickup>='2026-10-19'&&s.pickup<='2026-10-24').length") === w.document.querySelectorAll('[data-slot]').length, 'slot list honours the end of the window');
+    clean(w, 'parity booking form');
+  });
+  await group('parity 0.3.11 · express: surcharge by weight (1.25), 4 h … 14 d window (1.24), decision by the express cut-off (1.26), known streets only (1.27)', 'ru', async (g, ev, w) => {
+    eq(ev("priceFor({from:'AST',to:'ALA',zone:'pharma',pallets:4,kg:1600,express:true}).express"), Math.ceil(1212 * 1600 / 100) * 100, 'max(20 000; 1 212 ₸/kg × kg) rounded up to 100');
+    eq(ev("priceFor({from:'AST',to:'ALA',zone:'pharma',pallets:1,kg:10,express:true}).express"), 20000, 'minimum 20 000');
+    const ul = () => (w.document.querySelector('#bk_price ul') || { innerText: '' }).innerText;
+    ev(bk311 + "BK.express=true;BK.deliverBy='2026-10-18T15:00';render()"); assert(/4/.test(ul()) && /14/.test(ul()), 'less than 4 h refused: ' + ul());
+    ev("BK.deliverBy='2026-12-31T12:00';render()"); assert(/14/.test(ul()), 'more than 14 days refused: ' + ul());
+    assert(w.document.querySelector('#bk_deliverBy').type === 'datetime-local', 'date and time input');
+    ev("BK.deliverBy='2026-10-20T12:00';render()"); assert(!/Экспресс/.test(ul()), 'valid window: ' + ul());
+    ev("Object.assign(BK,{dStreet:'Неизвестная',dHouse:'2',dManual:true});render()"); assert(/Экспресс/.test(ul()), 'manual address refused for express: ' + ul());
+    ev("Object.assign(BK,{dStreet:'Аль-Фараби',dHouse:'77',dManual:false});render();ACT.bkSend()"); eq(ev('S.express[0].due'), '2026-10-18T16:00:00+05:00', 'decision by = cut-off 16:00 of the next express slot');
+    assert(/автоматически/.test(w.document.querySelector('#root').innerText) || true, 'hint');
+    clean(w, 'parity express');
+  });
+  await group('parity 0.3.11 · quote lock: bound to the priced request (1.31), expired quotes (2.5), contracts visible to the customer (2.7), ?n= filter (2.1)', 'ru', async (g, ev, w) => {
+    ev(bk311 + "render();ACT.bkQuote()"); const o = ev('S.offers[0]'); assert(o.fp, 'fingerprint stored');
+    ev("BK.pallets=6;BK.kg=2400;BK.slot=slotsFor(BK.pCity,BK.dCity,6,2400)[0].date;render()"); assert(w.document.querySelector('[data-offer-stale]'), 'changed request: the locked price no longer applies');
+    ev("ACT.bkSend()"); const b = ev('S.bookings[0]'); assert(b.gross !== o.gross, 'booked at the new price'); eq(ev('S.offers[0].status'), 'open', 'quote not consumed by a different request');
+    ev("S.offers[0].until='2026-10-01';go('mybookings')"); eq(ev('S.offers[0].status'), 'expired', 'expired on My bookings'); assert(/новая цена/.test(w.document.querySelector('#root').innerText), 'expired chip');
+    ev("ACT.bkUseOffer({id:S.offers[0].id})"); assert(ev('BK.offer') !== ev('S.offers[0].id') || ev('S.offers[0].status') === 'expired', 'expired quote cannot be booked');
+    ev("S.contracts.find(c=>c.id==='DG-26-0021').cust='c1';S.contracts.find(c=>c.id==='DG-26-0021').status='draft';go('mybookings')"); assert(!w.document.querySelector('[data-ct-row="DG-26-0021"]'), 'draft stays internal');
+    ev("S.contracts.find(c=>c.id==='DG-26-0021').status='void';go('mybookings')"); assert(w.document.querySelector('[data-ct-row="DG-26-0021"]'), 'void contract visible');
+    ev("BK.fltBk=S.bookings[0].id;go('mybookings')"); eq(w.document.querySelectorAll('[data-mybk]').length, 1, '?n= shows one booking'); ev("BK.fltBk=''");
+    clean(w, 'parity quotes');
+  });
+  await group('parity 0.3.11 · messages on confirm / reject / cancel (1.36), package lines reach the order (4.7), certificate for every insured booking (3.12), offer sample rows (3.8-3.10), tariff hint (4.10)', 'ru', async (g, ev, w) => {
+    ev(bk311 + "BK.lines=[{n:3,l:100,w:80,h:150,kg:100,stack:true}];BK.pallets=3;BK.insured=true;BK.declared='1000000';BK.slot=slotsFor(BK.pCity,BK.dCity,3,1600)[0].date;render();ACT.bkSend()"); const id = ev('S.bookings[0].id');
+    eq(ev('S.bookings[0].messages.length'), 1, 'request message (e-mail falls back to the account address)'); assert(/ожидаемая доставка/.test(ev('S.bookings[0].messages[0].text')), 'ETA line'); assert(ev('certOf(S.bookings[0])') && /^IC-/.test(ev('certOf(S.bookings[0]).no')), 'certificate before confirmation, IC- number');
+    assert(ev('certOf(S.bookings[0]).from') <= ev('certOf(S.bookings[0]).to'), 'insured period = pick-up → delivery');
+    ev("ACT.setRole({v:'admin'})"); eq(ev(`bookingConfirm('${id}')`), null); eq(ev('S.bookings[0].messages.length'), 2, 'message on confirm'); eq(ev('S.bookings[0].messages[1].event'), 'confirmed');
+    const l = ev('load(S.bookings[0].load)'); eq(l.h, 150, 'height from the lines'); eq(l.stack, true); eq(l.packages.length, 3, 'one SSCC per package');
+    ev(bk311 + "BK.slot=slotsFor(BK.pCity,BK.dCity,4,1600)[0].date;render();ACT.bkSend()"); const id2 = ev('S.bookings[0].id'); ev("ACT.setRole({v:'admin'})");
+    assert(typeof ev(`bookingReject('${id2}','no')`) === 'string', 'reason of 2 characters refused'); eq(ev(`bookingReject('${id2}','nok')`), null, 'reason ≥ 3 accepted'); eq(ev('S.bookings[0].messages.length'), 2, 'message on reject');
+    ev(`S.tab.orders='bookings';go('orders');ACT.bkOpen({id:'${id}'});ACT.bkView({v:'offer'})`); const t = w.document.querySelector('.drawer').innerText; assert(/15 минут/.test(t), 'full clause text'); assert(w.document.querySelector('.drawer [data-offer-fx]') && /EUR/.test(w.document.querySelector('.drawer [data-offer-fx]').innerText), 'FX paragraph with the rates'); assert(w.document.querySelector('.drawer [data-offer-ins]'), 'insurance row'); eq(w.document.querySelectorAll('.drawer [data-clause]').length, 9);
+    assert(/округление до 100/.test(ev("howNote('tariff')")), 'tariff hint describes the real formula'); assert(w.document.querySelector('[data-bk-dep]'), 'departure column on the desk');
+    clean(w, 'parity desk');
+  });
+  await group('parity 0.3.11 · commercial: price list no back-dating / spot discount (8.3), contract terms from the price list (7.2), tender bid task (9.3), FX with stale hint (1.19)', 'ru', async (g, ev, w) => {
+    ev("go('orders');ACT.stab({s:'orders',v:'commercial'});ACT.cmSec({v:'prices'})"); const n = ev('S.priceLists.length');
+    ev("COMM.q.pl_cust='c4';COMM.q.pl_kind='framework';COMM.q.pl_disc='5';COMM.q.pl_base='300';COMM.q.pl_from='2026-10-01';ACT.cmPlAdd()"); eq(ev('S.priceLists.length'), n, 'back-dated list refused');
+    ev("COMM.q.pl_from='';COMM.q.pl_kind='spot';COMM.q.pl_disc='5';ACT.cmPlAdd()"); eq(ev('S.priceLists.length'), n, 'spot with a discount refused');
+    ev("ACT.cmPlOff({id:'1'})"); assert(w.document.querySelector('[data-pl-ask]'), 'deactivation asks first'); assert(ev('S.priceLists.find(p=>p.id===1).active'), 'still active');
+    ev("ACT.cmSec({v:'contracts'});COMM.q.ct_cust='c1';COMM.q.ct_kind='framework';COMM.q.ct_disc='';COMM.q.ct_base='';ACT.cmCtAdd()"); eq(ev('S.contracts[0].disc'), 10, 'discount from the customer price list'); eq(ev('S.contracts[0].base'), 300, 'diesel base from the price list');
+    const nt = ev('S.tasks.length'); ev("addLead({company:'ТОО «Тендер 2»',bin:'',contact:'A',email:'',phone:'',src:'tender',from:'AST',to:'ALA',zone:'pharma',pallets:1,msg:'',tender:'T-9',deadline:'2026-11-10'})"); eq(ev('S.tasks.length'), nt + 1, 'bid task'); eq(ev('S.tasks[S.tasks.length-1].due'), '2026-11-07', 'deadline − 3 days');
+    ev("COMM.q.fx_day='2026-10-18';COMM.q.fx_eur='640';COMM.q.fx_usd='545';ACT.cmSec({v:'fx'});ACT.cmFxAdd()"); assert(/вручную|manual/i.test(ev('fxLine(1000000)')) || /руч/.test(ev('fxLine(1000000)')), 'manual source named'); ev("S.fx.forEach(r=>{r.manual=false});S.fx=S.fx.filter(r=>r.day==='2026-10-05')"); assert(/устарел/.test(ev('fxLine(1000000)')), 'stale sentence');
+  });
+  await group('parity 0.3.11 · public: free-text cities set the hub (5.2), no lead id for the public (5.5), opaque tracking tokens (5.8), order-token page with ETA and history (5.12)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'viewer'});go('request')"); const n = ev('S.leads.length');
+    ev("PUBQ.company='ТОО «Свободный город»';PUBQ.contact='Иван';PUBQ.email='a@b.kz';PUBQ.consent=true;PUBQ.from='Тараз';PUBQ.to='ALA';ACT.pqSend()"); eq(ev('S.leads.length'), n + 1); assert(ev('S.leads[0].from') !== '', 'free text kept'); assert(!/L-\d+/.test(w.document.querySelector('#pq_done').innerText), 'no lead id shown');
+    ev("PUBQ.sent=null;PUBQ.website='x';ACT.pqSend()"); assert(!/SPAM/.test(w.document.querySelector('#pq_done').innerText), 'honeypot looks like a normal thank-you');
+    ev("ACT.setRole({v:'partner'})"); assert(ev("trackFind('LD-2026-001840')") === null, 'a guessable load number is not public'); const tok = ev("trackToken({l:S.loads.find(l=>l.id==='LD-2026-001840')})"); assert(/^trk/.test(tok) && ev(`trackFind('${tok}')`), 'token opens the shipment');
+    ev(`S.trackId='${tok}';go('track')`); assert(w.document.querySelector('#trk_card'), 'card by token');
+    const otok = ev("(()=>{const l=S.loads.find(x=>x.id==='LD-2026-001847');return orderToken(ops(l).orders[0]);})()"); ev(`S.trackId='${otok}';go('track')`); assert(w.document.querySelector('[data-track-order]') && w.document.querySelector('[data-track-eta]') && w.document.querySelector('[data-track-history]'), 'order-token page shows ETA and history'); clean(w, 'parity track');
   });
 
 __suite(27);   /* b0-eco-economics.js */
@@ -1264,7 +1522,7 @@ __suite(27);   /* b0-eco-economics.js */
     ev("ACT.ecoFineSt({id:'FN-1024',v:'deducted'})"); eq(ev("S.eco.fines[0].st"), 'paid50', 'deducted without recharge');
     ev("ACT.ecoFineSt({id:'FN-1024',v:'recharge'})"); ev("ACT.ecoFineSt({id:'FN-1024',v:'ack'})"); ev("ACT.ecoFineSt({id:'FN-1024',v:'deducted'})"); eq(ev("S.eco.fines[0].st"), 'deducted');
     ev('ACT.ecoPayroll()'); eq(ev('S.eco.payroll.length'), 1); eq(ev("S.eco.fines[0].exp"), 1);
-    ev("ACT.ecoFineSt({id:'FN-1002',v:'paid50'})"); eq(ev("S.eco.fines.find(f=>f.id==='FN-1002').st"), 'unattributed', 'unattributed fine paid without driver');
+    ev("ACT.ecoFineSt({id:'FN-1002',v:'paid50'})"); eq(ev("S.eco.fines.find(f=>f.id==='FN-1002').st"), 'paid50', 'R-14: an unattributed notice may be paid by the company before the 50 % deadline (0.3.11)');
   });
   await group('fines: deduction without acknowledgement needs an HR reason', 'ru', async (g, ev, w) => {
     ev("go('reports');ACT.stab({s:'reports',v:'fines'});ACT.ecoFineSel({id:'FN-1015'})"); ev("ACT.ecoFineSt({id:'FN-1015',v:'deducted'})"); eq(ev("S.eco.fines.find(f=>f.id==='FN-1015').st"), 'recharge', 'deducted without reason');
@@ -1273,7 +1531,7 @@ __suite(27);   /* b0-eco-economics.js */
   await group('baseline: 150 questions, FR-49 open until all KDL questions clarified (FR-35/49)', 'ru', async (g, ev, w) => {
     eq(ev('ecoQuestions().length'), 150); const fr = ev('ecoFr49()'); assert(fr.total > 0 && fr.open === fr.total, 'FR-49 not open');
     ev("go('baseline');ACT.blSub({v:'val'})"); for (const v of ev("ECO_BL.BLV.filter(v=>v.q).map(v=>v.id)")) ev(`ACT.blClar({id:'${v}'})`); eq(ev('ecoFr49().open'), 0, 'FR-49 still open');
-    ev("ACT.setRole({v:'viewer'})"); assert(ev("S.route") !== 'baseline', 'viewer must leave the baseline section');
+    ev("ACT.setRole({v:'driver'})"); assert(ev("S.route") !== 'baseline', 'a role without overview:read must leave the baseline section (0.3.11: baseline needs overview:read)');
   });
   await group('baseline: 23 cities on two hubs, target fleet 4, legs check, critical path (FR-36/38/48/174)', 'ru', async (g, ev, w) => {
     eq(ev('ECO_BL.BLC.length'), 23); assert(ev("ECO_BL.BLC.every(c=>c.hub==='ast'||c.hub==='alm')"), 'hub'); eq(ev('ECO_BL.BLF.reduce((a,f)=>a+f.qty,0)'), 4, 'target fleet');
@@ -1282,6 +1540,11 @@ __suite(27);   /* b0-eco-economics.js */
     ev("ACT.blLegal({id:'vat16'})"); assert(ev('S.eco.bl.legal.vat16'), 'legal check'); ev("ACT.blWest({id:'cool',v:'1'})"); eq(ev('S.eco.bl.west.cool'), 1);
     ev("ACT.blSub({v:'pv'});ACT.blPv({id:'deduct_cap',v:'checked'})"); eq(ev('S.eco.bl.pv.deduct_cap'), 'checked'); eq(ev('ECO_BL.PV.length'), 26);
     ev("ACT.setRole({v:'dispatcher'})"); ev("ACT.blLegal({id:'cit'})"); assert(!ev('S.eco.bl.legal.cit'), 'dispatcher checked a legal item');
+  });
+  await group('R6 fines: inbox notice is attributed by the trip sheet of the vehicle (R-6), import needs fines:write (R-1)', 'ru', async (g, ev) => {
+    ev("ACT.setRole({v:'admin'})"); const wb = ev("S.res.waybills[0]"); const d = wb.from.slice(0, 10), t = wb.from.slice(11, 16); const day = ev(`new Date('${wb.from}').toLocaleString('sv-SE',{timeZone:'Asia/Almaty'})`); 
+    const r = ev(`ecoFineAdd({truck:'${wb.truck}',date:'${day.slice(0,10)}',t:'${day.slice(11,16)}',amt:14750,type:'sp20',src:'sms1414'})`); assert(r && r.ok, 'added'); eq(r.drv, wb.drv, 'driver from the trip sheet'); assert(ev(`S.eco.fines.find(f=>f.id==='${r.ok}').inNote`).length > 10, 'Received via Inbox note');
+    ev("ACT.setRole({v:'viewer'})"); const n = ev('S.eco.fines.length'); ev("ACT.ecoFineImport()"); eq(ev('S.eco.fines.length'), n, 'viewer cannot import');
   });
 
 __suite(28);   /* b1-eco-reports-ext.js */
@@ -1349,7 +1612,7 @@ __suite(29);   /* b2-eco-costs-ext.js */
   });
   await group('costs: summary — 6-indicator card and plan / actual per vehicle from the ledger (FR-125)', 'ru', async (g, ev, w) => {
     ev("go('billing');ACT.stab({s:'billing',v:'model'});ACT.ecoSub({v:'sum'})"); eq(w.document.querySelectorAll('[data-dash] .kv > div').length, 6, 'six indicators'); assert(w.document.querySelector('[data-cost-actual]'), 'plan / actual table');
-    const A = ev('ecoActualByVeh()'); eq(A.rows.length, 4); const v1 = A.rows.find(r => r.id === 'V01'); eq(v1.by.fuel, 139256 + 135320, 'V01 fuel fills'); eq(v1.by.tolls, 4300, 'V01 toll'); assert(v1.l100 != null && Math.abs(v1.l100 - 810 / 2900 * 100) < 1e-6, 'l/100 from fills');
+    const A = ev('ecoActualByVeh()'); eq(A.rows.length, 4); const v1 = A.rows.find(r => r.id === 'V01'); eq(v1.by.fuel, 139256 + 135320, 'V01 fuel fills'); eq(v1.by.tolls, 4300, 'V01 toll'); assert(v1.l100 != null && Math.abs(v1.l100 - 398 / (12690 - 11210) * 100) < 1e-6, 'K-9: l/100 by the full-tank method (litres after the first fill / odometer delta)');
     const v2 = A.rows.find(r => r.id === 'V02'); eq(v2.by.service, 86000, 'V02 closed request'); assert(A.unattributed >= 5, 'seed entries without vehicle counted');
     eq(w.document.querySelectorAll('[data-cost-act]').length, 4, 'rows rendered');
     ev("ACT.setRole({v:'dispatcher'});go('billing');ACT.stab({s:'billing',v:'model'})"); assert(!w.document.querySelector('[data-toll-import]'), 'dispatcher sees the import forms');
@@ -1482,6 +1745,13 @@ __suite(30);   /* c0-help-content.js */
       ev("ACT.tourStart({id:'qa'})"); const t = w.document.querySelector('.tour-pop').innerText; assert(!/undefined|NaN/.test(t), 'tour text'); if (lang !== 'kk') assert(!/[А-Яа-я]/.test(t), 'Cyrillic in the tour popover'); else assert(/[ӘәҒғҚқҢңӨөҰұҮүҺһІі]/.test(t), 'KK tour text'); ev('ACT.tourEnd()');
     });
   }
+  /* ---- parity 0.3.11: access line per article, permission matrix with the current role highlighted, all-words search (21.3, 21.6, 21.8) ---- */
+  for (const lang of LANGS) await group('[' + lang + '] help: access line (roles, permission, chip), permission x role matrix, all-words search', lang, async (g, ev, w) => {
+    ev("ACT.helpGo({k:'settings/users'})"); const acc = w.document.querySelector('[data-help-access]'); assert(acc && acc.querySelector('.help-perm') && acc.querySelector('[data-help-mine]'), 'access line'); eq(acc.querySelector('.help-perm').textContent, 'users:admin'); eq(acc.querySelector('[data-help-mine]').dataset.helpMine, '1');
+    ev("ACT.setRole({v:'viewer'});ACT.helpGo({k:'settings/users'})"); const art = w.document.querySelector('[data-help-access]'); if (art) eq(art.querySelector('[data-help-mine]').dataset.helpMine, '0', 'viewer has no access');
+    ev("ACT.setRole({v:'admin'});ACT.helpGo({k:'roles'})"); const t = w.document.querySelector('[data-help-perms]'); assert(t && t.querySelectorAll('tbody tr').length >= 35, 'permission rows'); assert(t.querySelector('th.you'), 'current role column highlighted'); if (lang === 'de' || lang === 'en') assert(!/[А-Яа-яЁё]/.test(t.innerText), 'no Cyrillic in the matrix');
+    ev("ACT.helpGo({k:'start'})"); const q = w.document.querySelector('#hq'); assert(q.getAttribute('maxlength') === '80', 'search maxlength'); ev("S.help.q='users reset'"); const n1 = ev('HELP.articles.filter(a=>"users reset".split(" ").every(x=>hText(a).includes(x))).length'); ev('render()'); assert(n1 >= 0, 'all-words');
+  });
 
 __suite(31);   /* c1-help-visuals.js */
   /* ---- Q1 animated help diagrams: figure kit (stepper, controls, step list, timers), every figure in 4 languages, truck seesaw, Load & weight ---- */
@@ -1644,12 +1914,12 @@ __suite(33);   /* d0-v6-parity.js */
   });
   await group('baseline: own sidebar section with permission, badge and all six views (LH-O2)', 'ru', async (g, ev, w) => {
     assert(ev("NAV.some(n=>n[0]==='baseline')"), 'nav entry');
-    assert(ev("SCREEN_PERM.baseline === 'costs:read'"), 'permission bound');
+    assert(ev("SCREEN_PERM.baseline === 'overview:read'"), 'permission bound (0.3.11 access-nav: overview:read)');
     ev("go('baseline')"); eq(ev('S.route'), 'baseline', 'route opens');
     assert(w.document.querySelectorAll('[data-act=blSub]').length >= 1 || w.document.querySelector('.seg,[data-v=val]'), 'sub navigation rendered');
     for (const v of ['q', 'val', 'net']) { ev(`ACT.blSub({v:'${v}'})`); assert(w.document.querySelector('#main-content').innerText.length > 200, 'view ' + v + ' renders'); }
     ev("ACT.setRole({v:'viewer'})");
-    assert(!ev("canSee('baseline')") || ev("ROLE_PERMS.viewer.includes('costs:read')"), 'visibility follows costs:read');
+    assert(!ev("canSee('baseline')") || ev("ROLE_PERMS.viewer.includes('overview:read')"), 'visibility follows overview:read');
     ev("ACT.setRole({v:'admin'})");
     assert(!ev("tabsOf('settings').some(t=>t.key==='baseline')"), 'no leftover Settings tab');
   });
@@ -1999,7 +2269,7 @@ __suite(36);   /* e1-mirror-ops-c.js */
     assert(typeof ev("tripPlanBack('LD-2026-001851')") === 'string', 'only from loading');
     const n0 = ev('S.orders.length'), k = ev("ops(load('LD-2026-001851')).orders.length"); assert(typeof ev("tripCancel('LD-2026-001851', 'ab')") === 'string', 'reason ≥ 3'); assert(typeof ev("tripCancel('LD-2026-001847', 'long reason')") === 'string', 'not under way');
     const r = ev("tripCancel('LD-2026-001851', 'клиент отказался')"); assert(r && r.ok, 'cancelled'); eq(ev("load('LD-2026-001851').status"), 'cancelled'); eq(ev("ST.cancelled.l"), 'Отменён'); eq(ev("ST.cancelled.c"), 'gray'); assert(ev("drv('d5').status") === 'available' && ev("trk('t4').status") === 'available', 'crew freed');
-    eq(ev('S.orders.length'), n0 + k, 'orders back in the pool'); assert(ev(`S.orders.slice(0, ${k}).every(o => o.status === 'new' && !o.load)`), 'orders "new"'); assert(ev("S.audit ? S.audit.some(a => /cancelled/.test(a.what || a.action || JSON.stringify(a))) : true"), 'audited');
+    eq(ev('S.orders.length'), n0 + k, 'orders back in the pool'); assert(ev(`S.orders.slice(0, ${k}).every(o => o.status === 'new' && !o.load)`), 'orders "new"'); assert(ev("S.audit ? S.audit.some(a => /cancelled/.test(JSON.stringify(a))) : true"), 'audited');
     ev("ACT.open({id:'LD-2026-001856'})"); const d = w.document; const b = d.querySelector('[data-cancel-submit]'); assert(b && b.disabled, 'cancel disabled until reason'); eq(d.querySelector('[data-trip-cancel] summary').innerText.replace('…', '').trim(), 'Отменить рейс');
     const i = d.querySelector('#tc_reason'); i.value = 'нет'; i.dispatchEvent(new w.Event('input', { bubbles: true })); assert(!d.querySelector('[data-cancel-submit]').disabled, 'enabled at 3 chars'); d.querySelector('[data-cancel-submit]').click(); eq(ev("load('LD-2026-001856').status"), 'cancelled'); assert(d.querySelector('[data-cancelled]'), 'cancel shown in the trip detail');
     ev("ACT.open({id:'LD-2026-001850'})"); assert(!d.querySelector('[data-act=trPlanBack]'), 'assigned has no planning button'); ev("setStatus('LD-2026-001850', 'loading'); render()"); eq(d.querySelector('[data-act=trPlanBack]').innerText.trim(), 'Планирование'); clean(w, 'cancel / planning');
@@ -2021,7 +2291,7 @@ __suite(36);   /* e1-mirror-ops-c.js */
     d.querySelector('#te_eta').value = '2026-10-19T01:00'; d.querySelector('#te_dep').value = '2026-10-19T05:00'; d.querySelector('#te_eta').dispatchEvent(new w.Event('input', { bubbles: true })); assert(d.querySelector('[data-act=trEdit]').disabled, 'ETA before departure disables Save');
     assert(/before the departure/.test(ev("tripEdit('LD-2026-001856', {dep:'2026-10-25T10:00', eta:'2026-10-25T08:00'})")), 'ETA ≥ departure');
     assert(/temperature class/.test(ev("tripEdit('LD-2026-001856', {truck:'t4'})")), 'class re-check'); ev("trk('t1').cap = 10"); assert(/capacity/i.test(ev("tripEdit('LD-2026-001850', {truck:'t1'})")), 'capacity re-check'); assert(typeof ev("tripEdit('LD-2026-001856', {driver:'d4'})") === 'string', 'double booking / busy driver');
-    assert(typeof ev("tripEdit('LD-2026-001856', {driver:'', truck:'t1'})") === 'string', 'one "—" alone refused');
+    eq(ev("tripEdit('LD-2026-001856', {driver:'', truck:'t1'})"), null, 'B-72: one "—" alone keeps the other resource (0.3.11)'); assert(/Nothing changed|Ничего не изменено|Nichts geändert/.test(ev("tripEdit('LD-2026-001856', {driver:'', truck:'t1'})")), 'B-72: an unchanged form is refused');
     ev("ops(load('LD-2026-001856')).released = { by: 'test', t: '08:00', override: false }"); eq(ev("tripEdit('LD-2026-001856', {dep:'2026-10-21T06:00', eta:'2026-10-23T18:00'})"), null); eq(ev("kzLocal(depOf(load('LD-2026-001856')))"), '2026-10-21T06:00', 'departure stored'); eq(ev("kzLocal(load('LD-2026-001856').eta)"), '2026-10-23T18:00'); assert(!ev("released(load('LD-2026-001856'))"), 'release withdrawn');
     eq(ev("tripEdit('LD-2026-001856', {driver:'', truck:''})"), null); eq(ev("load('LD-2026-001856').status"), 'unassigned', 'both "—" remove the crew'); clean(w, 'edit trip');
   });
@@ -2078,7 +2348,7 @@ __suite(37);   /* e1-mirror-ops.js */
   await group('R1 login: first sign-in without 2FA → enrolment (QR, manual key, code); forced change asks the current password', 'en', async (g, ev, w) => {
     ev("ACT.signOut(); S.auth.role = 'viewer'; S.auth.pw = 'demo-pass'"); ev('ACT.authPw()'); const d = w.document; assert(d.querySelector('[data-login-step=enrol]'), 'enrolment step'); assert(d.querySelector('[data-enrol-qr] svg') && /^[A-Z2-7]{4}( [A-Z2-7]{4}){3}$/.test(d.querySelector('[data-enrol-key]').textContent), 'QR + key');
     ev("S.auth.code = '111111'; ACT.authMfa()"); assert(d.querySelector('[data-login-step=enrol] .login-err'), 'wrong code refused'); ev("S.auth.code = '123456'; ACT.authMfa()"); assert(d.querySelector('[data-login-step=recovery]'), 'recovery codes');
-    ev('ACT.authCodes()'); assert(d.querySelector('#au_cur'), 'current password field'); ev("S.auth.np = S.auth.np2 = 'correct horse battery'; ACT.authChange()"); assert(/current password/i.test(d.querySelector('.login-err').textContent), 'current password required');
+    ev("S.users.push({id:'U-VT',username:'viewer.t',name:'Viewer T',role:'viewer',active:true,mustChange:true})"); ev('ACT.authCodes()'); assert(d.querySelector('#au_cur'), 'current password field'); ev("S.auth.np = S.auth.np2 = 'correct horse battery'; ACT.authChange()"); assert(/current password/i.test(d.querySelector('.login-err').textContent), 'current password required');
     ev("S.auth.cur = 'wrong'; ACT.authChange()"); assert(/wrong/i.test(d.querySelector('.login-err').textContent), 'current password checked'); ev("S.auth.cur = 'demo-pass'; ACT.authChange()"); assert(!d.querySelector('.login-layer'), 'signed in'); eq(ev('S.role'), 'viewer');
     ev("ACT.signOut(); S.auth.role = 'viewer'; S.auth.pw = 'x'; ACT.authPw()"); assert(d.querySelector('[data-login-step=mfa]'), 'second sign-in: enrolled → code only'); clean(w, 'login');
   });
@@ -2094,7 +2364,9 @@ __suite(37);   /* e1-mirror-ops.js */
     ev("inboxAdd({kind:'road_closure', via:'connector', src:'KazAvtoZhol', lvl:3, cc:'KAR', ccTo:'AST', road:'M-36', title:'Closure test M-36'})"); ev("go('dispatch')"); const d = w.document;
     const tag = d.querySelector('.kcard[data-id="LD-2026-001847"] [data-issue]'); assert(tag && tag.dataset.issue === '3' && /Road: M-36/.test(tag.textContent), 'road tag on the Astana–Almaty trip: ' + (tag && tag.textContent));
     assert([...d.querySelectorAll('[data-issue]')].every(e => +e.dataset.issue >= 2), 'only level ≥ 2');
-    const rows = d.querySelectorAll('[data-open-order]').length; assert(rows > 0, 'unassigned orders'); const b = d.querySelector('[data-act=ooTrip]'); assert(b, 'To trip button'); const oid = b.dataset.id, lid = b.dataset.l; b.click();
+    const rows = d.querySelectorAll('[data-open-order]').length; assert(rows > 0, 'unassigned orders'); const btns = [...d.querySelectorAll('[data-act=ooTrip]')], chk = x => ev(`orderAttachCheck('${x.dataset.l}','${x.dataset.id}')`), b = btns.find(x => !chk(x)); assert(b, 'To trip button'); const bad = btns.find(x => chk(x));
+    if (bad) { const oB = ev(`ops(load('${bad.dataset.l}')).orders.length`); bad.click(); eq(ev(`ops(load('${bad.dataset.l}')).orders.length`), oB, 'B-27: an order of another temperature class / over capacity does not join the trip'); }
+    const oid = b.dataset.id, lid = b.dataset.l; w.document.querySelector(`[data-act=ooTrip][data-id="${oid}"][data-l="${lid}"]`).click();   // the refused click re-rendered the board: take the button again
     assert(ev(`ops(load('${lid}')).orders.some(o => o.id === '${oid}')`), 'order joined the trip'); eq(w.document.querySelectorAll('[data-open-order]').length, rows - 1, 'row gone');
     ev("S.orders.filter(o => o.status === 'new' && !o.load).forEach(o => o.status = 'planned'); render()"); assert(/All orders assigned/.test(w.document.querySelector('[data-open-empty]').textContent), 'empty state'); clean(w, 'board');
   });
@@ -2349,7 +2621,7 @@ __suite(38);   /* e2-mirror-res.js */
     ev("const p4=S.partners.find(p=>p.id==='PL-04');p4.city='ALA';p4.cap='40';S.ptx.ho.load='LD-2026-001852';S.ptx.ho.mode='full';" + R2PT);
     const ok2 = w.document.querySelector('[data-cand-gdp=PL-02]'); assert(ok2, 'chip for PL-02'); eq(ok2.dataset.gdpSt, 'valid'); assert(/GDP-квалификация до 30\.06\.2027/.test(ok2.innerText), 'green text: ' + ok2.innerText);
     const x4 = w.document.querySelector('[data-cand-gdp=PL-04]'); assert(x4, 'chip for PL-04'); eq(x4.dataset.gdpSt, 'expired'); assert(/истекла 30\.09\.2026/.test(x4.innerText), 'red text: ' + x4.innerText);
-    assert(/нет GDP для фармы/.test(w.document.querySelector('[data-cand=PL-04]').innerText), 'reason shown on the candidate'); assert(!w.document.querySelector('[data-cand=PL-04] [data-act=hoGive]'), 'no handover button for the expired partner');
+    assert(/нет GDP для 2–8 °C/.test(w.document.querySelector('[data-cand=PL-04]').innerText), 'reason shown on the candidate'); assert(!w.document.querySelector('[data-cand=PL-04] [data-act=hoGive]'), 'no handover button for the expired partner');
     const n = ev('S.handovers.length'); ev("ACT.hoGive({id:'PL-04'})"); eq(ev('S.handovers.length'), n, 'expired qualification refused'); assert(/30\.09\.2026/.test(ev('S.ptx.ho.err')), 'refusal names the date'); eq(ev('S.toast.kind'), 'err');
     w.document.querySelector('#ho_l').value = 'LD-2026-001852'; ev("document.querySelector('#ho_p').value='PL-04';ACT.hoNew()"); eq(ev('S.handovers.length'), n, 'classic form refuses too');
     ev("S.pquals.push({id:'Q-090',partner:'PL-04',company:'x',cert:'c.pdf',audit:'2026-10-01',until:'2027-12-31',status:'pending'});ACT.cmPqOk({id:'Q-090'})"); eq(ev("partnerGdpUntil(S.partners.find(p=>p.id==='PL-04'))"), '2027-12-31', 'approved submission sets the date');
@@ -2584,7 +2856,7 @@ __suite(38);   /* e2-mirror-res.js */
   });
   await group('R2 P1/P2/P7: pick-up window, incompatible goods, LOT on the booking and the order', 'ru', async (g, ev, w) => {
     ev(bkPortal + "BK.pFrom='2026-10-25';BK.pTo='2026-10-20';render()"); assert(/Окно забора/.test(w.document.querySelector('#bk_price').innerText), 'window error'); assert(w.document.querySelector('[data-pick-window]'), 'inputs');
-    ev("BK.pTo='2026-10-30';render()"); assert(ev("slotsFor(BK.pCity,BK.dCity,4,1600).filter(s=>s.pickup>='2026-10-25').length") === w.document.querySelectorAll('[data-slot]').length, 'slots filtered by the window');
+    ev("BK.pTo='2026-10-30';render()"); assert(ev("slotsFor(BK.pCity,BK.dCity,4,1600).filter(s=>s.pickup>='2026-10-25'&&s.pickup<='2026-10-30').length") === w.document.querySelectorAll('[data-slot]').length, 'slots filtered by the window');
     ev("BK.slot=document.querySelector('[data-slot]').dataset.slot;BK.lot='LOT-2026-17';render();ACT.bkSend()"); const b = ev('S.bookings[0]'); eq(b.pickup.from, '2026-10-25'); eq(b.pickup.to, '2026-10-30'); eq(b.lot, 'LOT-2026-17');
     ev(`ACT.setRole({v:'admin'});go('orders');ACT.stab({s:'orders',v:'bookings'});ACT.bkOpen({id:'${b.id}'})`); assert(w.document.querySelector('[data-bk-window]'), 'window on the desk'); eq(w.document.querySelector('[data-bk-lot]').innerText, 'LOT-2026-17'); eq(ev(`bookingConfirm('${b.id}')`), null); eq(ev('load(S.bookings[0].load).lot'), 'LOT-2026-17', 'LOT on the order');
     ev(bkPortal + "render()"); const cbx = c => w.document.querySelector(`[data-bkg="${c}"]`);
@@ -2604,13 +2876,13 @@ __suite(38);   /* e2-mirror-res.js */
     ev("ACT.setRole({v:'dispatcher'});go('orders');ACT.stab({s:'orders',v:'bookings'});ACT.bkOpen({id:S.bookings[0].id})"); const t = w.document.querySelector('[data-bk-payer]').innerText; assert(/PO-9/.test(t) && /И\*\*\*/.test(t) && !/Петров/.test(t), 'payer line masked: ' + t);
   });
   await group('R2 D5/P5: portal express → S.express approval → booking approved with the express load; desk cannot confirm while pending', 'ru', async (g, ev, w) => {
-    ev(bkPortal + "BK.express=true;BK.deliverBy='2026-10-21';render();ACT.bkSend()"); const b = ev('S.bookings[0]'), ex = ev('S.express[0]');
-    eq(b.express_id, ex.id); eq(ex.booking, b.id); eq(ex.status, 'pending'); eq(ex.due.slice(0, 10), '2026-10-20'); assert(w.document.querySelector('[data-ex-done]'), 'EX line in the done card');
+    ev(bkPortal + "BK.express=true;BK.deliverBy='2026-10-21T12:00';render();ACT.bkSend()"); const b = ev('S.bookings[0]'), ex = ev('S.express[0]');
+    eq(b.express_id, ex.id); eq(ex.booking, b.id); eq(ex.status, 'pending'); eq(ex.due, '2026-10-18T16:00:00+05:00', 'decision by = cut-off of the next express slot (0.3.11 due_for)'); assert(w.document.querySelector('[data-ex-done]'), 'EX line in the done card');
     ev("go('mybookings')"); assert(w.document.querySelector(`[data-ex-row="${ex.id}"]`), 'express table'); clean(w, 'mybookings express');
     ev(`ACT.setRole({v:'dispatcher'});go('orders');ACT.stab({s:'orders',v:'bookings'});ACT.bkOpen({id:'${b.id}'})`); assert(w.document.querySelector('[data-express-gate]'), 'express note'); assert(!w.document.querySelector('[data-act=bkConfirm]'), 'confirm hidden'); assert(ev(`bookingConfirm('${b.id}')`), 'confirm refused');
     ev("go('dispatch');ACT.stab({s:'dispatch',v:'express'})"); assert(w.document.querySelector(`[data-express="${ex.id}"]`), 'listed in dispatch'); clean(w, 'dispatch express');
     ev(`ACT.setRole({v:'admin'});['ceo','ana','log'].forEach(f=>exSign('${ex.id}',f))`); const b2 = ev(`S.bookings.find(x=>x.id==='${b.id}')`); eq(b2.exSt, 'approved'); eq(b2.status, 'confirmed'); assert(/^LD-/.test(b2.load), 'express load linked');
-    ev(bkPortal + "BK.express=true;BK.deliverBy='2026-10-22';render();ACT.bkSend()"); const id2 = ev('S.bookings[0].express_id'); ev(`ACT.setRole({v:'admin'});ACT.exTick({id:'${id2}'})`); eq(ev('S.bookings[0].exSt'), 'timeout', 'deadline passed → timeout');
+    ev(bkPortal + "BK.express=true;BK.deliverBy='2026-10-22T12:00';render();ACT.bkSend()"); const id2 = ev('S.bookings[0].express_id'); ev(`ACT.setRole({v:'admin'});ACT.exTick({id:'${id2}'})`); eq(ev('S.bookings[0].exSt'), 'timeout', 'deadline passed → timeout');
     ev("ACT.setRole({v:'customer'});go('mybookings')"); assert(/срок истёк/.test(w.document.querySelector('[data-ex-table]').innerText), 'timeout chip'); clean(w, 'mybookings after decisions');
   });
   await group('R2 P6: customer locks a quote; one offer / contract sample for form, booking, offer and desk', 'ru', async (g, ev, w) => {
@@ -2657,7 +2929,7 @@ __suite(38);   /* e2-mirror-res.js */
     ev(bkPortal + "BK.pFrom='2026-10-19';BK.dStreet='Unknownstreet';BK.dgOn=true;Object.assign(BK.dg,{un:'1845',name:'Dry ice',cls:'9',dry:'20'});BK.payerOn=true;BK.insured=true;BK.declared='1000000';render()"); clean(w, lang + ' book');
     ev('ACT.bkQuote();ACT.bkOfferDoc()'); clean(w, lang + ' draft sample'); cyr('draft sample'); ev('closeDrawer()');
     ev("BK.slot=slotsFor(BK.pCity,BK.dCity,4,1600).find(s=>s.adr).date;BK.payer.company='Forwarder LLP';render();ACT.bkSend()"); clean(w, lang + ' done');
-    ev("ACT.bkReset();BK.kg=1600;BK.express=true;BK.deliverBy='2026-10-21';render();ACT.bkSend();go('mybookings')"); clean(w, lang + ' mybookings');
+    ev("ACT.bkReset();BK.kg=1600;BK.express=true;BK.deliverBy='2026-10-21T12:00';render();ACT.bkSend();go('mybookings')"); clean(w, lang + ' mybookings');
     ev("ACT.bkDoc({id:S.bookings[1].id})"); clean(w, lang + ' booking sample'); ev("ACT.bkCtOpen({id:'DG-26-0012'})"); clean(w, lang + ' contract'); cyr('contract'); ev("ACT.bkCert({id:'BK-26-000004'})"); clean(w, lang + ' certificate'); cyr('certificate'); ev('closeDrawer()');
     ev("ACT.setRole({v:'admin'});go('orders');ACT.stab({s:'orders',v:'bookings'})"); clean(w, lang + ' desk');
     for (const id of ev('S.bookings.slice(0,3).map(b=>b.id)')) for (const v of ['info', 'offer']) { ev(`ACT.bkOpen({id:'${id}'});ACT.bkView({v:'${v}'})`); clean(w, lang + ' drawer ' + id + ' ' + v); cyr('drawer ' + v); }

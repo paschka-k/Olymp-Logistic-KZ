@@ -20,7 +20,7 @@
     ev("ACT.stab({s:'dispatch',v:'board'}); ACT.open({id:'LD-2026-001851'})"); assert(w.document.querySelector('#dr_dep') && w.document.querySelector('[data-act=drUnassign]'), 'drawer release / replanning block'); w.document.querySelector('[data-act=drUnassign]').click(); eq(ev("load('LD-2026-001851').status"), 'unassigned'); clean(w, 'drawer');
   });
   await group('planning: 7-day capacity from data, scenarios change supply and demand, target fleet of 4 trucks, KZ working-day calendar (FR-38/119/156)', 'ru', async (g, ev, w) => {
-    const c = ev('planCapacity(false)'); eq(c.length, 7); eq(c[0].dem, ev("S.loads.filter(l => l.status !== 'delivered' && l.eta.slice(0,10) === '2026-10-18').reduce((s,l) => s + l.pallets, 0) + S.express.filter(e => e.status === 'pending' && e.want.slice(0,10) === '2026-10-18').reduce((s,e) => s + e.pal, 0)"), 'demand from loads and open express of the day'); assert(c.some(x => x.pct > 100), 'a shortfall exists in the demo');
+    const c = ev('planCapacity(false)'); eq(c.length, 7); eq(c[0].dem, ev("S.loads.filter(l => l.status !== 'delivered' && l.eta.slice(0,10) === '2026-10-18').reduce((s,l) => s + l.pallets, 0) + S.express.filter(e => e.status === 'pending' && e.want.slice(0,10) === '2026-10-18').reduce((s,e) => s + e.pal, 0)"), 'demand from loads and open express of the day'); assert(c.every(x => typeof x.need === 'number' && x.reserve === x.trucks - x.need), 'vehicles needed and reserve per day (A-47 / A-50)'); assert(c.some(x => x.pct > 100), 'a shortfall exists in the demo');
     ev('S.ops.scen.peak = true'); eq(ev('planCapacity(false)[1].dem'), Math.round(c[1].dem * 1.3), 'peak +30 %'); ev('S.ops.scen.peak = false; S.ops.scen.storm = true; S.ops.storm = ["KAR","AST"]'); eq(ev('planCapacity(false)[2].trucks'), Math.max(0, c[2].trucks - 2), 'blizzard removes two trucks'); assert(!ev("gate(load('LD-2026-001850')).find(x => x.key === 'wx').pass"), 'storm warning reaches the gate');
     ev('S.ops.scen.storm = false; S.ops.storm = []'); const t = ev('planCapacity(true)'); assert(t.every(x => x.trucks === 4 && x.cap <= 60), 'target fleet 4 trucks, 60 pallets');
     eq(ev("dayKind('2026-10-25')"), 'holiday'); eq(ev("dayKind('2026-10-26')"), 'transfer', 'Republic Day on Sunday moves to Monday'); assert(ev("isWorkDay('2026-10-19')") && !ev("isWorkDay('2026-10-24')")); eq(ev("addWorkDays('2026-10-23', 1)"), '2026-10-27', 'deadline skips weekend + transferred holiday');
@@ -28,4 +28,11 @@
   });
   await group('Dispatch extras render in every language without undefined / NaN', 'ru', async () => {
     for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("go('dispatch'); ACT.stab({s:'dispatch',v:'express'})"); clean(gg.w, lang + ' express'); gg.ev("ACT.stab({s:'dispatch',v:'planning'}); S.ops.target = true; S.ops.scen.storm = true; render()"); clean(gg.w, lang + ' planning'); gg.ev("ACT.stab({s:'dispatch',v:'board'}); ACT.open({id:'LD-2026-001850'})"); clean(gg.w, lang + ' drawer'); } finally { gg.done(); } }
+  });
+
+  /* ---- operations parity pass: A-45 / A-47 / A-50 planning rows and hub filter, B-45..47 trip without crew ---- */
+  await group('parity pass: planning shows vehicles needed and reserve, follows the hub segment; a trip can be planned without crew and times', 'en', async (g, ev, w) => {
+    ev("go('dispatch'); ACT.stab({s:'dispatch',v:'planning'})"); assert(w.document.querySelector('[data-need-row]') && w.document.querySelector('[data-reserve-row]'), 'A-47 / A-50: rows');
+    const sum = () => ev('planCapacity(false).reduce((s, r) => s + r.trucks + r.drivers, 0)'), all = sum(); ev("S.hub = 'ALA'"); assert(sum() < all, 'A-45: the hub filter reaches trucks and drivers of the capacity'); ev("S.hub = ''");
+    ev("S.ops.plan.sel = ['O-26-0103']; S.ops.plan.truck = ''; S.ops.plan.drv = ''; S.ops.plan.dep = ''; S.ops.plan.eta = ''"); const r = ev('planCreate()'); assert(r && r.id, 'B-45..47: planned without crew and times'); eq(ev("load('" + r.id + "').status"), 'unassigned');
   });

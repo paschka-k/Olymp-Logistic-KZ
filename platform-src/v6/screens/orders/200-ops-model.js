@@ -109,7 +109,22 @@
     return ops;
   }
   if (!(SCREENS.orders.tabs || []).some(t => t.key === 'orders')) { const body0 = SCREENS.orders.body; addTab('orders', 'orders', T('Заказы', 'Aufträge', 'Orders', 'Тапсырыстар'), body0); }   // the base table becomes the first tab once tabs exist
-  const ops = l => { if (!l.ops) l.ops = buildOps(l); return l.ops; };
+  /* C-25 / C-26: an order is "handed" when every place of it sits in an approved full or partial hand-over of S.handovers (160-partners.js); handedAuto marks values set here, so a manual o.handed is never cleared */
+  const hoCode = (l, i) => (globalThis.ssccOf ? ssccOf(l, i) : '00' + '4870' + l.id.replace(/\D/g, '').padStart(9, '0').slice(-9) + String(i + 1).padStart(4, '0') + '0');
+  const syncHo = (l, o) => {
+    const hs = (S.handovers || []).filter(h => h.load === l.id && h.st === 'approved'), all = o.orders.flatMap(x => x.places || []);
+    o.orders.forEach(x => {
+      if (x.handed && !x.handedAuto) return;
+      let by = null;
+      if (hs.length && (x.places || []).length) {
+        const covered = x.places.every(p => { const code = hoCode(l, all.indexOf(p)), h = hs.find(k => k.mode !== 'part' || (k.items || []).includes(code) || (k.items || []).includes(p.sscc)); if (h && !by) by = h.p; return !!h; });
+        if (!covered) by = null;
+      }
+      if (by) { x.handed = by; x.handedAuto = true; } else if (x.handedAuto) { delete x.handed; delete x.handedAuto; }
+    });
+  };
+  const ops = l => { if (!l.ops) l.ops = buildOps(l); syncHo(l, l.ops); return l.ops; };
+  globalThis.hoCode = hoCode;
   globalThis.ops = ops; globalThis.ssccMake = ssccMake; globalThis.ssccValid = ssccValid; globalThis.ssccFromScan = ssccFromScan; globalThis.MFRS = MFRS; globalThis.MFR_G = MFR_G;
   const places = l => ops(l).orders.flatMap(o => o.places);
   const findPlace = sscc => { for (const l of S.loads) { const p = places(l).find(x => x.sscc === sscc); if (p) return { l, p, o: ops(l).orders.find(o => o.id === p.order) }; } return null; };
@@ -174,7 +189,7 @@
       { to: 2, km: 640, road: T('областная дорога Костанай – Карабутак – Актобе', 'Gebietsstraße Kostanay – Karabutak – Aktobe', 'regional road Kostanay – Karabutak – Aktobe', 'Қостанай – Қарабұтақ – Ақтөбе жолы'), maxAxle: 8000, maxGross: 25000, spring: { from: '04-01', to: '05-15', maxAxle: 6000, maxGross: 15000 } },
       { to: 3, km: 560, road: T('трасса Актобе – Кандыагаш – Атырау', 'Straße Aktobe – Kandyagash – Atyrau', 'road Aktobe – Kandyagash – Atyrau', 'Ақтөбе – Қандыағаш – Атырау жолы'), maxAxle: 10000, maxGross: 40000 }] };
   S.loads.forEach(l => { if (l.id === WEST_ID && l.from === 'AST' && l.to === 'ATY') l.west = true; });   /* the seeded West trip (a new load may reuse the id counter) */
-  const tripDay = l => l.eta.slice(0, 10);
+  const tripDay = l => new Date((l.dep ? new Date(l.dep) : depOf(l)).getTime() + 5 * 3600e3).toISOString().slice(0, 10);   // departure day (KZ), C-72
   const inSpring = l => { const md = tripDay(l).slice(5); return md >= '04-01' && md <= '05-15'; };
   function legsOf(l, spring) {
     const base = l.west ? WEST.legs : [{ to: 1, km: dist(l.from, l.to), road: HUBS[l.from].city + ' – ' + HUBS[l.to].city, maxAxle: 11500, maxGross: 40000 }];   /* national roads: 11.5 t per drive axle (planning value) */
@@ -309,7 +324,7 @@
     const empty = Math.round(km * CM.retPct / 100), emptyCost = Math.round(empty * ty.fuel / 100 * CM.diesel), fixed = Math.round((kmAll + empty) * CM.fixKm);
     return { rate: ty.rate * km, fuel, toll, driver, hours, empty, emptyCost, fixed, total: fuel + toll + driver + emptyCost + fixed };
   }
-  const calcOpt = l => { const d = l.driver ? drv(l.driver) : null, sp = inSpring(l) || !!S.ops.spring; return { legs: legsOf(l, sp), spring: sp, season: season(l.eta), adrDriver: d && d.id ? (ADR_DRV[d.id] ? { name: d.name, to: ADR_DRV[d.id] } : false) : null }; };
+  const calcOpt = l => { const d = l.driver ? drv(l.driver) : null, sp = inSpring(l) || !!S.ops.spring; return { legs: legsOf(l, sp), spring: sp, season: season(tripDay(l)), adrDriver: d && d.id ? (ADR_DRV[d.id] ? { name: d.name, to: ADR_DRV[d.id] } : false) : null }; };
   const km_ = l => legsOf(l).reduce((s, g) => s + g.km, 0);
   /* truck finder: every catalogue type in its variants + every fleet truck (+ demo vehicles), feasibility first, then cheaper (rate or full cost), ties by utilisation */
   function finder(l, byTotal, opt) {
@@ -387,7 +402,7 @@
   const recon = l => ops(l).orders.map(o => { const n = o.places.filter(p => p.scans.some(s => s.ev === 'load' && s.load === l.id)).length, wrong = o.places.filter(p => p.scans.some(s => s.load !== l.id)).length, exp = o.places.length;
     return { id: o.id, to: o.to, exp, n, wrong, ok: n === exp && !wrong, lvl: n === exp && !wrong ? 0 : n < exp ? 3 : 2, mark: wrong ? T('не тот рейс', 'falsche Tour', 'wrong trip', 'басқа рейс') : n === exp ? T('сходится', 'stimmt', 'matches', 'сәйкес') : n < exp ? T('недостача ', 'fehlt ', 'short ', 'жетіспейді ') + (exp - n) : T('излишек', 'Überschuss', 'surplus', 'артық') }; });
   const reconOk = l => recon(l).every(r => r.ok);
-  function rescan(lid, oid) { const l = load(lid), o = ops(l).orders.find(x => x.id === oid); const p = o && o.places.find(x => !x.scans.some(s => s.ev === 'load' && s.load === lid)); if (!p) return false;
+  function rescan(lid, oid) { if (!canDo('orders:write')) return false; const l = load(lid), o = ops(l).orders.find(x => x.id === oid); const p = o && o.places.find(x => !x.scans.some(s => s.ev === 'load' && s.load === lid)); if (!p) return false;
     p.scans.push({ t: fdt(NOW).slice(-5), ev: 'load', where: HUBS[l.from].city, load: lid }); ops(l).scanLog.push(p.sscc + ' → ' + o.id); audit('Load', lid, 'Rescan ' + p.sscc, ''); return true; }
   /* departure weighing (FR-145): record → excess against the limits of the planned type; override only with trips:override_load + reason */
   function weighLimits(l) { const o = ops(l); const ty = (o.plan && TYPES[o.plan.type]) || (l.truck ? typeOfTruck(trk(l.truck)) : null) || TYPES.r12; return ty; }
@@ -410,10 +425,20 @@
   }
   /* plan of the vehicle type (FR-99): a type that does not fit needs trips:override_load and a reason; `v` = { zones, split, regime } of the what-if */
   function savePlan(lid, typeId, reason, v) {
-    const l = load(lid), ty = TYPES[typeId]; if (!ty) return T('Тип ТС не найден', 'Fahrzeugtyp nicht gefunden', 'Vehicle type not found', 'КҚ түрі табылмады');
-    v = v || {}; const p = prof(ty, v.zones, v.split, v.regime), r = loadCalc(ops(l).orders, p, calcOpt(l));
+    const l = load(lid); v = v || {};
+    if (!canDo('trips:write')) return NOWRITE();   // C-16: load.plan needs trips:write
+    if (!['unassigned', 'assigned', 'loading'].includes(l.status)) return T('Рейс уже выехал — план не меняется', 'Fahrt bereits abgefahren — Plan nicht änderbar', 'Trip already left — the plan cannot change', 'Рейс шығып кеткен — жоспар өзгермейді');
+    const notFound = T('Тип ТС не найден', 'Fahrzeugtyp nicht gefunden', 'Vehicle type not found', 'КҚ түрі табылмады'), own = /^[fd]:/.test(String(typeId));
+    let p;
+    if (own) {   // C-13: an own fleet truck (f:<id>) or a demo vehicle (d:<id>) is saved as the plan
+      const id = typeId.slice(2);
+      if (typeId[0] === 'f') { const t = trk(id); if (!t || !t.id) return notFound; if (t.hub && t.hub !== l.from) return T('ТС другого хаба', 'Fahrzeug eines anderen Hubs', 'Vehicle belongs to another hub', 'КҚ басқа хабқа тиесілі'); p = truckProf(t); }
+      else { const dm = DEMO.find(x => x.id === id); if (!dm) return notFound; p = demoProf(dm); }
+    } else { const ty = TYPES[typeId]; if (!ty) return notFound; p = prof(ty, v.zones, v.split, v.regime); }
+    const r = loadCalc(ops(l).orders, p, own && p.own && p.own.truck ? Object.assign({ cls: p.own.truck.zones }, calcOpt(l)) : calcOpt(l)), pl0 = ops(l).plan, rg = own ? 'auto' : (v.regime || 'auto');
+    if (pl0 && pl0.type === typeId && pl0.zones === p.zones && (p.zones !== 2 || pl0.split === p.split) && (pl0.regime || 'auto') === rg) return T('План не изменился', 'Plan unverändert', 'Plan unchanged', 'Жоспар өзгермеген');   // C-15
     if (!r.fits) { if (!canDo('trips:override_load')) return T('Не помещается — план только с обоснованием руководителя (trips:override_load)', 'Passt nicht — Plan nur mit Begründung einer Leitung (trips:override_load)', 'Does not fit — plan only with a supervisor reason (trips:override_load)', 'Сыймайды — жоспар тек басшы негіздемесімен'); if (!reason || reason.trim().length < 10) return T('Обоснование перегруза ≥ 10 знаков', 'Begründung der Überschreitung ≥ 10 Zeichen', 'Reason for the overload, 10+ characters', 'Артық жүк негіздемесі ≥ 10 таңба'); }
-    ops(l).plan = { type: typeId, zones: p.zones, split: p.split, regime: v.regime || 'auto', label: p.label, by: 'Sarah Johnson', t: fdt(NOW).slice(-5), fits: r.fits, reason: r.fits ? '' : reason.trim() };
+    ops(l).plan = { type: typeId, zones: p.zones, split: p.split, regime: rg, label: p.label, by: 'Sarah Johnson', t: fdt(NOW).slice(-5), fits: r.fits, reason: r.fits ? '' : reason.trim() };
     audit('Load', lid, (r.fits ? 'Plan ' : 'Plan override ') + p.label, r.fits ? '' : reason.trim()); return null;
   }
   Object.assign(globalThis, { loadCalc, bestSplit, tripCost, finder, vehMatch, splitPlan, sequence, fefo, recon, reconOk, rescan, weigh, weighOverride, weighLimits, savePlan, calcOpt, loadKm: km_ });
@@ -431,8 +456,12 @@
   const docWhy = (l, k) => k === 'esf' ? T('ЭСФ формируется из доставленного заказа после подтверждения POD', 'ESF entsteht aus dem gelieferten Auftrag nach POD-Freigabe', 'ESF is generated from the delivered order once the POD is approved', 'ЭШФ POD расталған соң жеткізілген тапсырыстан жасалады') : k === 'waybill' ? (l.driver && l.truck ? T('Нужен предрейсовый медосмотр водителя (FR-114)', 'Vorfahrtuntersuchung des Fahrers nötig (FR-114)', 'Pre-trip medical check of the driver required (FR-114)', 'Жүргізушінің рейс алдындағы медтексеруі қажет (FR-114)') : T('Нужны водитель и ТС', 'Fahrer und Fahrzeug nötig', 'Driver and truck required', 'Жүргізуші мен КҚ қажет')) : T('Рейс не назначен', 'Fahrt nicht zugewiesen', 'Load not assigned', 'Рейс тағайындалмаған');
   function docGen(lid, k) { const l = load(lid), o = ops(l); if (!docCan(l, k)) return docWhy(l, k); if (o.kdocs[k] !== 'none' && o.kdocs[k] !== 'rejected') return null; o.kdocs[k] = 'ready'; if (k === 'esf') l.esf = 'issued'; audit('Docs', lid, 'Generate ' + k, ''); return null; }
   function docSign(lid, k) { const o = ops(load(lid)); if (o.kdocs[k] !== 'ready') return T('Сначала сформируйте документ', 'Erst Dokument erstellen', 'Generate the document first', 'Алдымен құжатты жасаңыз'); if (!canDo('documents:sign')) return T('Нет права documents:sign', 'Kein Recht documents:sign', 'No permission documents:sign', 'documents:sign құқығы жоқ'); o.kdocs[k] = 'signed'; audit('Docs', lid, 'Sign ' + k + ' (NCALayer, demo)', 'cert KZ-NCA-2026-4471'); return null; }
-  function docSend(lid, k) { const l = load(lid), o = ops(l); if (!KDOC[k].send) return T('Документ не передаётся в госсистему', 'Dokument geht an kein Staatssystem', 'Document is not sent to a state system', 'Құжат мемлекеттік жүйеге жіберілмейді'); if (o.kdocs[k] !== 'signed') return T('Сначала подпишите ЭЦП', 'Erst mit EDS signieren', 'Sign with the e-signature first', 'Алдымен ЭЦҚ қол қойыңыз'); o.kdocs[k] = 'sent'; o.inbox.push({ key: k.toUpperCase(), lvl: 1, text: T('Отправлено в ', 'Gesendet an ', 'Sent to ', 'Жіберілді: ') + KDOC[k].send + ' · ' + fdt(NOW) }); if (k === 'esf') l.esf = 'issued'; audit('Docs', lid, 'Send ' + k + ' → ' + KDOC[k].send, ''); return null; }
-  function docPoll(lid) { const l = load(lid), o = ops(l); let n = 0; Object.keys(o.kdocs).forEach(k => { if (o.kdocs[k] === 'sent') { o.kdocs[k] = 'accepted'; n++; o.inbox.push({ key: k.toUpperCase(), lvl: 0, text: KDOC[k].send + ': ' + T('принят, рег. № ', 'angenommen, Reg.-Nr. ', 'accepted, reg. no. ', 'қабылданды, тіркеу № ') + 'KZ-' + hashOf(lid + k) }); if (k === 'esf') l.esf = 'confirmed'; } }); return n; }
+  function docSend(lid, k) { const l = load(lid), o = ops(l); if (!canDo('documents:sign')) return T('Нет права documents:sign', 'Kein Recht documents:sign', 'No permission documents:sign', 'documents:sign құқығы жоқ'); if (!KDOC[k].send) return T('Документ не передаётся в госсистему', 'Dokument geht an kein Staatssystem', 'Document is not sent to a state system', 'Құжат мемлекеттік жүйеге жіберілмейді'); if (o.kdocs[k] !== 'signed') return T('Сначала подпишите ЭЦП', 'Erst mit EDS signieren', 'Sign with the e-signature first', 'Алдымен ЭЦҚ қол қойыңыз'); o.kdocs[k] = 'sent'; o.inbox.push({ key: k.toUpperCase(), lvl: 1, text: T('Отправлено в ', 'Gesendet an ', 'Sent to ', 'Жіберілді: ') + KDOC[k].send + ' · ' + fdt(NOW) }); if (k === 'esf') l.esf = 'issued'; audit('Docs', lid, 'Send ' + k + ' → ' + KDOC[k].send, ''); return null; }
+  function docPoll(lid) { const l = load(lid), o = ops(l); let n = 0; Object.keys(o.kdocs).forEach(k => { if (o.kdocs[k] === 'sent') {
+        const c = cust(l.cust);   // E-6: ESF / SNT of a customer without a valid 12-digit BIN is rejected by the state system (level-3 hint, "Generate again" becomes reachable)
+        if ((k === 'esf' || k === 'snt') && !(c && /^\d{12}$/.test(String(c.bin || '').replace(/\D/g, '')))) { o.kdocs[k] = 'rejected'; o.inbox.push({ key: k.toUpperCase(), lvl: 3, text: KDOC[k].send + ': ' + T('отклонён — неверный БИН получателя', 'abgelehnt — ungültige BIN des Empfängers', 'rejected — invalid BIN of the recipient', 'қабылданбады — алушының БСН қате') + ' · ' + fdt(NOW) }); return;
+        }
+        o.kdocs[k] = 'accepted'; n++; o.inbox.push({ key: k.toUpperCase(), lvl: 0, text: KDOC[k].send + ': ' + T('принят, рег. № ', 'angenommen, Reg.-Nr. ', 'accepted, reg. no. ', 'қабылданды, тіркеу № ') + 'KZ-' + hashOf(lid + k) }); if (k === 'esf') l.esf = 'confirmed'; } }); return n; }
   const docSet = l => Object.keys(KDOC).map(k => ({ k, name: KDOC[k].name, st: ops(l).kdocs[k], chip: DST[ops(l).kdocs[k]] || DST.none, can: docCan(l, k), why: docWhy(l, k), send: KDOC[k].send }));
   Object.assign(globalThis, { KDOC, DST, docGen, docSign, docSend, docPoll, docSet });
 
@@ -490,19 +519,26 @@
   const gateOk = l => gate(l).every(x => x.pass);
   function release(lid, reason) {
     const l = load(lid), o = ops(l); if (!['assigned', 'loading'].includes(l.status)) return T('Выпуск возможен для назначенного рейса до отправления', 'Freigabe nur für zugewiesene Fahrten vor Abfahrt', 'Release applies to an assigned load before departure', 'Шығару тек жөнелтуге дейін');
-    if (gateOk(l)) { o.released = { by: 'Sarah Johnson', t: fdt(NOW).slice(-5), override: false }; o.revoked = null; audit('Release', lid, 'Go', ''); return null; }
+    if (gateOk(l)) { if (!canDo('documents:sign')) return T('Нет права documents:sign', 'Kein Recht documents:sign', 'No permission documents:sign', 'documents:sign құқығы жоқ'); o.released = { by: 'Sarah Johnson', t: fdt(NOW).slice(-5), override: false }; o.revoked = null; audit('Release', lid, 'Go', ''); return null; }
     if (!canDo('trips:override_release')) return T('Go/No-Go не пройден — исключение только с правом trips:override_release', 'Go/No-Go nicht bestanden — Ausnahme nur mit Recht trips:override_release', 'Go/No-Go failed — exception only with permission trips:override_release', 'Go/No-Go өтпеді — тек trips:override_release құқығымен');
     if (!reason || reason.trim().length < 10) return T('Укажите обоснование исключения (≥ 10 знаков)', 'Begründung der Ausnahme angeben (≥ 10 Zeichen)', 'Give a reason for the exception (10+ characters)', 'Ерекшелік негіздемесін көрсетіңіз (≥ 10 таңба)');
     o.released = { by: 'Sarah Johnson', t: fdt(NOW).slice(-5), override: true, reason: reason.trim(), failed: gate(l).filter(x => !x.pass).map(x => x.key) }; o.revoked = null;
     audit('Release', lid, 'Override release', reason.trim()); return null;
   }
   const REVOKE = { weather: T('погода / дорога', 'Wetter / Straße', 'weather / road', 'ауа райы / жол'), vehicle: T('транспорт', 'Fahrzeug', 'vehicle', 'көлік'), driver: T('водитель', 'Fahrer', 'driver', 'жүргізуші'), documents: T('документы', 'Dokumente', 'documents', 'құжаттар'), load: T('загрузка', 'Beladung', 'load', 'тиеу'), alarm: T('критическая тревога', 'kritischer Alarm', 'critical alarm', 'сыни дабыл'), planning: T('рейс изменён', 'Tour geändert', 'trip changed', 'рейс өзгерді'), other: T('другое', 'Sonstiges', 'other', 'басқа') };
-  function revoke(lid, why) { const o = ops(load(lid)); if (!o.released) return false; o.released = null; o.revoked = { why: why || 'other', t: fdt(NOW).slice(-5) }; audit('Release', lid, 'Revoke', REVOKE[why] || why); return true; }
+  function revoke(lid, why, alarmId) { const o = ops(load(lid)); if (!o.released) return false; o.released = null; o.revoked = { why: why || 'other', t: fdt(NOW).slice(-5), alarm: alarmId || null }; audit('Release', lid, 'Revoke', (REVOKE[why] || why) + (alarmId ? ' · #' + alarmId : '')); return true; }
+  /* E-44 (0.3.11 release.py): a critical alarm (level 3) on a released trip before departure or on its vehicle withdraws the release automatically, reason "alarm" + alarm id */
+  function alarmRevoke(a) { if (!a || a.lvl < 3) return 0; let n = 0; S.loads.forEach(l => { if ((a.load === l.id || (a.truck && a.truck === l.truck)) && ['assigned', 'loading'].includes(l.status) && ops(l).released && revoke(l.id, 'alarm', a.id)) n++; }); return n; }
   const released = l => !!ops(l).released;
-  Object.assign(globalThis, { gate, gateOk, release, revoke, released, REVOKE });
+  Object.assign(globalThis, { gate, gateOk, release, revoke, released, REVOKE, alarmRevoke });
   /* the status rule: loading → in_transit only with a valid release (FR-91); the dispatch drag & drop and the drawer button both go through canMove */
   const canMove0 = canMove;
-  canMove = function (l, to) { const e = canMove0(l, to); if (e) return e; if (to === 'in_transit' && l.status === 'loading' && !released(l)) return LT('ops_model.go_no_go_release_required_tab_docume'); return null; };
+  canMove = function (l, to) { const e = canMove0(l, to); if (e) return e; if (to === 'in_transit' && l.status === 'loading' && !released(l)) return LT('ops_model.go_no_go_release_required_tab_docume');
+    /* B-66 (0.3.11 release.depart): every gate is re-evaluated at the moment of departure unless the release is an audited exception */
+    if (to === 'in_transit' && l.status === 'loading') { const o = ops(l); if (!(o.released && o.released.override)) { const bad = gate(l).filter(x => !x.pass); if (bad.length) return T('Выезд заблокирован — не пройдены проверки: ', 'Abfahrt blockiert – nicht bestandene Prüfungen: ', 'Departure blocked – failed gates: ', 'Жөнелту бұғатталған — өтпеген тексерулер: ') + bad.map(x => x.label).join('; '); } }
+    /* B-64 (operations.py): delivered only when every stop is delivered */
+    if (to === 'delivered' && !l.epod && typeof tripStops === 'function' && tripStops(l).some(s => s.kind === 'unload' && !s.delivered)) return T('Не все точки доставлены', 'Nicht alle Stopps zugestellt', 'Not all stops are delivered', 'Барлық нүктелер жеткізілмеген');
+    return null; };
   /* double booking (FR-93): a driver or truck that already carries an active load cannot be assigned again, whatever its status flag says */
   const assign0 = assign;
   /* FR-93: a resource is double-booked when it is flagged busy or sits on a load this platform assigned (seeded demo loads with free-flagged resources stay re-plannable) */
@@ -522,9 +558,14 @@
   /* replan(lid, iso, why[, 'dep']): iso is the new ETA, or with mode 'dep' (0.3.9 ReplanDb) the new departure — the ETA moves by the same amount */
   const RPL = { weather: T('погода', 'Wetter', 'weather', 'ауа райы'), road: T('дорога', 'Straße', 'road', 'жол'), vehicle: T('транспорт', 'Fahrzeug', 'vehicle', 'көлік'), customer: T('клиент', 'Kunde', 'customer', 'клиент') };
   function replan(lid, etaIso, why, mode) { const l = load(lid); if (!canDo('trips:write')) return NOWRITE(); if (!etaIso || isNaN(new Date(etaIso))) return T('Укажите новое время', 'Neue Zeit angeben', 'Enter the new time', 'Жаңа уақытты көрсетіңіз'); if (['in_transit', 'problem', 'delivered', 'aborted', 'cancelled'].includes(l.status)) return T('Рейс уже в пути', 'Fahrt bereits unterwegs', 'Load already on the road', 'Рейс жолда');
-    let nd = new Date(/Z|[+-]\d\d:\d\d$/.test(etaIso) ? etaIso : etaIso.length === 16 ? etaIso + ':00+05:00' : etaIso + '+05:00');   /* a datetime-local value is KZ time */
-    if (mode === 'dep') { const dep0 = Date.parse(globalThis.depOf ? depOf(l) : l.eta), shift = nd.getTime() - dep0; if (l.dep) l.dep = nd.toISOString(); nd = new Date(Date.parse(l.eta) + shift); }
-    const old = l.eta, lbl = (mode === 'dep' && RPL[why]) || REVOKE[why] || RPL[why] || why; l.eta = nd.toISOString(); ops(l).replans.push({ from: old, to: l.eta, why: why || 'other', mode: mode || 'eta', t: fdt(NOW).slice(-5) }); l.notes.push({ who: 'System', t: fdt(NOW).slice(-5), text: T('Перенос: ', 'Verschiebung: ', 'Replanned: ', 'Ауыстыру: ') + fdt(old) + ' → ' + fdt(l.eta) + ' · ' + lbl }); if (released(l)) revoke(lid, 'planning'); audit('Dispatch', lid, 'Replan → ' + fdt(l.eta), lbl || ''); return null; }
+    let newDep = null; let nd = new Date(/Z|[+-]\d\d:\d\d$/.test(etaIso) ? etaIso : etaIso.length === 16 ? etaIso + ':00+05:00' : etaIso + '+05:00');   /* a datetime-local value is KZ time */
+    if (mode === 'dep') { const dep0 = Date.parse(globalThis.depOf ? depOf(l) : l.eta), shift = nd.getTime() - dep0; newDep = l.dep ? nd.toISOString() : null; nd = new Date(Date.parse(l.eta) + shift); }
+    if (nd.getTime() === Date.parse(l.eta)) return T('Отправление не изменилось', 'Abfahrt unverändert', 'Departure unchanged', 'Жөнелту өзгермеген');
+    { const dur = Date.parse(l.eta) - new Date(depOf(l)).getTime(), w1 = nd.getTime(), s1 = w1 - dur;   // B-21: the new window [dep, eta] must not overlap another active load of the crew
+      const clash = S.loads.find(x => x.id !== l.id && isActive(x) && ((l.driver && x.driver === l.driver) || (l.truck && x.truck === l.truck)) && Date.parse(x.eta) > s1 && new Date(depOf(x)).getTime() < w1);
+      if (clash) return T('Двойное бронирование в новое время: рейс ', 'Doppelbuchung zur neuen Zeit: Fahrt ', 'Double booking at the new time: load ', 'Жаңа уақытта қос брондау: рейс ') + clash.id;
+      const dd = l.driver ? drv(l.driver) : null, lic = dd && dd.docs && dd.docs.find(x => x.type === 'lic'); if (lic && lic.to && lic.to < nd.toISOString().slice(0, 10)) return T('Права водителя истекают до новой даты прибытия', 'Führerschein des Fahrers läuft vor der neuen Ankunft ab', 'The driver licence expires before the new arrival date', 'Жүргізуші куәлігі жаңа келу күнінен бұрын аяқталады'); }
+    const old = l.eta, lbl = (mode === 'dep' && RPL[why]) || REVOKE[why] || RPL[why] || why; l.eta = nd.toISOString(); if (newDep) l.dep = newDep; ops(l).replans.push({ from: old, to: l.eta, why: why || 'other', mode: mode || 'eta', t: fdt(NOW).slice(-5) }); l.notes.push({ who: 'System', t: fdt(NOW).slice(-5), text: T('Перенос: ', 'Verschiebung: ', 'Replanned: ', 'Ауыстыру: ') + fdt(old) + ' → ' + fdt(l.eta) + ' · ' + lbl }); if (released(l)) revoke(lid, 'planning'); audit('Dispatch', lid, 'Replan → ' + fdt(l.eta), lbl || ''); return null; }
   globalThis.REPLAN_WHY = RPL;
   function medcheck(did) { const d = drv(did); if (!d.id) return false; d.medcheck = today; audit('Drivers', d.name, 'Pre-trip medical check', ''); return true; }
   Object.assign(globalThis, { unassign, replan, medcheck });

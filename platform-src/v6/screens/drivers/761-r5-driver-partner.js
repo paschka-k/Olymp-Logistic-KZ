@@ -212,3 +212,5 @@ ${a.extra.length ? `<p class="note">${esc(T('Лишние места от вод
     r5TplLang: d => { N.prev = d.v; render(); },
   });
 })();
+/* P-66 · the CRM decision on a partner GDP submission uses the Partners handler: approver = current user, GDP validity stays out of the contract end (p.until) */
+(function () { if (!globalThis.partnerGdpDecide) return; ACT.cmPqOk = d => { partnerGdpDecide(d.id, true); }; ACT.cmPqNo = d => { partnerGdpDecide(d.id, false); }; })();

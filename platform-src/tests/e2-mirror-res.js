@@ -213,7 +213,7 @@
     ev("const p4=S.partners.find(p=>p.id==='PL-04');p4.city='ALA';p4.cap='40';S.ptx.ho.load='LD-2026-001852';S.ptx.ho.mode='full';" + R2PT);
     const ok2 = w.document.querySelector('[data-cand-gdp=PL-02]'); assert(ok2, 'chip for PL-02'); eq(ok2.dataset.gdpSt, 'valid'); assert(/GDP-квалификация до 30\.06\.2027/.test(ok2.innerText), 'green text: ' + ok2.innerText);
     const x4 = w.document.querySelector('[data-cand-gdp=PL-04]'); assert(x4, 'chip for PL-04'); eq(x4.dataset.gdpSt, 'expired'); assert(/истекла 30\.09\.2026/.test(x4.innerText), 'red text: ' + x4.innerText);
-    assert(/нет GDP для фармы/.test(w.document.querySelector('[data-cand=PL-04]').innerText), 'reason shown on the candidate'); assert(!w.document.querySelector('[data-cand=PL-04] [data-act=hoGive]'), 'no handover button for the expired partner');
+    assert(/нет GDP для 2–8 °C/.test(w.document.querySelector('[data-cand=PL-04]').innerText), 'reason shown on the candidate'); assert(!w.document.querySelector('[data-cand=PL-04] [data-act=hoGive]'), 'no handover button for the expired partner');
     const n = ev('S.handovers.length'); ev("ACT.hoGive({id:'PL-04'})"); eq(ev('S.handovers.length'), n, 'expired qualification refused'); assert(/30\.09\.2026/.test(ev('S.ptx.ho.err')), 'refusal names the date'); eq(ev('S.toast.kind'), 'err');
     w.document.querySelector('#ho_l').value = 'LD-2026-001852'; ev("document.querySelector('#ho_p').value='PL-04';ACT.hoNew()"); eq(ev('S.handovers.length'), n, 'classic form refuses too');
     ev("S.pquals.push({id:'Q-090',partner:'PL-04',company:'x',cert:'c.pdf',audit:'2026-10-01',until:'2027-12-31',status:'pending'});ACT.cmPqOk({id:'Q-090'})"); eq(ev("partnerGdpUntil(S.partners.find(p=>p.id==='PL-04'))"), '2027-12-31', 'approved submission sets the date');
@@ -448,7 +448,7 @@
   });
   await group('R2 P1/P2/P7: pick-up window, incompatible goods, LOT on the booking and the order', 'ru', async (g, ev, w) => {
     ev(bkPortal + "BK.pFrom='2026-10-25';BK.pTo='2026-10-20';render()"); assert(/Окно забора/.test(w.document.querySelector('#bk_price').innerText), 'window error'); assert(w.document.querySelector('[data-pick-window]'), 'inputs');
-    ev("BK.pTo='2026-10-30';render()"); assert(ev("slotsFor(BK.pCity,BK.dCity,4,1600).filter(s=>s.pickup>='2026-10-25').length") === w.document.querySelectorAll('[data-slot]').length, 'slots filtered by the window');
+    ev("BK.pTo='2026-10-30';render()"); assert(ev("slotsFor(BK.pCity,BK.dCity,4,1600).filter(s=>s.pickup>='2026-10-25'&&s.pickup<='2026-10-30').length") === w.document.querySelectorAll('[data-slot]').length, 'slots filtered by the window');
     ev("BK.slot=document.querySelector('[data-slot]').dataset.slot;BK.lot='LOT-2026-17';render();ACT.bkSend()"); const b = ev('S.bookings[0]'); eq(b.pickup.from, '2026-10-25'); eq(b.pickup.to, '2026-10-30'); eq(b.lot, 'LOT-2026-17');
     ev(`ACT.setRole({v:'admin'});go('orders');ACT.stab({s:'orders',v:'bookings'});ACT.bkOpen({id:'${b.id}'})`); assert(w.document.querySelector('[data-bk-window]'), 'window on the desk'); eq(w.document.querySelector('[data-bk-lot]').innerText, 'LOT-2026-17'); eq(ev(`bookingConfirm('${b.id}')`), null); eq(ev('load(S.bookings[0].load).lot'), 'LOT-2026-17', 'LOT on the order');
     ev(bkPortal + "render()"); const cbx = c => w.document.querySelector(`[data-bkg="${c}"]`);
@@ -468,13 +468,13 @@
     ev("ACT.setRole({v:'dispatcher'});go('orders');ACT.stab({s:'orders',v:'bookings'});ACT.bkOpen({id:S.bookings[0].id})"); const t = w.document.querySelector('[data-bk-payer]').innerText; assert(/PO-9/.test(t) && /И\*\*\*/.test(t) && !/Петров/.test(t), 'payer line masked: ' + t);
   });
   await group('R2 D5/P5: portal express → S.express approval → booking approved with the express load; desk cannot confirm while pending', 'ru', async (g, ev, w) => {
-    ev(bkPortal + "BK.express=true;BK.deliverBy='2026-10-21';render();ACT.bkSend()"); const b = ev('S.bookings[0]'), ex = ev('S.express[0]');
-    eq(b.express_id, ex.id); eq(ex.booking, b.id); eq(ex.status, 'pending'); eq(ex.due.slice(0, 10), '2026-10-20'); assert(w.document.querySelector('[data-ex-done]'), 'EX line in the done card');
+    ev(bkPortal + "BK.express=true;BK.deliverBy='2026-10-21T12:00';render();ACT.bkSend()"); const b = ev('S.bookings[0]'), ex = ev('S.express[0]');
+    eq(b.express_id, ex.id); eq(ex.booking, b.id); eq(ex.status, 'pending'); eq(ex.due, '2026-10-18T16:00:00+05:00', 'decision by = cut-off of the next express slot (0.3.11 due_for)'); assert(w.document.querySelector('[data-ex-done]'), 'EX line in the done card');
     ev("go('mybookings')"); assert(w.document.querySelector(`[data-ex-row="${ex.id}"]`), 'express table'); clean(w, 'mybookings express');
     ev(`ACT.setRole({v:'dispatcher'});go('orders');ACT.stab({s:'orders',v:'bookings'});ACT.bkOpen({id:'${b.id}'})`); assert(w.document.querySelector('[data-express-gate]'), 'express note'); assert(!w.document.querySelector('[data-act=bkConfirm]'), 'confirm hidden'); assert(ev(`bookingConfirm('${b.id}')`), 'confirm refused');
     ev("go('dispatch');ACT.stab({s:'dispatch',v:'express'})"); assert(w.document.querySelector(`[data-express="${ex.id}"]`), 'listed in dispatch'); clean(w, 'dispatch express');
     ev(`ACT.setRole({v:'admin'});['ceo','ana','log'].forEach(f=>exSign('${ex.id}',f))`); const b2 = ev(`S.bookings.find(x=>x.id==='${b.id}')`); eq(b2.exSt, 'approved'); eq(b2.status, 'confirmed'); assert(/^LD-/.test(b2.load), 'express load linked');
-    ev(bkPortal + "BK.express=true;BK.deliverBy='2026-10-22';render();ACT.bkSend()"); const id2 = ev('S.bookings[0].express_id'); ev(`ACT.setRole({v:'admin'});ACT.exTick({id:'${id2}'})`); eq(ev('S.bookings[0].exSt'), 'timeout', 'deadline passed → timeout');
+    ev(bkPortal + "BK.express=true;BK.deliverBy='2026-10-22T12:00';render();ACT.bkSend()"); const id2 = ev('S.bookings[0].express_id'); ev(`ACT.setRole({v:'admin'});ACT.exTick({id:'${id2}'})`); eq(ev('S.bookings[0].exSt'), 'timeout', 'deadline passed → timeout');
     ev("ACT.setRole({v:'customer'});go('mybookings')"); assert(/срок истёк/.test(w.document.querySelector('[data-ex-table]').innerText), 'timeout chip'); clean(w, 'mybookings after decisions');
   });
   await group('R2 P6: customer locks a quote; one offer / contract sample for form, booking, offer and desk', 'ru', async (g, ev, w) => {
@@ -521,7 +521,7 @@
     ev(bkPortal + "BK.pFrom='2026-10-19';BK.dStreet='Unknownstreet';BK.dgOn=true;Object.assign(BK.dg,{un:'1845',name:'Dry ice',cls:'9',dry:'20'});BK.payerOn=true;BK.insured=true;BK.declared='1000000';render()"); clean(w, lang + ' book');
     ev('ACT.bkQuote();ACT.bkOfferDoc()'); clean(w, lang + ' draft sample'); cyr('draft sample'); ev('closeDrawer()');
     ev("BK.slot=slotsFor(BK.pCity,BK.dCity,4,1600).find(s=>s.adr).date;BK.payer.company='Forwarder LLP';render();ACT.bkSend()"); clean(w, lang + ' done');
-    ev("ACT.bkReset();BK.kg=1600;BK.express=true;BK.deliverBy='2026-10-21';render();ACT.bkSend();go('mybookings')"); clean(w, lang + ' mybookings');
+    ev("ACT.bkReset();BK.kg=1600;BK.express=true;BK.deliverBy='2026-10-21T12:00';render();ACT.bkSend();go('mybookings')"); clean(w, lang + ' mybookings');
     ev("ACT.bkDoc({id:S.bookings[1].id})"); clean(w, lang + ' booking sample'); ev("ACT.bkCtOpen({id:'DG-26-0012'})"); clean(w, lang + ' contract'); cyr('contract'); ev("ACT.bkCert({id:'BK-26-000004'})"); clean(w, lang + ' certificate'); cyr('certificate'); ev('closeDrawer()');
     ev("ACT.setRole({v:'admin'});go('orders');ACT.stab({s:'orders',v:'bookings'})"); clean(w, lang + ' desk');
     for (const id of ev('S.bookings.slice(0,3).map(b=>b.id)')) for (const v of ['info', 'offer']) { ev(`ACT.bkOpen({id:'${id}'});ACT.bkView({v:'${v}'})`); clean(w, lang + ' drawer ' + id + ' ' + v); cyr('drawer ' + v); }

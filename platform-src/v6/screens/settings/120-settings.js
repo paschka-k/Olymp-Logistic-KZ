@@ -47,7 +47,7 @@
     ['anom', 'receipt', 'green', T('Аномалии ЭСФ и счетов', 'ESF-/Rechnungsanomalien', 'ESF / invoice anomalies', 'ЭШФ және шот ауытқулары'), T('Дубли, расхождения, пропущенные позиции', 'Dubletten, Abweichungen, fehlende Positionen', 'Duplicates, mismatches, missing lines', 'Қайталанулар, айырмашылықтар')]];
   globalThis.CFG = { cur: dup(base), saved: JSON.stringify(base), live: { shift: 9 }, tab: false, auditOpen: false };
   S.audit = [];
-  globalThis.audit = (module, subject, decision, reason) => { const d = clockNow(); S.audit.unshift({ t: p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds()), user: 'Sarah Johnson', module, subject, decision, reason: reason || '' }); };
+  globalThis.audit = (module, subject, decision, reason) => { const d = clockNow(); S.audit.unshift({ t: LF.time(d), user: 'Sarah Johnson', module, subject, decision, reason: reason || '' }); };
   const getp = (p) => p.split('.').reduce((o, k) => o[k], CFG.cur);
   const setp = (p, v) => { const a = p.split('.'), k = a.pop(); a.reduce((o, x) => o[x], CFG.cur)[k] = v; };
   const dirty = () => JSON.stringify(CFG.cur) !== CFG.saved;

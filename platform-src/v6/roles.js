@@ -1,6 +1,6 @@
 /* Roles & permissions (FR-14/137): 11 roles, permission matrix generated from the source platform (role-perms.json),
    screen / tab gating, role shells (driver, customer, partner use their own menu), role switcher. */
-const VERSION = '6.4.4', BUILD = '@@BUILD@@';
+const VERSION = '6.5.0', BUILD = '@@BUILD@@';
 const ROLES = ['admin', 'dispatcher', 'warehouse', 'driver', 'auditor', 'viewer', 'manager', 'finance', 'quality', 'customer', 'partner'];
 const ROLE_NAME = {
   admin: LT('role.administrator'), dispatcher: LT('role.dispatcher'), warehouse: LT('role.warehouse'),
@@ -9,7 +9,7 @@ const ROLE_NAME = {
   customer: LT('role.customer_portal'), partner: LT('role.partner_portal'),
 };
 const ROLE_PERMS = /*@@ROLEPERMS@@*/{};
-const SCREEN_PERM = { dashboard: 'overview:read', orders: 'orders:read', dispatch: 'trips:read', fleet: 'fleet:read', drivers: 'drivers:read', routes: 'trips:read', hubs: 'trips:read', pod: 'trips:read', billing: 'costs:read', reports: 'overview:read', ai: 'overview:read', settings: 'overview:read', baseline: 'costs:read' };
+const SCREEN_PERM = { dashboard: 'overview:read', orders: 'orders:read', dispatch: 'trips:read', fleet: 'fleet:read', drivers: 'drivers:read', routes: 'trips:read', hubs: 'trips:read', pod: 'trips:read', billing: 'costs:read', reports: 'overview:read', ai: 'overview:read', settings: 'overview:read', baseline: 'overview:read' };
 const SHELL_NAV = { driver: [], customer: [], partner: [] };   // role shells: [id, icon, label, phase] pushed by the driver-app / portal areas
 const ALWAYS = ['help', 'changes', 'track', 'request'];   // track / request: public views (W4)
 const canDo = p => (ROLE_PERMS[S.role] || []).includes(p);

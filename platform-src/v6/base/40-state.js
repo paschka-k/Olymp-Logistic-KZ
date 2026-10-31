@@ -112,7 +112,7 @@ function bindActions() {
       const before = a.watch ? a.watch(d) : null;
       const r = fn.call(this, d, el, e);
       const after = a.watch ? a.watch(d) : null;
-      if (!a.watch || before !== after) audit(a.module, a.subject ? a.subject(d) : name, a.decision(d), a.reason ? a.reason(d) : '');
+      if (!a.watch || before !== after) audit(a.module, a.subject ? a.subject(d) : name, a.decision(d), a.reason ? a.reason(d) : '', a.code || meta.area + '.' + name.toLowerCase());
       return r;
     };
     wrapped.__audited = true;

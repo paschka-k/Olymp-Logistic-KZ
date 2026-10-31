@@ -24,14 +24,19 @@
   globalThis.driverPiiReveal = id => { if (!canDo('pii:read')) return false; const d = drv(id); if (!d || !d.id) return false; SHOWN = d.id; audit('Drivers', d.code, T('Просмотр персональных данных', 'Personendaten angezeigt', 'Personal data viewed', 'Дербес деректер қаралды'), 'iin,phone,license_no'); return true; };
   globalThis.driverPiiMask = { iin: mIin, phone: mPh };
   const list = () => hubFilter(S.drivers).filter(d => (!F.st || d.status === F.st) && (!F.rto || rto(d) === F.rto) && (!F.hub || d.hub === F.hub) && (!F.rate || d.rating >= +F.rate));
+  /* F-113 · licence and ADR deadlines are visible outside Staff */
+  const dchip = iso => (iso ? chip(DOCST[docState(iso)].c, fd(iso)) : '<span class="faint">—</span>');
+  const licTd = d => { const x = (d.docs || []).find(y => y.type === 'lic'); return dchip(x && x.to); };
+  const adrTd = d => dchip(globalThis.RES && RES.initDriver ? RES.initDriver(d).res.adr : '');
   function table() {
     const body = list().map(d => { const lt = lastTrip(d), t = loadOfDriver(d.id) && trk(loadOfDriver(d.id).truck), bad = expired(d), sn = soon(d);
       return `<tr class="${S.drawer && S.drawer.id === d.id ? 'is-selected' : ''}" data-act="openD" data-id="${d.id}"><td><span class="cell">${avatar(d.ini, 1)}<span><b>${esc(d.name)}</b><div class="sub">${d.code} · ${esc(T('кат.', 'Kl.', 'class', 'сан.'))} ${d.lic} · ${d.exp} ${esc(T('лет стажа', 'J. Erfahrung', 'yrs exp.', 'жыл өтіл'))}</div></span></span></td>
 <td class="mono" data-pii-iin="${d.id}">${pii(d, 'iin')}</td><td class="mono" data-pii-phone="${d.id}">${pii(d, 'phone')}${piiBtn(d) ? '<div>' + piiBtn(d) + '</div>' : ''}</td>
 <td>${chip(DS[d.status].c, DS[d.status].l)}</td><td class="center"><span class="dot ${rtoDot(d)}${rto(d) === 'red' ? ' pulse' : ''}" style="width:16px;height:16px"></span></td><td>${stars(d.rating)}</td>
 <td>${lt ? `<b>${esc(lt.txt)}</b><div class="sub">${esc(lt.sub)}</div>` : '<span class="faint">—</span>'}</td><td><b>${esc(HUBS[d.hub].city)}</b><div class="sub">${t ? esc(T('в рейсе, ', 'im Einsatz, ', 'on trip, ', 'рейсте, ') + t.plate) : d.status === 'rest' ? esc(T('отдых (РТО)', 'Ruhezeit (RTO)', 'rest period (RTO)', 'демалыс (РТО)')) : esc(HUBS[d.hub].name)}</div></td>
+<td>${licTd(d)}</td><td>${adrTd(d)}</td>
 <td>${bad ? chip('red', T('Док.: просрочено ', 'Dok.: abgelaufen ', 'Docs: expired ', 'Құж.: мерзімі өтті ') + bad) : sn ? chip('yellow', T('Док.: скоро ', 'Dok.: bald ', 'Docs: soon ', 'Құж.: жақында ') + sn) : chip('green', T('Док. в порядке', 'Dok. OK', 'Docs OK', 'Құж. дұрыс'))}</td></tr>`; }).join('');
-    const th = [T('Водитель', 'Fahrer', 'Driver', 'Жүргізуші'), T('ИИН', 'IIN', 'IIN', 'ЖСН'), T('Телефон', 'Telefon', 'Phone', 'Телефон'), T('Статус', 'Status', 'Status', 'Күйі'), T('РТО', 'RTO', 'RTO risk', 'РТО'), T('Рейтинг', 'Bewertung', 'Rating', 'Рейтинг'), T('Последний рейс', 'Letzte Fahrt', 'Last trip', 'Соңғы рейс'), T('Местоположение', 'Standort', 'Location', 'Орналасуы'), T('Документы', 'Dokumente', 'Documents', 'Құжаттар')];
+    const th = [T('Водитель', 'Fahrer', 'Driver', 'Жүргізуші'), T('ИИН', 'IIN', 'IIN', 'ЖСН'), T('Телефон', 'Telefon', 'Phone', 'Телефон'), T('Статус', 'Status', 'Status', 'Күйі'), T('РТО', 'RTO', 'RTO risk', 'РТО'), T('Рейтинг', 'Bewertung', 'Rating', 'Рейтинг'), T('Последний рейс', 'Letzte Fahrt', 'Last trip', 'Соңғы рейс'), T('Местоположение', 'Standort', 'Location', 'Орналасуы'), T('Права до', 'Führerschein bis', 'Licence until', 'Куәлік дейін'), T('ДОПОГ до', 'ADR bis', 'ADR until', 'ДОПОГ дейін'), T('Документы', 'Dokumente', 'Documents', 'Құжаттар')];
     return `${canDo('pii:read') ? `<p class="note" data-pii-note>${esc(T('Просмотр персональных данных записывается в журнал аудита.', 'Die Anzeige personenbezogener Daten wird im Audit-Protokoll erfasst.', 'Viewing personal data is recorded in the audit log.', 'Дербес деректерді қарау аудит журналына жазылады.'))}</p>` : ''}${KIT.table(th, body, { cols: 9, empty: T('Нет водителей по фильтрам', 'Keine Fahrer', 'No drivers match', 'Сүзгі бойынша жүргізуші жоқ') })}`;
   }
   SCREENS.drivers = {

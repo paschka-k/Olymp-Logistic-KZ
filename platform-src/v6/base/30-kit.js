@@ -29,8 +29,8 @@ const KIT = {
   table: (head, bodyHtml, o = {}) =>
     `<div class="card tcard"><table class="table" data-test="table"${o.id ? ` id="${o.id}"` : ''}${o.attrs ? ' ' + o.attrs : ''}><thead><tr>${head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${bodyHtml || (o.empty === false ? '' : `<tr><td colspan="${o.cols || head.length}" class="empty">${esc(o.empty || LT('kit.empty'))}</td></tr>`)}</tbody></table></div>`,
   /** labelled text input of the account / settings forms: KIT.field('au_name', 'Name', 'text', value, 'placeholder') */
-  field: (id, label, type, val, hint) =>
-    `<label class="fl">${esc(label)}<input class="inp" id="${id}" data-au="${id.slice(3)}" type="${type}" value="${esc(val || '')}" autocomplete="off"${hint ? ` placeholder="${esc(hint)}"` : ''}></label>`,
+  field: (id, label, type, val, hint, attrs) =>
+    `<label class="fl">${esc(label)}<input class="inp" id="${id}" data-au="${id.slice(3)}" type="${type}" value="${esc(val || '')}" autocomplete="off"${hint ? ` placeholder="${esc(hint)}"` : ''}${attrs || ''}></label>`,
   /** heading of a drawer section: opens <div class="drawer-section"> (close it with </div>) */
   sectionHead: title => `<div class="drawer-section"><h4>${esc(title)}</h4>`,
   /** drawer frame (labelled modal dialog, FR-215): r = { title, html, xl } as returned by DRAWERS[type] */

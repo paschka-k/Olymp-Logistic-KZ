@@ -39,7 +39,7 @@
   (SCREENS.orders.tabs || []).forEach(t => { if (t.key === 'commercial') t.perm = 'crm:read'; });
   const B = {};
   const gate = (k, perm) => { let f = ACT[k]; B[k] = f;   /* B = the 500 handler as loaded; overrides below wrap it */ Object.defineProperty(ACT, k, { configurable: true, enumerable: true, get: () => { const g = f; return (...a) => (canDo(perm) ? (g ? g(...a) : undefined) : NOPERM(perm)); }, set: nf => { f = nf; } }); };
-  ['cmCustAdd', 'cmAddrAdd', 'cmAddrOk', 'cmAddrDel', 'cmPlAdd', 'cmPlOff', 'cmOfAdd', 'cmOfVoid', 'cmOfAccept', 'cmCtAdd', 'cmCtSend', 'cmCtVoid', 'cmCtSign', 'cmLead', 'cmLeadAdd', 'cmLeadSave', 'cmLeadErase', 'cmLeadTask', 'cmTaskFor', 'cmTaskAdd', 'cmTaskDone', 'cmCtVoidOk'].forEach(k => gate(k, 'crm:write'));
+  ['cmCustAdd', 'cmAddrAdd', 'cmAddrOk', 'cmAddrDel', 'cmPlAdd', 'cmPlOff', 'cmPlOffYes', 'cmOfAdd', 'cmOfVoid', 'cmOfAccept', 'cmCtAdd', 'cmCtSend', 'cmCtVoid', 'cmCtSign', 'cmLead', 'cmLeadAdd', 'cmLeadSave', 'cmLeadErase', 'cmLeadTask', 'cmTaskFor', 'cmTaskAdd', 'cmTaskDone', 'cmCtVoidOk'].forEach(k => gate(k, 'crm:write'));
   gate('cmFxAdd', 'costs:approve');
 
   /* ---------- section post-processing ---------- */

@@ -1,0 +1,6 @@
+const fs=require('fs');const p='platform-src/tests/61-shell-ext.js';let s=fs.readFileSync(p,'utf8');
+const a=s.indexOf("    for (let i = 0; i < 4; i++) ev(\"S.auth.code='000000';ACT.authMfa()\")");const b=s.indexOf("    const e = ev(\"S.audit.filter(a=>a.action==='auth.mfa_failed')");
+if(a<0||b<0)throw new Error('x');
+s=s.slice(0,a)+"    login('manager', '000000'); for (let i = 0; i < 3; i++) ev(\"S.auth.code='000000';ACT.authMfa()\"); assert(!ev(\"userOf('manager').locked\"), '4 failures do not lock'); ev(\"S.auth.code='000000';ACT.authMfa()\"); eq(ev(\"userOf('manager').locked\"), true, 'the 5th wrong code locks the account'); eq(ev('S.auth.step'), 'password'); ev(\"S.auth.role='manager';S.auth.pw='x'\"); ev('ACT.authPw()'); assert(w.document.querySelector('[data-login-step=password] .login-err'), 'a locked account is refused'); ev(\"userOf('manager').locked=false\");\n"+s.slice(b);
+s=s.replace("ev('ACT.signOut()'); ev(`S.auth.role='${role}';S.auth.pw='x'`); ev('ACT.authPw()'); ev(`S.auth.code='${code}'`); ev('ACT.authMfa()'); };","ev('ACT.signOut()'); ev(`S.auth.role='${role}';S.auth.pw='x'`); ev('ACT.authPw()'); ev(`S.auth.code='${code}'`); ev('ACT.authMfa()'); };");
+fs.writeFileSync(p,s);

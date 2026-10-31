@@ -19,7 +19,7 @@
   await group('R1 login: first sign-in without 2FA → enrolment (QR, manual key, code); forced change asks the current password', 'en', async (g, ev, w) => {
     ev("ACT.signOut(); S.auth.role = 'viewer'; S.auth.pw = 'demo-pass'"); ev('ACT.authPw()'); const d = w.document; assert(d.querySelector('[data-login-step=enrol]'), 'enrolment step'); assert(d.querySelector('[data-enrol-qr] svg') && /^[A-Z2-7]{4}( [A-Z2-7]{4}){3}$/.test(d.querySelector('[data-enrol-key]').textContent), 'QR + key');
     ev("S.auth.code = '111111'; ACT.authMfa()"); assert(d.querySelector('[data-login-step=enrol] .login-err'), 'wrong code refused'); ev("S.auth.code = '123456'; ACT.authMfa()"); assert(d.querySelector('[data-login-step=recovery]'), 'recovery codes');
-    ev('ACT.authCodes()'); assert(d.querySelector('#au_cur'), 'current password field'); ev("S.auth.np = S.auth.np2 = 'correct horse battery'; ACT.authChange()"); assert(/current password/i.test(d.querySelector('.login-err').textContent), 'current password required');
+    ev("S.users.push({id:'U-VT',username:'viewer.t',name:'Viewer T',role:'viewer',active:true,mustChange:true})"); ev('ACT.authCodes()'); assert(d.querySelector('#au_cur'), 'current password field'); ev("S.auth.np = S.auth.np2 = 'correct horse battery'; ACT.authChange()"); assert(/current password/i.test(d.querySelector('.login-err').textContent), 'current password required');
     ev("S.auth.cur = 'wrong'; ACT.authChange()"); assert(/wrong/i.test(d.querySelector('.login-err').textContent), 'current password checked'); ev("S.auth.cur = 'demo-pass'; ACT.authChange()"); assert(!d.querySelector('.login-layer'), 'signed in'); eq(ev('S.role'), 'viewer');
     ev("ACT.signOut(); S.auth.role = 'viewer'; S.auth.pw = 'x'; ACT.authPw()"); assert(d.querySelector('[data-login-step=mfa]'), 'second sign-in: enrolled → code only'); clean(w, 'login');
   });
@@ -35,7 +35,9 @@
     ev("inboxAdd({kind:'road_closure', via:'connector', src:'KazAvtoZhol', lvl:3, cc:'KAR', ccTo:'AST', road:'M-36', title:'Closure test M-36'})"); ev("go('dispatch')"); const d = w.document;
     const tag = d.querySelector('.kcard[data-id="LD-2026-001847"] [data-issue]'); assert(tag && tag.dataset.issue === '3' && /Road: M-36/.test(tag.textContent), 'road tag on the Astana–Almaty trip: ' + (tag && tag.textContent));
     assert([...d.querySelectorAll('[data-issue]')].every(e => +e.dataset.issue >= 2), 'only level ≥ 2');
-    const rows = d.querySelectorAll('[data-open-order]').length; assert(rows > 0, 'unassigned orders'); const b = d.querySelector('[data-act=ooTrip]'); assert(b, 'To trip button'); const oid = b.dataset.id, lid = b.dataset.l; b.click();
+    const rows = d.querySelectorAll('[data-open-order]').length; assert(rows > 0, 'unassigned orders'); const btns = [...d.querySelectorAll('[data-act=ooTrip]')], chk = x => ev(`orderAttachCheck('${x.dataset.l}','${x.dataset.id}')`), b = btns.find(x => !chk(x)); assert(b, 'To trip button'); const bad = btns.find(x => chk(x));
+    if (bad) { const oB = ev(`ops(load('${bad.dataset.l}')).orders.length`); bad.click(); eq(ev(`ops(load('${bad.dataset.l}')).orders.length`), oB, 'B-27: an order of another temperature class / over capacity does not join the trip'); }
+    const oid = b.dataset.id, lid = b.dataset.l; w.document.querySelector(`[data-act=ooTrip][data-id="${oid}"][data-l="${lid}"]`).click();   // the refused click re-rendered the board: take the button again
     assert(ev(`ops(load('${lid}')).orders.some(o => o.id === '${oid}')`), 'order joined the trip'); eq(w.document.querySelectorAll('[data-open-order]').length, rows - 1, 'row gone');
     ev("S.orders.filter(o => o.status === 'new' && !o.load).forEach(o => o.status = 'planned'); render()"); assert(/All orders assigned/.test(w.document.querySelector('[data-open-empty]').textContent), 'empty state'); clean(w, 'board');
   });

@@ -478,5 +478,90 @@
     "status": "mt",
     "by": "machine translation (Claude)",
     "date": "2026-10-20"
+  },
+  "shell.forbidden_text": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-30"
+  },
+  "shell.go_to_start": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-30"
+  },
+  "shell.open_menu": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-30"
+  },
+  "shell.close_menu": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-30"
+  },
+  "shell.astana_utc5": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-30"
+  },
+  "shell.account_locked": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-30"
+  },
+  "shell.login_failed": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-30"
+  },
+  "shell.login_failed_short": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-30"
+  },
+  "shell.mfa_failed": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-30"
+  },
+  "shell.signed_in": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-30"
+  },
+  "shell.pw_contains_username": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-30"
+  },
+  "shell.pw_too_common": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-30"
+  },
+  "shell.records_admin": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-30"
+  },
+  "shell.help_article": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-30"
+  },
+  "shell.attempts_left": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-30"
+  },
+  "shell.recovery_code_hint": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-30"
+  },
+  "shell.design_switch": {
+    "status": "mt",
+    "by": "machine translation (Claude)",
+    "date": "2026-10-30"
   }
 }

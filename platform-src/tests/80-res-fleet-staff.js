@@ -4,7 +4,7 @@
     ev("S.trucks.push(Object.assign({}, S.trucks[0], {id:'t9',plate:'999 ZZZ 01',docs:Object.assign({}, S.trucks[0].docs),svc:Object.assign({}, S.trucks[0].svc),ob:null,lp:null,status:'available'}));RES.initTruck(trk('t9'),true)");
     assert(!ev("RES.planAvail(trk('t9'))"), 'must not be plannable before closing'); assert(ev("compat(load('LD-2026-001852'),drv('d2'),trk('t9')).some(x=>/FR-157/.test(x))"), 'compat must name the checklist');
     assert(ev("RES.obClose(trk('t9'))"), 'close must be refused while incomplete'); ev("trk('t9').lp.src='sts';trk('t9').lp.date='2026-10-01'");
-    for (const k of ['sts', 'tachograph', 'adr']) ev(`RES.obConfirm(trk('t9'),'${k}','X1')`);
+    eq(typeof ev("RES.obConfirm(trk('t9'),'sts','X1')"), 'string', 'F-63: STS ref must match 4–30 chars'); for (const k of ['sts', 'tachograph', 'adr']) ev(`RES.obConfirm(trk('t9'),'${k}','STS-1234')`);
     eq(ev("RES.obClose(trk('t9'))"), null, 'close'); assert(ev("RES.planAvail(trk('t9'))"), 'plannable after close');
   });
   await group('W2 fleet: load profile calibration validates and computes axle shares (FR-141)', 'ru', async (g, ev) => {
@@ -53,4 +53,8 @@
     for (const s of ['notified', 'accepted', 'deducted']) eq(ev(`RES.fineSet('${fid}','${s}')`), null); assert(ev(`S.costs.some(c=>c.ref==='${fid}'&&c.amount<0)`), 'deduction entry');
     const n = ev('RES.fineImport().length'); assert(n === 2 && ev("S.res.fines.filter(f=>f.drv).length") >= 3, 'import attributes by waybill');
     ev("go('drivers');ACT.stab({s:'drivers',v:'staff'})"); assert(w.document.querySelector('[data-fine]'), 'fines table'); clean(w, 'staff');
+  });
+  await group('R6 staff: urgent trip U-<n> is created when no unassigned load exists (S-17/S-19)', 'ru', async (g, ev) => {
+    ev("ACT.setRole({v:'admin'})"); const n0 = ev('S.loads.length'); const r = ev("RES.urgentTrip('AST',{zone:'chilled',hrsRaw:'3'})"); assert(r && /^U-\d+$/.test(r.ok), 'urgent trip id: ' + JSON.stringify(r)); eq(ev('S.loads.length'), n0 + 1); eq(ev(`load('${r.ok}').status`), 'assigned'); eq(ev(`load('${r.ok}').notes.some(n=>/Срочный рейс/.test(n.text))`), true);
+    assert(/h/.test(ev("RES.urgentTrip('AST',{hrsRaw:'20'})")), 'h outside 0.5…12 refused'); assert(typeof ev("RES.urgentTrip('AST',{order:'ZZ'})") === 'string', 'unknown order refused');
   });

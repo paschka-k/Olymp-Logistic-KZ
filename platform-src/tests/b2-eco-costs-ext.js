@@ -22,7 +22,7 @@
   });
   await group('costs: summary — 6-indicator card and plan / actual per vehicle from the ledger (FR-125)', 'ru', async (g, ev, w) => {
     ev("go('billing');ACT.stab({s:'billing',v:'model'});ACT.ecoSub({v:'sum'})"); eq(w.document.querySelectorAll('[data-dash] .kv > div').length, 6, 'six indicators'); assert(w.document.querySelector('[data-cost-actual]'), 'plan / actual table');
-    const A = ev('ecoActualByVeh()'); eq(A.rows.length, 4); const v1 = A.rows.find(r => r.id === 'V01'); eq(v1.by.fuel, 139256 + 135320, 'V01 fuel fills'); eq(v1.by.tolls, 4300, 'V01 toll'); assert(v1.l100 != null && Math.abs(v1.l100 - 810 / 2900 * 100) < 1e-6, 'l/100 from fills');
+    const A = ev('ecoActualByVeh()'); eq(A.rows.length, 4); const v1 = A.rows.find(r => r.id === 'V01'); eq(v1.by.fuel, 139256 + 135320, 'V01 fuel fills'); eq(v1.by.tolls, 4300, 'V01 toll'); assert(v1.l100 != null && Math.abs(v1.l100 - 398 / (12690 - 11210) * 100) < 1e-6, 'K-9: l/100 by the full-tank method (litres after the first fill / odometer delta)');
     const v2 = A.rows.find(r => r.id === 'V02'); eq(v2.by.service, 86000, 'V02 closed request'); assert(A.unattributed >= 5, 'seed entries without vehicle counted');
     eq(w.document.querySelectorAll('[data-cost-act]').length, 4, 'rows rendered');
     ev("ACT.setRole({v:'dispatcher'});go('billing');ACT.stab({s:'billing',v:'model'})"); assert(!w.document.querySelector('[data-toll-import]'), 'dispatcher sees the import forms');

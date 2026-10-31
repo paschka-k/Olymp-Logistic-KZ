@@ -6,7 +6,7 @@
   });
   await group('Documents KZ: generate → PDF → sign → IS ESF per row, signature only where the type needs it, "Generate all"', 'ru', async (g, ev, w) => {
     ev("S.ops.docSel = 'LD-2026-001851'; go('orders'); ACT.stab({s:'orders',v:'docs'})"); const d = w.document; assert(d.querySelectorAll('[data-doc]').length >= 8, 'rows');
-    d.querySelector('[data-act=dkGen][data-k=order]').click(); eq(ev("ops(load('LD-2026-001851')).kdocs.order"), 'ready'); assert(d.querySelector('[data-act=dkPdf][data-k=order]') && d.querySelector('[data-act=dkSign][data-k=order]'), 'PDF + sign for the order'); d.querySelector('[data-act=dkGen][data-k=reg]').click(); assert(!d.querySelector('[data-act=dkSign][data-k=reg]'), 'copies of certificates need no signature');
+    eq(ev("ops(load('LD-2026-001851')).kdocs.reg"), 'ready', 'E-11: the pre-trip set is ready as soon as the load has a crew'); eq(ev("ops(load('LD-2026-001851')).kdocs.order"), 'signed', 'E-11: the order is ready and signed'); d.querySelector('[data-act=dkGen][data-k=transfer]').click(); eq(ev("ops(load('LD-2026-001851')).kdocs.transfer"), 'ready'); assert(d.querySelector('[data-act=dkPdf][data-k=transfer]') && d.querySelector('[data-act=dkSign][data-k=transfer]'), 'PDF + sign for the transfer note'); assert(!d.querySelector('[data-act=dkSign][data-k=reg]'), 'copies of certificates need no signature');
     assert(typeof ev("docGen('LD-2026-001851', 'epod')") === 'string', 'ePOD only after delivery'); d.querySelector('[data-act=dkAll]').click(); const left = ev("docSet(load('LD-2026-001851')).filter(x => x.st === 'none' && x.can).length"); eq(left, 0, 'generate all leaves nothing generable');
     ev("ACT.dkSel({id:'LD-2026-001841'})"); eq(ev("docGen('LD-2026-001841', 'epod')"), null, 'ePOD of a delivered, approved trip'); clean(w, 'documents');
   });
@@ -18,4 +18,13 @@
   });
   await group('Documents KZ renders the new set in every language without undefined / NaN', 'ru', async () => {
     for (const lang of LANGS) { const gg = await fresh(lang); try { for (const id of ['LD-2026-001850', 'LD-2026-001856', 'LD-2026-001841']) { gg.ev("S.ops.docSel = '" + id + "'; go('orders'); ACT.stab({s:'orders',v:'docs'})"); clean(gg.w, lang + ' documents ' + id); } if (lang === 'de' || lang === 'en') assert(!/[А-Яа-яЁё]/.test([...gg.w.document.querySelectorAll('[data-doc] b, [data-doc] .sub')].map(e => e.innerText).join(' ')), lang + ' Cyrillic in document names'); } finally { gg.done(); } }
+  });
+
+  /* ---- operations parity pass: E-4 / E-25 / E-42 permission gates, E-44 critical alarm withdraws the release, E-6 rejection ---- */
+  await group('parity pass: documents and release need documents:sign, a critical alarm withdraws the release with its id, a state system can reject an ESF', 'en', async (g, ev) => {
+    const L = 'LD-2026-001851';
+    ev("ACT.setRole({v:'warehouse'})"); assert(/documents:sign/.test(ev("docGen('" + L + "', 'transfer')")), 'E-4: generate needs documents:sign'); assert(/documents:sign/.test(ev("docSend('" + L + "', 'ttn')")), 'E-4: send needs documents:sign'); ev("ACT.setRole({v:'admin'})");
+    ev("ops(load('" + L + "')).released = { by: 'test', t: '08:00', override: false }"); ev("raiseAlarm({ lvl: 2, cat: 'door', src: 'wialon', hub: 'AST', load: '" + L + "', truck: 't4', text: 'level 2' })"); assert(ev("released(load('" + L + "'))"), 'a level-2 alarm keeps the release');
+    ev("raiseAlarm({ lvl: 3, cat: 'temperature', src: 'wialon', hub: 'AST', load: '" + L + "', truck: 't4', text: 'level 3' })"); assert(!ev("released(load('" + L + "'))") && ev("ops(load('" + L + "')).revoked.why") === 'alarm' && /^ALM-/.test(ev("ops(load('" + L + "')).revoked.alarm")), 'E-44: a critical alarm withdraws the release, reason alarm + id');
+    ev("cust('c1').bin = '12'; ops(load('LD-2026-001841')).kdocs.esf = 'sent'"); eq(ev("docPoll('LD-2026-001841')"), 0); eq(ev("ops(load('LD-2026-001841')).kdocs.esf"), 'rejected', 'E-6: an ESF with an invalid BIN is rejected'); assert(ev("ops(load('LD-2026-001841')).inbox.some(x => x.lvl === 3)"), 'E-6: level-3 hint');
   });

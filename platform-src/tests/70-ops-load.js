@@ -11,9 +11,9 @@
     const ft = ev("finder(load('LD-2026-001850'), true, {}).rows.filter(x => x.fits)"); assert(ft.every((x, i) => i === 0 || ft[i - 1].cost.total <= x.cost.total), 'full-cost ranking is ascending'); assert(f.partners.length >= 2 && f.partners.some(p => p.fits), 'partner offers listed');
   });
   await group('plan of the vehicle type: an unfitting type needs trips:override_load and a reason, audited (FR-99)', 'ru', async (g, ev) => {
-    assert(typeof ev("savePlan('LD-2026-001845', 'v10', '')") === 'string', 'no reason must be refused'); eq(ev("savePlan('LD-2026-001845', 'v10', 'demo reason: one more pallet, cleared by ops lead')"), null, 'admin with reason');
-    assert(ev("ops(load('LD-2026-001845')).plan.fits === false && S.audit.some(a => a.decision.startsWith('Plan override'))"), 'plan stored with override + audit'); ev("ACT.setRole({v:'dispatcher'})"); assert(/override_load/.test(ev("savePlan('LD-2026-001845', 'v35', 'dispatcher tries with a long reason')")), 'dispatcher has no override right');
-    eq(ev("savePlan('LD-2026-001845', 'r12', '')"), null, 'fitting type needs no reason');
+    assert(typeof ev("savePlan('LD-2026-001851', 't35', '')") === 'string', 'no reason must be refused'); eq(ev("savePlan('LD-2026-001851', 't35', 'demo reason: one more pallet, cleared by ops lead')"), null, 'admin with reason');
+    assert(ev("ops(load('LD-2026-001851')).plan.fits === false && S.audit.some(a => a.decision.startsWith('Plan override'))"), 'plan stored with override + audit'); ev("ACT.setRole({v:'dispatcher'})"); assert(/override_load/.test(ev("savePlan('LD-2026-001851', 'v35', 'dispatcher tries with a long reason')")), 'dispatcher has no override right');
+    eq(ev("savePlan('LD-2026-001851', 'r20', '')"), null, 'fitting type needs no reason');
   });
   await group('split over two trucks when no single vehicle takes the load; cost compared with one bigger truck (FR-139)', 'ru', async (g, ev) => {
     const ok = ev("splitPlan(load('LD-2026-001850'))"); assert(!ok.needed && ok.props.length > 0 && ok.props.every(p => typeof p.diff === 'number'), 'split proposals with cost difference');
@@ -113,4 +113,15 @@
     for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev(`go('orders'); ACT.stab({s:'orders',v:'loadw'}); ACT.lwSel({id:'${W}'}); S.ops.fleetX = true; S.ops.v35 = true; S.ops.split = true; S.ops.spring = true; render()`); clean(gg.w, lang + ' west load');
       if (lang === 'de' || lang === 'en') { const t = ['[data-sec=vtype] h3', '[data-diagram]', '[data-sec=bars]', '[data-sec=view2]', '[data-sec=match] .lw-ins', '[data-sim-how]'].map(q => gg.w.document.querySelector(q).textContent).join(' '); assert(!/[А-Яа-яЁё]/.test(t.replace(/Дмитрий Орлов/g, '')), lang + ' has Cyrillic: ' + (t.match(/.{0,20}[А-Яа-яЁё].{0,20}/) || [''])[0]); }
       gg.ev(`ACT.lwType({id:'${W}', v:'t20'})`); clean(gg.w, lang + ' tent without temperature control'); gg.ev(`ACT.lwType({id:'${W}', v:'t75'}); ACT.lwZones({id:'${W}', v:'2'})`); clean(gg.w, lang + ' two zones'); } finally { gg.done(); } }
+  });
+
+  /* ---- operations parity pass: C-25 hand-overs lock the orders, C-13 / C-15 / C-16 plan of an own vehicle ---- */
+  await group('parity pass: partner hand-overs set o.handed, an own vehicle is saved as the plan (unchanged / permission guards)', 'en', async (g, ev) => {
+    const L = 'LD-2026-001856';
+    ev("S.handovers.push({ id: 'HO-T1', load: '" + L + "', p: 'PL-01', st: 'approved', mode: 'full', items: [] })"); assert(ev("ops(load('" + L + "')).orders.every(o => o.handed === 'PL-01')"), 'C-25: an approved full hand-over locks every order');
+    ev("S.handovers.length = 0"); assert(ev("ops(load('" + L + "')).orders.every(o => !o.handed)"), 'C-25: the lock is lifted with the hand-over');
+    const P1 = 'LD-2026-001851'; eq(ev("savePlan('" + P1 + "', 'f:t1', 'test reason: own vehicle as the plan')"), null, 'C-13: own vehicle saved as the plan');
+    assert(ev("ops(load('" + P1 + "')).plan.type") === 'f:t1' && /123 ABC 01/.test(ev("ops(load('" + P1 + "')).plan.label")), 'C-13: the plan stores the vehicle and shows its plate');
+    assert(/unchanged/i.test(ev("savePlan('" + P1 + "', 'f:t1', 'test reason: own vehicle as the plan')")), 'C-15: Plan unchanged');
+    ev("ACT.setRole({v:'viewer'})"); assert(/trips:write/.test(ev("savePlan('" + P1 + "', 'r20', '')")), 'C-16: saving the plan needs trips:write'); ev("ACT.setRole({v:'admin'})");
   });

@@ -23,12 +23,12 @@ ${issueTag(l)}${l.status === 'problem' ? `<div class="prob">${ic('alert', 14)} $
   }
   function board() {
     const f = S.f;
-    const ls = hubFilter(S.loads, hubOfLoad).filter(l => (!f.pri || l.priority === f.pri) && (!f.hub || l.from === f.hub || l.to === f.hub) && (!f.drv || (l.driver && drv(l.driver).status === f.drv)));
+    const ls = ownLoads(hubFilter(S.loads, hubOfLoad)).filter(l => (!f.pri || l.priority === f.pri) && (!f.hub || l.from === f.hub || l.to === f.hub) && (!f.drv || (l.driver && drv(l.driver).status === f.drv)));
     return `<div class="board">${ORDER.map(s => { const c = ls.filter(l => l.status === s);
       return `<div class="col" data-col="${s}"><div class="colh"><span class="d ${ST[s].c}"></span><b>${esc(ST[s].l)}</b><span class="cnt">${c.length}</span></div><div class="colb">${c.map(card).join('') || `<div class="empty">—</div>`}</div></div>`; }).join('')}</div>`;
   }
   function planning() {
-    const un = hubFilter(S.loads, hubOfLoad).filter(l => l.status === 'unassigned');
+    const un = ownLoads(hubFilter(S.loads, hubOfLoad)).filter(l => l.status === 'unassigned');
     const rows = Object.keys(ZONES).map(z => {
       const dem = un.filter(l => l.zone === z).reduce((s, l) => s + l.pallets, 0), n = un.filter(l => l.zone === z).length;
       const cap = S.trucks.filter(t => t.status === 'available' && t.zones.includes(z)).reduce((s, t) => s + t.cap, 0), pct = cap ? Math.round(dem / cap * 100) : (dem ? 100 : 0);

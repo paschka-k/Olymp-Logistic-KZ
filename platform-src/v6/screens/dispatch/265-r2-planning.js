@@ -24,6 +24,7 @@
     const W = globalThis.WEATHER, lv = {};
     hubs.forEach(h => { const c = W && W.WX[h] && W.WX[h][i]; lv[h] = c ? W.risk(c) : 0; if (i <= 1 && (S.closures || []).some(x => !x.lifted && x.hub === h)) lv[h] = Math.max(lv[h], 2); });
     let lvl = Math.max(0, ...hubs.map(h => lv[h])), cities = hubs.filter(h => lvl > 0 && lv[h] === lvl);
+    if (typeof roadMsgs === 'function') roadMsgs().forEach(m => { if (m.until && m.until.slice(0, 10) < d) return; const ml = Math.min(3, m.lvl || 0); if (ml > lvl) { lvl = ml; cities = []; } if (ml && ml === lvl) cities = Array.from(new Set(cities.concat([m.cc].concat(m.ccTo ? [m.ccTo] : [])))); });   // A-52 (plan.py: worst active road / weather message valid that day)
     if (S.ops.scen.storm && (i === 2 || i === 3)) { lvl = 3; cities = Array.from(new Set(cities.concat(['KAR', 'AST']))); }
     const trips = ls.filter(l => cities.includes(l.from) || cities.includes(l.to)).map(l => l.id);
     return { lvl, cities, trips };

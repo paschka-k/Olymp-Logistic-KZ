@@ -8,6 +8,7 @@
    that cannot lie in the past (a future version stays "scheduled" until its date), read / write right per kind, manufacturer logo upload. */
 (function () {
   ensureTabs('settings', 'base', T('Основные', 'Allgemein', 'General', 'Негізгі'));
+  if (SCREENS.settings.tabs && SCREENS.settings.tabs[0] && SCREENS.settings.tabs[0].key === 'base') SCREENS.settings.tabs[0].perm = 'users:admin';   // 0.3.11: company / notification configuration is administration, not overview:read
   const RS_F = [['kind', 'select', ['axle', 'gross', 'bridge', 'city']], ['a', 'text'], ['b', 'text'], ['city', 'text'], ['maxAxle', 'num0'], ['maxGross', 'num0'], ['maxGvw', 'num0'], ['from', 'text'], ['to', 'text'], ['start', 'text'], ['end', 'text'], ['road', 'text'], ['off', 'bool']];
   /* r = right to see the kind, w = right to write it (null = read-only here), crit = fields that need the second approval ('all' = every field, also for a new record) */
   const KINDS = {
@@ -112,7 +113,7 @@
     refTick();
     if (valid_from && valid_from < today) return T('«Действует с» не может быть в прошлом', '„Gültig ab“ darf nicht in der Vergangenheit liegen', 'Valid from cannot be in the past', '«Күшіне енеді» өткен күн бола алмайды');
     let i = find(kind, key); const isNew = !i;
-    if (isNew) { if (!/^[A-Za-z0-9_-]{2,24}$/.test(key || '')) return T('Ключ: 2–24 латинских символа', 'Schlüssel: 2–24 lateinische Zeichen', 'Key: 2–24 Latin characters', 'Кілт: 2–24 латын таңбасы'); if (kind === 'restriction' && !/^RS-\d{3,4}$/.test(key)) return inv('key'); i = { kind, key, label: key, data: {}, version: 0, valid_from: '', pending: null, next: null, history: [] }; }
+    if (isNew) { if (!/^[\p{L}\d_-]{2,40}$/u.test(key || '')) return T('Ключ: 2–40 символов (буквы, цифры, _ -)', 'Schlüssel: 2–40 Zeichen (Buchstaben, Ziffern, _ -)', 'Key: 2–40 characters (letters, digits, _ -)', 'Кілт: 2–40 таңба (әріптер, сандар, _ -)'); if (kind === 'restriction' && !/^RS-\d{3,4}$/.test(key)) return inv('key'); i = { kind, key, label: key, data: {}, version: 0, valid_from: '', pending: null, next: null, history: [] }; }
     if (i.pending) return T('Уже есть версия, ожидающая второй подписи', 'Es wartet bereits eine Version auf die 2. Freigabe', 'A version is already awaiting the second approval', 'Екінші қолтаңбаны күтетін нұсқа бар');
     if (i.next) return T('Уже запланирована версия с ', 'Es ist bereits eine Version geplant ab ', 'A version is already scheduled from ', 'Нұсқа жоспарланған: ') + fd(i.next.valid_from);
     const nd = Object.assign({}, i.data); K.f.forEach(f => { const v = data[f[0]]; if (v === undefined) return; nd[f[0]] = f[1] === 'number' ? (v === '' ? nd[f[0]] : +v) : f[1] === 'num0' ? (v === '' || v == null ? null : +v) : f[1] === 'bool' ? !!v : String(v); });
