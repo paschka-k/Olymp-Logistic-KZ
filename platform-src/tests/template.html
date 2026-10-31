@@ -1,7 +1,46 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>Kökzhol · platform tests</title>
-<style>body{font:14px/1.5 system-ui,sans-serif;margin:24px;max-width:960px}h1{font-size:20px}.ok{color:#166534}.bad{color:#be123c;font-weight:600}.flaky{color:#a16207}.quar{color:#6b21a8}#sum{padding:10px 14px;border-radius:8px;background:#f3f4f6;margin:12px 0}li{margin:2px 0}iframe{display:none}#frames iframe.kept{display:block;border:2px solid #be123c;margin:0 0 16px}#frames .failcap{font-weight:600;color:#be123c;margin-top:16px}</style></head>
-<body><h1>Platform tests</h1><div id="sum">running…</div><ul id="out"></ul><div id="frames"></div>
+<style>
+:root{--ink:#1f2933;--muted:#5b6573;--line:#d9dde3;--blue:#3d6698;--bg:#fff;color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,system-ui,-apple-system,'Segoe UI',sans-serif}
+.wrap{max-width:1500px;margin:0 auto;padding:20px 16px 60px}
+header{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--line);padding-bottom:14px}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--blue)}
+h1{font:600 30px/1.15 'Roboto Condensed','Arial Narrow',sans-serif;margin:4px 0}
+.muted{color:var(--muted);font-size:13px}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:stretch}
+.kpis{display:flex;gap:10px;flex-wrap:wrap}
+.kpi{border:1px solid var(--line);padding:8px 12px;min-width:120px;display:flex;flex-direction:column}
+.kpi span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.kpi b{font:600 22px 'Roboto Condensed','Arial Narrow',sans-serif}
+button{font:inherit;border:1px solid var(--blue);background:#fff;color:var(--blue);padding:8px 14px;cursor:pointer}
+button.primary{background:var(--blue);color:#fff}
+.mods{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0}
+.mod{border:1px solid var(--line);padding:4px 8px;font-size:12px;display:flex;gap:8px}
+.mod.done{border-color:#8fb0d6;background:#e8eff8}.mod.bad{border-color:#1f3b63;background:#d4e2f2}.mod.run{border-color:#3d6698}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 600px;gap:18px;align-items:start}
+@media(max-width:1100px){.grid{grid-template-columns:1fr}}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500;padding:6px 8px;border-bottom:1px solid var(--line)}
+td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.tag{display:inline-block;padding:1px 7px;font-size:11px;white-space:nowrap;border:1px solid #b4cbe6;background:#e8eff8;color:#264a7a}
+tr.fail .tag{background:#1f3b63;border-color:#1f3b63;color:#fff}tr.flaky .tag{background:#fef3c7;border-color:#e0b64a;color:#7a5200}tr.quar .tag{background:#f3e8ff;border-color:#c4a3ee;color:#6b21a8}
+.err{color:#b3261e;font-size:12px;margin-top:2px}.mono{font-family:ui-monospace,Consolas,monospace}
+#rows.onlyfail tr:not(.fail){display:none}
+.framebox{position:sticky;top:10px}.framebox .box{position:relative;height:347px;overflow:hidden;border:1px solid var(--line);background:#f6f7f9}
+.box:empty::before{content:'Окно платформы появляется на время каждого сценария';display:block;padding:14px;color:#5b6573;font-size:13px}.box iframe{position:absolute;left:0;top:0;width:1316px;height:760px;border:0;background:#fff;transform:scale(.456);transform-origin:0 0}
+#frames iframe{display:none}#frames iframe.kept{display:block;border:2px solid #be123c;margin:0 0 16px}#frames .failcap{font-weight:600;color:#be123c;margin-top:16px}
+details.log{margin-top:18px}.ok{color:#166534}.bad{color:#be123c;font-weight:600}.flaky{color:#a16207}.quar{color:#6b21a8}#sum{padding:10px 14px;border-radius:8px;background:#f3f4f6;margin:12px 0}li{margin:2px 0}
+</style></head>
+<body><div class="wrap">
+<header><div><div class="eyebrow">Kökzhol · платформа v6 · QA</div><h1>Автотесты · <span id="total">…</span> сценариев</h1>
+<div class="muted">Каждый сценарий выполняется на реальной платформе v6 в отдельном окне (слева таблица по порядку прогона, справа окно проверяемой платформы): данные, интерфейс всех разделов, права, четыре языка, доступность.</div></div>
+<div class="tools"><div class="kpis" id="kpis"></div><button id="only">Только ошибки</button><button id="run" class="primary">Запустить заново</button></div></header>
+<div class="mods" id="mods"></div>
+<div class="grid"><div class="tw"><table><thead><tr><th>№</th><th>Модуль</th><th>Сценарий</th><th>Итог</th><th>мс</th></tr></thead><tbody id="rows"></tbody></table></div>
+<div class="framebox"><div class="muted">Тестируемая платформа · <span id="current">—</span></div><div class="box" id="pv"></div></div></div>
+<details class="log"><summary class="muted">Текстовый журнал</summary><div id="sum">running…</div><ul id="out"></ul></details>
+<div id="frames"></div></div>
 <script>
 /* Same contract as tests.html (window.__TESTS) so tools/run-ui-tests.cjs runs it unchanged.
    Every group loads a fresh copy of platform-v6*.html in a hidden iframe, so tests never share state.
@@ -16,6 +55,42 @@ window.__TESTS = { total: 0, passed: 0, failed: 0, failures: [], flaky: [], quar
 const LANGS = ['ru', 'de', 'en', 'kk'], file = l => (l === 'ru' ? 'index.html' : l + '.html');
 const out = document.getElementById('out');
 const __Q = new URLSearchParams(location.search);
+/* module titles of the result table and the chips (file name of the suite → what it tests), 0.3.11 style */
+const __MODS = { '10-navigation': 'Навигация', '20-dispatch': 'Диспетчер', '30-chain': 'Цепочка заказ → оплата', '40-reports-ai-settings': 'Отчёты, ИИ, настройки', '50-legacy-tabs': 'Вкладки 0.3.x', '60-foundation': 'Основа v6', '61-shell-ext': 'Оболочка · поиск, вход, история', '62-language-audit': 'Языки RU / DE / EN / KK', '63-narrow': 'Узкое окно', '70-ops-load': 'Загрузка и вес', '71-ops-ship': 'Отправки и маркировка', '72-ops-docs': 'Документы РК', '73-ops-dispatch': 'Диспетчер · Go/No-Go', '74-ops-dashboard': 'Обзор и планирование', '75-ops-trips': 'Рейсы', '76-ops-docs': 'Документы · набор и ЭСФ', '80-res-fleet-staff': 'Автопарк и персонал', '81-res-driver-app': 'Приложение водителя', '82-res-coverage-lines': 'Покрытие связи и линии', '83-res-thermo': 'Термостатус', '84-res-weather': 'Погода', '85-res-coverage': 'Покрытие и безопасность', '86-res-fleet-ext': 'Реестр автопарка', '87-res-partners': 'Партнёры', '88-res-staff-app': 'Персонал · приложение', '90-rec-records': 'Записи и администрирование', 'a0-por-portals': 'Порталы клиента и партнёра', 'b0-eco-economics': 'Экономика', 'b1-eco-reports-ext': 'Отчёты · KPI', 'b2-eco-costs-ext': 'Затраты', 'c0-help-content': 'Справка', 'c1-help-visuals': 'Справка · схемы', 'c2-notes': 'Пояснения', 'd0-v6-parity': 'Паритет 0.3.10', 'e1-mirror-ops': 'Паритет операций 0.3.9', 'e2-mirror-res': 'Паритет ресурсов 0.3.9', 'e3-hub-inbound': 'Хаб · приёмка и рампы', 'e4-rules-sla': 'Правила и SLA', 'e5-driver-partner': 'Водитель и партнёр', 'f0-a11y': 'Доступность', 'f0-ci-infra': 'CI и инфраструктура', 'f0-delivery': 'Поставка и версии', 'f0-shell-parity': 'Оболочка · паритет', 'f1-data-integrity': 'Данные · целостность', 'f2-ops-fleet': 'Операции и парк', 'f3-records-portals': 'Записи и порталы', 'f4-economics': 'Экономика · паритет', 'f5-a11y-layout': 'Доступность и вёрстка', 'g4-architecture': 'Архитектура и строки', 'g5-help-figures-scroll': 'Справка · рисунки' };
+const __modOf = i => { if (i < 0) return '—'; const n = __SUITES[i].name.replace(/\.js$/, ''), k = Object.keys(__MODS).filter(x => n.startsWith(x)).sort((a, b) => b.length - a.length)[0]; return k ? __MODS[k] : n; };
+const UI = {
+  rows: [], mods: new Map(), t0: performance.now(), onlyFail: false,
+  $: id => document.getElementById(id),
+  /* planned scenarios per module: count the group() calls of every suite in this very page (loops over languages add more at run time) */
+  async plan() {
+    try {
+      const src = await (await fetch(location.pathname)).text(), parts = src.split(/__suite\((\d+)\);/);
+      for (let k = 1; k < parts.length; k += 2) { const i = +parts[k]; if (!(i >= 0 && i < __SUITES.length) || !__runs(i)) continue; const n = (parts[k + 1].match(/await group\(/g) || []).length, m = this.mod(__modOf(i)); m.plan += n; }
+    } catch (e) { /* file:// or offline: chips fill as the suites run */ }
+    this.paint();
+  },
+  mod(name) { let m = this.mods.get(name); if (!m) { m = { name, plan: 0, done: 0, ok: 0, bad: 0 }; this.mods.set(name, m); } return m; },
+  paint(end) {
+    const mods = [...this.mods.values()], total = end ? this.rows.length : Math.max(this.rows.length, mods.reduce((a, m) => a + Math.max(m.plan, m.done), 0)), R = window.__TESTS;
+    this.$('total').textContent = total;
+    this.$('kpis').innerHTML = [['Пройдено', R.passed + ' / ' + total], ['Ошибки', R.failed], ['Время', Math.round((performance.now() - this.t0) / 1000) + ' с']].map(([k, v]) => '<div class="kpi"><span>' + k + '</span><b>' + v + '</b></div>').join('');
+    this.$('mods').innerHTML = mods.filter(m => m.plan || m.done).map(m => { const n = Math.max(m.plan, m.done); return '<div class="mod' + (m.bad ? ' bad' : m.done >= n && n ? ' done' : m.done ? ' run' : '') + '"><span>' + esc(m.name) + '</span><b>' + m.ok + ' / ' + n + '</b></div>'; }).join('');
+    this.$('run').textContent = end ? 'Запустить заново' : 'Тесты выполняются…'; this.$('run').style.opacity = end ? 1 : .6;
+  },
+  cur(name) { this.$('current').textContent = (this.rows.length + 1) + '. ' + name; },
+  add(name, err, kind) {
+    const m = this.mod(__modOf(__CUR)), r = { n: this.rows.length + 1, mod: m.name, name, err, kind, ms: '' };
+    m.done++; if (err && kind !== 'quar') m.bad++; else m.ok++;
+    const tr = document.createElement('tr'); tr.className = err && kind !== 'quar' ? 'fail' : kind === 'quar' ? 'quar' : kind === 'flaky' ? 'flaky' : '';
+    tr.innerHTML = '<td class="mono">' + r.n + '</td><td>' + esc(m.name) + '</td><td>' + esc(name) + (err ? '<div class="err">' + esc(err) + '</div>' : '') + '</td><td><span class="tag">' + (err && kind !== 'quar' ? 'ОШИБКА' : kind === 'quar' ? 'карантин' : kind === 'flaky' ? 'повтор' : 'OK') + '</span></td><td class="mono"></td>';
+    this.$('rows').appendChild(tr); r.tr = tr; this.rows.push(r);
+    if (this.rows.length % 3 === 0 || err) this.paint();
+  },
+  ms(ms) { const r = this.rows[this.rows.length - 1]; if (r) { r.ms = ms; r.tr.lastChild.textContent = ms; } },
+};
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+UI.$('only').onclick = () => { UI.onlyFail = !UI.onlyFail; UI.$('rows').classList.toggle('onlyfail', UI.onlyFail); UI.$('only').textContent = UI.onlyFail ? 'Показать все' : 'Только ошибки'; };
+UI.$('run').onclick = () => { if (window.__TESTS.done) location.reload(); };
 const __SUITES = /*@@SUITELIST@@*/[];
 const __QUARANTINE = /*@@QUARANTINE@@*/[];
 const __HARNESS = {
@@ -33,12 +108,12 @@ const __suite = i => { const t = performance.now(); if (__CUR >= 0 && __runs(__C
 const __ONLY = (__Q.get('suite') || '').split(',').map(s => s.trim()).filter(Boolean);
 const __runs = i => (i < 0 || !__ONLY.length || __ONLY.some(p => __SUITES[i].name.includes(p))) && (!__SHARD || i < 0 || __SHARD.of[i] === __SHARD.k);
 if (__SHARD) window.__TESTS.shard = { k: __SHARD.k, n: __SHARD.n, files: __SUITES.filter((s, i) => __SHARD.of[i] === __SHARD.k).map(s => s.name), of: __SUITES.length };
-const log = (name, err, kind) => { const R = window.__TESTS; R.total++; if (err && kind !== 'quar') { R.failed++; R.failures.push(name + ' — ' + err); } else R.passed++; const li = document.createElement('li'); li.className = kind === 'quar' ? 'quar' : err ? 'bad' : kind === 'flaky' ? 'flaky' : 'ok'; li.textContent = (kind === 'quar' ? '⚠ quarantined: ' : err ? '✗ ' : kind === 'flaky' ? '↻ flaky (passed on retry): ' : '✓ ') + name + (err ? ' — ' + err : ''); out.appendChild(li); };
+const log = (name, err, kind) => { const R = window.__TESTS; R.total++; if (err && kind !== 'quar') { R.failed++; R.failures.push(name + ' — ' + err); } else R.passed++; const li = document.createElement('li'); li.className = kind === 'quar' ? 'quar' : err ? 'bad' : kind === 'flaky' ? 'flaky' : 'ok'; li.textContent = (kind === 'quar' ? '⚠ quarantined: ' : err ? '✗ ' : kind === 'flaky' ? '↻ flaky (passed on retry): ' : '✓ ') + name + (err ? ' — ' + err : ''); out.appendChild(li); UI.add(name, err, kind); };
 const assert = (c, msg) => { if (!c) throw new Error(msg || 'assertion failed'); };
 const eq = (a, b, msg) => assert(a === b, (msg || 'expected equal') + ': ' + JSON.stringify(a) + ' !== ' + JSON.stringify(b));
 async function fresh(lang) {
   const [l, q] = String(lang || 'ru').split('?');
-  const f = document.createElement('iframe'); f.style.cssText = 'width:1316px;height:760px'; f.src = file(l) + (q ? '?' + q : ''); document.getElementById('frames').appendChild(f);
+  const f = document.createElement('iframe'); if (__KEEPFAIL) f.style.cssText = 'width:1316px;height:760px'; f.src = file(l) + (q ? '?' + q : ''); document.getElementById(__KEEPFAIL ? 'frames' : 'pv').appendChild(f);
   await new Promise((ok, no) => { f.onload = ok; f.onerror = no; setTimeout(() => no(new Error('iframe timeout')), 20000); });
   const w = f.contentWindow; w.__errs = []; w.addEventListener('error', e => w.__errs.push(e.message));
   /* exports must not reach the browser: a click on <a download> and window.open() are recorded in w.__downloads instead of
@@ -67,12 +142,13 @@ async function group1(name, lang, fn) {
   if (last && !(!quar && keepFail(last.g, name, r.errs[0]))) last.g.done();
   log(name, err, quar ? 'quar' : '');
 }
-async function group(name, lang, fn) { const t0 = performance.now(); try { await group1(name, lang, fn); } finally { (window.__TESTS.times = window.__TESTS.times || []).push([name, Math.round(performance.now() - t0)]); } }
+async function group(name, lang, fn) { const t0 = performance.now(); if (__runs(__CUR)) UI.cur(name); try { await group1(name, lang, fn); } finally { const ms = Math.round(performance.now() - t0); (window.__TESTS.times = window.__TESTS.times || []).push([name, ms]); if (__runs(__CUR)) UI.ms(ms); } }
 const clean = (w, where) => { const t = w.document.querySelector('#root').innerText; const m = t.match(/.{0,20}(undefined|NaN|\[object|\bnull\b).{0,20}/); assert(!m, where + ' contains "' + (m && m[0]) + '"'); assert(!w.__errs.length, where + ' threw: ' + w.__errs[0]); };
 
 (async () => {
+  await UI.plan();
 /*@@SUITES@@*/
   __suite(-1);
-  const R = window.__TESTS; document.getElementById('sum').textContent = R.passed + '/' + R.total + ' passed, ' + R.failed + ' failed' + (R.flaky.length ? ', ' + R.flaky.length + ' flaky' : '') + (R.quarantined.length ? ', ' + R.quarantined.length + ' quarantined' : '') + (R.shard ? ' · shard ' + R.shard.k + '/' + R.shard.n : ''); R.ms = Math.round(performance.now()); R.done = true;
+  const R = window.__TESTS; document.getElementById('sum').textContent = R.passed + '/' + R.total + ' passed, ' + R.failed + ' failed' + (R.flaky.length ? ', ' + R.flaky.length + ' flaky' : '') + (R.quarantined.length ? ', ' + R.quarantined.length + ' quarantined' : '') + (R.shard ? ' · shard ' + R.shard.k + '/' + R.shard.n : ''); R.ms = Math.round(performance.now()); R.done = true; UI.$('current').textContent = 'готово'; UI.paint(true);
 })().catch(e => { log('harness', e.message); window.__TESTS.done = true; });
 </script></body></html>
