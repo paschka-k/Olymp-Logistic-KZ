@@ -23,7 +23,7 @@ main{overflow:auto;height:100vh;position:relative}
 .tcard{overflow:auto} .table tbody tr{cursor:pointer;height:var(--row-h)} .table tbody tr:hover{background:var(--bg-hover)} .table tr.is-selected{background:var(--bg-selected)} .table th,.table td{text-align:left;padding:10px 14px;vertical-align:middle} .empty{text-align:center;color:var(--text-faint);padding:24px}
 .pager{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:12px;color:var(--text-muted);border-top:1px solid var(--border)} .pgb{border:1px solid var(--border-input);background:#fff;border-radius:8px;min-width:30px;height:30px;margin-left:4px;cursor:pointer} .pgb.on{background:var(--primary);color:#fff;border-color:var(--primary)}
 .filters{margin:0} .filters label{font-size:12px;font-weight:500;color:var(--text-muted)} .select{border:1px solid var(--border-input);border-radius:999px;background:#fff;height:36px;padding:0 12px;font:inherit}
-.drawer{z-index:40;top:0;width:var(--drawer-w);overflow:auto} .drawer-head .x{cursor:pointer;color:var(--text-muted)} .drawer-tabs{overflow-x:auto} .drawer-tabs .tab{cursor:pointer;padding:12px 0;font-weight:500;color:var(--text-muted);white-space:nowrap}.drawer-tabs .tab.active{color:var(--primary);border-bottom:2px solid var(--primary)}
+.drawer{z-index:40;top:0;width:var(--drawer-w);max-width:100%;overflow:auto} .drawer-head .x{cursor:pointer;color:var(--text-muted)} .drawer-tabs{overflow-x:auto} .drawer-tabs .tab{cursor:pointer;padding:12px 0;font-weight:500;color:var(--text-muted);white-space:nowrap}.drawer-tabs .tab.active{color:var(--primary);border-bottom:2px solid var(--primary)}
 .kv{display:grid;grid-template-columns:1fr 1fr;gap:14px} .kv small{display:block;color:var(--text-muted);font-size:12px} .kv b{font-weight:600}
 .ident{display:flex;gap:12px;align-items:center;margin-bottom:16px} .fl{display:block;font-size:12px;color:var(--text-muted);margin-bottom:12px} .fl .select{display:block;width:100%;margin-top:4px;border-radius:10px} .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .ta{width:100%;border:1px solid var(--border-input);border-radius:10px;padding:10px;font:inherit;margin:8px 0;resize:vertical} .note-i{padding:8px 0;border-bottom:1px solid var(--border)} .note-i small{color:var(--text-faint)}
@@ -56,7 +56,8 @@ main{overflow:auto;height:100vh;position:relative}
 label.drop-zone{display:block;cursor:pointer} .dzrow td{padding:6px 14px!important} .dzrow{height:auto!important;cursor:default}
 
 /* phase 6: reports, AI Ops, settings */
-.drawer.xl{width:min(var(--drawer-w-xl),100%)}
+.drawer.xl{width:min(var(--drawer-w-xl),100%);max-width:100%}
+.drawer.md,.drawer:has(.drawer-tabs){width:min(520px,100%)}   /* tabbed card and wide forms: tabs and two-column grids fit without scrolling */
 .rep-filters{position:sticky;top:calc(var(--topbar-h) + 72px);z-index:8;background:var(--bg-page,#f8f8fc);padding:8px 0}
 .sec-head{display:flex;justify-content:space-between;align-items:baseline;margin:8px 0 -4px} .sec-head h3{margin:0;font-size:16px} .sec-head span{font-size:12px;color:var(--text-faint)}
 .rep-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}

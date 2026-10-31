@@ -35,5 +35,5 @@ const KIT = {
   sectionHead: title => `<div class="drawer-section"><h4>${esc(title)}</h4>`,
   /** drawer frame (labelled modal dialog, FR-215): r = { title, html, xl } as returned by DRAWERS[type] */
   drawer: r =>
-    `<aside class="drawer open${r.xl ? ' xl' : ''}" role="dialog" aria-modal="true" aria-labelledby="drawer-title" tabindex="-1" data-test="drawer"><div class="drawer-head"><span id="drawer-title">${esc(r.title)}</span><button type="button" class="x" data-test="drawer-close" data-act="close" aria-label="${esc(LT('core.close'))}">${ic('x', 18)}</button></div>${r.html}</aside>`,
+    `<aside class="drawer open${r.xl ? ' xl' : r.md ? ' md' : ''}" role="dialog" aria-modal="true" aria-labelledby="drawer-title" tabindex="-1" data-test="drawer"><div class="drawer-head"><span id="drawer-title">${esc(r.title)}</span><button type="button" class="x" data-test="drawer-close" data-act="close" aria-label="${esc(LT('core.close'))}">${ic('x', 18)}</button></div>${r.html}</aside>`,
 };
