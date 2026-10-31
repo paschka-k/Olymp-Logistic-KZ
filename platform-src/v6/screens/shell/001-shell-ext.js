@@ -429,9 +429,21 @@
       else if (!window.frameElement && LANG === 'ru' && /(^|\/)(index\.html)?$/.test(location.pathname)) { const st = localStorage.getItem('olymp.lang'); if (/^(de|en|kk)$/.test(st || '')) location.replace(fileFor(st) + location.search + location.hash); }
     } catch (_) { /* storage blocked */ }
   })();
-  (function designStart() {   // the design choice survives a reload (not inside test frames)
-    const sd = ACT.setDesign; if (typeof sd === 'function') ACT.setDesign = d => { sd(d); try { if (!window.frameElement) localStorage.setItem('olymp.design', S.design); } catch (_) { /* private mode */ } };
-    try { const st = !window.frameElement && localStorage.getItem('olymp.design'); if ((st === 'olymp' || st === 'kokzhol') && st !== S.design) { S.design = st; document.documentElement.dataset.design = st; } } catch (_) { /* private mode */ }
+  /* the design choice survives a reload (0.3.11 «olymp.design»): saved in localStorage — not inside test frames, which share the origin of the harness — and ?brand=olymp|kokzhol wins over the stored choice and replaces it.
+     designSave / designLoad take the storage as an argument so the contract is testable with a stand-in */
+  const DESIGNS = ['olymp', 'kokzhol'];
+  globalThis.designSave = st => { try { if (st) st.setItem('olymp.design', S.design); } catch (_) { /* private mode */ } };
+  globalThis.designLoad = (st, search) => {
+    try {
+      const q = new URLSearchParams(search == null ? location.search : search).get('brand'), stored = st && st.getItem('olymp.design'), pick = DESIGNS.includes(q) ? q : DESIGNS.includes(stored) ? stored : null;
+      if (pick && pick !== S.design) S.design = pick; if (pick) document.documentElement.dataset.design = S.design;
+      if (DESIGNS.includes(q)) designSave(st);
+    } catch (_) { /* private mode */ }
+    return S.design;
+  };
+  (function designStart() {
+    const sd = ACT.setDesign, store = () => (window.frameElement ? null : localStorage); if (typeof sd === 'function') ACT.setDesign = d => { sd(d); try { designSave(store()); } catch (_) { /* private mode */ } };
+    try { designLoad(store()); } catch (_) { /* private mode */ }
   })();
   document.addEventListener('DOMContentLoaded', () => {
     H.home = S.route;

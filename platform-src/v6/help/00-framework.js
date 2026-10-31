@@ -3,7 +3,11 @@
    the article shows the "text in Russian" marker (FR-135/170). Content files: v6/help/10-start.js … 50-reference.js; visuals 60-visuals.js
    (HELP.visuals[id] → SVG/HTML string); guided tours 70-tours.js (HELP.tours, FR-160). Article key = v6 screen id or "screen/tab" so the
    "?" button of the top bar (ACT.helpHere) opens the article of the current screen / tab; a tab without its own article falls back to the screen. */
-const HELP = { groups: [], articles: [], glossary: [], faq: [], deadlines: [], visuals: {}, tours: [] };
+const HELP = { groups: [], articles: [], glossary: [], faq: [], deadlines: [], visuals: {}, tours: [], ptours: [] };   // ptours: tours of the portal shells (their steps sit on portal screens that are not in NAV); allTours() = tours + ptours
+const allTours = () => HELP.tours.concat(HELP.ptours);
+/* the customer portal gets a short help (0.3.11 «Портал клиента: короткая справка»): login, account, the portal articles, contracts, tours, glossary and FAQ — no operations, roles or administration articles */
+const CUSTOMER_HELP = ['start', 'login', 'account', 'tours', 'portal', 'portal/book', 'portal/my', 'book', 'mybookings', 'track', 'request', 'contracts', 'glossary', 'faq'];
+const helpVisible = a => (S.role === 'customer' ? CUSTOMER_HELP.includes(a.key) || (a.screen && canSee(a.screen) && !!a.portal) : !a.screen || canSee(a.screen) || a.portal);
 const helpGroup = (key, title) => HELP.groups.push({ key, title });
 /* helpAdd merges a second article with the same key (the ported manual 10-70 and a workstream file both describe a tab):
    the group of the first stays, scalar fields of the later (workstream) article win, list fields are concatenated. */
@@ -26,7 +30,8 @@ helpGroup('ref', T('Справочник', 'Nachschlagen', 'Reference', 'Аны�
 S.help = { key: 'start', q: '' };
 const helpArt = k => HELP.articles.find(a => a.key === k);
 /* article of the current screen / tab: "screen/tab" if it exists, else the screen article, else the overview */
-const helpKeyFor = () => { const r = S.route, sc = SCREENS[r], t = sc && sc.tabs ? (curTab(r) || {}).key : (S.tab[r] || ''); return helpArt(r + '/' + t) ? r + '/' + t : helpArt(r) ? r : 'start'; };
+const HELP_ALIAS = { driverapp: 'drivers/app' };   // role-shell screens that are described by the article of the screen they mirror
+const helpKeyFor = () => { const r = S.route, sc = SCREENS[r], t = sc && sc.tabs ? (curTab(r) || {}).key : (S.tab[r] || ''); return helpArt(r + '/' + t) ? r + '/' + t : helpArt(r) ? r : HELP_ALIAS[r] && helpArt(HELP_ALIAS[r]) ? HELP_ALIAS[r] : 'start'; };
 const hText = a => [tx(a.title), tx(a.sub), tx(a.purpose), tx(a.who), a.fr || '', a.key, (a.see || []).map(tx).join(' '), (a.rules || []).map(tx).join(' '),
   (a.howto || []).map(h => tx(h.t) + ' ' + h.steps.map(tx).join(' ')).join(' '),
   a.special === 'glossary' ? HELP.glossary.map(g => tx(g[0]) + ' ' + tx(g[1])).join(' ') : '', a.special === 'faq' ? HELP.faq.map(g => tx(g[0]) + ' ' + tx(g[1])).join(' ') : '',
@@ -55,13 +60,13 @@ function rolesTable() {
 const deadlinesTable = () => `<div style="overflow:auto"><table class="help-dl"><thead><tr><th>${esc(T('Срок', 'Frist', 'Deadline', 'Мерзім'))}</th><th>${esc(T('Что', 'Was', 'What', 'Не'))}</th><th>${esc(T('Где в платформе', 'Wo in der Plattform', 'Where in the platform', 'Платформада қайда'))}</th></tr></thead><tbody>${HELP.deadlines.map(d => `<tr><td><b>${esc(d.date)}</b></td><td>${esc(tx(d.what))}</td><td>${d.screen ? `<a class="lnk" data-act="helpOpen" data-s="${d.screen}" data-t="${d.tab || ''}">${esc(tx(d.where))}</a>` : esc(tx(d.where))}</td></tr>`).join('')}</tbody></table></div>`;
 const tourStartScreen = t => t.steps[0].screen;
 const tourCan = t => canSee(tourStartScreen(t));
-const toursList = () => `<div class="help-tours">${HELP.tours.map(t => `<div class="help-tour" data-tour="${t.id}"><b>${esc(tx(t.title))}</b><span class="note">${esc(T('для: ', 'für: ', 'for: ', 'кімге: '))}${esc(tx(t.who))} · ${t.steps.length} ${esc(T('шагов', 'Schritte', 'steps', 'қадам'))}</span>${tourCan(t) ? `<button class="btn sm primary" data-act="tourStart" data-id="${t.id}">▶ ${esc(T('Начать тур', 'Tour starten', 'Start the tour', 'Турды бастау'))}</button>` : `<span class="chip gray">${esc(T('недоступно вашей роли', 'für Ihre Rolle nicht verfügbar', 'not available to your role', 'рөліңізге қолжетімсіз'))}</span>`}</div>`).join('')}</div>`;
+const toursList = () => `<div class="help-tours">${allTours().map(t => `<div class="help-tour" data-tour="${t.id}"><b>${esc(tx(t.title))}</b><span class="note">${esc(T('для: ', 'für: ', 'for: ', 'кімге: '))}${esc(tx(t.who))} · ${t.steps.length} ${esc(T('шагов', 'Schritte', 'steps', 'қадам'))}</span>${tourCan(t) ? `<button class="btn sm primary" data-act="tourStart" data-id="${t.id}">▶ ${esc(T('Начать тур', 'Tour starten', 'Start the tour', 'Турды бастау'))}</button>` : `<span class="chip gray">${esc(T('недоступно вашей роли', 'für Ihre Rolle nicht verfügbar', 'not available to your role', 'рөліңізге қолжетімсіз'))}</span>`}</div>`).join('')}</div>`;
 const visualHtml = id => (HELP.visuals[id] ? `<figure class="hv" data-visual="${id}">${HELP.visuals[id]()}</figure>` : '');
 function articleHtml(a) {
   const q = S.help.q.trim();
   const ul = (arr, ord) => (arr && arr.length ? `<${ord ? 'ol' : 'ul'}>${arr.map(x => `<li>${hl(tx(x), q)}</li>`).join('')}</${ord ? 'ol' : 'ul'}>` : '');
   const rel = (a.related || []).map(k => helpArt(k)).filter(Boolean);
-  const tour = HELP.tours.find(t => t.at === a.key);
+  const tour = allTours().find(t => t.at === a.key);
   return `<article class="card card-body help-art" data-help="${a.key}"><h2>${hl(tx(a.title), q)}</h2>${a.sub ? `<div class="note">${hl(tx(a.sub), q)}</div>` : ''}
 ${accessLine(a)}<p class="help-links">${a.screen && canSee(a.screen) ? `<a class="lnk" data-act="helpOpen" data-s="${a.screen}" data-t="${a.tab || ''}" role="button" tabindex="0">▸ ${esc(T('Открыть экран', 'Bildschirm öffnen', 'Open the screen', 'Экранды ашу'))}</a>` : ''}${tour && tourCan(tour) ? ` <a class="lnk" data-act="tourStart" data-id="${tour.id}" role="button" tabindex="0">▶ ${esc(T('Тур', 'Tour', 'Tour', 'Тур'))}: ${esc(tx(tour.title))}</a>` : ''}</p>
 <p>${hl(tx(a.purpose), q)}</p>${(a.visuals || []).map(visualHtml).join('')}${a.who ? `<h4>${esc(T('Кто работает', 'Wer arbeitet damit', 'Who uses it', 'Кім жұмыс істейді'))}</h4><p>${hl(tx(a.who), q)}</p>` : ''}
@@ -79,7 +84,7 @@ SCREENS.help = {
   sub: () => T('Статьи по экранам и вкладкам, роли, схемы процессов, туры, глоссарий, вопросы и ответы', 'Artikel zu Bildschirmen und Registerkarten, Rollen, Prozessbilder, Touren, Glossar, FAQ', 'Articles per screen and tab, roles, process diagrams, tours, glossary, FAQ', 'Экрандар мен қойындылар бойынша мақалалар, рөлдер, процесс сызбалары, турлар, глоссарий, FAQ'),
   actions: () => `<label class="searchbox">${ic('search', 14)}<input id="hq" maxlength="80" placeholder="${esc(T('Поиск по справке…', 'Hilfe durchsuchen…', 'Search help…', 'Анықтамадан іздеу…'))}" value="${esc(S.help.q)}" aria-label="${esc(T('Поиск по справке', 'Hilfe durchsuchen', 'Search help', 'Анықтамадан іздеу'))}"></label><button class="btn grey" data-act="helpPrint">${esc(T('Печать', 'Drucken', 'Print', 'Басып шығару'))}</button>`,
   body: () => {
-    const q = S.help.q.trim().toLowerCase(), words = q.split(/\s+/).filter(Boolean), vis = HELP.articles.filter(a => (!a.screen || canSee(a.screen) || a.portal) && (!q || words.every(w => hText(a).includes(w))));   // 0.3.11: every word must match
+    const q = S.help.q.trim().toLowerCase(), words = q.split(/\s+/).filter(Boolean), vis = HELP.articles.filter(a => helpVisible(a) && (!q || words.every(w => hText(a).includes(w))));   // 0.3.11: every word must match
     const cur = vis.find(a => a.key === S.help.key) || vis[0];
     const nav = HELP.groups.map(g => { const as = vis.filter(a => a.group === g.key); return as.length ? `<h5>${esc(g.title)}</h5>${as.map(a => `<a class="${cur === a ? 'on' : ''}" data-act="helpGo" data-k="${a.key}" role="button" tabindex="0"${cur === a ? ' aria-current="true"' : ''}>${esc(tx(a.title))}</a>`).join('')}` : ''; }).join('');
     return `<div class="help"><nav class="card help-nav" aria-label="Help">${q ? `<p class="note help-found" style="padding:10px 12px 0">${esc(T('Найдено статей: ', 'Gefundene Artikel: ', 'Articles found: ', 'Табылған мақалалар: '))}${vis.length}</p>` : ''}${nav || `<p class="note" style="padding:12px">${esc(T('Ничего не найдено', 'Nichts gefunden', 'Nothing found', 'Ештеңе табылмады'))}</p>`}</nav>${cur ? articleHtml(cur) : ''}</div>`;
@@ -103,7 +108,7 @@ function helpDecorate() {
   if (S.route === 'help') return;
   const act = $('.page-head .actions'); if (!act || $('.help-q', act)) return;
   const k = helpKeyFor(), a = helpArt(k); if (!a) return;
-  const tour = HELP.tours.find(t => tourStartScreen(t) === S.route && tourCan(t));
+  const tour = allTours().find(t => tourStartScreen(t) === S.route && tourCan(t));
   act.insertAdjacentHTML('beforeend', `${tour ? `<button class="btn grey sm help-q" data-act="tourStart" data-id="${tour.id}" title="${esc(tx(tour.title))}" aria-label="${esc(T('Тур: ', 'Tour: ', 'Tour: ', 'Тур: ') + tx(tour.title))}">▶</button>` : ''}<button class="btn grey sm help-q" data-act="helpHere" title="${esc(T('Справка: ', 'Hilfe: ', 'Help: ', 'Анықтама: ') + tx(a.title))}" aria-label="${esc(T('Справка: ', 'Hilfe: ', 'Help: ', 'Анықтама: ') + tx(a.title))}">?</button>`);
 }
 /* render hook: after every render add the context help links and the tour layer (70-tours.js registers HELP.afterRender) */

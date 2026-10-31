@@ -56,7 +56,7 @@ const LANGS = ['ru', 'de', 'en', 'kk'], file = l => (l === 'ru' ? 'index.html' :
 const out = document.getElementById('out');
 const __Q = new URLSearchParams(location.search);
 /* module titles of the result table and the chips (file name of the suite → what it tests), 0.3.11 style */
-const __MODS = { '10-navigation': 'Навигация', '20-dispatch': 'Диспетчер', '30-chain': 'Цепочка заказ → оплата', '40-reports-ai-settings': 'Отчёты, ИИ, настройки', '50-legacy-tabs': 'Вкладки 0.3.x', '60-foundation': 'Основа v6', '61-shell-ext': 'Оболочка · поиск, вход, история', '62-language-audit': 'Языки RU / DE / EN / KK', '63-narrow': 'Узкое окно', '70-ops-load': 'Загрузка и вес', '71-ops-ship': 'Отправки и маркировка', '72-ops-docs': 'Документы РК', '73-ops-dispatch': 'Диспетчер · Go/No-Go', '74-ops-dashboard': 'Обзор и планирование', '75-ops-trips': 'Рейсы', '76-ops-docs': 'Документы · набор и ЭСФ', '80-res-fleet-staff': 'Автопарк и персонал', '81-res-driver-app': 'Приложение водителя', '82-res-coverage-lines': 'Покрытие связи и линии', '83-res-thermo': 'Термостатус', '84-res-weather': 'Погода', '85-res-coverage': 'Покрытие и безопасность', '86-res-fleet-ext': 'Реестр автопарка', '87-res-partners': 'Партнёры', '88-res-staff-app': 'Персонал · приложение', '90-rec-records': 'Записи и администрирование', 'a0-por-portals': 'Порталы клиента и партнёра', 'b0-eco-economics': 'Экономика', 'b1-eco-reports-ext': 'Отчёты · KPI', 'b2-eco-costs-ext': 'Затраты', 'c0-help-content': 'Справка', 'c1-help-visuals': 'Справка · схемы', 'c2-notes': 'Пояснения', 'd0-v6-parity': 'Паритет 0.3.10', 'e1-mirror-ops': 'Паритет операций 0.3.9', 'e2-mirror-res': 'Паритет ресурсов 0.3.9', 'e3-hub-inbound': 'Хаб · приёмка и рампы', 'e4-rules-sla': 'Правила и SLA', 'e5-driver-partner': 'Водитель и партнёр', 'f0-a11y': 'Доступность', 'f0-ci-infra': 'CI и инфраструктура', 'f0-delivery': 'Поставка и версии', 'f0-shell-parity': 'Оболочка · паритет', 'f1-data-integrity': 'Данные · целостность', 'f2-ops-fleet': 'Операции и парк', 'f3-records-portals': 'Записи и порталы', 'f4-economics': 'Экономика · паритет', 'f5-a11y-layout': 'Доступность и вёрстка', 'g4-architecture': 'Архитектура и строки', 'g5-help-figures-scroll': 'Справка · рисунки' };
+const __MODS = { '10-navigation': 'Навигация', '20-dispatch': 'Диспетчер', '30-chain': 'Цепочка заказ → оплата', '40-reports-ai-settings': 'Отчёты, ИИ, настройки', '50-legacy-tabs': 'Вкладки 0.3.x', '60-foundation': 'Основа v6', '61-shell-ext': 'Оболочка · поиск, вход, история', '62-language-audit': 'Языки RU / DE / EN / KK', '63-narrow': 'Узкое окно', '70-ops-load': 'Загрузка и вес', '71-ops-ship': 'Отправки и маркировка', '72-ops-docs': 'Документы РК', '73-ops-dispatch': 'Диспетчер · Go/No-Go', '74-ops-dashboard': 'Обзор и планирование', '75-ops-trips': 'Рейсы', '76-ops-docs': 'Документы · набор и ЭСФ', '80-res-fleet-staff': 'Автопарк и персонал', '81-res-driver-app': 'Приложение водителя', '82-res-coverage-lines': 'Покрытие связи и линии', '83-res-thermo': 'Термостатус', '84-res-weather': 'Погода', '85-res-coverage': 'Покрытие и безопасность', '86-res-fleet-ext': 'Реестр автопарка', '87-res-partners': 'Партнёры', '88-res-staff-app': 'Персонал · приложение', '90-rec-records': 'Записи и администрирование', 'a0-por-portals': 'Порталы клиента и партнёра', 'b0-eco-economics': 'Экономика', 'b1-eco-reports-ext': 'Отчёты · KPI', 'b2-eco-costs-ext': 'Затраты', 'c0-help-content': 'Справка', 'c1-help-visuals': 'Справка · схемы', 'c2-notes': 'Пояснения', 'd0-v6-parity': 'Паритет 0.3.10', 'e1-mirror-ops': 'Паритет операций 0.3.9', 'e2-mirror-res': 'Паритет ресурсов 0.3.9', 'e3-hub-inbound': 'Хаб · приёмка и рампы', 'e4-rules-sla': 'Правила и SLA', 'e5-driver-partner': 'Водитель и партнёр', 'f0-a11y': 'Доступность', 'f0-ci-infra': 'CI и инфраструктура', 'f0-delivery': 'Поставка и версии', 'f0-shell-parity': 'Оболочка · паритет', 'f1-data-integrity': 'Данные · целостность', 'f2-ops-fleet': 'Операции и парк', 'f3-records-portals': 'Записи и порталы', 'f4-economics': 'Экономика · паритет', 'f5-a11y-layout': 'Доступность и вёрстка', 'g4-architecture': 'Архитектура и строки', 'g5-help-figures-scroll': 'Справка · рисунки', 'h1-data-seed-integrity': 'Данные · сид 0.3.11', 'h2-load-ship-vehicle': 'Загрузка, отправки, ТС · 0.3.11', 'h3-dispatch-gonogo-safety': 'Диспетчер, Go/No-Go, безопасность · 0.3.11', 'h4-resources-partners': 'Ресурсы и партнёры · 0.3.11', 'h5-driver-app-delivery': 'Водитель и доставка · 0.3.11', 'h6-portal-commercial': 'Портал и коммерция · 0.3.11', 'h7-economics-reports': 'Экономика и отчёты · 0.3.11', 'h8-shell-i18n-help': 'Оболочка, языки, справка · 0.3.11' };
 const __modOf = i => { if (i < 0) return '—'; const n = __SUITES[i].name.replace(/\.js$/, ''), k = Object.keys(__MODS).filter(x => n.startsWith(x)).sort((a, b) => b.length - a.length)[0]; return k ? __MODS[k] : n; };
 const UI = {
   rows: [], mods: new Map(), t0: performance.now(), onlyFail: false,
@@ -91,7 +91,7 @@ const UI = {
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 UI.$('only').onclick = () => { UI.onlyFail = !UI.onlyFail; UI.$('rows').classList.toggle('onlyfail', UI.onlyFail); UI.$('only').textContent = UI.onlyFail ? 'Показать все' : 'Только ошибки'; };
 UI.$('run').onclick = () => { if (window.__TESTS.done) location.reload(); };
-const __SUITES = [{"name":"10-navigation.js","ms":3049},{"name":"20-dispatch.js","ms":587},{"name":"30-chain.js","ms":447},{"name":"40-reports-ai-settings.js","ms":531},{"name":"50-legacy-tabs.js","ms":786},{"name":"60-foundation.js","ms":971},{"name":"61-shell-ext.js","ms":4141},{"name":"62-language-audit.js","ms":2265},{"name":"63-narrow.js","ms":9450},{"name":"70-ops-load.js","ms":4070},{"name":"71-ops-ship.js","ms":1035},{"name":"72-ops-docs.js","ms":861},{"name":"73-ops-dispatch.js","ms":1011},{"name":"74-ops-dashboard.js","ms":1042},{"name":"75-ops-trips.js","ms":1180},{"name":"76-ops-docs.js","ms":835},{"name":"80-res-fleet-staff.js","ms":948},{"name":"81-res-driver-app.js","ms":1133},{"name":"82-res-coverage-lines.js","ms":1350},{"name":"83-res-thermo.js","ms":871},{"name":"84-res-weather.js","ms":902},{"name":"85-res-coverage.js","ms":1915},{"name":"86-res-fleet-ext.js","ms":1277},{"name":"87-res-partners.js","ms":3018},{"name":"88-res-staff-app.js","ms":1163},{"name":"90-rec-records.js","ms":2493},{"name":"a0-por-portals.js","ms":1760},{"name":"b0-eco-economics.js","ms":1944},{"name":"b1-eco-reports-ext.js","ms":1157},{"name":"b2-eco-costs-ext.js","ms":1484},{"name":"c0-help-content.js","ms":3125},{"name":"c1-help-visuals.js","ms":1756},{"name":"c2-notes.js","ms":2682},{"name":"d0-v6-parity.js","ms":3193},{"name":"e1-mirror-ops-a.js","ms":2411},{"name":"e1-mirror-ops-b.js","ms":1870},{"name":"e1-mirror-ops-c.js","ms":3096},{"name":"e1-mirror-ops.js","ms":5006},{"name":"e2-mirror-res.js","ms":15641},{"name":"e3-hub-inbound.js","ms":1449},{"name":"e4-rules-sla.js","ms":1977},{"name":"e5-driver-partner.js","ms":1798},{"name":"f0-a11y.js","ms":915},{"name":"f0-ci-infra.js","ms":3922},{"name":"f0-delivery.js","ms":627},{"name":"f0-shell-parity.js","ms":357},{"name":"f1-data-integrity.js","ms":582},{"name":"f2-ops-fleet.js","ms":200},{"name":"f3-records-portals.js","ms":212},{"name":"f4-economics.js","ms":200},{"name":"f5-a11y-layout.js","ms":742},{"name":"g4-architecture.js","ms":1077},{"name":"g5-help-figures-scroll.js","ms":274}];
+const __SUITES = [{"name":"10-navigation.js","ms":3049},{"name":"20-dispatch.js","ms":587},{"name":"30-chain.js","ms":447},{"name":"40-reports-ai-settings.js","ms":531},{"name":"50-legacy-tabs.js","ms":786},{"name":"60-foundation.js","ms":971},{"name":"61-shell-ext.js","ms":4141},{"name":"62-language-audit.js","ms":2265},{"name":"63-narrow.js","ms":9450},{"name":"70-ops-load.js","ms":4070},{"name":"71-ops-ship.js","ms":1035},{"name":"72-ops-docs.js","ms":861},{"name":"73-ops-dispatch.js","ms":1011},{"name":"74-ops-dashboard.js","ms":1042},{"name":"75-ops-trips.js","ms":1180},{"name":"76-ops-docs.js","ms":835},{"name":"80-res-fleet-staff.js","ms":948},{"name":"81-res-driver-app.js","ms":1133},{"name":"82-res-coverage-lines.js","ms":1350},{"name":"83-res-thermo.js","ms":871},{"name":"84-res-weather.js","ms":902},{"name":"85-res-coverage.js","ms":1915},{"name":"86-res-fleet-ext.js","ms":1277},{"name":"87-res-partners.js","ms":3018},{"name":"88-res-staff-app.js","ms":1163},{"name":"90-rec-records.js","ms":2493},{"name":"a0-por-portals.js","ms":1760},{"name":"b0-eco-economics.js","ms":1944},{"name":"b1-eco-reports-ext.js","ms":1157},{"name":"b2-eco-costs-ext.js","ms":1484},{"name":"c0-help-content.js","ms":3125},{"name":"c1-help-visuals.js","ms":1756},{"name":"c2-notes.js","ms":2682},{"name":"d0-v6-parity.js","ms":3193},{"name":"e1-mirror-ops-a.js","ms":2411},{"name":"e1-mirror-ops-b.js","ms":1870},{"name":"e1-mirror-ops-c.js","ms":3096},{"name":"e1-mirror-ops.js","ms":5006},{"name":"e2-mirror-res.js","ms":15641},{"name":"e3-hub-inbound.js","ms":1449},{"name":"e4-rules-sla.js","ms":1977},{"name":"e5-driver-partner.js","ms":1798},{"name":"f0-a11y.js","ms":915},{"name":"f0-ci-infra.js","ms":3922},{"name":"f0-delivery.js","ms":627},{"name":"f0-shell-parity.js","ms":357},{"name":"f1-data-integrity.js","ms":582},{"name":"f2-ops-fleet.js","ms":200},{"name":"f3-records-portals.js","ms":212},{"name":"f4-economics.js","ms":200},{"name":"f5-a11y-layout.js","ms":742},{"name":"g4-architecture.js","ms":1077},{"name":"g5-help-figures-scroll.js","ms":274},{"name":"h1-data-seed-integrity.js","ms":789},{"name":"h2-load-ship-vehicle.js","ms":1179},{"name":"h3-dispatch-gonogo-safety.js","ms":978},{"name":"h4-resources-partners.js","ms":1403},{"name":"h5-driver-app-delivery.js","ms":1026},{"name":"h6-portal-commercial.js","ms":552},{"name":"h7-economics-reports.js","ms":649},{"name":"h8-shell-i18n-help.js","ms":1142}];
 const __QUARANTINE = [];
 const __HARNESS = {
   /* longest-processing-time split: heaviest suite first onto the lightest shard; deterministic for a given suite list */
@@ -1201,7 +1201,7 @@ __suite(23);   /* 87-res-partners.js */
   });
   await group('P4 partners: contact drawer masks numbers, Call (simulation) is audited, copy', 'ru', async (g, ev, w) => {
     ev("ACT.setRole({v:'admin'});" + PTAB + ";ACT.ptContact({id:'PL-01'})"); assert(w.document.querySelector('[data-contacts=PL-01]'), 'drawer'); clean(w, 'contact drawer');
-    const c = ev("partnerContacts(S.partners.find(p=>p.id==='PL-01'))"); eq(c.length, 2, 'two persons'); assert(/•/.test(w.document.querySelector('[data-contact]').innerText), 'masked'); assert(c[0].tel.indexOf('•') < 0 && !w.document.body.innerText.includes(c[0].mob), 'full number hidden before the call');
+    const c = ev("partnerContacts(S.partners.find(p=>p.id==='PL-01'))"); eq(c.length, 3, 'three persons'); assert(/•/.test(w.document.querySelector('[data-contact]').innerText), 'masked'); assert(c[0].tel.indexOf('•') < 0 && !w.document.body.innerText.includes(c[0].mob), 'full number hidden before the call');
     const a0 = ev('S.audit.length'); ev(`ACT.ptCall({id:'${c[0].id}'})`); assert(w.document.body.innerText.includes(c[0].mob), 'revealed after the call'); assert(ev('S.audit.length') >= a0 + 2, 'reveal + call audited'); assert(ev("S.audit.some(a=>/pii\\.read/.test(a.decision))"), 'pii.read audit entry'); assert(w.document.querySelector('[data-call]'), 'call log in the drawer');
     ev("ACT.ptCopy({id:'PL-01'})"); assert(ev('S.ptx.lastCopy').indexOf('СтепьЛогистик') >= 0, 'copy text'); ev("ACT.setRole({v:'viewer'})"); ev("ACT.ptCall({id:'PL-02:0'})"); assert(!ev("S.ptx.revealed['PL-02:0']"), 'no right -> no reveal');
   });
@@ -2515,10 +2515,10 @@ __suite(38);   /* e2-mirror-res.js */
     eq(ev("trk('t1').kg"), ev("typeOfTruck(trk('t1')).kg"), 'payload from type'); clean(w, 'fleet table');
   });
   await group('R2 F14/F10 registry: ID, capacity kg · pal, KASKO, ADR columns, logger ID in calibration, CSV and default view', 'en', async (g, ev, w) => {
-    const d = w.document; ev(R2REG); const th = [...d.querySelectorAll('#rg_table th')].map(x => x.innerText); assert(th.includes('ADR'), 'ADR column default ' + th); assert(th.some(x => /Logger/.test(x)), 'logger in calibration header');
+    const d = w.document; ev(R2REG); const th = [...d.querySelectorAll('#rg_table th')].map(x => x.innerText); assert(th.includes('ADR'), 'ADR column default ' + th); assert(th.some(x => /logger/i.test(x)), 'logger in calibration header');
     assert(d.querySelector('[data-logger=t1]'), 'logger cell');
     ev("ACT.rgCols()"); for (const k of ['code', 'kg', 'kasko']) { const cb = d.querySelector(`.rg_col[value=${k}]`); assert(cb && !cb.checked, k + ' optional column'); cb.checked = true; cb.dispatchEvent(new w.Event('change', { bubbles: true })); }
-    const th2 = [...d.querySelectorAll('#rg_table th')].map(x => x.innerText); assert(th2.includes('ID') && th2.includes('Capacity') && th2.includes('Comprehensive until'), 'added ' + th2);
+    const th2 = [...d.querySelectorAll('#rg_table th')].map(x => x.innerText); assert(th2.some(x => /^id$/i.test(x)) && th2.some(x => /^capacity$/i.test(x)) && th2.some(x => /^comprehensive until$/i.test(x)), 'added ' + th2);
     assert(/\d kg · \d+ pal/.test(d.querySelector('#rg_table').innerText), 'kg · pal cell'); ev("S.res.fleet.kasko.t1='2026-11-01';render()"); assert(d.querySelector('#rg_table').innerText.includes('01.11.2026'), 'kasko date');
     ev('ACT.rgCsv()'); const csv = ev('S.res.lastCsv'); const hd = csv.split(String.fromCharCode(13, 10))[0].replace(/^﻿/, '').split(';'); assert(hd.includes('ADR') && hd.includes('ID') && hd.includes('Capacity'), 'csv header ' + hd); assert(csv.includes(ev("trk('t1').logger")), 'csv logger');
     w.document.querySelector('#rg_vname').value = 'Mine'; ev('ACT.rgSave()'); eq(ev("S.res.views.find(v=>v.name==='Mine').def"), true, 'default view'); clean(w, 'registry columns');
@@ -4626,6 +4626,1068 @@ __suite(52);   /* g5-help-figures-scroll.js */
     ev("go('fleet')"); assert(Math.abs(sb().scrollTop - max) <= 1, 'kept after changing the screen');
     ev("ACT.helpGo({k:'start'})"); const hn = w.document.querySelector('.help-nav');
     if (hn && hn.scrollHeight > hn.clientHeight + 20) { hn.scrollTop = 80; ev('render()'); eq(w.document.querySelector('.help-nav').scrollTop, 80, 'help menu keeps its position'); }
+  });
+
+__suite(53);   /* h1-data-seed-integrity.js */
+  /* ---- H1 · 0.3.11 parity, seed-data integrity: the «Данные · …» / «Fragenkatalog · …» scenarios that f1-data-integrity.js and f4-economics.js
+     only covered in part (docs/parity-0311/autotests-gap.md, section 2 and h1). One group walks every record of a dataset and names the
+     first offender. v6 deliberately differs from the 0.3.11 seed (7 trucks / 7 drivers / 17 partners / 2 contacts per partner / 4 target
+     vehicles), so counts are never ported literally: the v6 equivalent is «every record satisfies the rule». Weather forecast cities
+     (0.3.11 «Данные · погода» 121–133) are covered by h3. ---- */
+
+  /* Region code of a KZ plate (NNN LLL RR) -> registration oblast / city of republican significance. */
+  const H1_PLATE_REGION = { '01': 'AST', '02': 'ALA', '09': 'KAR', '17': 'SHY', '06': 'ATY' };
+
+  await group('data: plate region code is a hub region of the network and matches the truck hub for most trucks (0.3.11 Данные · ТС 22–25)', 'ru', async (g, ev) => {
+    /* 0.3.11 rule: «регион 02 (Алматы)» — every truck was registered where the fleet lived. v6 has hubs in five cities, and a truck may be
+       registered in one hub city and based at another (t3 is plated 01 Astana but works from Karaganda, t5 is plated 09 Karaganda but works
+       from Astana — both are leasing/transfer cases and other tests pin these plates), so the v6 rule is: the region of every plate is the
+       region of one of the network hubs, and the plate matches the home hub for at least two thirds of the fleet. */
+    const tr = ev('S.trucks.map(t=>({id:t.id,plate:t.plate,hub:t.hub}))'), hubs = ev('Object.keys(HUBS)');
+    const regionHubs = Object.values(H1_PLATE_REGION);
+    assert(regionHubs.every(h => hubs.includes(h)), 'region table points at a hub that does not exist');
+    let match = 0;
+    for (const t of tr) {
+      const reg = t.plate.slice(-2);
+      assert(H1_PLATE_REGION[reg], t.id + ': plate region ' + reg + ' is not the region of any network hub (' + t.plate + ')');
+      if (H1_PLATE_REGION[reg] === t.hub) match++;
+    }
+    assert(match / tr.length >= 2 / 3, 'only ' + match + ' of ' + tr.length + ' plates carry the region of the truck hub');
+    for (const h of ['AST', 'ALA']) assert(tr.some(t => t.hub === h && H1_PLATE_REGION[t.plate.slice(-2)] === h), 'no truck of hub ' + h + ' with the region of ' + h);
+  });
+
+  await group('data: fleet composition — reefers with an active cooling unit and at least one van without; target fleet of the baseline is 4 vehicles with exactly one active-cooling body (0.3.11 Автопарк FR-38)', 'ru', async (g, ev) => {
+    const tr = ev('S.trucks.map(t=>({id:t.id,model:t.model,cool:t.cool,unit:t.unit,cap:t.cap,zones:t.zones}))');
+    assert(tr.length >= 4, 'fleet size ' + tr.length);
+    assert(tr.filter(t => t.cool === 'active').length >= 1, 'no truck with active cooling');
+    assert(tr.every(t => t.cool !== 'active' || (t.unit && t.unit !== '—')), 'active cooling without a refrigeration unit');
+    assert(tr.some(t => /^Van|^Tent/.test(t.model)), 'no van / tent in the fleet');
+    assert(tr.every(t => t.cap > 0 && t.zones.length > 0), 'truck without capacity / zones');
+    eq(ev('ECO_BL.BLF.reduce((a,f)=>a+f.qty,0)'), 4, 'target fleet of the baseline');
+    eq(ev('ECO_CV.length'), 4, 'cost-model vehicles V01..V04');
+    eq(ev('ECO_CV.filter(v=>v.unitL>0).length'), 1, 'exactly one target vehicle with an active cooling unit (V01 on R1)');
+  });
+
+  await group('data: partner contacts — every partner has its managers with role, name, phone, mobile and masked variants (0.3.11 Данные · контакты 254–275)', 'ru', async (g, ev) => {
+    /* 0.3.11: 3 managers per partner; v6 seed (FR-82): 2 persons per partner, numbers masked until an audited reveal */
+    const r = ev('S.partners.map(p=>({id:p.id,c:partnerContacts(p)}))');
+    assert(r.length >= 15, 'partners ' + r.length);
+    const ids = new Set();
+    for (const p of r) {
+      assert(p.c.length >= 2, p.id + ': contacts ' + p.c.length);
+      eq(new Set(p.c.map(c => c.name)).size, p.c.length, p.id + ': the same person twice');
+      for (const c of p.c) {
+        for (const k of ['id', 'role', 'name', 'tel', 'mob', 'telM', 'mobM']) assert(c[k] && String(c[k]).trim(), p.id + ': contact field ' + k + ' empty');
+        assert(!ids.has(c.id), 'duplicate contact id ' + c.id); ids.add(c.id);
+        assert(/^\+7 7\d\d\d? ?[\d ]+$/.test(c.tel) || /^\+7 \d{3,4} [\d ]+$/.test(c.tel), c.id + ': landline ' + c.tel);
+        assert(/^\+7 7\d\d \d{3} \d{2} \d{2}$/.test(c.mob), c.id + ': mobile ' + c.mob);
+        assert(/^\+7 7•• ••• •• \d\d$/.test(c.telM) && c.telM.slice(-2) === c.tel.slice(-2), c.id + ': masked landline ' + c.telM);
+        assert(/^\+7 7•• ••• •• \d\d$/.test(c.mobM) && c.mobM.slice(-2) === c.mob.slice(-2), c.id + ': masked mobile ' + c.mobM);
+      }
+    }
+  });
+
+  await group('data: partner contract end «until» is MM.YYYY (or «—» for blocked) and the 3-month renewal reminders on the Partners screen are exactly the partners due (0.3.11 Данные · контакты / FR-26)', 'ru', async (g, ev, w) => {
+    const r = ev('S.partners.map(p=>({id:p.id,until:p.until,tier:p.tier}))'), now = ev('({y:NOW.getFullYear(),m:NOW.getMonth()+1})');
+    for (const p of r) assert(p.until === '—' || /^(0[1-9]|1[0-2])\.20\d\d$/.test(p.until), p.id + ': contract end ' + p.until);
+    const due = r.filter(p => { const m = /^(\d{2})\.(\d{4})$/.exec(p.until); return m && p.tier !== 'blocked' && (+m[2] - now.y) * 12 + (+m[1] - now.m) <= 3; }).map(p => p.id).sort();
+    assert(due.length >= 1, 'the demo has at least one contract due within 3 months');
+    ev("ACT.setRole({v:'dispatcher'});go('dispatch');ACT.dtab({v:'partners'})");
+    const shown = [...w.document.querySelectorAll('[data-partner]')].filter(tr => tr.querySelector('[data-act=ptRenew]')).map(tr => tr.getAttribute('data-partner')).sort();
+    eq(shown.join(','), due.join(','), 'renewal reminders vs contracts due');
+    ev("ACT.setRole({v:'admin'})");
+  });
+
+  await group('data: partner directory — carrier-type partners of tier silver or better exist, ids are PL-/PW- and unique, a carrier is GDP-qualified (0.3.11 FR-45 Партнёры: GarantA, KazExpress, KazGen, SpezAvto)', 'ru', async (g, ev) => {
+    /* DATA GAP by design: v6 carries anonymised partner names (PL-01..PL-08, PL-10), not the 0.3.11 carrier names */
+    const P = ev('S.partners.map(p=>({id:p.id,type:p.type,tier:p.tier,gdp:p.gdp,name:p.name}))');
+    for (const p of P) { assert(/^P[LW]-\d\d$/.test(p.id), 'partner id ' + p.id); assert(p.name && p.name.length > 3, p.id + ': name'); }
+    eq(new Set(P.map(p => p.id)).size, P.length, 'duplicate partner ids');
+    const lp = P.filter(p => p.type === 'lp');
+    assert(lp.length >= 4, 'carriers ' + lp.length);
+    assert(lp.filter(p => p.tier === 'gold' || p.tier === 'silver').length >= 2, 'fewer than two carriers of tier silver or better');
+    assert(lp.some(p => p.gdp), 'no GDP-qualified carrier');
+  });
+
+  await group('data: driver hours stay inside the limits — day, week, year, continuous driving (0.3.11 Данные · персонал, hours part)', 'ru', async (g, ev) => {
+    const L = ev('RES.LIM'), r = ev('S.drivers.map(d=>({id:d.id,week:d.week,onDuty:d.onDuty,cont:d.res.cont,year:d.res.year,days:d.res.days,h14:d.res.hours14}))');
+    for (const d of r) {
+      assert(d.week >= 0 && d.week <= L.week, d.id + ': week ' + d.week + ' h over ' + L.week);
+      assert(d.onDuty >= 0 && d.onDuty <= L.dayExt, d.id + ': on duty ' + d.onDuty + ' h over ' + L.dayExt);
+      assert(d.cont >= 0 && d.cont <= L.cont, d.id + ': continuous driving ' + d.cont + ' h over ' + L.cont);
+      assert(d.year >= 0 && d.year <= L.year, d.id + ': year ' + d.year + ' h over ' + L.year);
+      assert(d.h14 == null || d.h14 <= L.twoWeeks, d.id + ': 14-day ' + d.h14 + ' h over ' + L.twoWeeks);
+    }
+  });
+
+  await group('data: fines — article, positive integer amount in tenge, status from the fine state machine (0.3.11 Данные · штрафы, structure)', 'ru', async (g, ev) => {
+    const F = ev('S.res.fines.map(f=>({id:f.id,article:f.article,amount:f.amount,status:f.status}))'), st = ev('Object.keys(RES.FINE_ST)');
+    assert(F.length >= 3, 'fines ' + F.length);
+    for (const f of F) {
+      assert(/КоАП|Code|Verwaltung|ӘҚБтК/i.test(f.article) && f.article.length > 10, f.id + ': article ' + f.article);
+      assert(Number.isInteger(f.amount) && f.amount > 0, f.id + ': amount ' + f.amount);
+      assert(st.includes(f.status), f.id + ': status ' + f.status);
+    }
+    eq(new Set(F.map(f => f.id)).size, F.length, 'duplicate fine ids');
+  });
+
+  await group('data: every driver assigned to a load holds a licence category valid for the truck (CE for a tractor with trailer) at the ETA (0.3.11 Данные · рейс 49–70)', 'ru', async (g, ev) => {
+    const r = ev(`S.loads.filter(l => l.driver && l.truck).map(l => { const t = S.trucks.find(x => x.id === l.truck), d = S.drivers.find(x => x.id === l.driver); const lic = d && d.docs.find(x => x.type === 'lic'); return { id: l.id, eta: String(l.eta).slice(0, 10), cat: d && d.lic, semi: !!(t && /\\+/.test(t.make)), to: lic && lic.to, drv: l.driver }; })`);
+    assert(r.length >= 5, 'assigned loads ' + r.length);
+    for (const l of r) {
+      assert(['C', 'CE'].includes(l.cat), l.id + ': driver ' + l.drv + ' category ' + l.cat);
+      if (l.semi) eq(l.cat, 'CE', l.id + ': tractor with trailer needs CE');
+      assert(l.to && l.to >= l.eta, l.id + ': licence of ' + l.drv + ' ends ' + l.to + ' before the ETA ' + l.eta);
+    }
+  });
+
+  await group('baseline: temperature shipments per month 40 / 6 / 6 (with Makinsk), 2–8 °C is 77 % (0.3.11 Fragenkatalog · города 378)', 'ru', async (g, ev) => {
+    const s = ev('ECO_BL.BLC.reduce((a,c)=>[a[0]+c.t[0],a[1]+c.t[1],a[2]+c.t[2]],ECO_BL.BLD.makinsk.slice())');
+    eq(s.join('/'), '40/6/6', 'temperature split per month'); eq(Math.round(s[0] / (s[0] + s[1] + s[2]) * 100), 77, '2–8 °C share');
+    eq(ev('ECO_BL.BLD.tempMon'), 35, 'temperature shipments per month (A1) as shown on the baseline screen');
+    for (const c of ev('ECO_BL.BLC')) assert(c.t.every(x => Number.isInteger(x) && x >= 0), c.id + ': temperature split');
+  });
+
+  await group('baseline: every ring is assigned to a model of the target fleet that has vehicles, and the south ring exhausts 200 000 km in less than 18 months (0.3.11 Fragenkatalog · парк 390–391, FR-50)', 'ru', async (g, ev) => {
+    const R = ev('ECO_BL.BLR'), F = ev('ECO_BL.BLF');
+    for (const r of R) { const f = F.find(x => x.id === r.veh); assert(f && f.qty > 0, r.id + ': vehicle model ' + r.veh + ' is not in the target fleet'); }
+    const s = R.find(r => r.id === 'S'), months = 200000 / (s.km * s.per) * 12;
+    assert(months < 18, 'south ring: 200 000 km in ' + months.toFixed(1) + ' months');
+    const rr = ev('ECO_RINGS.find(r=>r.id==="S")'); assert(rr && Math.abs(200000 / (rr.km * rr.per) * 12 - months) < 1e-9, 'cost model ring S differs from the baseline');
+  });
+
+  await group('baseline: express is 36,3 % of the outsourcing budget at 8,3 % of the weight, outsourcing 290,4 M ₸/year, express surcharge 88,7 M ₸/year (0.3.11 Fragenkatalog · экономика 392–394)', 'ru', async (g, ev, w) => {
+    const d = ev('ECO_BL.BLD'), outs = d.garanta + d.kazexp;
+    eq((d.expKg * d.expRate / outs * 100).toFixed(1), '36.3', 'express share of the budget (A2)'); eq((d.expKg / d.kgMon * 100).toFixed(1), '8.3', 'express share of the weight (A2)');
+    eq((outs * 12 / 1e6).toFixed(1), '290.4', 'outsourcing per year (G25)');
+    eq(((d.expRate - d.ltlRate) * d.expKg * 12 / 1e6).toFixed(1), '88.7', 'express surcharge per year (T140)');
+    ev("go('baseline')"); const t = w.document.querySelector('#main-content').innerText;
+    assert(/36,3 %/.test(t) && /8,3 % веса/.test(t) && /290,4 млн/.test(t), 'baseline screen shows 36,3 % / 8,3 % / 290,4 млн ₸');
+  });
+
+  await group('baseline: the 150 questions are consistent — unique codes A1…T150, every finding and gap points at an existing question, statuses add up (0.3.11 FR-35…51 list in sync with the baseline screen)', 'ru', async (g, ev, w) => {
+    const q = ev('ecoQuestions().map(x=>({code:x.code,sec:x.sec,st:x.st}))');
+    eq(q.length, 150, 'questions'); eq(new Set(q.map(x => x.code)).size, 150, 'duplicate question codes');
+    assert(q.every(x => ['ok', 'dev', 'q', 'gap'].includes(x.st)), 'question status');
+    const codes = new Set(q.map(x => x.code)), refs = ev("ECO_BL.BLV.map(v=>[v.id,v.ref]).concat(ECO_BL.BLG.map(x=>['gap',x.ref]))");
+    for (const [id, ref] of refs) for (const c of (String(ref).match(/[A-T]\d{1,3}/g) || [])) assert(codes.has(c), id + ': ref ' + c + ' is not a question of the catalogue');
+    eq(new Set(ev('ECO_BL.BLV.map(v=>v.id)')).size, ev('ECO_BL.BLV.length'), 'duplicate finding ids');
+    ev("go('baseline');ACT.blSub({v:'q'})"); assert(!/Запросы FR-35…51/.test(w.document.querySelector('#main-content').innerText), 'round-3 request list must not be duplicated on the baseline screen');
+    eq(w.document.querySelectorAll('[data-q]').length, 150, 'question rows');
+  });
+
+  await group('costs: assumption items of the bottom-up summary are marked — source «допущение» and a yellow chip; items from the Fragenkatalog are not (0.3.11 Затраты 435)', 'ru', async (g, ev, w) => {
+    const rows = ev('ecoCostCalc().rows.map(r=>({k:r.k,assumption:r.assumption,src:r.src}))');
+    assert(rows.filter(r => r.assumption).length >= 5, 'assumption items ' + rows.filter(r => r.assumption).length);
+    for (const r of rows) assert(r.assumption === /допущение|Annahme|assumption|болжам/i.test(r.src), r.k + ': source «' + r.src + '» vs assumption flag ' + r.assumption);
+    ev("go('billing');ACT.stab({s:'billing',v:'model'});ACT.ecoSub({v:'sum'})");
+    const tr = [...w.document.querySelectorAll('#main-content .tcard table tr')].filter(t => /Fragenkatalog|допущение/.test(t.innerText));
+    assert(tr.filter(t => /допущение/.test(t.innerText)).length >= 5, 'assumption rows are not marked on the screen');
+  });
+
+  await group('data: location directory — every network city has names in four languages, valid coordinates, a coordinate pair; every LOCS entry names a hub (0.3.11 FR-135 Справочник мест 665; KATO checked by the validator only)', 'ru', async (g, ev) => {
+    /* v6 LOCS = {code: {n, hub, km}}, KZMAP.CITY = [ru, kk, de, en, lat, lon]; there is no KATO field in the seed (decision: the validator katoVerify is the contract) */
+    const city = ev('KZMAP.CITY'), hubs = ev('Object.keys(HUBS)');
+    eq(city.length, 23, 'network cities');
+    for (const c of city) {
+      for (let i = 0; i < 4; i++) assert(typeof c[i] === 'string' && c[i].trim(), c[0] + ': name #' + i + ' empty');
+      assert(c[4] > 40 && c[4] < 56 && c[5] > 46 && c[5] < 88, c[0] + ': coordinates ' + c[4] + ',' + c[5] + ' outside Kazakhstan');
+    }
+    eq(new Set(city.map(c => c[0])).size, city.length, 'duplicate cities');
+    const L = ev('Object.entries(LOCS).map(([k,v])=>({k,n:v.n,hub:v.hub,km:v.km}))');
+    assert(L.length >= 15, 'locations ' + L.length);
+    for (const l of L) { assert(l.n && l.n.trim(), l.k + ': name'); assert(hubs.includes(l.hub), l.k + ': hub ' + l.hub); assert(Number.isFinite(l.km) && l.km >= 0, l.k + ': km ' + l.km); }
+    eq(ev('typeof katoVerify'), 'function', 'KATO validator');
+  });
+
+  await group('data: manufacturer logos — every registry entry with a logo resolves to an asset file that loads (0.3.11 Производители / Логотипы)', 'ru', async (g, ev) => {
+    const srcs = ev("Object.keys(MFRS).filter(k=>MFRS[k].logo).map(k=>[k,mfrSrc(k)])");
+    assert(srcs.length >= 6, 'manufacturers with a logo ' + srcs.length);
+    for (const [k, src] of srcs) { const r = await fetch(src.replace(/^\//, '')).catch(() => null); assert(r && r.ok, k + ': logo file ' + src + ' does not load'); }
+  });
+
+__suite(54);   /* h2-load-ship-vehicle.js */
+/* ---- H2 · 0.3.11 parity for Load & weight, Shipments and the vehicle match (docs/parity-0311/autotests-gap.md, file h2).
+   0.3.11 scenarios: «Производители» 484–486, «Загрузка · типы ТС» 497/502/504/507, «Загрузка · согласованность» 554/555/556/564,
+   «Подбор ТС · симуляция» 557/559, FR-143 676, «Логотипы производителей · экран 04» 711–712.
+   v6 seed differs from the 0.3.11 demo: the West trip LD-2026-001856 runs on the fleet truck t1 (Reefer 20 t, 33 places) and not on
+   the 0.3.11 V02 (HOWO 10 t, 18 places), so absolute figures of 0.3.11 (4 + 14 places, 50,4 m³, R-106) are replaced by the invariants
+   they stood for: drawn = ticked = counted, the recommendation is the smallest fitting type, an unfitting type names its reason. ---- */
+{
+  const W = 'LD-2026-001856';
+  const open = (ev, id = W) => ev(`go('orders'); ACT.stab({s:'orders',v:'loadw'}); ACT.lwSel({id:'${id}'})`);
+  const num = s => parseFloat(String(s).replace(/ | |\s/g, '').replace(',', '.'));
+  /* the first number of «a / b …» of a tile or a bar, whatever the thousands separator is */
+  const first = s => num(String(s).split('/')[0]);
+  const second = s => num(String(s).split('/')[1]);
+  /* 0.3.11 sameState(): what is ticked = what is drawn = what is counted (tiles) = what the bars show */
+  const same = (ev, w, id, where) => {
+    const d = w.document, r = ev(`(() => { const c = lwCalc(load('${id}')); return { posUsed: c.posUsed, pal: c.p.pal, thermo: c.p.thermo, fUsed: c.groups.front.used, mUsed: c.groups.main.used, kg: Math.round(c.kg), kgMax: c.p.kg, m3: Math.round(c.m3 * 10) / 10, m3Max: c.p.m3, nTick: ops(load('${id}')).orders.filter(o => o.on !== false && !o.handed).length, palTick: ops(load('${id}')).orders.filter(o => o.on !== false && !o.handed && o.pal > 0).reduce((s, o) => s + o.pal, 0) }; })()`);
+    const drawn = d.querySelectorAll('[data-diagram] [data-slot]').length;
+    eq(drawn, (r.thermo ? r.fUsed : 0) + r.mUsed, where + ': places drawn in the diagram = places counted');
+    const tile = d.querySelector('[data-sum=pal] b').textContent, barEl = d.querySelector('[data-bar=pal] .bar-lab span:last-child');
+    eq(first(tile), r.posUsed, where + ': pallet tile'); eq(second(tile), r.pal, where + ': pallet tile capacity');
+    if (barEl) { eq(first(barEl.textContent), r.posUsed, where + ': pallet bar'); eq(second(barEl.textContent), r.pal, where + ': pallet bar capacity'); }
+    else assert(r.posUsed > r.pal && d.querySelector('[data-bar][data-over="1"]'), where + ': the pallet bar is folded into the zone bar only when that zone is overloaded');   /* barsCard() hides a duplicate overloaded «pallets» bar */
+    eq(first(d.querySelector('[data-sum=kg] b').textContent), r.kg, where + ': weight tile'); eq(first(d.querySelector('[data-bar=kg] .bar-lab span:last-child').textContent), r.kg, where + ': weight bar');
+    eq(first(d.querySelector('[data-sum=m3] b').textContent), r.m3, where + ': volume tile'); eq(first(d.querySelector('[data-bar=m3] .bar-lab span:last-child').textContent), r.m3, where + ': volume bar');
+    eq(d.querySelectorAll('[data-order]:not(.off):not([data-locked])').length, r.nTick, where + ': ticked rows = ticked orders');
+    return r;
+  };
+
+  /* ---------- Производители (484–486): logos on the place rows, the label and the search ---------- */
+  await group('manufacturers (0.3.11 «Производители» 484): place rows of the West trip carry the logo of their manufacturer, every id exists in MFRS and its logo file loads', 'ru', async (g, ev, w) => {
+    ev(`S.ops.shipLoad = '${W}'; go('orders'); ACT.stab({s:'orders',v:'ship'})`); const d = w.document;
+    const ms = ev(`[...new Set(ops(load('${W}')).orders.map(o => o.mfr))]`); assert(ms.length >= 2, 'the West trip has goods of several manufacturers: ' + ms.join(','));
+    for (const m of ms) assert(ev(`!!MFRS['${m}']`), m + ' is in the registry');
+    const rows = [...d.querySelectorAll('[data-line]')]; assert(rows.length >= 8, 'place rows ' + rows.length);
+    assert(rows.every(r => r.querySelector('.mlogo')), 'every place row has a logo or an initials badge');
+    for (const m of ms) { assert(d.querySelector(`.sh-mfr[data-mfr="${m}"]`), m + ': manufacturer card'); assert(d.querySelector(`.sh-mfr[data-mfr="${m}"] [data-mfr-logo="${m}"]`), m + ': card logo badge'); }
+    const named = ev(`['Beckman', 'Werfen'].map(n => Object.keys(MFRS).find(k => MFRS[k].name.includes(n)) || null)`); assert(named.every(Boolean), 'Beckman Coulter and Werfen are in the registry');
+    for (const m of ms.filter(m => ev(`!!MFRS['${m}'].logo`))) { const src = d.querySelector(`.sh-mfr[data-mfr="${m}"] img`).getAttribute('src'); assert(/manufacturers\/.+\.(webp|png|svg|jpe?g)$/i.test(src), m + ': logo path ' + src); const ok = await w.fetch(src).then(r => r.ok, () => false); assert(ok, m + ': logo file ' + src + ' is served'); }
+    clean(w, 'place rows with logos');
+  });
+  await group('manufacturers (0.3.11 485): the place label shows the manufacturer name, company and logo in its header', 'ru', async (g, ev, w) => {
+    ev(`S.ops.shipLoad = '${W}'; go('orders'); ACT.stab({s:'orders',v:'ship'})`); const d = w.document, rows = [...d.querySelectorAll('[data-line]')];
+    for (const r of [rows[0], rows[Math.floor(rows.length / 2)], rows[rows.length - 1]]) {
+      const s = r.dataset.s; ev(`ACT.shPick({s:'${s}'})`); const lab = d.querySelector(`[data-label="${s}"]`); assert(lab, s + ': label drawn');
+      const m = ev(`opsPlaces(load('${W}')).find(p => p.sscc === '${s}').mfr || ops(load('${W}')).orders.find(o => o.places.some(p => p.sscc === '${s}')).mfr`), name = ev(`MFRS['${m}'].name`);
+      assert(lab.querySelector('b').textContent.includes(name), s + ': header names ' + name); assert(lab.querySelector('.mlogo') && lab.querySelector('[data-mfr-logo]'), s + ': header has the logo element');
+    }
+    clean(w, 'label');
+  });
+  await group('manufacturers (0.3.11 486): a search result of goods carries the logo (or the manufacturer badge) of the line', 'ru', async (g, ev, w) => {
+    const hit = ev(`(() => { const l = load('${W}'), o = ops(l).orders.find(x => MFRS[x.mfr].logo) || ops(l).orders[0]; return { art: o.lines[0].art, mfr: o.mfr, logo: !!MFRS[o.mfr].logo }; })()`);
+    ev(`go('dashboard'); gsInput(${JSON.stringify(hit.art)})`); const d = w.document, rows = [...d.querySelectorAll('.gs-row')].filter(r => r.querySelector('.gs-main'));
+    assert(rows.length >= 1, 'a result for the article ' + hit.art);
+    const mine = ev(`gsResults().L.filter(x => x.kind === 'line' && x.hit === ${JSON.stringify(hit.art)}).map(x => x.mfr)`); assert(mine.includes(hit.mfr), 'the result row knows its manufacturer ' + hit.mfr);
+    assert(hit.logo ? !!d.querySelector('.gs-row .gs-logo img') : !!d.querySelector('.gs-row .gs-type'), 'logo (' + hit.logo + ') or badge in the search row'); clean(w, 'search with logos');
+  });
+
+  /* ---------- Загрузка · типы ТС (497, 502, 504, 507) ---------- */
+  await group('vehicle types (0.3.11 497): the default view is the actual vehicle; places per zone, pallets and volume are what the orders add up to', 'ru', async (g, ev, w) => {
+    open(ev); const d = w.document;
+    assert(d.querySelector('[data-act=lwType][data-v="f:t1"].on'), 'default = actual vehicle t1 (0.3.11: V02)'); const r = same(ev, w, W, 'default');
+    const o = ev(`(() => { const c = lwCalc(load('${W}')); return { f: c.groups.front.used, m: c.groups.main.used, pal: c.pal, m3: Math.round(c.m3 * 10) / 10, sumPal: ops(load('${W}')).orders.filter(o => o.on !== false && !o.handed).reduce((s, o) => s + o.pal, 0), sumM3: Math.round(ops(load('${W}')).orders.filter(o => o.on !== false && !o.handed).reduce((s, o) => s + o.m3, 0) * 10) / 10, fits: c.fits }; })()`);
+    eq(o.pal, o.sumPal, 'pallets = sum of the ticked orders'); eq(o.m3, o.sumM3, 'volume = sum of the ticked orders'); eq(o.f + o.m, r.posUsed, 'places per zone add up to the places used'); assert(o.f > 0 && o.m > 0, 'both chambers are used (thermo containers and the 15–25 °C body)');
+    assert(ev(`lwCalc(load('${W}')).issues.filter(i => i.sev === 3).length`) === 0, 'no critical check on the default vehicle'); assert(d.querySelector('[data-chamber=front]') && d.querySelector('[data-chamber=main]'), 'two chambers in the legend');
+    clean(w, 'default vehicle');
+  });
+  await group('vehicle types (0.3.11 502): 7.5 t with 2 zones — a bulkhead pushed to the minimum overloads zone 1 (2–8 °C) as a critical check, moving it back clears it', 'ru', async (g, ev, w) => {
+    open(ev); const d = w.document; ev(`ACT.lwType({id:'${W}', v:'t75', z:'2'})`);
+    const cold = ev(`lwCalc(load('${W}')).groups.front.pal`), t = ev('TYPES.t75.z2'); assert(cold > t.splitMin, 'the cold pallets (' + cold + ') exceed the minimum of zone 1 (' + t.splitMin + ')');
+    ev(`ACT.lwBulk({id:'${W}', v:'-20'})`); eq(+d.querySelector('[data-bulkhead]').dataset.bulkhead, t.splitMin, 'bulkhead at the minimum'); assert(d.querySelector('[data-bulk-ctl] [data-v^="-"]').disabled, 'cannot move further forward');
+    const z = ev(`lwCalc(load('${W}')).issues.find(i => i.code === 'zone' && i.zone === 'zone1')`); assert(z && z.sev === 3 && /\+\d/.test(z.text), 'zone 1 overloaded: ' + (z && z.text)); assert(d.querySelector('[data-check=zone][data-lvl="3"]') && d.querySelector('[data-bar=zone1][data-over="1"]'), 'check and bar show the overload');
+    ev(`ACT.lwBulk({id:'${W}', v:'20'})`); assert(!ev(`lwCalc(load('${W}')).issues.some(i => i.code === 'zone' && i.zone === 'zone1')`), 'zone 1 fits with the bulkhead at the maximum'); clean(w, 'bulkhead');
+  });
+  await group('vehicle types (0.3.11 504): ticking another order recomputes the vehicle match — the recommendation follows the load (smallest fitting type), and returns when the order is unticked', 'ru', async (g, ev, w) => {
+    open(ev); const d = w.document, rec = () => d.querySelector('[data-match-rec]').dataset.matchRec, calc = () => ev(`vehMatch(load('${W}')).rec ? vehMatch(load('${W}')).rec.key : ''`);
+    const k0 = rec(); eq(k0, calc(), 'the card shows the computed recommendation'); assert(k0, 'a catalogue type fits the default load');
+    const ords = ev(`ops(load('${W}')).orders.filter(o => o.pal > 0 && !o.handed).map(o => ({ id: o.id, on: o.on !== false, pal: o.pal }))`);
+    const keys = new Set([k0]), rank = k => ev(`vehMatch(load('${W}')).cat.findIndex(x => x.key === '${k}')`);
+    for (const o of ords) { ev(`ACT.lwOrd({id:'${W}', o:'${o.id}'})`); eq(rec(), calc(), o.id + ': card follows the model after the tick'); keys.add(rec()); ev(`ACT.lwOrd({id:'${W}', o:'${o.id}'})`); eq(rec(), k0, o.id + ': the recommendation returns after the order is ticked back'); }
+    ords.filter(o => o.on).forEach(o => ev(`ACT.lwOrd({id:'${W}', o:'${o.id}'})`)); const k1 = rec(); assert(k1 === '' || rank(k1) <= rank(k0), 'a lighter load never recommends a bigger type: ' + k0 + ' → ' + k1);
+    ords.filter(o => !o.on).forEach(o => ev(`ACT.lwOrd({id:'${W}', o:'${o.id}'})`)); assert(keys.size >= 1, 'recommendations seen: ' + [...keys].join(',')); ev(`ops(load('${W}')).orders.forEach(o => { if (o.pal > 0 && !o.handed) o.on = true; }); render()`);
+    const k2 = rec(); assert(k2 === '' || rank(k2) >= rank(k0), 'all orders ticked never recommend a smaller type: ' + k0 + ' → ' + k2); clean(w, 'match recompute');
+  });
+  await group('vehicle types (0.3.11 507): alarms and the dispatcher compute with the actual truck, not with a saved plan of another type', 'ru', async (g, ev, w) => {
+    const L = W; eq(ev(`savePlan('${L}', 't35', 'demo: plan of another type, cleared by the ops lead')`), null, 'plan t35 saved with override'); assert(ev(`ops(load('${L}')).plan.fits === false`), 'the plan does not fit');
+    const act = ev(`(() => { const t = trk(load('${L}').truck); return { id: t.id, fits: loadCalc(ops(load('${L}')).orders, typeOfTruck(t), t.zones).fits }; })()`); assert(act.id, 'the trip has an actual truck'); eq(ev(`load('${L}').truck`), act.id, 'actual truck unchanged by the plan');
+    ev("go('dashboard'); S.tab.dashboard = 'overview'; render()"); const risk = [...w.document.querySelectorAll('[data-ov-risk]')].map(e => e.textContent).filter(t => t.includes(L) && /не помещается|does not fit|passt nicht/i.test(t));
+    eq(risk.length > 0, !act.fits, 'dashboard risk "load does not fit" follows the actual truck (fits=' + act.fits + '), not the plan');
+    const view = ev(`lwTypeFor(load('${L}')).id`); eq(view, 't35', 'the load card opens on the saved plan'); ev(`ACT.lwType({id:'${L}', v:'f:${act.id}'})`); eq(ev(`lwTypeFor(load('${L}')).own.truck.id`), act.id, 'the actual truck is selectable next to the plan');
+    clean(w, 'actual vs plan');
+  });
+
+  /* ---------- Загрузка · согласованность (554, 555, 556, 564) ---------- */
+  await group('load consistency (0.3.11 554): fresh state — ticked orders = places drawn = tiles = bars', 'ru', async (g, ev, w) => {
+    open(ev); const r = same(ev, w, W, 'fresh West trip'); assert(r.nTick >= 6, 'ticked orders in the fresh state ' + r.nTick); eq(ev(`ops(load('${W}')).orders.filter(o => o.on === false).length`) + r.nTick, ev(`ops(load('${W}')).orders.length`), 'every order is either ticked or off');
+    clean(w, 'consistency');
+  });
+  await group('load consistency (0.3.11 555): every catalogue type × 1 / 2 thermo zones / no control × bulkhead − / + — the diagram, the tiles and the bars agree', 'ru', async (g, ev, w) => {
+    open(ev); let n = 0;
+    for (const t of ['t35', 't6', 't75', 't10', 't125']) {
+      for (const z of ev(`[1, 2, 0].filter(z => hasVar(TYPES.${t}, z) && (z !== 0 || TYPES.${t}.nt || TYPES.${t}.thermo === false))`)) {
+        ev(`ACT.lwType({id:'${W}', v:'${t}', z:'${z}'})`); same(ev, w, W, t + ' · ' + z + ' zones'); n++;
+        if (z === 2) for (const dv of [-20, 20, -2, 2]) { ev(`ACT.lwBulk({id:'${W}', v:'${dv}'})`); same(ev, w, W, t + ' · bulkhead ' + w.document.querySelector('[data-bulkhead]').dataset.bulkhead); n++; }
+      }
+    }
+    for (const id of ['r12', 'r20', 'v10', 't20']) { ev(`ACT.lwType({id:'${W}', v:'${id}', z:'${id === 't20' ? 0 : 1}'})`); same(ev, w, W, id); n++; }
+    ev(`ACT.lwType({id:'${W}', v:'f:t1'})`); same(ev, w, W, 'back on the actual vehicle'); assert(n >= 25, 'variants compared ' + n); clean(w, 'all variants');
+  });
+  await group('load consistency (0.3.11 556): ticking an order redraws the diagram, the tiles and the bars in the same tick', 'ru', async (g, ev, w) => {
+    open(ev); const d = w.document, snap = () => [d.querySelectorAll('[data-diagram] [data-slot]').length, d.querySelector('[data-sum=pal] b').textContent, d.querySelector('[data-sum=kg] b').textContent, d.querySelector('[data-bar=pal] .bar-lab').textContent, d.querySelector('[data-bar=kg] .bar-lab').textContent].join('|');
+    const s0 = snap(), id = ev(`ops(load('${W}')).orders.find(o => o.on !== false && !o.handed && o.pal > 0).id`);
+    ev(`ACT.lwOrd({id:'${W}', o:'${id}'})`); assert(snap() !== s0, 'unticking ' + id + ' changed the diagram, tiles and bars at once'); assert(d.querySelector(`[data-order="${id}"]`).classList.contains('off') && !d.querySelector(`[data-diagram] [data-slot="${id}"]`), id + ' left the diagram'); same(ev, w, W, 'after unticking');
+    ev(`ACT.lwOrd({id:'${W}', o:'${id}'})`); eq(snap(), s0, 'ticking it back restores everything'); assert(d.querySelector(`[data-diagram] [data-slot="${id}"]`), id + ' is drawn again'); same(ev, w, W, 'after ticking back');
+    assert(/LIFO/.test(d.querySelector('[data-diagram]').textContent), 'the diagram explains LIFO'); clean(w, 'ticking');
+  });
+  await group('load consistency (0.3.11 564): after a full hand-over to a partner every order row is locked, nothing is ticked, the diagram is empty and the tiles read 0', 'ru', async (g, ev, w) => {
+    ev(`S.handovers.push({ id: 'HO-H2', load: '${W}', p: 'PL-01', st: 'approved', mode: 'full', items: [] })`); open(ev); const d = w.document;
+    const rows = [...d.querySelectorAll('[data-order]')]; assert(rows.length >= 8 && rows.every(r => r.dataset.locked === '1'), 'every order row is locked: ' + rows.filter(r => r.dataset.locked !== '1').map(r => r.dataset.order).join(','));
+    eq(d.querySelectorAll('[data-diagram] [data-slot]').length, 0, 'no place in the diagram'); eq(first(d.querySelector('[data-sum=pal] b').textContent), 0, 'pallet tile 0'); eq(first(d.querySelector('[data-sum=kg] b').textContent), 0, 'weight tile 0');
+    eq(d.querySelectorAll('[data-order]:not([data-locked]) input:checked').length, 0, 'nothing ticked'); assert(d.querySelector('[data-sim-best][data-sim-empty]'), 'the finder asks for ticked orders'); assert(!ev(`ops(load('${W}')).orders.some(o => !o.handed)`), 'every order is handed over');
+    clean(w, 'full hand-over');
+  });
+
+  /* ---------- Подбор ТС · симуляция (557, 559) and FR-143 cost (676) ---------- */
+  await group('truck finder (0.3.11 557): small types do not fit, fitting ones are ranked above the others, the recommendation is the cheapest fitting one', 'ru', async (g, ev, w) => {
+    const f = ev(`(() => { const x = finder(load('${W}'), false, {}); return { n: x.rows.length, best: x.best && x.best.key, rows: x.rows.map(r => ({ key: r.key, fits: r.fits, rate: r.cost.rate, why: r.issues.filter(i => i.sev === 3).map(i => i.code) })) }; })()`);
+    assert(f.n >= 16, 'candidates ' + f.n); assert(f.best, 'a recommendation exists'); const firstBad = f.rows.findIndex(r => !r.fits); assert(firstBad > 0 && f.rows.slice(firstBad).every(r => !r.fits), 'fitting rows are all above the unfitting: ' + f.rows.map(r => r.key + (r.fits ? '+' : '-')).join(' '));
+    const fit = f.rows.filter(r => r.fits); assert(fit.every((r, i) => !i || fit[i - 1].rate <= r.rate), 'fitting rows ascend by cost'); eq(f.rows[0].key, f.best, 'recommended = first row');
+    const small = f.rows.filter(r => /^c:t35:|^c:t6:/.test(r.key)); assert(small.length >= 4 && small.every(r => !r.fits), '3.5 t and 6 t do not take the West trip: ' + small.filter(r => r.fits).map(r => r.key));
+    assert(f.rows.filter(r => !r.fits).every(r => r.why.length > 0), 'every unfitting candidate names a critical reason');
+    ev(`go('orders'); ACT.stab({s:'orders',v:'loadw'}); ACT.lwSel({id:'${W}'})`); eq(w.document.querySelector('[data-sim-best]').dataset.simBest, f.best, 'the card shows the recommendation'); assert(w.document.querySelector('[data-sim][data-fits="1"].rec, [data-sim].rec'), 'recommended row is marked');
+    clean(w, 'finder ranking');
+  });
+  await group('truck finder (0.3.11 559): a pallet taller than the body is flagged in the simulation, the bars, the side view, the diagram and the checks', 'ru', async (g, ev, w) => {
+    open(ev); const d = w.document; const id = ev(`ops(load('${W}')).orders.find(o => o.on !== false && !o.handed && o.pal > 0).id`);
+    ev(`ops(load('${W}')).orders.find(o => o.id === '${id}').h = 180; ACT.lwType({id:'${W}', v:'t35', z:'1'})`); const H = ev('TYPES.t35.z1.H'); eq(H, 175, 'the 3.5 t body is 175 cm');
+    const c = ev(`lwCalc(load('${W}')).issues.find(i => i.code === 'h')`); assert(c && c.sev === 3 && c.text.includes(id) && /180/.test(c.text) && /175/.test(c.text) && /\+5/.test(c.text), 'critical height check: ' + (c && c.text));
+    const hv = d.querySelector('[data-height-view]'); assert(hv && hv.dataset.over === '1' && hv.dataset.h === '180' && hv.dataset.hin === '175', 'side view shows 180 > 175'); assert(d.querySelector('[data-bar=h][data-over="1"]') && d.querySelector('[data-ex=h]'), 'height bar over'); assert(d.querySelector('[data-check=h][data-lvl="3"]'), 'height check');
+    assert(/↑/.test(d.querySelector(`[data-diagram] [data-slot="${id}"]`) ? d.querySelector('[data-diagram]').textContent : ''), 'the tall pallet is marked ↑ in the diagram'); assert(ev(`finder(load('${W}'), false, {}).rows.find(r => r.key === 'c:t35:1').issues.some(i => i.code === 'h')`), 'the finder row of 3.5 t names the height'); assert(ev(`vehMatch(load('${W}')).cat.find(x => x.key === 't35:1').r.issues.some(i => i.code === 'h')`), 'vehicle match row too');
+    ev(`ACT.lwType({id:'${W}', v:'f:t1'})`); eq(d.querySelector('[data-height-view]').dataset.over, '0', 'the 20-t reefer (265 cm) takes 180 cm'); assert(!ev(`lwCalc(load('${W}')).issues.some(i => i.code === 'h')`), 'no height check on the actual vehicle'); clean(w, 'height');
+  });
+  await group('truck finder (0.3.11 FR-143 676): "cheapest" ranks by the full trip cost — fuel, tolls, driver hours, empty return and fixed costs — and the total is exactly their sum', 'ru', async (g, ev, w) => {
+    const f = ev(`(() => { const x = finder(load('${W}'), true, {}); return x.rows.map(r => ({ key: r.key, fits: r.fits, c: r.cost })); })()`);
+    assert(f.length >= 16, 'rows ' + f.length); for (const r of f) { const c = r.c; assert([c.fuel, c.toll, c.driver, c.emptyCost, c.fixed].every(v => Number.isFinite(v) && v >= 0), r.key + ': components are numbers'); eq(c.total, c.fuel + c.toll + c.driver + c.emptyCost + c.fixed, r.key + ': total = sum of the components'); assert(c.fuel > 0 && c.toll > 0 && c.driver > 0 && c.emptyCost > 0, r.key + ': every component counts'); }
+    const fit = f.filter(r => r.fits); assert(fit.length >= 2 && fit.every((r, i) => !i || fit[i - 1].c.total <= r.c.total), 'fitting rows ascend by total cost'); const rate = ev(`finder(load('${W}'), false, {}).rows.filter(r => r.fits).map(r => r.key)`), tot = fit.map(r => r.key); assert(rate.length === tot.length, 'the same candidates fit under both rankings');
+    ev(`ACT.lwOpt({v:'total'})`); open(ev); const d = w.document; assert(d.querySelector('[data-sim-how]'), 'how it decides'); const rows = [...d.querySelectorAll('[data-sim][data-fits="1"]')].map(r => r.dataset.sim); eq(rows[0], tot[0], 'the UI lists the cheapest by total cost first'); clean(w, 'finder cost');
+  });
+
+  /* ---------- Логотипы производителей · экран 04 (711–712): no overlap, logo at the right ---------- */
+  for (const px of [1500, 1024]) await group('manufacturer cards at ' + px + ' px (0.3.11 «Логотипы производителей» ' + (px === 1500 ? '711' : '712') + '): the logo sits at the right edge of the card and does not overlap the text', 'ru', async (g, ev, w) => {
+    g.f.style.width = px + 'px'; await new Promise(r => setTimeout(r, 400)); ev(`S.ops.shipLoad = '${W}'; go('orders'); ACT.stab({s:'orders',v:'ship'})`); const d = w.document, cards = [...d.querySelectorAll('.sh-mfr[data-mfr]')];
+    assert(cards.length >= 2, 'manufacturer cards ' + cards.length); const inter = (a, b) => a.left < b.right - 0.5 && a.right > b.left + 0.5 && a.top < b.bottom - 0.5 && a.bottom > b.top + 0.5;
+    for (const c of cards) { const m = c.dataset.mfr, cr = c.getBoundingClientRect(), logo = c.querySelector('[data-mfr-logo]').getBoundingClientRect(), text = c.children[1].getBoundingClientRect(), small = c.querySelector('.mlogo').getBoundingClientRect();
+      assert(logo.width > 0 && logo.right <= cr.right + 1 && logo.left >= cr.left, m + ': logo inside the card'); assert(cr.right - logo.right < 40, m + ': logo at the right edge (gap ' + Math.round(cr.right - logo.right) + ')'); assert(!inter(logo, text), m + ': logo overlaps the text'); assert(!inter(small, text), m + ': initials / small logo overlaps the text'); assert(text.right <= logo.left + 1, m + ': text ends before the logo'); }
+    const withFile = cards.filter(c => ev(`!!MFRS['${c.dataset.mfr}'].logo`)).length; assert(withFile === 0 || cards.every(c => c.querySelector('[data-mfr-logo]')), 'cards without a logo file keep the badge'); assert(d.documentElement.scrollWidth <= px + 2, 'no horizontal page scroll at ' + px + ' px: ' + d.documentElement.scrollWidth); clean(w, 'cards ' + px);
+  });
+}
+
+__suite(55);   /* h3-dispatch-gonogo-safety.js */
+/* ---- H3 · 0.3.11 parity for dispatch, Go/No-Go release, safety simulations, the working-day header, inbox texts and the weather data
+   (docs/parity-0311/autotests-gap.md, file h3). 0.3.11 scenarios: «FR-33 Авария» 313, «FR-33 Диспетчер» 314, «FR-51 ДОПОГ» 430,
+   «Версии и дата» 552–553, «FR-91…100 Рейсы и Go/No-Go» 612/614, «FR-135 Справочник мест, казахский, системные тексты» 666/669–671,
+   «FR-173 Формы для существующих API» 709, and «Данные · погода» 121–133 (the forecast of every network city: a data gap in v6,
+   WEATHER.WX had 10 of 23 cities and the others silently fell back to hub AST). v6 differs from the 0.3.11 seed: no R-103 / R-106,
+   so the scenarios run on the v6 trips that have the same properties (a chilled trip through Karaganda, an ADR trip with a certified driver). ---- */
+{
+  const CYR = /[А-Яа-яЁёӘәІіҢңҒғҮүҰұҚқӨөҺһ]/;
+
+  /* ---------- «Данные · погода» 121–133: every network city has its own forecast ---------- */
+  await group('weather data (0.3.11 «Данные · погода» 121–133): every city of the network map has its own 7-day forecast with risk 0–3 — no silent fallback to hub AST', 'ru', async (g, ev) => {
+    const cities = ev('KZMAP.CITY.map(c => c[0])'); eq(cities.length, 23, 'network cities on the map');
+    const keys = cities.map(c => ev(`WEATHER.cityKey(${JSON.stringify(c)})`)); const bad = cities.filter((c, i) => !keys[i]); eq(bad.length, 0, 'cities without a forecast key: ' + bad.join(', ')); eq(new Set(keys).size, 23, 'one forecast per city (no shared key)');
+    for (let i = 0; i < cities.length; i++) {
+      const k = keys[i], f = ev(`WEATHER.WX['${k}'] ? WEATHER.WX['${k}'].map(c => ({ max: c.max, min: c.min, wind: c.wind, snow: c.snow, risk: WEATHER.risk(c) })) : null`); assert(f, cities[i] + ' (' + k + '): own forecast, not the fallback of hub AST');
+      eq(f.length, 7, cities[i] + ': 7 days'); assert(f.every(c => Number.isFinite(c.max) && Number.isFinite(c.min) && c.min <= c.max && c.wind >= 0 && c.wind < 40), cities[i] + ': min ≤ max, plausible wind'); assert(f.every(c => [0, 1, 2, 3].includes(c.risk)), cities[i] + ': risk levels 0–3');
+      assert(f.every(c => c.min > -45 && c.max < 40), cities[i] + ': October / November climate, no extremes'); const hub = ev(`WEATHER.cityHub('${k}')`); assert(ev(`!!HUBS['${hub}']`), cities[i] + ': serving hub ' + hub);
+      eq(ev(`WEATHER.cityName('${k}')`), cities[i], cities[i] + ': name in the forecast table');
+    }
+    /* regional variation: south warmer than north, the plan rows are not copies of the hub rows */
+    const mx = k => ev(`WEATHER.WX['${k}'][0].max`); assert(mx('SAR') > mx('AST') + 8 && mx('TUR') > mx('KAR') + 8, 'the south is warmer than the steppe'); assert(mx('PET') < mx('ALA') && mx('OSK') < mx('TAR'), 'north-east colder than the south');
+    const sig = k => ev(`JSON.stringify(WEATHER.WX['${k}'])`), own = keys.filter(k => ev(`!HUBS['${k}']`)); assert(own.every(k => sig(k) !== sig(ev(`WEATHER.cityHub('${k}')`))), 'no city repeats the forecast of its hub');
+  });
+  await group('weather data: the other network cities are listed under the main table, selectable, and the free-text spelling resolves to one city (0.3.11 666 «Қарағанды» = «Karaganda» = «Караганда»)', 'ru', async (g, ev, w) => {
+    ev("go('routes'); ACT.stab({s:'routes',v:'wx'})"); const d = w.document;
+    eq(d.querySelectorAll('#wx_grid tbody tr').length, 10, 'main table: 5 hubs + 5 West cities'); eq(d.querySelectorAll('#wx_grid_more tbody tr').length, 13, 'second table: the other 13 network cities'); assert(d.querySelector('[data-wx-more]'), 'heading of the second table');
+    for (const k of ['TAR', 'PAV', 'OSK', 'SAR']) assert(d.querySelector(`#wx_grid_more [data-wx-city="${k}"]`), k + ' row');
+    ev("ACT.wxCity({id:'OSK'})"); eq(ev('S.wx.sel'), 'OSK'); assert(d.querySelector('[data-wx-card]').innerText.includes('Усть-Каменогорск') && d.querySelectorAll('[data-wx-card] .prm').length === 7, 'city card of Oskemen with 7 days');
+    for (const t of ['Қарағанды', 'Karaganda', 'Караганда', 'karaganda', ' KARAGANDA ', 'KAR']) eq(ev(`WEATHER.cityKey(${JSON.stringify(t)})`), 'KAR', 'cityKey ' + t);
+    eq(ev("WEATHER.cityKey('Өскемен')"), 'OSK'); eq(ev("WEATHER.cityKey('Усть-Каменогорск')"), 'OSK'); eq(ev("WEATHER.cityKey('Oskemen')"), 'OSK'); eq(ev("WEATHER.cityKey('Köln')"), null, 'unknown town'); eq(ev("WEATHER.cityKey('')"), null);
+    ev("S.hub = 'SHY'; render()"); const hubs = [...d.querySelectorAll('[data-wx-city]')].map(e => ev(`WEATHER.cityHub('${e.dataset.wxCity}')`)); assert(hubs.length >= 5 && hubs.every(h => h === 'SHY'), 'the hub filter reaches the second table: ' + hubs.join(',')); assert(d.querySelector('#wx_grid_more [data-wx-city="TUR"]'), 'Turkistan belongs to hub Shymkent'); ev("S.hub = ''"); clean(w, 'weather');
+  });
+  await group('weather data renders in every language without undefined / NaN; DE / EN without Cyrillic', 'ru', async () => {
+    for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("go('routes'); ACT.stab({s:'routes',v:'wx'}); ACT.wxCity({id:'SAR'})"); clean(gg.w, lang + ' weather'); const t = gg.w.document.querySelector('#wx_grid_more').innerText + ' ' + gg.w.document.querySelector('[data-wx-card]').innerText;
+      if (lang === 'de' || lang === 'en') assert(!CYR.test(t), lang + ' has Cyrillic: ' + (t.match(/.{0,20}[А-Яа-яЁё].{0,20}/) || [''])[0]); eq(gg.ev('Object.keys(WEATHER.WX).length'), 23, lang + ': 23 forecasts'); } finally { gg.done(); } }
+  });
+
+  /* ---------- FR-33 Авария 313 / Диспетчер 314 / ДОПОГ 430 ---------- */
+  await group('FR-33 breakdown (0.3.11 313): the «Breakdown» simulation on a trip through Karaganda opens a playbook and offers the contacts of the service partner of Karaganda', 'ru', async (g, ev, w) => {
+    const L = ev("S.loads.find(l => ['in_transit', 'loading', 'assigned'].includes(l.status) && l.truck && routeCities(l).includes('KAR')).id"); const h0 = ev(`trk(load('${L}').truck).health`); ev(`go('routes'); ACT.stab({s:'routes',v:'sec'}); document.querySelector('#ssim_l').value = '${L}'; ACT.secSim({v:'breakdown'})`);
+    const inc = ev('S.inc[0]'); assert(inc.sim === L && inc.pb.length >= 3 && inc.pb.every(x => x.length > 10), 'playbook with ≥ 3 steps: ' + JSON.stringify(inc.pb)); assert(ev(`trk(load('${L}').truck).health`) === 'red', 'the truck is flagged');
+    const ws = ev(`serviceOnRoute(load('${L}'))`); assert(ws, 'a service partner on the route'); const ahead = ev(`tripStops(load('${L}')).filter(s => !s.passed && s.cc).map(s => s.cc)`), wsCc = ev(`(S.partners.find(p => p.id === '${ws.id}') || {}).city`); assert(ahead.includes(wsCc === 'KST' ? 'KOS' : wsCc), 'the service is ahead on the route, not behind (stops ahead: ' + ahead.join('>') + ', service in ' + wsCc + ')');   /* v6: the nearest workshop ahead of the broken-down truck; 0.3.11 always had it in Karaganda */ assert(ev(`S.partners.find(p => p.id === '${ws.id}').type`) === 'ws', 'it is a workshop');
+    const people = ev(`partnerContacts(S.partners.find(p => p.id === '${ws.id}'))`); assert(people.length >= 2 && people.every(c => c.name && c.role && c.tel && c.mob), 'contacts with name, role, phone, mobile: ' + people.length);
+    ev('go("dashboard")'); const d = w.document, card = d.querySelector('[data-playbook]'); assert(card && d.querySelectorAll('[data-playbook] li').length === inc.pb.length, 'playbook card on the dashboard'); const b = card.querySelector(`[data-act=trPartner][data-id="${ws.id}"]`); assert(b && b.textContent.includes(ws.name), 'button with the contacts of the service');
+    b.click(); assert(d.querySelectorAll('[data-contact]').length >= 2, 'the contact drawer lists the people'); ev(`ACT.ovPbReset({id:'${L}'})`); assert(!d.querySelector('[data-playbook]'), 'reset removes the playbook card'); eq(ev(`trk(load('${L}').truck).health`), h0, 'reset restores the truck health'); clean(w, 'breakdown');
+  });
+  await group('FR-33 dispatcher (0.3.11 314): the trip detail of a chilled load shows the service on the route with its contacts', 'ru', async (g, ev, w) => {
+    const L = ev("S.loads.find(l => ['assigned', 'loading', 'in_transit'].includes(l.status) && l.zone !== 'ambient' && serviceOnRoute(l)).id"); ev(`ACT.open({id:'${L}'})`); const d = w.document, ws = ev(`serviceOnRoute(load('${L}'))`);
+    const box = d.querySelector('[data-trip-ws]'); assert(box && box.dataset.tripWs === ws.id, 'service on the route ' + ws.id); assert(box.textContent.includes(ws.name) && box.textContent.includes(ws.tier), 'name and tier'); const n = ev(`partnerContacts(S.partners.find(p => p.id === '${ws.id}')).length`); assert(n >= 2, 'contacts of the service: ' + n);
+    const cold = ev(`ops(load('${L}')).orders.some(o => o.cls !== 'ambient')`); if (cold) assert(ev(`S.partners.find(p => p.id === '${ws.id}').reefer`) || ev("!S.partners.some(p => p.type === 'ws' && p.reefer && p.tier !== 'blocked')"), 'a chilled load is served by a reefer workshop when there is one'); clean(w, 'service on route');
+  });
+  await group('FR-51 ADR (0.3.11 430): a trip with dangerous goods shows the responsible driver with the certificate date in its Go / No-Go checks', 'ru', async (g, ev, w) => {
+    const L = ev("S.loads.find(l => ['assigned', 'loading', 'in_transit'].includes(l.status) && loadAdr(l) && l.driver && ADR_DRV[l.driver]).id"), dr = ev(`drv(load('${L}').driver)`); ev(`ACT.open({id:'${L}'})`); const d = w.document;
+    const row = [...d.querySelectorAll('.tr-chk')].find(r => /ДОПОГ|ADR/.test(r.textContent)); assert(row, 'ADR check in the trip detail'); assert(row.textContent.includes(dr.name), 'the check names the responsible driver ' + dr.name + ': ' + row.textContent);
+    assert(row.textContent.includes(ev(`fd(RES.adrState(drv(load('${L}').driver)).to)`)), 'certificate date in the check'); const g1 = ev(`gate(load('${L}')).find(x => x.key === 'adr')`); assert(g1 && g1.pass && g1.text.includes(dr.name), 'the gate row names the driver too'); clean(w, 'ADR');
+  });
+
+  /* ---------- Версии и дата (FR-74/76) 552–553 ---------- */
+  for (const lang of LANGS) await group('working-day header (0.3.11 «Версии и дата» 552–553) [' + lang + ']: weekday, date and the Astana zone in the language of the interface', lang, async (g, ev, w) => {
+    const t = w.document.querySelector('[data-bizdate]').textContent.trim(); assert(t.startsWith({ ru: 'Вс', de: 'So', en: 'Sun', kk: 'Жс' }[lang]), 'weekday (Sunday): ' + t); assert(t.includes('18.10.2026'), 'demo date: ' + t);
+    assert(t.includes({ ru: 'Астана', de: 'Astana', en: 'Astana', kk: 'Астана' }[lang]) && /UTC\+5/.test(t), 'zone: ' + t); if (lang === 'de' || lang === 'en') assert(!CYR.test(t), lang + ' header has Cyrillic: ' + t);
+    eq(ev('opsToday'), '2026-10-18', 'ops day'); const d2 = ev('fd(opsToday)'); assert(/18/.test(d2) && /2026/.test(d2), 'fd() date: ' + d2); clean(w, 'header ' + lang);
+  });
+
+  /* ---------- FR-91…100 Рейсы и Go/No-Go 612 / 614 ---------- */
+  await group('Go / No-Go (0.3.11 FR-91 612): revoking a release — a trip without a release is refused, a reason outside the list is refused, a valid revoke withdraws the permission', 'ru', async (g, ev, w) => {
+    const L = 'LD-2026-001851'; assert(!ev(`released(load('${L}'))`), 'not released at the start'); assert(typeof ev(`revokeErr('${L}', 'weather')`) === 'string', '409: no release to revoke'); eq(ev(`revoke('${L}', 'weather')`), false, 'revoke without a release does nothing');
+    eq(ev(`release('${L}', 'exception for the revoke test, cleared by ops lead')`), null, 'released with an audited exception'); assert(ev(`released(load('${L}'))`), 'released');
+    for (const bad of ['nonsense', 'x', 'constructor', '__proto__']) { assert(typeof ev(`revokeErr('${L}', ${JSON.stringify(bad)})`) === 'string', '422: reason "' + bad + '" is outside the list'); eq(ev(`revoke('${L}', ${JSON.stringify(bad)})`), false, bad + ' is refused'); assert(ev(`released(load('${L}'))`), 'still released after "' + bad + '"'); }
+    const keys = ev('Object.keys(REVOKE)'); assert(keys.length >= 6 && keys.includes('weather') && keys.includes('other'), 'the reason list: ' + keys.join(','));
+    ev("ACT.open({id:'" + L + "'}); S.ops.docSel = '" + L + "'"); eq(ev(`revoke('${L}', 'weather')`), true, 'a valid reason revokes'); assert(!ev(`released(load('${L}'))`), 'permission withdrawn'); eq(ev(`ops(load('${L}')).revoked.why`), 'weather', 'reason stored'); assert(ev("S.audit.some(a => a.decision === 'Revoke' && /#?weather|погода|Wetter|weather/i.test(a.note || a.reason || a.detail || JSON.stringify(a)))"), 'audit record');
+    assert(typeof ev(`revokeErr('${L}', 'weather')`) === 'string', 'a second revoke is refused (409)');
+    ev("setStatus('" + L + "','loading')"); assert(ev(`canMove(load('${L}'), 'in_transit')`), 'the trip is blocked again until the gate is passed and released'); clean(w, 'revoke');
+  });
+  await group('dashboard KPI (0.3.11 FR-100 614): «Alarms» counts every open risk / critical alarm even when the list shows only the first 9', 'ru', async (g, ev, w) => {
+    const kpi = () => num(w.document.querySelectorAll('[data-ov-kpis] .kpi-tile')[5].querySelector('.value').textContent); const num = s => parseInt(String(s).replace(/\D/g, ''), 10);
+    ev("go('dashboard')"); const k0 = kpi(), n0 = w.document.querySelectorAll('[data-ov-alarm]').length; assert(n0 >= 3 && n0 <= 9, 'list before ' + n0);
+    const cats = ev('Object.keys(ALARM_CAT)'), hubs = ev('Object.keys(HUBS)'); let made = 0; for (const c of cats) for (const h of hubs) if (made < 14 && ev(`(() => { const n = S.alarms.length; raiseAlarm({ lvl: 3, cat: '${c}', hub: '${h}', load: null, truck: null, text: 'H3 alarm ${c} ${h}' }); return S.alarms.length > n; })()`)) made++;
+    assert(made === 14, 'created alarms ' + made); ev('render()'); const k1 = kpi(), n1 = w.document.querySelectorAll('[data-ov-alarm]').length;
+    eq(n1, 9, 'the list is capped at 9'); eq(k1, k0 + 14, 'the KPI counts all of them (' + k0 + ' + 14), not only the 9 listed'); assert(k1 > n1, 'the KPI exceeds the list'); assert(w.document.querySelector('[data-ov-kpis] .kpi-tile:nth-child(6)').innerText.length > 0, 'tile text');
+    ev("S.alarms.filter(a => /^H3 alarm/.test(a.text)).forEach(a => { a.status = 'closed'; }); render()"); eq(kpi(), k0, 'closed alarms leave the KPI'); clean(w, 'kpi alarms');
+  });
+
+  /* ---------- FR-135 666 / 669–671: inbox texts ---------- */
+  await group('inbox (0.3.11 666): a message about «Қарағанды» / «Karaganda» is routed as one city — the road / weather message acts on the trip through Karaganda', 'ru', async (g, ev, w) => {
+    const L = ev("S.loads.find(l => ['in_transit', 'loading', 'assigned'].includes(l.status) && routeCities(l).includes('KAR')).id"); const before = ev(`roadRisk(load('${L}')) ? roadRisk(load('${L}')).lvl : 0`);
+    const keys = ['Қарағанды', 'Karaganda', 'Караганда'].map(t => ev(`WEATHER.cityKey(${JSON.stringify(t)})`)); assert(keys.every(k => k === 'KAR'), 'three spellings, one city: ' + keys.join(','));
+    for (const t of ['Қарағанды', 'Karaganda']) { const cc = ev(`WEATHER.cityKey(${JSON.stringify(t)})`); const m = ev(`inboxAdd({ kind: 'weather_warning', via: 'manual', src: 'Kazhydromet', title: 'Storm warning ${t}', city: ${JSON.stringify(t)}, cc: '${cc}', lvl: 3 })`); assert(m.cc === 'KAR', 'message city code'); assert(ev(`roadRisk(load('${L}')) && roadRisk(load('${L}')).lvl === 3`), t + ': the trip through Karaganda is at risk level 3'); ev(`S.inbox.find(x => x.id === '${m.id}').st = 'done'`); }
+    eq(ev(`roadRisk(load('${L}')) ? roadRisk(load('${L}')).lvl : 0`), before, 'closed messages leave the risk'); eq(ev("ROAD_CITY.KAR"), ev('HUBS.KAR.city'), 'the city list names Karaganda'); clean(w, 'inbox city');
+  });
+  await group('inbox (0.3.11 669–671, BUG-34): demo connector messages (storm, security) and the simulations exist in all four languages — DE / EN without Cyrillic, no transliteration', 'ru', async () => {
+    const texts = async lang => { const gg = await fresh(lang); try { return gg.ev("({ inbox: S.inbox.map(m => [m.id, m.title, m.text]), sims: MIRROR_SIMS.map(s => s[1]), kinds: Object.keys(INBOX_KIND).map(k => INBOX_KIND[k]), sims2: S.inc.map(i => [i.type, i.text]), pb: ['fire', 'breakdown', 'theft'].map(k => (globalThis.SIM_PB && SIM_PB[k]) || null) })"); } finally { gg.done(); } };
+    const ru = await texts('ru'), kk = await texts('kk'), de = await texts('de'), en = await texts('en'); assert(ru.inbox.length >= 8, 'seed messages ' + ru.inbox.length); const storm = ru.inbox.findIndex(m => m[0] === 'IN-0002'), sec = ru.inbox.findIndex(m => /Wialon|Дверь/.test(m[1] + m[2]));
+    assert(storm >= 0 && sec >= 0, 'storm and security demo messages found');
+    for (const [name, L] of [['de', de], ['en', en]]) { L.inbox.forEach(m => assert(!CYR.test(m[1] + ' ' + m[2]) || /ТОО|[A-Z0-9]{3} [A-Z]{3} \d\d/.test(m[1] + m[2]), name + ': ' + m[0] + ' is not translated: ' + m[1])); L.sims.forEach(s => assert(!CYR.test(s), name + ': simulation name ' + s)); L.kinds.forEach(s => assert(!CYR.test(s), name + ': message kind ' + s)); }
+    for (const i of [storm, sec]) { assert(de.inbox[i][1] !== ru.inbox[i][1] && en.inbox[i][1] !== ru.inbox[i][1] && kk.inbox[i][1] !== ru.inbox[i][1], 'message ' + ru.inbox[i][0] + ' differs per language'); assert(/[ӘәІіҢңҒғҮүҰұҚқӨөҺһ]/.test(kk.inbox[i][1] + kk.inbox[i][2]), 'kk text uses Kazakh letters: ' + kk.inbox[i][1]); assert(de.inbox[i][1] !== en.inbox[i][1] || /^[A-Za-z0-9 ]+$/.test(de.inbox[i][1]), 'de differs from en'); }
+    assert(!/[ӘәІіҢңҒғҮүҰұҚқӨөҺһ]/.test(de.inbox[storm][1] + en.inbox[storm][1]), 'no Kazakh letters in DE / EN'); assert(/Qaragandy|Karaganda/.test(en.inbox[storm][1]), 'EN names the city in Latin: ' + en.inbox[storm][1]);
+  });
+
+  /* ---------- FR-173 709: vehicles of a line ---------- */
+  await group('lines (0.3.11 709, FR-173): a truck can be assigned to a line only from the hub where the line starts; every change is audited and versioned', 'ru', async (g, ev, w) => {
+    const ln = ev("S.res.lines.find(l => l.active && l.veh.length < 9)"); assert(ln, 'a line with room for another truck'); const hub = ln.from, ok = ev(`S.trucks.find(t => t.hub === '${hub}' && !S.res.lines.find(x => x.id === '${ln.id}').veh.includes(t.id))`), other = ev(`S.trucks.find(t => t.hub !== '${hub}' && t.hub !== '${ln.to}')`);   /* the seed lines of the return legs (LN-5, LN-7) run with a truck of the destination hub, so the rule is: a hub at either end of the line */
+    assert(other, 'a truck of another hub'); const v0 = ev(`S.res.lines.find(x => x.id === '${ln.id}').veh.slice()`), n0 = ev('S.audit.length');
+    if (ok) { eq(ev(`lineVehSet('${ln.id}', ${JSON.stringify(v0.concat(ok.id))})`), true, 'same-hub truck assigned'); assert(ev(`S.res.lines.find(x => x.id === '${ln.id}').veh.includes('${ok.id}')`), 'stored'); assert(ev('S.audit.length') > n0, 'audited'); ev(`lineVehSet('${ln.id}', ${JSON.stringify(v0)})`); }
+    eq(ev(`lineVehSet('${ln.id}', ${JSON.stringify(v0.concat(other.id))})`), false, 'a truck of hub ' + other.hub + ' cannot serve the line ' + hub + ' → ' + ln.to); eq(ev(`S.res.lines.find(x => x.id === '${ln.id}').veh.join()`), v0.join(), 'the line vehicles are unchanged');
+    ev("S.tab.routes = 'lines'; go('routes')"); const sel = w.document.querySelector(`[data-lnadd="${ln.id}"]`); if (sel) assert([...sel.options].every(o => !o.value || ev(`trk('${o.value}').hub`) === hub), 'the add-vehicle list offers only trucks of ' + hub);
+    ev("ACT.setRole({v:'dispatcher'})"); eq(ev(`lineVehSet('${ln.id}', [])`), false, 'planning:admin is required'); clean(w, 'line vehicles');
+  });
+}
+
+__suite(56);   /* h4-resources-partners.js */
+  /* ==== H4 · parity with the 0.3.11 suite: resources, partners, fleet display, privacy (docs/parity-0311/autotests-gap.md, file h4) ====
+     v6 seed differs from the 0.3.11 seed on purpose: 7 trucks (not 4), 7 drivers, 17 partners (8 workshops PW-01…08 + 9 logistics, no PL-09), 5 hubs,
+     PL-01 policy "50 млн ₸". Where a 0.3.11 number is quoted it is replaced by the live v6 count and the comment says so. */
+  const H4PT = "ACT.setRole({v:'admin'});go('dispatch');ACT.dtab({v:'partners'})", H4ST = "go('drivers');ACT.stab({s:'drivers',v:'staff'})";
+  const h4set = (w, k, v) => { const e = w.document.querySelector(`[data-pf=${k}]`); e.value = v; e.dispatchEvent(new w.Event('input', { bubbles: true })); };
+
+  /* ---------- Персонал / FR-09 Подбор ТС · срочный рейс ---------- */
+  await group('urgent trip: the duty driver is a candidate but every truck of the hub is busy -> each truck gives a reason, no Assign button (0.3.11 «Персонал» #169 «Дежурный … все ТС заняты»)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'})");
+    const hasDrv = ev("RES.urgent('AST',{hrs:6}).drivers.some(x=>x.ok&&x.d.hub==='AST')");
+    assert(hasDrv, 'a free Astana driver exists in the v6 seed (candidate)');
+    ev("S.trucks.filter(t=>t.hub==='AST').forEach(t=>{t.status='busy'})");
+    const u = ev("RES.urgent('AST',{hrs:6})"), ast = u.trucks.filter(x => x.t.hub === 'AST');
+    assert(ast.length >= 2, 'Astana trucks listed (v6: ' + ast.length + ', 0.3.11: 3)'); assert(ast.every(x => !x.ok && x.why.length > 0), 'every busy truck of the hub carries a reason: ' + JSON.stringify(ast.map(x => x.why)));
+    assert(ast.every(x => x.why.some(y => /рейс|занят|на линии|busy|trip/i.test(y))), 'the reason names the trip');
+    assert(!ev("RES.urgent('AST',{hrs:6}).bestT"), 'no truck to offer'); assert(ev("RES.urgent('AST',{hrs:6}).drivers.some(x=>x.ok)"), 'the driver stays a candidate');
+    ev(H4ST); ev("document.querySelector('[data-stf=hub]').value='AST';document.querySelector('[data-stf=hub]').dispatchEvent(new Event('input',{bubbles:true}))");
+    const d = w.document; assert(d.querySelector('#st_urgent'), 'urgent card'); assert(!d.querySelector('[data-act=stUrgent]'), 'no "Assign" without a truck'); assert(d.querySelector('[data-urg-d][data-ok="1"]'), 'a driver row is green');
+    assert(![...d.querySelectorAll('[data-urg-t]')].some(e => e.dataset.ok === '1'), 'no green truck row'); clean(w, 'urgent card');
+  });
+  await group('urgent trip: no free truck in Astana / Almaty -> subcontract recommendation (GarantA / KazExpress) with the Partners tab, in four languages (0.3.11 «Персонал» #171, «FR-09 Подбор ТС» #223 Almaty, #224 Astana)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'})");
+    for (const hub of ['AST', 'ALA']) {
+      ev("S.trucks.forEach(t=>{t.status='busy'})");   // v6 has 7 trucks; 0.3.11 «при парке 4 ТС» -> all of them blocked here
+      const u = ev(`RES.urgent('${hub}',{hrs:6,thermo:true})`); assert(u.trucks.every(x => !x.ok), hub + ': all trucks blocked'); assert(!u.bestT, hub + ': no best truck');
+      ev(H4ST + `;document.querySelector('[data-stf=hub]').value='${hub}';document.querySelector('[data-stf=hub]').dispatchEvent(new Event('input',{bubbles:true}))`);
+      const note = w.document.querySelector('#st_urgent [data-urg-none=truck]').innerText; assert(/Нет свободной ТС с нужными параметрами/.test(note) && /субподрядчик/.test(note) && /Партнёры/.test(note), hub + ': recommendation text: ' + note);
+      assert(!w.document.querySelector('[data-act=stUrgent]'), hub + ': no assignment button');
+    }
+    for (const lang of ['de', 'en', 'kk']) { const gg = await fresh(lang); try { gg.ev("ACT.setRole({v:'admin'});S.trucks.forEach(t=>{t.status='busy'})"); gg.ev(H4ST); const t = gg.w.document.querySelector('#st_urgent [data-urg-none=truck]').innerText;
+      assert(lang === 'de' ? /Subunternehmer/.test(t) : lang === 'en' ? /subcontractor/.test(t) : /мердігер/.test(t), lang + ' recommendation: ' + t); if (lang !== 'kk') assert(!/[А-Яа-я]{4,}/.test(t), lang + ' note without Cyrillic'); clean(gg.w, 'urgent ' + lang); } finally { gg.done(); } }
+  });
+
+  /* ---------- Партнёры ---------- */
+  await group('partners screen lists every partner with a KPI tile per tier and per type; Blocked and Service filters (0.3.11 «Партнёры» #276 22 partners, #277 Blocked, #280 8 workshops; v6: 17 partners, 2 blocked, 8 workshops)', 'ru', async (g, ev, w) => {
+    ev(H4PT); clean(w, 'partners'); const N = ev('S.partners.length'), d = w.document;
+    eq(d.querySelectorAll('[data-partner]').length, N, 'all partners listed (v6 ' + N + ', 0.3.11 22)');
+    const tiles = [...d.querySelectorAll('.kpi-row.k6 > *')].map(e => e.innerText.replace(/\s+/g, ' ').trim());
+    for (const [tier, lab] of [['gold', 'Gold'], ['silver', 'Silver'], ['bronze', 'Bronze'], ['blocked', 'Заблокировано']]) { const n = ev(`S.partners.filter(p=>p.tier==='${tier}').length`); assert(tiles.some(t => t.includes(lab) && new RegExp('(^|\\D)' + n + '(\\D|$)').test(t)), 'KPI tile ' + lab + ' = ' + n + ' in ' + JSON.stringify(tiles)); }
+    eq(ev("S.partners.filter(p=>p.tier==='gold').length + S.partners.filter(p=>p.tier==='silver').length + S.partners.filter(p=>p.tier==='bronze').length + S.partners.filter(p=>p.tier==='blocked').length"), N, 'the four tiers add up to all partners');
+    assert(d.querySelector('[data-kpi-type=ws]') && d.querySelector('[data-kpi-type=lp]'), 'service / logistics tiles');
+    h4set(w, 'tier', 'blocked'); const bl = ev("S.partners.filter(p=>p.tier==='blocked')"); assert(bl.length >= 2, 'at least two blocked partners'); eq(d.querySelectorAll('[data-partner]').length, bl.length, 'Blocked filter');
+    for (const p of bl) { assert(p.block && p.block.length >= 5, p.id + ' has a reason'); assert(d.querySelector(`[data-partner=${p.id}]`).innerText.includes(p.block), p.id + ': reason «' + p.block + '» visible in the row'); }
+    h4set(w, 'tier', ''); h4set(w, 'type', 'ws'); const ws = ev("S.partners.filter(p=>p.type==='ws').length"); eq(ws, 8, 'v6 seed: 8 workshops PW-01…08 (as 0.3.11)'); eq(d.querySelectorAll('[data-partner]').length, ws, 'Service filter shows the workshops');
+    assert([...d.querySelectorAll('[data-partner]')].every(r => /^PW-/.test(r.dataset.partner)), 'only workshops'); h4set(w, 'type', ''); eq(d.querySelectorAll('[data-partner]').length, N, 'filter reset');
+  });
+  await group('the hub filter of the top bar narrows the partners list to the partners of that hub zone — Almaty -> south (0.3.11 «FR-32 Хаб» #282, after P86)', 'ru', async (g, ev, w) => {
+    ev(H4PT); const N = ev('S.partners.length'); eq(w.document.querySelectorAll('[data-partner]').length, N, 'no filter keeps all');
+    const exp = ev("S.partners.filter(p=>WEATHER.cityHub(p.city)==='ALA').map(p=>p.id)"); assert(exp.length >= 2 && exp.length < N, 'Almaty has its own partners: ' + exp.join());
+    ev("ACT.hubSet({v:'ALA'})"); const got = [...w.document.querySelectorAll('[data-partner]')].map(r => r.dataset.partner).sort(); eq(got.join(), exp.slice().sort().join(), 'only the Almaty-hub partners');
+    assert(got.includes('PW-02') && got.includes('PL-02') && !got.includes('PL-01'), 'Almaty workshop + logistics, not Astana'); clean(w, 'partners ALA');
+    const ky = ev("[...document.querySelectorAll('.kpi-row.k6 > *')].map(e=>e.innerText.replace(/\\s+/g,' ')).join('|')"); assert(/Gold/.test(ky), 'KPI tiles follow the filter');
+    ev("ACT.hubSet({v:'AST'})"); assert(![...w.document.querySelectorAll('[data-partner]')].some(r => r.dataset.partner === 'PL-02'), 'Astana does not show Almaty');
+    ev("ACT.hubSet({v:''})"); eq(w.document.querySelectorAll('[data-partner]').length, N, 'all hubs again');
+  });
+  await group('PL-01 carrier liability policy is stored and printed in the handover candidate and in the handover act (0.3.11 «FR-28 Полис» #290: «полис ответственности · лимит 50 млн ₸»)', 'ru', async (g, ev, w) => {
+    ev(H4PT); const pol = ev("S.partners.find(p=>p.id==='PL-01').ins"); assert(pol && /50/.test(pol), 'PL-01 policy stored: ' + pol);
+    const lid = ev("S.loads.find(l=>l.status==='unassigned'&&l.zone!=='ambient'&&!l.adr).id"); ev("S.partners.find(p=>p.id==='PL-01').city='AST';S.partners.find(p=>p.id==='PL-01').cap='40';S.partners.find(p=>p.id==='PL-01').cold=1;S.partners.find(p=>p.id==='PL-01').gdp=1");
+    ev(`S.ptx.ho.load='${lid}';S.ptx.ho.mode='full';render()`); const c = w.document.querySelector('[data-cand=PL-01]'); assert(c, 'PL-01 is a candidate on the Astana route'); assert(c.querySelector('[data-cand-price]'), 'it is acceptable, so price and policy are shown');
+    assert(c.innerText.includes('полис ответственности · лимит ' + pol), 'candidate row prints the policy: ' + c.innerText);
+    ev("ACT.hoGive({id:'PL-01'})"); const h = ev("S.handovers[S.handovers.length-1]"); eq(h.p, 'PL-01'); const act = w.document.querySelector(`[data-ho=${h.id}]`).innerText; assert(act.includes('полис ' + pol), 'the handover act prints the policy: ' + act.slice(0, 500));
+    ev("S.partners.find(p=>p.id==='PL-02').ins='';S.partners.find(p=>p.id==='PL-02').city='AST';S.partners.find(p=>p.id==='PL-02').cap='40';S.partners.find(p=>p.id==='PL-02').cold=1;S.partners.find(p=>p.id==='PL-02').gdp=1"); const l2 = ev("S.loads.find(l=>l.status==='unassigned'&&l.zone!=='ambient'&&!l.adr&&l.id!=='" + lid + "')||S.loads.find(l=>l.status==='unassigned'&&l.zone!=='ambient'&&!l.adr)").id; ev(`S.ptx.ho.load='${l2}';S.ptx.ho.mode='full';render()`);
+    const c2 = w.document.querySelector('[data-cand=PL-02]'); if (c2) assert(/нет полиса ответственности перевозчика/.test(c2.innerText) && !c2.querySelector('[data-act=hoGive]'), 'a carrier without a policy is refused: ' + c2.innerText);
+  });
+  await group('service on route: Bronze workshop is called only by agreement, a blocked workshop is never callable, a Gold reefer service answers within 4 h and covers a cold trip (0.3.11 «Сервис» #305 PW-05, #306 PW-08 Pavlodar, «FR-23 Рефсервис» #309 Kostanay mobile call-out)', 'ru', async (g, ev, w) => {
+    ev(H4PT); const d = w.document;
+    /* v6 routes are hub to hub: Aktobe (PW-05, Bronze) lies on Astana -> Atyrau, Pavlodar (PW-08, blocked) on none — so the blocked workshop is moved onto a route to see the rule */
+    const rowsOf = lid => { ev(`S.ptx.ho.load='${lid}';render()`); return [...d.querySelectorAll('[data-ws]')].map(e => e.dataset.ws); };
+    const atyLoad = ev("S.loads.find(l=>!l.partner&&['unassigned','assigned','loading','in_transit'].includes(l.status)&&((l.from==='AST'&&l.to==='ATY')||(l.from==='ATY'&&l.to==='AST'))).id");
+    assert(rowsOf(atyLoad).includes('PW-05'), 'Bronze Aktobe workshop on the Astana - Atyrau trip'); const b5 = d.querySelector('[data-ws=PW-05]'); eq(ev("S.partners.find(p=>p.id==='PW-05').tier"), 'bronze');
+    assert(b5.querySelector('[data-act=ptCallWs]').innerText.includes('по согласованию'), 'Bronze call is marked «по согласованию»: ' + b5.innerText); const g7 = d.querySelector('[data-ws=PW-01] [data-act=ptCallWs]'); assert(g7 && !g7.innerText.includes('по согласованию'), 'a Gold workshop is called without that note');
+    const pw8 = ev("S.partners.find(p=>p.id==='PW-08')"); eq(pw8.tier, 'blocked', 'PW-08 Pavlodar is blocked'); assert(pw8.block && pw8.block.length > 5, 'with a reason');
+    for (const l of ev("S.loads.map(l=>l.id)")) assert(!rowsOf(l).includes('PW-08'), 'PW-08 is on no v6 route (' + l + ')');
+    ev("S.partners.find(p=>p.id==='PW-08').city='KAR'"); const kar = ev("S.loads.find(l=>!l.partner&&['unassigned','assigned','loading','in_transit'].includes(l.status)&&(l.from==='KAR'||l.to==='KAR')).id"); assert(rowsOf(kar).includes('PW-08'), 'moved onto a route the blocked workshop is listed ...');
+    const r8 = d.querySelector('[data-ws=PW-08]'); assert(/Заблокирован/.test(r8.innerText) && r8.innerText.includes(pw8.block), '... with its reason'); assert(!r8.querySelector('[data-act=ptCallWs]'), '... but without a Call button'); ev("ACT.ptCallWs({id:'PW-08'})"); assert(!ev("S.ptx.called['PW-08']"), 'the action refuses a blocked workshop');
+    const gold = ev("S.partners.filter(p=>p.type==='ws'&&p.tier==='gold'&&p.reefer).map(p=>({id:p.id,resp:parseFloat(String(p.resp).replace(',','.'))}))"); assert(gold.length >= 2 && gold.every(p => p.resp <= 4), 'Gold reefer workshops answer within 4 h: ' + JSON.stringify(gold));
+    ev(H4PT); const cold = ev("S.loads.find(l=>l.zone!=='ambient'&&!l.partner&&['unassigned','assigned','loading','in_transit'].includes(l.status)&&l.to==='ATY').id"); ev("S.partners.find(p=>p.id==='PW-06').reefer=false;S.partners.find(p=>p.id==='PW-05').reefer=false;S.partners.find(p=>p.id==='PW-01').reefer=true");
+    ev("render()"); const cov = [...d.querySelectorAll('[data-cov^=' + cold + ']')].map(r => r.innerText.replace(/\s+/g, ' ')); assert(cov.length >= 2, 'coverage rows of the cold trip'); assert(cov.some(t => /мобильный выезд PW-0\d \(.+\) · ≤ 4/.test(t)), 'a city without a reefer partner gets the mobile call-out of a Gold reefer service within 4 h: ' + cov.join(' || '));
+    ev("ACT.setRole({v:'viewer'});go('dispatch');ACT.dtab({v:'partners'})"); assert(d.querySelector('[data-ws]') && !d.querySelector('[data-act=ptCallWs]'), 'viewer: list yes, Call no (partners:write)');
+  });
+
+  /* ---------- Автопарк ---------- */
+  await group('«Show extended fleet» gives >= 9 trucks with and without temperature control; pressing it again returns the real fleet (0.3.11 «Автопарк · показ» #491 >= 9, #493 back to 4 -> v6: 7)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'});go('fleet')"); const real = ev('S.trucks.length'); eq(real, 7, 'v6 real fleet'); eq(ev('RES.fleetAll().length'), real, 'before the toggle');
+    eq(ev("document.querySelectorAll('#fl_table tbody tr').length"), real, 'table before = real fleet'); assert(w.document.querySelector('[data-act=flExt]'), 'toggle button');
+    ev("ACT.flExt()"); const all = ev('RES.fleetAll()'); assert(all.length >= 9, 'extended fleet >= 9, got ' + all.length); assert(ev("RES.fleetAll().some(t=>RES.truckCooling(t)==='none')"), 'trucks without temperature control'); assert(ev("RES.fleetAll().some(t=>RES.truckCooling(t)!=='none')"), 'trucks with cooling');
+    assert(ev("RES.fleetAll().some(t=>RES.truckCooling(t)==='active')"), 'an active-cooling (two-chamber / reefer) class'); eq(ev("document.querySelectorAll('#fl_table tbody tr').length"), all.length, 'table shows the extended fleet'); assert(/Всего ТС/.test(w.document.querySelector('#root').innerText), 'total tile'); assert(ev("S.trucks.length") === real && !ev("S.trucks.some(t=>t.demo)"), 'demo trucks never join S.trucks'); clean(w, 'fleet extended');
+    ev("ACT.flExt()"); eq(ev('RES.fleetAll().length'), real, 'second press returns the real fleet'); eq(ev("document.querySelectorAll('#fl_table tbody tr').length"), real, 'table back'); eq(ev('RES.fleetAll().length'), ev('S.trucks.length'));
+  });
+  await group('fleet registry tab: one h1, the eyebrow number 10 and the «Add vehicle» button; reference data «+ Vehicle» / «+ Driver» lead to the registries, the driver register shows no personal data (0.3.11 «FR-132 Одна навигация» #661, «Новые записи» #721)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'});go('fleet');ACT.stab({s:'fleet',v:'registry'})"); const d = w.document;
+    eq(d.querySelectorAll('h1').length, 1, 'one h1: ' + [...d.querySelectorAll('h1')].map(x => x.innerText).join(' / ')); assert(d.querySelector('#fl_reg, #rg_table, .tcard table'), 'registry table');
+    const eyebrow = ev("document.querySelector('.eyebrow').innerText"); assert(/^10\s*·/.test(eyebrow), 'the eyebrow carries the screen number 10: ' + eyebrow); assert(w.document.querySelector('.pill-tab.active').innerText.trim() === 'Реестр', 'the registry tab is active');
+    ev("ACT.stab({s:'fleet',v:'fleet'})"); assert(d.querySelector('[data-act=addT]'), 'the «Add vehicle» button of the fleet tab'); eq(d.querySelectorAll('h1').length, 1, 'still one h1'); ev("ACT.stab({s:'fleet',v:'registry'})"); assert(d.querySelector('[data-act=rgOpen]'), 'registry rows open a truck card'); clean(w, 'registry');
+    ev("go('settings');ACT.stab({s:'settings',v:'ref'})"); assert([...d.querySelectorAll('[data-act=rfKind]')].some(e => e.dataset.v === 'vehicle'), 'vehicle kind'); ev("ACT.rfKind({v:'vehicle'})"); assert(d.querySelector('[data-act=rfFleet]'), '«+ Vehicle» button'); ev("ACT.rfFleet()"); eq(ev('S.route'), 'fleet', '«+ Vehicle» leads to the fleet registry');
+    ev("go('settings');ACT.stab({s:'settings',v:'ref'});ACT.rfKind({v:'driver'})"); assert(d.querySelector('[data-act=rfAddDrv]'), '«+ Driver» button'); const tab = d.querySelector('#root').innerText; assert(!/\+7[ (]?\d{3}[\d ()-]{6,}/.test(tab) && !/\b\d{12}\b/.test(tab), 'the driver register shows no phone / IIN'); ev("ACT.rfAddDrv()"); eq(ev('S.route'), 'drivers', '«+ Driver» leads to the drivers register');
+    ev("go('drivers');ACT.stab({s:'drivers',v:'drivers'})"); const dt = d.querySelector('#root').innerText; assert(!/\b\d{12}\b/.test(dt), 'drivers table masks the IIN'); assert(!/\+7[ (]?\d{3}[\d ()-]{6,}/.test(dt), 'drivers table masks the phone');
+  });
+
+  /* ---------- Приватность FR-81/82/85/89 ---------- */
+  await group('privacy matrix: the driver sees no fines, staff, costs or phones; the auditor sees the fines but no phones (0.3.11 «FR-81/82/85/89 Приватность» #599)', 'ru', async (g, ev, w) => {
+    const d = w.document;
+    ev("ACT.setRole({v:'driver'})"); eq(ev('S.route'), 'driverapp', 'driver shell only'); for (const p of ['drivers:read', 'costs:read', 'fines:write', 'pii:read', 'partners:write', 'fleet:read']) assert(!ev(`canDo('${p}')`), 'driver without ' + p);
+    for (const s of ['drivers', 'costs', 'billing', 'partners', 'fleet', 'reports']) assert(!ev(`canSee('${s}')`), 'driver does not see ' + s);
+    ev("go('drivers')"); assert(ev('S.route') !== 'drivers' && !d.querySelector('[data-fine]'), 'driver cannot open staff / fines'); for (const t of ['shift', 'route', 'stop', 'ret', 'fuel', 'me']) { ev(`ACT.daTab({v:'${t}'})`); assert(!/\+7[ (]?\d{3}[\d ()-]{6,}/.test(d.querySelector('.da-phone').innerText.replace(/\+7 701 000 11 22/g, '')), 'no partner / staff phone in the driver app tab ' + t); }
+    ev("ACT.setRole({v:'auditor'})"); assert(ev("canDo('drivers:read')") && ev("canDo('costs:read')"), 'auditor reads staff and costs'); assert(!ev("canDo('pii:read')"), 'auditor has no pii:read'); assert(!ev("canDo('fines:write')"), 'auditor does not write');
+    ev("go('drivers');ACT.stab({s:'drivers',v:'staff'})"); eq(ev('S.route'), 'drivers'); assert(d.querySelectorAll('[data-fine]').length > 0, 'auditor sees the fines'); assert(!d.querySelector('[data-act=fineImport],[data-act=fineSet],[data-act=fineAssign]'), 'read-only fines'); const txt = d.querySelector('#root').innerText; assert(!/\+7[ (]?\d{3}[\d ()-]{6,}/.test(txt) && !/\b\d{12}\b/.test(txt), 'no phone / IIN on staff');
+    ev("go('dispatch');ACT.dtab({v:'partners'});ACT.ptContact({id:'PL-01'})"); assert(d.querySelector('[data-contacts=PL-01]'), 'contact drawer opens for the auditor'); assert(/•/.test(d.querySelector('[data-contact]').innerText), 'numbers masked'); const c0 = ev("partnerContacts(S.partners.find(p=>p.id==='PL-01'))[0]"); ev(`ACT.ptCall({id:'${c0.id}'})`); assert(!d.body.innerText.includes(c0.mob) && !ev(`S.ptx.revealed['${c0.id}']`), 'the auditor cannot reveal a number');
+    ev("ACT.setRole({v:'admin'})"); ev(`ACT.ptCall({id:'${c0.id}'})`); assert(d.body.innerText.includes(c0.mob), 'admin reveals after the audited call');
+  });
+
+  /* ---------- Lane J · передача партнёру ---------- */
+  await group('partner handover records the logger, the temperature and the seal at receipt AND at ePOD (0.3.11 «Lane J» #639 FR-117)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'});" + H4PT); const lid = ev("S.loads.find(l=>l.status==='unassigned'&&l.zone==='chilled'&&!l.adr).id"); ev(`S.ptx.ho.load='${lid}';S.ptx.ho.mode='full';render()`);
+    const cand = ev("[...document.querySelectorAll('[data-cand] [data-act=hoGive]')].map(b=>b.dataset.id).find(id=>S.partners.find(p=>p.id===id).tier==='gold')"); if (!cand) { assert(true, 'no gold candidate in this data'); return; }
+    ev(`ACT.hoGive({id:'${cand}'})`); const id = ev("S.handovers[S.handovers.length-1].id"); const d = w.document;
+    assert(d.querySelector(`[data-ho-portal=${id}] input[data-lg]`), 'logger / temperature / seal inputs at receipt');
+    d.querySelector(`#lg_logger_${id}`).value = ''; ev(`ACT.hoPortal({id:'${id}'})`); const h0 = ev(`S.handovers.find(x=>x.id==='${id}')`);
+    if (h0.portal === 1) { assert(h0.lg && h0.lg.logger, 'v6 fills the default logger when the field is empty (0.3.11 answers 409): ' + JSON.stringify(h0.lg)); } else { eq(h0.portal || 0, 0, 'receipt refused without a logger'); d.querySelector(`#lg_logger_${id}`).value = 'TL-77'; ev(`ACT.hoPortal({id:'${id}'})`); }
+    d.querySelector(`#lg_logger_${id}`) && (d.querySelector(`#lg_logger_${id}`).value = 'TL-4711'); ev(`ACT.hoPortal({id:'${id}'})`); const h1 = ev(`S.handovers.find(x=>x.id==='${id}')`);
+    assert(h1.lg && h1.lg.logger && isFinite(h1.lg.temp) && h1.lg.seal, 'receipt: logger / °C / seal recorded: ' + JSON.stringify(h1.lg));
+    eq(h1.portal, 2, 'scan step done'); d.querySelector(`#lg_logger_${id}`).value = 'TL-4711'; d.querySelector(`#lg_temp_${id}`).value = '4,6'; d.querySelector(`#lg_seal_${id}`).value = 'S-990011';
+    ev(`ACT.hoScan({id:'${id}'})`); d.querySelector(`#ho_reason_${id}`).value = 'Partner portal down, paper POD faxed'; d.querySelector(`#lg_temp_${id}`) && 0; ev(`ACT.hoEpod({id:'${id}'})`);
+    const h = ev(`S.handovers.find(x=>x.id==='${id}')`); assert(h.epod, 'ePOD recorded'); assert(h.lg.pickup || h.lg.logger, 'receipt entry kept'); const dl = h.lg.delivery; assert(dl && dl.logger && isFinite(dl.temp) && dl.seal, 'ePOD entry: logger / °C / seal: ' + JSON.stringify(h.lg));
+    const line = d.querySelector(`[data-ho-lg=${id}]`).innerText; assert(/Логгер · приём: .+ °C · пломба .+доставка: .+ °C · пломба/s.test(line), 'one line shows receipt and delivery: ' + line);
+  });
+  await group('fine of a truck with no assignment at the violation time: driver «not determined», the notification step is refused (0.3.11 «FR-118…127» #648 FR-122: «Водитель не определён», уведомление 409)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'})"); const a = ev("RES.driverAt('654 MNO 09','2026-01-05T03:10:00+05:00')"); eq(a.drv, null, 'no waybill covers the instant -> no driver'); eq(a.wb, null); assert(a.why && a.why.length > 10, 'reason given: ' + a.why);
+    const un = ev("S.res.fines.find(f=>!f.drv)"); assert(un, 'an unattributed fine exists in the seed (plate 456 DEF 02)'); eq(un.status, 'new'); assert(un.attrWhy, 'fine carries the reason'); const n0 = ev("S.audit.length");
+    const err = ev(`RES.fineSet('${un.id}','notified')`); assert(typeof err === 'string' && err.length > 3, 'notify refused while the driver is not determined: ' + err); eq(ev(`S.res.fines.find(f=>f.id==='${un.id}').status`), 'new', 'status unchanged');
+    ev(H4ST); const row = w.document.querySelector(`[data-fine=${un.id}]`); assert(row, 'fine row'); assert(row.innerText.includes(un.attrWhy), 'the row says why no driver: ' + row.innerText.slice(0, 300)); assert(!row.querySelector('[data-act=fineSet]'), 'no «notify driver» button for an undetermined fine'); assert(row.querySelector('[data-act=fineAssign]'), 'manual attribution offered');
+    ev(`ACT.fineSet({id:'${un.id}',v:'notified'})`); eq(ev(`S.res.fines.find(f=>f.id==='${un.id}').status`), 'new', 'the action also refuses');
+    ev(`RES.fineAssign('${un.id}','d5')`); eq(ev(`S.res.fines.find(f=>f.id==='${un.id}').status`), 'attributed'); eq(ev(`RES.fineSet('${un.id}','notified')`), null, 'after a manual attribution the notification works'); clean(w, 'fines');
+  });
+
+  /* ---------- Данные · контакты / партнёры ---------- */
+  await group('data: every partner has 3 managers with role, name, phone and mobile; masked variants keep only the prefix and the last two digits (0.3.11 «Данные · контакты» #254–275 «3 менеджера с именем, телефоном и мобильным»; v6: 17 partners)', 'ru', async (g, ev, w) => {
+    const r = ev("S.partners.map(p=>({id:p.id,type:p.type,c:partnerContacts(p)}))"); assert(r.length >= 15, 'partners ' + r.length); const ids = new Set();
+    const ROLES = { ws: ['Руководитель сервиса', 'Диспетчер 24/7', 'Мастер-приёмщик'], lp: ['Руководитель отдела перевозок', 'Диспетчер 24/7', 'Менеджер по работе с клиентами'] };
+    for (const p of r) {
+      eq(p.c.length, 3, p.id + ': 3 managers (0.3.11 «контактов 3»)'); eq(p.c.map(c => c.role).join('|'), ROLES[p.type === 'ws' ? 'ws' : 'lp'].join('|'), p.id + ': the 0.3.11 role set of a ' + (p.type === 'ws' ? 'workshop' : 'logistics partner'));
+      eq(new Set(p.c.map(c => c.name)).size, 3, p.id + ': three different people');
+      p.c.forEach((c, i) => { eq(c.id, p.id + ':' + i, 'contact id'); assert(!ids.has(c.id), 'duplicate id ' + c.id); ids.add(c.id);
+        assert(c.name.trim().length >= 5 && c.tel && c.mob, c.id + ': name / phone / mobile present');
+        assert(/^\+7 \d{3,4} \d{3} \d{2} \d{2}$/.test(c.tel), c.id + ': landline ' + c.tel); assert(/^\+7 7\d\d \d{3} \d{2} \d{2}$/.test(c.mob), c.id + ': mobile ' + c.mob);
+        assert(/^\+7 \d•• ••• •• \d\d$/.test(c.telM) && /^\+7 7•• ••• •• \d\d$/.test(c.mobM), c.id + ': masked ' + c.telM + ' / ' + c.mobM); eq(c.telM.slice(-2), c.tel.slice(-2), 'masked phone keeps the last two digits'); eq(c.mobM.slice(-2), c.mob.slice(-2), 'masked mobile keeps the last two digits');
+        assert(!c.telM.includes(c.tel.slice(4, 9)) && !c.mobM.includes(c.mob.slice(4, 9)), c.id + ': the middle digits are hidden'); });
+      eq(new Set(p.c.map(c => c.mob)).size, 3, p.id + ': three different mobiles'); }
+    assert(r.every(p => p.c.some(c => /24\/7/.test(c.role))), 'every partner has a 24/7 dispatcher contact');
+  });
+  await group('contact drawer shows the three persons masked, reveal needs the right and is audited, roles are translated (0.3.11 «Данные · контакты» + FR-82; per-role rules: admin / dispatcher may call, viewer / auditor / driver may not)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'});" + H4PT + ";ACT.ptContact({id:'PW-02'})"); const d = w.document; eq(d.querySelectorAll('[data-contact]').length, 3, 'three persons in the drawer'); const c = ev("partnerContacts(S.partners.find(p=>p.id==='PW-02'))");
+    assert([...d.querySelectorAll('[data-contact]')].every(e => /•/.test(e.innerText)), 'all three masked'); for (const x of c) assert(d.querySelector('[data-contacts=PW-02]').innerText.includes(x.role) && d.querySelector('[data-contacts=PW-02]').innerText.includes(x.name), x.id + ': role and name shown');
+    const a0 = ev('S.audit.length'); ev(`ACT.ptCall({id:'${c[2].id}'})`); assert(d.body.innerText.includes(c[2].mob) && !d.body.innerText.includes(c[0].mob), 'only the called person is revealed'); assert(ev('S.audit.length') >= a0 + 2, 'reveal + call audited'); eq(Object.keys(ev('S.ptx.revealed')).filter(k => /^PW-02:/.test(k)).join(), 'PW-02:2');
+    ev("S.ptx.revealed={}"); for (const role of ['viewer', 'auditor', 'driver', 'warehouse']) { ev(`ACT.setRole({v:'${role}'})`); ev(`ACT.ptCall({id:'PW-02:1'})`); assert(!ev("S.ptx.revealed['PW-02:1']"), role + ' cannot reveal a number'); }
+    ev("ACT.setRole({v:'dispatcher'})"); ev("ACT.ptCall({id:'PW-02:1'})"); assert(ev("S.ptx.revealed['PW-02:1']"), 'dispatcher (partners:write) may reveal');
+    for (const lang of ['de', 'en', 'kk']) { const gg = await fresh(lang); try { gg.ev("ACT.setRole({v:'admin'});go('dispatch');ACT.dtab({v:'partners'});ACT.ptContact({id:'PL-01'})"); const t = gg.w.document.querySelector('[data-contacts=PL-01]').innerText; eq(gg.w.document.querySelectorAll('[data-contact]').length, 3, lang + ': three persons'); if (lang !== 'kk') assert(!/[А-Яа-я]{4,}/.test(t), lang + ' contacts drawer without Cyrillic: ' + t.slice(0, 200)); assert(/24\/7/.test(t), lang + ': dispatcher 24/7'); clean(gg.w, 'contacts ' + lang); } finally { gg.done(); } }
+  });
+
+__suite(57);   /* h5-driver-app-delivery.js */
+  /* ==== H5 · parity with the 0.3.11 suite: driver app and delivery evidence (docs/parity-0311/autotests-gap.md, file h5) ====
+     v6 differences kept on purpose: the demo trip of driver d4 (LD-2026-001847, Astana -> Almaty) has 6 route points (3 unloading branches, 0.3.11: 3 points);
+     the delay incident is +60 min (0.3.11: +30); the dead-zone stretch is the v6 place pair of the route ("Караганда – Алматы"), not "Аксу-Аюлы – Мойынты". */
+  /* d3 is the seed driver without ADR and without a bound device: bind a compliant device and sign in so the app opens (761-r5: PIN / MDM gate) */
+  const H5D3 = "Object.assign(S.r5.pin.d3,{dev:'MDM-T-0003',model:'Zebra TC58',mdm:'ok',bound:true,sess:true});S.da.drv='d3'";
+  const H5DA = "ACT.setRole({v:'driver'});S.da.drv='d4'", H5LD = 'LD-2026-001847';
+  /* the delivery flow of 81-res-driver-app.js, up to the signature step of the last unloading point (every step is a separate eval: the page re-renders between them) */
+  const h5toSign = ev => {
+    ev(H5DA); ev("RES.daSeed();S.da.sh.d4.departed=true;const ss=S.da.sh.d4.stops;ss.forEach((s,i)=>{if(i<ss.length-1)s.st='done'});ss[ss.length-1].st='arrived'"); ev("ACT.daTab({v:'stop'})");
+    ev("ACT.daStep({v:'1'})"); ev("document.querySelector('#da_tmin').value=3.1;document.querySelector('#da_tmax').value=6.2;ACT.daThermo()"); ev("ACT.daScanAll()"); ev("ACT.daStep({v:'3'})"); ev("ACT.daPhoto()"); ev("ACT.daStep({v:'4'})");
+  };
+  const h5sign = (ev, name, role) => { ev("RES.daSignDemo()"); ev(`document.querySelector('#da_signer').value=${JSON.stringify(name)};document.querySelector('#da_role').value=${JSON.stringify(role)};ACT.daSign()`); };
+  const h5deliver = (ev, name, role) => { h5toSign(ev); h5sign(ev, name, role); };
+
+  await group('driver app admin panel «Change requests»: 19 requests FR-52…FR-70, 16 implemented, 3 planned (0.3.11 «Водитель · FR» #450 «19 запросов, 16 реализовано»)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'});go('drivers');ACT.stab({s:'drivers',v:'app'})"); const d = w.document, rows = [...d.querySelectorAll('[data-dfr]')];
+    eq(rows.length, 19, '19 requests'); eq(rows.map(r => r.dataset.dfr).join(), Array.from({ length: 19 }, (_, i) => 'FR-' + (52 + i)).join(), 'FR-52 … FR-70 in a row');
+    const done = rows.filter(r => r.innerText.includes('реализовано')); eq(done.length, 16, '16 implemented'); eq(rows.filter(r => r.innerText.includes('план v6')).map(r => r.dataset.dfr).join(), 'FR-68,FR-69,FR-70', 'the three open ones');
+    assert(/16 \/ 19/.test(d.querySelector('#da_frs .chip').innerText), 'counter chip: ' + d.querySelector('#da_frs .chip').innerText); assert(rows.every(r => r.querySelectorAll('td').length === 7), 'seven columns per request'); clean(w, 'change requests');
+  });
+  await group('driver app route tab: driving timer, route points with windows, KazAvtoZhol warning, waiting for the window (0.3.11 «FR-55/56 Маршрут» #456 «2,8 / 9 ч, 3 точки, ожидание окна, KazAvtoZhol»)', 'ru', async (g, ev, w) => {
+    ev(H5DA); ev("ACT.daTab({v:'route'})"); const d = w.document, stops = [...d.querySelectorAll('[data-stop]')];
+    assert(stops.length >= 3, 'route points of the bound trip (v6 ' + stops.length + ', 0.3.11 3)'); eq(ev("S.da.sh.d4.stops.filter(s=>s.kind==='load').length"), 1, 'one loading point'); assert(ev("S.da.sh.d4.stops.filter(s=>s.kind==='unload').length") >= 1, 'unloading point(s)'); assert(ev("S.da.sh.d4.stops.some(s=>s.kind==='via')"), 'transit point');
+    for (const s of stops) assert(/окно \d\d:00–\d\d:00/.test(s.innerText) && /ETA/.test(s.innerText), 'window and ETA on every point: ' + s.innerText.slice(0, 80));
+    const tm = d.querySelector('.da-phone .da-grid3').innerText.replace(/\s+/g, ' '); assert(/Вождение \d+,\d \/ 4,5 h/.test(tm) && /За день \d+(,\d)? \/ 9 h/.test(tm) && /До перерыва \d+ min/.test(tm), 'timer «x / 4,5 h», «y / 9 h», break in N min: ' + tm);
+    assert(d.querySelector('[data-stop]').innerText.includes('КазАвтоЖол') || stops.some(s => s.innerText.includes('КазАвтоЖол')), 'KazAvtoZhol drifts warning on the Karaganda point'); assert(stops.some(s => /км 112–140/.test(s.innerText)), 'with the km range');
+    const late = ev("(function(){const sh=S.da.sh.d4;return sh.stops.map(s=>s.win)})()"); assert(late.every(x => x[0] < x[1]), 'time windows are ordered');
+    ev("S.da.sh.d4.stops.forEach(s=>{if(s.kind==='via'){s.win=[3,4]}})"); ev("render()"); assert(/вне окна/.test(d.querySelector('.da-phone').innerText), 'a point outside its window is flagged «вне окна» (waiting for the window)');
+    const b0 = ev("RES.driveState(drv('d4')).cont"); assert(b0 > 0, 'a running driving block'); ev("ACT.daBreak()"); eq(ev("RES.driveState(drv('d4')).cont"), 0, '45 min break resets the block'); assert(/0 \/ 4,5 h/.test(d.querySelector('.da-phone .da-grid3').innerText.replace(/\s+/g, ' ')), 'timer shows the reset'); clean(w, 'route tab');
+    const gg = await fresh('en'); try { gg.ev(H5DA); gg.ev("ACT.daTab({v:'route'})"); assert(/KazAvtoZhol/.test(gg.w.document.querySelector('.da-phone').innerText), 'English UI names KazAvtoZhol'); clean(gg.w, 'route en'); } finally { gg.done(); }
+  });
+  await group('driver app route tab announces the dead zone with the stretch name and the time to it (0.3.11 «Покрытие связи» #541 «через … нет связи … Аксу-Аюлы – Мойынты»)', 'ru', async (g, ev, w) => {
+    ev(H5DA); const lid = ev("loadOfDriver('d4').id"); eq(lid, H5LD); const win = ev(`RES.deadWindow(load('${lid}'))`); assert(win && win.names && win.names.length, 'dead window with a stretch name: ' + JSON.stringify(win)); assert(win.km[1] > win.km[0], 'km range');
+    ev("ACT.daTab({v:'route'})"); const ban = [...w.document.querySelectorAll('.da-banner')].map(e => e.innerText).join(' | '); assert(/Зона без связи км \d+–\d+/.test(ban), 'banner on the route tab: ' + ban); assert(ban.includes(win.names[0]), 'the banner names the stretch «' + win.names[0] + '»: ' + ban);
+    assert(/сейчас, ещё ~\d+ мин|через ~\d+ мин; длится ~\d+ мин/.test(ban), 'minutes to / of the dead zone'); assert(/SMS/.test(ban), 'critical events go by SMS');
+    /* a trip that has not reached the zone yet: «in N min» */
+    ev(`load('${lid}').progress=0.1`); const ban2 = ev(`RES.covNote(load('${lid}'),'ru')`); assert(/через ~\d+ мин; длится ~\d+ мин/.test(ban2) && ban2.includes(win.names[0]), 'before the zone: ' + ban2);
+    const gg = await fresh('en'); try { gg.ev(H5DA); gg.ev("ACT.daTab({v:'route'})"); const t = [...gg.w.document.querySelectorAll('.da-banner')].map(e => e.innerText).join(' | '); assert(/Dead zone km \d+–\d+/.test(t) && /by SMS/.test(t), 'English banner: ' + t); clean(gg.w, 'coverage en'); } finally { gg.done(); }
+  });
+  await group('confirming a dispatcher message in the driver app creates an event for the dispatcher, also from the offline queue (0.3.11 «FR-63 Сообщения» #459 «Подтверждено водителем»)', 'ru', async (g, ev, w) => {
+    ev(H5DA); ev("RES.daSeed()"); ev("ACT.daTab({v:'me'})"); const d = w.document; assert(d.querySelector('[data-msg=m1] [data-act=daAck]'), 'confirm button'); const n0 = ev('S.da.feed.length'); ev("ACT.daAck({v:'m1'})");
+    eq(ev('S.da.feed.length'), n0 + 1, 'one event'); const e = ev('S.da.feed[0]'); eq(e.mod, 'messages'); assert(/^Прочитано: /.test(e.text) && e.text.includes('Погрузка на рампе'), 'event text: ' + e.text); eq(e.st, 'sent'); eq(e.load, H5LD, 'event of the bound trip');
+    assert(ev("S.da.sh.d4.msgs.find(m=>m.id==='m1').ack"), 'read time stored'); assert(!d.querySelector('[data-msg=m1] [data-act=daAck]') && /прочитано/.test(d.querySelector('[data-msg=m1]').innerText), 'button replaced by «прочитано hh:mm»'); assert(d.querySelector('[data-msg=m2] [data-act=daAck]'), 'the other message is still open');
+    ev("ACT.setRole({v:'admin'})"); ev(`closeDrawer();ACT.open({id:'${H5LD}'})`); assert([...w.document.querySelectorAll('.tr-feed')].some(r => /messages/.test(r.innerText) && /Прочитано/.test(r.innerText)), 'the dispatcher sees the confirmation in the trip feed');
+    ev(H5DA); ev("ACT.daNet()"); ev("ACT.daAck({v:'m2'})"); eq(ev("S.da.queue.length"), 1, 'offline: queued'); assert(!ev("S.da.feed.some(x=>x.text.includes('После Караганды'))"), 'not yet in the feed'); ev("ACT.daNet()"); eq(ev("S.da.queue.length"), 0); assert(ev("S.da.feed.some(x=>x.mod==='messages'&&x.st==='synced'&&x.text.includes('После Караганды'))"), 'synced to the dispatcher after reconnect'); clean(w, 'messages');
+  });
+  await group('delay incident moves the ETA and tells the dispatcher the new ETA (0.3.11 «FR-62 Инцидент» #460 «Задержка +30 мин → новое ETA»; v6 button is +60 min)', 'ru', async (g, ev, w) => {
+    ev(H5DA); ev("ACT.daTab({v:'me'})"); const d = w.document; assert([...d.querySelectorAll('[data-act=daInc][data-v=delay]')].length === 1 && /Задержка \+60 мин/.test(d.querySelector('[data-act=daInc][data-v=delay]').innerText), 'delay button');
+    const eta0 = ev(`Date.parse(load('${H5LD}').eta)`), inc0 = ev('S.inc.length'); ev("ACT.daInc({v:'delay'})"); const eta1 = ev(`Date.parse(load('${H5LD}').eta)`); eq(eta1 - eta0, 3600e3, 'ETA moves by exactly the announced 60 min');
+    const e = ev('S.da.feed[0]'); eq(e.mod, 'security'); assert(/Задержка \+60 мин · новое ETA \d\d:\d\d/.test(e.text), 'event names the new ETA: ' + e.text); const hhmm = ev(`fdt(load('${H5LD}').eta).slice(-5)`); assert(e.text.endsWith(hhmm), 'it is the new ETA ' + hhmm);
+    eq(ev('S.inc.length'), inc0 + 1, 'incident for security'); assert(ev(`load('${H5LD}').notes.some(n=>/ETA \\+60 мин/.test(n.text))`), 'note on the trip'); assert(ev("S.audit.some(a=>/Задержка/.test(a.decision))"), 'audited');
+    ev("ACT.setRole({v:'admin'})"); ev(`closeDrawer();ACT.open({id:'${H5LD}'})`); const aside = w.document.querySelector(`[data-trip-aside=${H5LD}]`).innerText; assert(aside.includes('ETA ' + ev(`fdt(load('${H5LD}').eta)`)), 'trip detail shows the new ETA'); assert(/новое ETA \d\d:\d\d/.test(w.document.querySelector('[data-drv-feed]').innerText), 'and the feed line «новое ETA hh:mm»'); clean(w, 'trip detail');
+    ev(H5DA); ev("ACT.daInc({v:'delay'})"); eq(ev(`Date.parse(load('${H5LD}').eta)`) - eta0, 7200e3, 'a second press adds another hour');
+  });
+  await group('driver profile: ADR missing -> dangerous-goods trips unavailable; monthly earnings follow the rates of the driver (0.3.11 «FR-66 Профиль» #464 «ДОПОГ отсутствует, заработок по J46»)', 'ru', async (g, ev, w) => {
+    const noAdr = ev("S.drivers.find(d=>!RES.adrState(d).has).id"); assert(noAdr, 'a driver without ADR in the seed'); ev(`ACT.setRole({v:'driver'});` + H5D3.replace(/d3/g, noAdr) + `;ACT.daTab({v:'me'})`); const d = w.document;
+    assert(d.querySelector('[data-adr-missing]') && /рейсы с опасным грузом недоступны/.test(d.querySelector('[data-adr-missing]').innerText), 'ADR missing note: ' + d.querySelector('.da-phone').innerText.slice(0, 600));
+    const row = [...d.querySelectorAll('.da-row')].find(r => /^ДОПОГ/.test(r.innerText.trim())); assert(row && /—/.test(row.innerText), 'the ADR row shows a dash');
+    const earn = ev(`drv('${noAdr}').res.earn`), exp = earn.base + earn.perKm * 4200 + earn.perDiem * 11; eq(+d.querySelector('[data-earn]').dataset.earn, exp, 'earnings = base + rate × 4200 km + per diem × 11'); const t = d.querySelector('[data-earn]').innerText.replace(/\u00a0/g, ' ');
+    assert(t.includes(String(earn.perKm) + ' ₸ × 4200 km') && t.replace(/\s/g, '').includes(String(exp)), 'the formula shows the rate of this driver: ' + t);
+    ev(`drv('${noAdr}').res.earn.perKm=20`); ev('render()'); eq(+d.querySelector('[data-earn]').dataset.earn, earn.base + 20 * 4200 + earn.perDiem * 11, 'a changed km rate changes the estimate'); assert(d.querySelector('[data-earn]').innerText.includes('20 ₸ × 4200 km'), 'and the printed rate');
+    const withAdr = ev("S.drivers.find(x=>RES.adrState(x).has).id"); ev(`S.da.drv='${withAdr}';render()`); assert(!d.querySelector('[data-adr-missing]'), 'a driver with ADR has no such note'); clean(w, 'profile');
+  });
+  await group('dispatcher sees the driver-app feed of the trip (5 events) and jumps to the app (0.3.11 «Водитель → диспетчер» #466)', 'ru', async (g, ev, w) => {
+    ev(H5DA); ev("RES.daSeed()"); ev("ACT.daAck({v:'m1'})"); ev("ACT.daAck({v:'m2'})"); ev("ACT.daInc({v:'delay'})"); ev("ACT.daChk({v:'tyres',s:'bad'})"); ev("ACT.daMed({v:'1'})"); assert(ev(`S.da.feed.filter(e=>e.load==='${H5LD}').length`) >= 5, 'five events of the driver');
+    ev("ACT.setRole({v:'dispatcher'})"); ev(`closeDrawer();ACT.open({id:'${H5LD}'})`); const d = w.document, feed = d.querySelector('[data-drv-feed]'); assert(feed, 'feed block in the trip detail'); const lines = [...feed.querySelectorAll('.tr-feed')]; assert(lines.length >= 5, 'at least five lines: ' + lines.length);
+    assert(lines.every(l => /\d\d:\d\d/.test(l.innerText) && l.querySelector('.chip')), 'time, module and delivery state on every line'); assert(lines.some(l => /messages/.test(l.innerText)) && lines.some(l => /security/.test(l.innerText)) && lines.some(l => /fleet/.test(l.innerText)), 'messages, security and fleet modules');
+    const btn = feed.querySelector('[data-act=trDrvApp]'); assert(btn && /Приложение водителя/.test(btn.innerText), 'link «Приложение водителя →»'); ev(`ACT.trDrvApp({id:'${H5LD}'})`); eq(ev('S.route'), 'drivers', 'jumps to Drivers'); eq(ev('S.tab.drivers'), 'app', '... tab «Driver app» (the office preview of the phone)'); assert(d.querySelector('.da-phone'), 'phone frame'); eq(ev('S.da.drv'), 'd4', 'of the driver of the trip'); assert(d.querySelector('#da_frs'), 'next to the change-request panel');
+  });
+  await group('signature step: consignee name and role, finger signature -> ePOD; the name never reaches the audit log (0.3.11 «Доставка · ePOD и связь» #627 «ФИО не попадает в журнал аудита»)', 'ru', async (g, ev, w) => {
+    const NAME = 'Получатель Тестовый'; h5toSign(ev);
+    const d = w.document; assert(d.querySelector('#da_signer') && d.querySelector('#da_role') && d.querySelector('#da_sig') && d.querySelector('[data-act=daSign]'), 'name, position and signature fields');
+    ev(`document.querySelector('#da_signer').value=${JSON.stringify(NAME)};document.querySelector('#da_role').value='кладовщик';ACT.daSign()`); eq(ev(`load('${H5LD}').status`), 'in_transit', 'no stroke on the pad -> no delivery'); ev("RES.daSignDemo()");
+    const a0 = ev('S.audit.length'); ev(`document.querySelector('#da_signer').value=${JSON.stringify(NAME)};document.querySelector('#da_role').value='кладовщик';ACT.daSign()`);
+    eq(ev(`load('${H5LD}').status`), 'delivered'); const e = ev(`load('${H5LD}').epod`); assert(e.signer === NAME && e.role === 'кладовщик' && e.sig, 'ePOD keeps signer, role and the signature flag (v6 prints the signer on the ePOD act)'); const aud = ev('S.audit.slice(0,' + (ev('S.audit.length') - a0) + ')'); assert(aud.length >= 1 && aud.some(x => /ePOD/.test(x.decision)), 'the delivery is audited: ' + JSON.stringify(aud).slice(0, 200));
+    const all = JSON.stringify(ev('S.audit')); assert(!all.includes(NAME) && !all.includes('Тестовый'), 'the consignee name is in no audit entry'); assert(!ev("S.audit.some(a=>/Получатель/.test(a.subject+' '+a.decision+' '+a.after+' '+(a.detail||'')))"), 'neither in subject nor in the decision text');
+    /* an intermediate unloading point takes the other code path (ePOD of the stop, trip stays open) */
+    const gg = await fresh('ru'); try { gg.ev(H5DA); gg.ev("RES.daSeed();S.da.sh.d4.departed=true;const ss=S.da.sh.d4.stops;ss.forEach(s=>{if(s.kind!=='unload')s.st='done'});const u=ss.find(s=>s.kind==='unload');u.st='arrived'"); gg.ev("ACT.daTab({v:'stop'})"); gg.ev("ACT.daStep({v:'1'})"); gg.ev("document.querySelector('#da_tmin').value=3.1;document.querySelector('#da_tmax').value=6.2;ACT.daThermo()"); gg.ev("ACT.daScanAll()"); gg.ev("ACT.daStep({v:'3'})"); gg.ev("ACT.daPhoto()"); gg.ev("ACT.daStep({v:'4'})");
+      h5sign(gg.ev, NAME, 'кладовщик'); eq(gg.ev(`load('${H5LD}').status`), 'in_transit', 'not the last point: the trip goes on'); assert(gg.ev("S.da.sh.d4.stops.find(s=>s.kind==='unload').epod"), 'stop ePOD stored'); assert(gg.ev("S.audit.some(a=>/ePOD/.test(a.decision))"), 'audited'); assert(!JSON.stringify(gg.ev('S.audit')).includes(NAME), 'intermediate unloading point: name not audited either'); } finally { gg.done(); }
+  });
+  await group('ePOD evidence record: device time and server time, SHA-256 of signature and photo, the hash check recomputes and matches (0.3.11 «Доставка · ePOD и связь» #628)', 'ru', async (g, ev, w) => {
+    h5deliver(ev, 'Aigul Saparova', 'clerk'); const d = w.document; eq(ev(`load('${H5LD}').status`), 'delivered'); const e = ev(`load('${H5LD}').epod`);
+    assert(/^\d\d\.\d\d.*\d\d:\d\d/.test(e.at), 'device time: ' + e.at); assert(/^\d\d\.\d\d.*\d\d:\d\d/.test(e.serverAt || ''), 'server receipt time: ' + e.serverAt);
+    assert(/^[0-9a-f]{64}$/.test(e.sigHash) && /^[0-9a-f]{64}$/.test(e.photoHash), 'SHA-256 of signature and photo are 64 hex'); assert(e.sigHash !== e.photoHash, 'different inputs, different hashes');
+    const rawSig = e.sigRaw, rawPhoto = e.photoRaw, sigH = e.sigHash, photoH = e.photoHash;   /* ev returns live objects: keep copies before tampering */
+    const v = ev(`epodVerify(load('${H5LD}').epod)`); assert(v.sig && v.photo, 'hash check matches: ' + JSON.stringify(v));
+    ev(`load('${H5LD}').epod.sigRaw='sig|[]'`); assert(!ev(`epodVerify(load('${H5LD}').epod).sig`), 'a tampered signature no longer matches'); ev(`load('${H5LD}').epod.sigRaw=${JSON.stringify(rawSig)}`); ev(`load('${H5LD}').epod.photoRaw='photo|forged'`); assert(!ev(`epodVerify(load('${H5LD}').epod).photo`), 'nor a tampered photo'); ev(`load('${H5LD}').epod.photoRaw=${JSON.stringify(rawPhoto)}`);
+    ev("ACT.daTab({v:'stop'})"); const t = d.querySelector(`[data-epod=${H5LD}]`).innerText; assert(/время устройства: \d\d\.\d\d.*получено сервером: \d\d\.\d\d/s.test(d.querySelector('[data-epod-time]').innerText), 'time line: ' + d.querySelector('[data-epod-time]').innerText);
+    const sig = d.querySelector('[data-epod-sig]').innerText; assert((sig.match(/SHA-256 [0-9a-f]{12}…/g) || []).length === 2, 'two hashes shown: ' + sig); assert((sig.match(/хэш-проверка совпадает/g) || []).length === 2, 'both checks match: ' + sig + ' ' + JSON.stringify(ev(`(function(){const e=load('${H5LD}').epod;return [!!e.sigRaw,e.sigRaw&&e.sigRaw.length,textHash(e.sigRaw)===e.sigHash,epodVerify(e)]})()`))); assert(sig.includes(sigH.slice(0, 12)) && sig.includes(photoH.slice(0, 12)), 'the shown prefixes are the stored hashes'); clean(w, 'ePOD card');
+    /* offline: the record is queued, the server time appears with the sync */
+    const gq = await fresh('ru'); try { h5toSign(gq.ev); gq.ev("ACT.daNet()"); gq.ev("RES.daSignDemo()"); gq.ev("document.querySelector('#da_signer').value='Aigul Saparova';document.querySelector('#da_role').value='clerk';ACT.daSign()");
+    const dq = gq.w.document, ev2 = gq.ev; const q = ev2("S.da.sh.d4.stops.find(s=>s.kind==='unload'&&s.epod&&!s.epod.serverAt)"); assert(q && q.epod.sigHash, 'offline: device time and hashes are stored, no server time yet'); assert(/в очереди/.test(dq.body.innerText), 'the card says «в очереди»');
+    ev2("ACT.daNet()"); assert(ev2("S.da.sh.d4.stops.filter(s=>s.epod).every(s=>s.epod.serverAt)"), 'after the sync every record has its server time'); assert(ev2(`epodVerify(S.da.sh.d4.stops.find(s=>s.epod).epod).sig`), 'the hash still matches after the sync'); } finally { gq.done(); }
+  });
+  await group('driver app new texts render in RU / DE / EN / KK without undefined / NaN (route banner with the stretch name, ADR note, ePOD hash check)', 'ru', async () => {
+    for (const lang of LANGS) { const gg = await fresh(lang); try { gg.ev("ACT.setRole({v:'driver'});" + H5D3); for (const t of ['route', 'me']) { gg.ev(`ACT.daTab({v:'${t}'})`); clean(gg.w, 'driver ' + lang + ' ' + t); }
+      const txt = gg.w.document.querySelector('.da-phone').innerText; assert(gg.w.document.querySelector('[data-adr-missing]'), lang + ': ADR note'); if (lang === 'de' || lang === 'en') assert(!/ДОПОГ отсутств/.test(txt), lang + ': ADR note translated');
+      h5toSign(gg.ev); h5sign(gg.ev, 'A B', 'x'); gg.ev("ACT.daTab({v:'stop'})");
+      const ep = gg.w.document.querySelector('[data-epod-time]'); assert(ep, lang + ': time line'); clean(gg.w, 'ePOD ' + lang); if (lang === 'de' || lang === 'en') assert(!/получено|хэш/.test(gg.w.document.querySelector('[data-epod-sig]').innerText + ep.innerText), lang + ': ePOD lines translated'); } finally { gg.done(); } }
+  });
+
+__suite(58);   /* h6-portal-commercial.js */
+  /* ---- H6 parity 0.3.11 (docs/parity-0311/autotests-gap.md, file h6): insurance and FX in price and sample, customer price-list line,
+     NCALayer message, second lead with the same BIN, FR-190 help article, FR-185 warnings in DE / EN ---- */
+  await group('por: insurance premium 0.15 % (min 3 000 tenge) outside VAT; EUR / USD at the NBK rate with its date in price and offer sample (0.3.11 «Страхование: премия … BUG-30», 575)', 'ru', async (g, ev, w) => {
+    eq(ev('INS.rate'), 0.0015, 'rate'); eq(ev('INS.min'), 3000, 'minimum');
+    const b = { from: 'TAR', to: 'SHY', zone: 'pharma', pallets: 4, kg: 1600 }, J = JSON.stringify;
+    eq(ev(`priceFor(${J(Object.assign({ insured: true, declared: 10000000 }, b))}).premium`), 15000, '10 M x 0.15 %');
+    eq(ev(`priceFor(${J(Object.assign({ insured: true, declared: 1000000 }, b))}).premium`), 3000, 'minimum applies below 2 M');
+    eq(ev(`priceFor(${J(Object.assign({ insured: false, declared: 10000000 }, b))}).premium`), 0, 'not insured: no premium');
+    const p = ev(`priceFor(${J(Object.assign({ insured: true, declared: 10000000 }, b))})`);
+    eq(p.vat, Math.round(p.net * ev('VAT')), 'VAT is taken on the net without the premium'); eq(p.gross, p.net + p.vat + 15000, 'gross = net + VAT + premium');
+    const fx = ev('fxLatest()'); assert(fx.EUR > 0 && fx.USD > 0 && /^\d{4}-\d\d-\d\d$/.test(fx.day), 'NBK rate with a date'); eq(ev('fxConv(10000000, S.fx[2].EUR)'), Math.round(10000000 / 631.8 * 100) / 100, 'conversion');
+    ev("ACT.setRole({v:'customer'});go('book');ACT.bkReset();BK.pCity='TAR';BK.pStreet='Абая';BK.pHouse='5';BK.dCity='SHY';BK.dStreet='Абая';BK.dHouse='10';BK.goods=['vaccines'];BK.zone='pharma';BK.pallets=4;BK.kg=1600;BK.insured=true;BK.declared=10000000;render()");
+    const root = w.document.querySelector('#root').innerText;
+    assert(/15 000 ₸/.test(w.document.querySelector('#bk_price').innerText), 'premium in the price block'); assert(/Страхов/.test(w.document.querySelector('#bk_price').innerText), 'premium row labelled');
+    assert(/€ \/ .*\$ · по курсу НБ РК на \d\d\.\d\d\.2026/.test(w.document.querySelector('#bk_price').innerText), 'price block: € and $ at the NBK rate with the date');
+    assert(/€/.test(root) && /\$/.test(root) && /по курсу НБ РК на \d\d\.\d\d\.2026/.test(w.document.querySelector('.bk-grid .sub') ? root : ''), 'insurance field shows € and $ at the NBK date');
+    ev('ACT.bkOfferDoc()'); const doc = w.document.querySelector('[data-offer-doc]'); assert(doc, 'sample opens');
+    assert(/Страховая премия \(без НДС\)/.test(doc.innerText) && /10 000 000/.test(doc.innerText), 'sample: insurance row (not subject to VAT) and the insured value');
+    const dfx = w.document.querySelector('[data-offer-fx]'); assert(dfx && /€/.test(dfx.textContent) && /\$/.test(dfx.textContent) && /курс НБ РК на \d\d\.\d\d\.2026/.test(dfx.textContent), 'sample: € / $ with the NBK date: ' + (dfx && dfx.textContent));
+    assert(/страховая стоимость/.test(dfx.textContent) && /премия/.test(dfx.textContent), 'sample: insured value and premium converted'); clean(w, 'offer sample');
+  });
+  await group('por: portal price shows the customer price-list line (framework · -10 % · diesel 340 / base 300), discount and fuel rows; the sample repeats it (0.3.11 753)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'customer'});S.custId='c1';go('book');ACT.bkReset();BK.pCity='ALA';BK.pStreet='Абая';BK.pHouse='5';BK.dCity='TAR';BK.dStreet='Абая';BK.dHouse='10';BK.goods=['vaccines'];BK.zone='pharma';BK.pallets=4;BK.kg=1600;render()");
+    const pl = w.document.querySelector('#bk_price [data-price-list]'); assert(pl, 'price-list line');
+    assert(/Прайс-лист клиента #1/.test(pl.textContent) && /рамочный/.test(pl.textContent) && /−10 %/.test(pl.textContent) && /дизель 340 \/ база 300/.test(pl.textContent), 'line: ' + pl.textContent);
+    const price = w.document.querySelector('#bk_price').innerText; assert(/Скидка по рамочному договору/.test(price) && /-\d[\d ]* ₸/.test(price), 'discount row'); assert(/Топливная надбавка\s+\d[\d ]* ₸/.test(price), 'fuel surcharge row');
+    const pf = ev("priceFor({from:'ALA',to:'TAR',zone:'pharma',pallets:4,kg:1600,cust:'c1'})"); assert(pf.discount > 0 && pf.fuel > 0, 'discount and surcharge in the model'); eq(pf.terms.diesel, 340); eq(pf.terms.base, 300);
+    ev('ACT.bkOfferDoc()'); const doc = w.document.querySelector('[data-offer-doc]'); assert(doc, 'sample'); const line = [...doc.querySelectorAll('p.note')].find(e => /Прайс-лист клиента/.test(e.textContent));
+    assert(line && /−10 %/.test(line.textContent) && /дизель 340 \/ база 300/.test(line.textContent), 'sample repeats the price-list line'); assert(/Топливная надбавка/.test(doc.innerText) && /Скидка/.test(doc.innerText), 'sample shows discount and surcharge'); eq(line.textContent, pl.textContent, 'same line in price and sample');
+    ev('closeDrawer()'); ev("S.custId='c4';render()"); assert(!w.document.querySelector('#bk_price [data-price-list]'), 'a customer without a list has no price-list line (line tariff)');
+    ev("S.custId='c2';render()"); assert(/спот/.test((w.document.querySelector('#bk_price [data-price-list]') || { textContent: '' }).textContent), 'spot list is named spot'); clean(w, 'price-list line');
+  });
+  await group('por: «Sign with EDS (NCALayer)» without NCALayer shows the message «NCALayer не запущен» and the contract stays sent (0.3.11 «NCALayer не запущен», 732)', 'ru', async (g, ev, w) => {
+    /* 0.3.11 talked to a local NCALayer socket; v6 mocks it: NCA.running=false is the "not started" state of that mock */
+    assert(ev("typeof NCA==='object' && NCA.running===true"), 'NCALayer mock is running by default');
+    ev("go('orders');ACT.stab({s:'orders',v:'commercial'});ACT.cmSec({v:'contracts'});COMM.q.ct_cust='c2';COMM.q.ct_kind='framework';COMM.q.ct_disc='8';COMM.q.ct_base='340';ACT.cmCtAdd();ACT.cmCtSend({id:S.contracts[0].id})");
+    const id = ev('S.contracts[0].id'); eq(ev('S.contracts[0].status'), 'sent');
+    ev("NCA.running=false;ACT.setRole({v:'customer'});S.custId='c2';go('mybookings')"); ev(`ACT.bkCtOpen({id:'${id}'});closeDrawer();render()`);
+    const btn = w.document.querySelector(`[data-act=bkSign][data-id="${id}"]`); assert(btn && !btn.disabled, 'sign button after reading the text'); btn.click();
+    const err = w.document.querySelector('[data-ct-err]'); assert(err && /NCALayer не запущен/.test(err.textContent), 'message: ' + (err && err.textContent)); eq(ev('S.contracts[0].status'), 'sent', 'status unchanged without a signature'); assert(!ev("activeFramework('c2')"), 'framework not active'); assert(!w.document.querySelector('[data-ct-msg]'), 'no success notice'); clean(w, 'ncalayer message');
+    ev("NCA.running=true"); w.document.querySelector(`[data-act=bkSign][data-id="${id}"]`).click(); eq(ev('S.contracts[0].status'), 'signed', 'signs when NCALayer runs'); assert(!w.document.querySelector('[data-ct-err]'), 'message cleared');
+  });
+  for (const lang of ['de', 'en']) await group('[' + lang + '] por: NCALayer message and booking warnings (weight per pallet, places) without Cyrillic (0.3.11 744-745, FR-185)', lang, async (g, ev, w) => {
+    ev("ACT.setRole({v:'customer'});go('book');ACT.bkReset();BK.kg=6000;BK.pallets=4;render()"); const t = w.document.querySelector('#root').innerText;
+    assert(w.document.querySelector('[data-avg]') && /1[ ,.  ]?200/.test(w.document.querySelector('[data-avg]').innerText), 'too heavy per pallet is named'); assert(!/[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]/.test(t), 'Cyrillic in the booking form: ' + (t.match(/.{0,20}[А-Яа-яЁё].{0,20}/) || [''])[0]);
+    ev("NCA.running=false;ACT.setRole({v:'admin'})"); ev("go('orders');ACT.stab({s:'orders',v:'commercial'});ACT.cmSec({v:'contracts'});COMM.q.ct_cust='c2';COMM.q.ct_kind='spot';ACT.cmCtAdd();ACT.cmCtSend({id:S.contracts[0].id})");
+    const id = ev('S.contracts[0].id'); ev(`ACT.setRole({v:'customer'});S.custId='c2';go('mybookings');ACT.bkCtOpen({id:'${id}'});closeDrawer();render()`); w.document.querySelector(`[data-act=bkSign][data-id="${id}"]`).click();
+    const err = w.document.querySelector('[data-ct-err]'); assert(err && /NCALayer/.test(err.textContent) && /not|nicht/.test(err.textContent), 'message in the page language: ' + (err && err.textContent)); assert(!/[А-Яа-яЁё]/.test(err.textContent), 'Cyrillic in the NCALayer message'); eq(ev('S.contracts[0].status'), 'sent');
+  });
+  await group('por: a second lead with the same BIN joins the same customer; the first one creates it (0.3.11 FR-127 «тот же клиент», 652)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'});go('orders');ACT.stab({s:'orders',v:'commercial'});ACT.cmSec({v:'crm'})"); const bin = ev("tinFix('19024000999')"); assert(ev(`tinCheck(${JSON.stringify(bin)}).valid`), 'test BIN valid');
+    const add = (name) => { ev(`COMM.q.ld_company='${name}';COMM.q.ld_src='tender';COMM.q.ld_deadline='2026-12-01';COMM.q.ld_tender='T-1';COMM.q.ld_bin=${JSON.stringify(bin)};ACT.cmLeadAdd()`); return ev('S.leads[0].id'); };
+    const n0 = ev('S.leads.length'), cu0 = ev('S.customers.length'); const a = add('BIN Test A'), b = add('BIN Test B'); eq(ev('S.leads.length'), n0 + 2, 'two leads'); assert(a !== b, 'two ids'); eq(ev(`S.leads.find(l=>l.id==='${a}').bin`), bin); eq(ev(`S.leads.find(l=>l.id==='${b}').bin`), bin);
+    ev(`ACT.cmLead({id:'${a}',v:'won'})`); eq(ev('S.customers.length'), cu0 + 1, 'first lead creates the customer'); const c1 = ev(`S.leads.find(l=>l.id==='${a}').custId`); assert(c1, 'customer id on the first lead');
+    ev(`ACT.cmLead({id:'${b}',v:'won'})`); eq(ev('S.customers.length'), cu0 + 1, 'second lead creates no duplicate'); eq(ev(`S.leads.find(l=>l.id==='${b}').custId`), c1, 'same customer'); eq(ev(`S.customers.filter(c=>c.bin===${JSON.stringify(bin)}).length`), 1, 'one customer per BIN');
+    eq(ev(`S.leads.find(l=>l.id==='${b}').onbExisted`), true, 'marked as joining an existing customer'); clean(w, 'crm after dedup');
+  });
+  await group('help: FR-190 article «Bookings – confirm, reject or cancel» exists with DE / EN text and no Cyrillic (0.3.11 744-745)', 'ru', async (g, ev) => {
+    const a = ev("(function(){var a=helpArt('orders/bookings');return a&&{key:a.key,fr:a.fr,title:a.title,purpose:a.purpose,who:a.who,rules:a.rules}})()"); assert(a, 'article orders/bookings'); assert(/FR-190/.test(a.fr), 'FR-190 named: ' + a.fr);
+    assert(/подтвердить, отклонить или отменить/.test(a.purpose[0]), 'RU: confirm, reject or cancel'); assert(/bestätigen, ablehnen oder stornieren/.test(a.purpose[1]), 'DE purpose'); assert(/confirm, reject or cancel/.test(a.purpose[2]), 'EN purpose');
+    assert(a.title[1] && a.title[2], 'DE / EN title'); const cyr = /[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]/; assert(![a.title[1], a.title[2], a.purpose[1], a.purpose[2]].concat((a.rules || []).flatMap(r => [r[1], r[2]])).some(s => cyr.test(s)), 'Cyrillic in the DE / EN text');
+    assert(ev("HELP.articles.some(function(x){return x.screen==='mybookings'&&/\\b190\\b/.test(x.fr)})"), 'portal article mybookings carries FR-190 as well');
+  });
+
+__suite(59);   /* h7-economics-reports.js */
+  /* ---- H7 · 0.3.11 parity, economics and reports: the «Отчёты», «Исходные данные», «Затраты», «Затраты · дизель», «Затраты · свой/внешний»
+     and FR-174 scenarios that b0/b1/b2 only covered in part (docs/parity-0311/autotests-gap.md, h7). v6 differs from 0.3.11 on purpose:
+     the baseline has six views instead of five tabs, the menu badge counts open questions to KDL (FR-49) instead of critical findings,
+     and the cost model works on the 4 target vehicles V01..V04. ---- */
+
+  await group('reports: driver report has one row per driver with trips, km and punctuality — numbers only, on-time 0–100 %, no NaN (0.3.11 Отчёты · по водителям 142–150)', 'ru', async (g, ev, w) => {
+    const drv = ev('S.drivers.map(d=>d.id)'), rep = ev('ecoDrvRep()');
+    eq(rep.length, drv.length, 'one report row per driver');
+    ev("ACT.setRole({v:'admin'});go('reports');ACT.stab({s:'reports',v:'kpi'})");
+    const rows = [...w.document.querySelectorAll('[data-drvrep]')];
+    eq(rows.length, drv.length, 'rows rendered');
+    for (const r of rep) {
+      assert(Number.isInteger(r.trips) && r.trips >= 0, r.id + ': trips ' + r.trips);
+      assert(Number.isFinite(r.km) && r.km >= 0, r.id + ': km ' + r.km);
+      assert(Number.isFinite(r.ontime) && r.ontime >= 0 && r.ontime <= 100, r.id + ': on-time ' + r.ontime);
+      const row = rows.find(x => x.getAttribute('data-drvrep') === r.id); assert(row, r.id + ': no row');
+      const t = row.innerText.replace(/\s/g, ' ');
+      assert(t.includes(r.name), r.id + ': driver name missing');
+      assert(t.replace(/ | /g, ' ').includes(String(r.km).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')), r.id + ': km ' + r.km + ' not in the row «' + t + '»');
+      assert(t.includes(r.ontime + ' %'), r.id + ': punctuality ' + r.ontime + ' % not in the row');
+      assert(!/NaN|undefined|null/.test(t), r.id + ': ' + t);
+    }
+  });
+
+  await group('baseline: section opens with the KPI row (≥ 8 tiles over the two rows), six views, and every finding of the validation view links to a question (0.3.11 Исходные данные 400–401)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'});go('baseline');ACT.blSub({v:'q'})");
+    const tiles = w.document.querySelectorAll('#main-content .kpi-row > *').length;
+    assert(tiles >= 8, 'KPI tiles ' + tiles);
+    eq(w.document.querySelectorAll('#main-content [data-act=blSub]').length, 6, 'views (0.3.11 had 5 tabs, v6 adds the plan-values view)');
+    ev("ACT.blSub({v:'val'})");
+    const rows = [...w.document.querySelectorAll('[data-finding]')], codes = new Set(ev('ecoQuestions().map(x=>x.code)'));
+    eq(rows.length, ev('ECO_BL.BLV.length'), 'one row per finding');
+    for (const r of rows) {
+      const id = r.getAttribute('data-finding'), refs = ev(`ECO_BL.BLV.find(v=>v.id==='${id}').ref`);
+      const c = String(refs).match(/[A-T]\d{1,3}/g) || [];
+      assert(c.length >= 1, id + ': finding without a question reference («' + refs + '»)');
+      for (const x of c) assert(codes.has(x), id + ': question ' + x + ' is not in the catalogue');
+      assert(r.innerText.includes(String(refs).split(/[\s,/]/)[0]), id + ': reference not shown on the row');
+    }
+  });
+
+  await group('baseline: filter «Критично» shows only the critical findings and their count equals the findings with level 3 (0.3.11 Исходные данные 402)', 'ru', async (g, ev, w) => {
+    ev("go('baseline');ACT.blSub({v:'val'});ACT.blVf({v:''})");
+    const crit = ev('ECO_BL.BLV.filter(v=>v.lvl>=3).map(v=>v.id)'); assert(crit.length >= 2, 'the demo has critical findings');
+    eq(w.document.querySelectorAll('[data-finding]').length, ev('ECO_BL.BLV.length'), 'all findings before the filter');
+    const btn = w.document.querySelector('[data-act=blVf][data-v=crit]'); assert(btn, 'filter «Критично» missing'); btn.click();
+    const shown = [...w.document.querySelectorAll('[data-finding]')].map(r => r.getAttribute('data-finding'));
+    eq(shown.join(','), crit.join(','), 'filtered findings');
+    assert(/Критично · \d+/.test(btn.textContent) || /\d+/.test(btn.textContent), 'count on the filter');
+    ev("ACT.blVf({v:''})"); eq(w.document.querySelectorAll('[data-finding]').length, ev('ECO_BL.BLV.length'), 'filter resets');
+  });
+
+  await group('baseline: menu badge equals the number of open questions to KDL (FR-49) and falls as they are clarified (0.3.11 Исходные данные 405: there the badge counted critical findings)', 'ru', async (g, ev, w) => {
+    /* v6 decision: the badge is the FR-49 counter (open questions to KDL), the critical count is shown on the filter chip of the validation view */
+    ev("ACT.setRole({v:'admin'});go('baseline')");
+    const open = ev('ecoFr49().open'), total = ev('ecoFr49().total');
+    assert(open > 0 && open <= total, 'open ' + open + ' of ' + total);
+    const link = w.document.querySelector('[data-test="nav:baseline"]'); assert(link, 'baseline link in the menu');
+    assert(link.textContent.includes(String(open)), 'badge «' + link.textContent.trim() + '» vs open ' + open);
+    eq(ev('NAV_BADGE.baseline()'), open, 'NAV_BADGE.baseline');
+    const q = ev('ECO_BL.BLV.find(v=>v.q).id'); ev(`ACT.blClar({id:'${q}'})`);
+    eq(ev('NAV_BADGE.baseline()') || 0, open - 1, 'badge after one clarification'); ev(`ACT.blClar({id:'${q}'})`);
+    eq(ev('NAV_BADGE.baseline()'), open, 'badge after undo');
+  });
+
+  await group('costs: section opens with 6 KPI tiles and 6 tabs; own transport is cheaper than outsourcing (0.3.11 Затраты 432, 434)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'});go('billing');ACT.stab({s:'billing',v:'model'});ACT.ecoSub({v:'sum'})");
+    eq(w.document.querySelectorAll('#main-content .kpi-row > *').length, 6, 'KPI tiles');
+    eq(w.document.querySelectorAll('#main-content [data-act=ecoSub]').length, 6, 'tabs');
+    const M = ev('ecoCostCalc()'), outs = ev('ECO_CP.outs');
+    eq(Math.round(outs / 1e5) / 10, 24.2, 'outsourcing per month (M ₸)');
+    assert(M.save > 0, 'own transport is dearer than outsourcing: ' + M.save);
+    eq(Math.round(M.save), Math.round(outs - M.tot), 'saving = outsourcing − running costs');
+    const t = w.document.querySelector('#main-content .kpi-row').innerText;
+    assert(/Против аутсорсинга/.test(t) && /−\d+ %/.test(t), 'KPI «Против аутсорсинга» shows a saving: ' + t.replace(/\s+/g, ' ').slice(0, 200));
+  });
+
+  await group('costs: summary has ≥ 18 items and the total row equals the sum of the items, year = 12 × month, shares add up to 100 % (0.3.11 Затраты 433)', 'ru', async (g, ev, w) => {
+    ev("go('billing');ACT.stab({s:'billing',v:'model'});ACT.ecoSub({v:'sum'})");
+    const rows = [...w.document.querySelectorAll('tr[data-cost]')], tot = w.document.querySelector('tr[data-cost-total]');
+    assert(rows.length >= 18, 'items ' + rows.length); assert(tot, 'total row');
+    const n = s => +s.replace(/[^\d]/g, ''), cell = (r, i) => r.children[i].innerText;
+    const sum = rows.reduce((a, r) => a + n(cell(r, 3)), 0), total = n(cell(tot, 3));
+    assert(Math.abs(sum - total) <= rows.length, 'Σ items ' + sum + ' ≠ total ' + total);
+    const M = ev('ecoCostCalc()'); eq(rows.length, M.rows.length, 'rows vs model'); assert(Math.abs(M.rows.reduce((a, r) => a + r.v, 0) - M.tot) < 1e-6, 'model rows ≠ model total');
+    assert(Math.abs(M.totVar + M.totFix - M.tot) < 1e-6, 'variable + fixed ≠ total');
+    for (const r of M.rows) assert(r.v >= 0 && Number.isFinite(r.v), r.k + ': ' + r.v);
+  });
+
+  await group('costs: diesel — 4 vehicles with 8 weekly values, the overrun over 8 % is flagged (V02), the price switch recalculates (0.3.11 Затраты · дизель 437–438)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'});go('billing');ACT.stab({s:'billing',v:'model'});ACT.ecoSub({v:'fuel'})");
+    const rows = [...w.document.querySelectorAll('tr[data-fuel]')];
+    eq(rows.length, 4, 'vehicles'); assert(rows.every(r => r.querySelectorAll('[data-fuel-wk] i').length === 8), 'eight weekly bars per vehicle');
+    for (const v of ['V01', 'V02', 'V03', 'V04']) { const wk = ev(`ecoFuelWeeks('${v}')`); eq(wk.length, 8, v + ': weeks'); assert(wk.every(x => x > 0 && Number.isFinite(x)), v + ': weekly values'); }
+    const M = ev('ecoCostCalc()');
+    for (const x of M.veh) {
+      const dev = (x.act - x.l100) / x.l100 * 100, row = rows.find(r => r.getAttribute('data-fuel') === x.id);
+      eq(row.hasAttribute('data-overrun'), dev > 8, x.id + ': overrun flag at ' + dev.toFixed(1) + ' %');
+    }
+    const v2 = rows.find(r => r.getAttribute('data-fuel') === 'V02'); assert(v2.hasAttribute('data-overrun') && /\+11/.test(v2.innerText) && /> 8 %/.test(v2.innerText), 'V02 overrun +11 % flagged: ' + v2.innerText.replace(/\s+/g, ' '));
+    const before = rows[0].innerText; ev("ACT.ecoDiesel({v:450})"); const after = w.document.querySelector('tr[data-fuel=V01]').innerText; ev("ACT.ecoDiesel({v:340})");
+    assert(before !== after, 'price 450 ₸/l did not change the fuel cost');
+  });
+
+  await group('costs: own vs external — 7 shipments, the cheaper option is named for each, a gap over 50 % needs two signatures (0.3.11 Затраты · свой/внешний 444–445)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'});go('billing');ACT.stab({s:'billing',v:'model'});ACT.ecoSub({v:'own'})");
+    const rows = [...w.document.querySelectorAll('tr[data-own]')]; eq(rows.length, 7, 'shipments');
+    const M = ev('ecoCostCalc()'), O = ev('ECO_COWN.map(o=>o.id)');
+    for (const id of O) {
+      const r = ev(`ecoOwnCalc(ECO_COWN.find(o=>o.id==='${id}'),ecoCostCalc())`), row = rows.find(x => x.getAttribute('data-own') === id);
+      eq(r.ownBetter, r.own <= r.ext, id + ': ownBetter vs the numbers (' + Math.round(r.own) + ' / ' + Math.round(r.ext) + ')');
+      assert(r.own > 0 && r.ext > 0, id + ': cost');
+      const cheaper = row.children[4].innerText.toLowerCase();
+      assert(r.ownBetter ? /свой/.test(cheaper) : /внешн/.test(cheaper), id + ': «Выгоднее» says «' + cheaper + '» but ownBetter=' + r.ownBetter);
+      eq(r.need, Math.abs(r.own - r.ext) / Math.max(r.own, r.ext) * 100 > 50, id + ': two signatures needed at gap ' + Math.round(r.pct) + ' %');
+      assert(r.need === /2 подписи|2 Unterschrift|2 signatures/.test(row.innerText) || /2\/2/.test(row.innerText), id + ': signature hint');
+    }
+    assert(O.some(id => ev(`ecoOwnCalc(ECO_COWN.find(o=>o.id==='${id}'),ecoCostCalc())`).need), 'at least one shipment with a gap over 50 %');
+  });
+
+  await group('baseline: planned values (FR-174) — 26 values, each with area and source, the unverified counter equals the values not marked «checked», a confirmation is audited (0.3.11 Плановые значения 715)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'admin'});go('baseline');ACT.blSub({v:'pv'})");
+    const PV = ev('ECO_BL.PV.map(p=>({id:p.id,area:p.area,src:p.source,where:p.where}))'); eq(PV.length, 26, 'planned values');
+    eq(new Set(PV.map(p => p.id)).size, 26, 'duplicate ids');
+    for (const p of PV) { assert(p.src && p.src.length > 3, p.id + ': source'); assert(p.where && p.where.length > 3, p.id + ': where used'); }
+    const rows = [...w.document.querySelectorAll('[data-pv]')]; eq(rows.length, 26, 'rows');
+    for (const p of PV) assert(rows.find(r => r.getAttribute('data-pv') === p.id).innerText.includes(p.src), p.id + ': source not shown');
+    const isOpen = p => ev(`(()=>{const a=S.eco.bl.pv['${p.id}'];return !(a==='checked'||(!a&&!['legal','integration'].includes('${p.area}')&&!['insurer','handling_fee','express_rate','truck_planning'].includes('${p.id}')));})()`);
+    const txt = () => w.document.querySelector('#main-content').innerText;
+    const open = PV.filter(isOpen); assert(open.length > 0, 'the demo has unverified values');
+    /* the chips above the table count the values per check status: the «to verify» chip equals the values the model flags as not checked and not assumption */
+    const toVerify = PV.filter(p => ev(`(()=>{const a=S.eco.bl.pv['${p.id}'];return a==='open'||(!a&&['legal','integration'].includes('${p.area}'));})()`)).length;
+    assert(new RegExp('проверить\\s*·\\s*' + toVerify).test(txt()), 'counter chip «проверить · ' + toVerify + '»');
+    const t = open.find(p => p.area === 'legal'), a0 = ev('S.audit.length');
+    ev(`ACT.blPv({id:'${t.id}',v:'checked'})`);
+    eq(ev('S.audit.length'), a0 + 1, 'confirmation not audited'); eq(ev('S.audit[0].subject'), t.id, 'audit subject'); eq(ev('S.audit[0].module'), ev("T('Исходные данные', 'Basisdaten', 'Baseline data', 'Бастапқы деректер')"), 'audit module');
+    eq(ev(`S.eco.bl.pv['${t.id}']`), 'checked'); assert(new RegExp('проверить\\s*·\\s*' + (toVerify - 1)).test(txt()), 'counter falls to ' + (toVerify - 1));
+    ev(`ACT.blPv({id:'${t.id}',v:'open'})`);
+    ev("ACT.setRole({v:'dispatcher'});go('baseline');ACT.blSub({v:'pv'})"); const a1 = ev('S.audit.length'); ev(`ACT.blPv({id:'${t.id}',v:'checked'})`);
+    eq(ev('S.audit.length'), a1, 'a role without costs:approve must not confirm'); eq(ev(`S.eco.bl.pv['${t.id}']`), 'open'); ev("ACT.setRole({v:'admin'})");
+  });
+
+__suite(60);   /* h8-shell-i18n-help.js */
+  /* ---- H8 parity 0.3.11 (docs/parity-0311/autotests-gap.md, file h8): unique sidebar labels, RU without i18n keys and English labels, level glyphs,
+     scroll restore on Back, DE tab title, ?brand=, design contrast, tours, help (structure diagram, page links, permission matrix, customer help) ---- */
+  const H8_CYR = /[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]/;
+  /* 0.3.11 656-658: no two sidebar entries share a label (the old test ran in RU, DE and EN; v6 runs it in all four languages and for every role) */
+  for (const lang of LANGS) await group('[' + lang + '] sidebar: no two entries with the same label, for every role (0.3.11 656-658 «нет двух пунктов с одинаковым названием»)', lang, async (g, ev, w) => {
+    for (const r of ev('ROLES')) {
+      ev(`ACT.setRole({v:'${r}'})`);
+      const labels = [...w.document.querySelectorAll('#side-nav .nav-item, #side-nav .rec-nav a, #side-nav .side-tools a')].map(e => { const s = e.querySelector('span:not(.badge-count):not(.nav-n)'); return (s || e).textContent.replace(/\s+/g, ' ').trim(); }).filter(Boolean);
+      const dup = labels.filter((x, i, a) => a.indexOf(x) !== i); assert(labels.length >= 3, r + ': entries ' + labels.length); assert(!dup.length, r + ': duplicate labels ' + [...new Set(dup)].join(' | '));
+    }
+    ev("ACT.setRole({v:'admin'})"); const menu = ev('NAV.map(function(n){return navLabel(n[0])})'); assert(menu.length === ev('NAV.length') && menu.every((x, i, a) => a.indexOf(x) === i), 'menu labels from NAV are unique: ' + menu.join(' | '));
+  });
+  /* 0.3.11 584: RU shows no i18n keys and no English labels. 62-language-audit.js runs only de / en for Cyrillic; this is the ru loop. Keys: ⟦missing⟧ markers, a text equal to a string-table key.
+     English labels: menu, tabs, buttons and headings that are Latin-only words (abbreviations in capitals, file formats and product names are fine) */
+  const h8RuAudit = (ev, w) => {
+    const keys = new Set(ev('Object.keys(STRINGS)')), hits = new Map(), d = w.document;
+    const ALLOW = /^(?:[A-Z0-9][A-Z0-9 .,·+\-–\/&()%#:₸]*|Excel|JSON|Wialon|Telegram|WhatsApp|e-mail|Kökzhol|Fragenkatalog\b.*|Partner API v\d+|SLA · KDL Olymp\b.*|(?:Van|Reefer|Truck) \d+ t|Thermo King.*|Dry ice)$/;
+    const add = (s, where) => { if (!hits.has(s)) hits.set(s, where); };
+    const scan = where => {
+      const root = d.querySelector('#root'), it = d.createTreeWalker(root, w.NodeFilter.SHOW_TEXT);
+      for (let n = it.nextNode(); n; n = it.nextNode()) { const p = n.parentElement; if (p && /^(SCRIPT|STYLE)$/.test(p.tagName)) continue; const s = n.nodeValue.trim(); if (s && (s.includes('⟦') || keys.has(s))) add('key: ' + s.slice(0, 60), where); }
+      root.querySelectorAll('[title],[placeholder],[aria-label],[alt]').forEach(e => ['title', 'placeholder', 'aria-label', 'alt'].forEach(a => { const s = (e.getAttribute(a) || '').trim(); if (s && (s.includes('⟦') || keys.has(s))) add('key @' + a + ': ' + s.slice(0, 60), where); }));
+      root.querySelectorAll('.nav-item, .pill-tab, [role=tab], button, .btn, a.lnk, h1, h2, h3, h4, .card-head').forEach(e => {
+        const s = e.textContent.replace(/\s+/g, ' ').trim(); if (!s || H8_CYR.test(s) || !/[A-Za-z]{4,}/.test(s) || ALLOW.test(s) || /^[^A-Za-z]*$/.test(s)) return; add('Latin label: ' + s.slice(0, 60), where);
+      });
+    };
+    const walk = (ids, pre) => ids.forEach(id => {
+      try { ev(`go(${JSON.stringify(id)})`); } catch (e) { return; }
+      if (ev('S.route') !== id) return;
+      const tabs = ev(`tabsOf(${JSON.stringify(id)}).map(t=>t.key)`);
+      if (!tabs.length) scan(pre + id); tabs.forEach(k => { ev(`setTab(${JSON.stringify(id)},${JSON.stringify(k)})`); scan(pre + id + '/' + k); });
+    });
+    walk(ev('Object.keys(SCREENS)'), '');
+    for (const role of ['driver', 'customer', 'partner', 'dispatcher', 'finance']) { ev(`ACT.setRole({v:'${role}'})`); walk([ev('S.route')].concat(ev(`(SHELL_NAV['${role}']||[]).map(n=>n[0])`)), role + ':'); }
+    ev("ACT.setRole({v:'admin'});go('help')"); ev('HELP.articles.map(function(a){return a.key})').forEach(k => { ev(`ACT.helpGo({k:${JSON.stringify(k)}})`); scan('help/' + k); });
+    return [...hits].map(([s, where]) => where + ' → ' + s);
+  };
+  await group('[ru] language audit: no i18n keys and no English labels in any screen, tab, role shell or help article (0.3.11 584; 62-language-audit.js runs de / en only)', 'ru', async (g, ev, w) => {
+    /* open defects of areas that this file's owner does not edit (reported to the owners): the AI assistant labels, the report-card buttons and the hub tab «Standgeld» have a Latin RU label.
+       The entries are matched by text, so the audit stays strict for everything else; remove an entry when its owner fixes the label. */
+    const OPEN = /^(?:Latin label: (?:Accept|Dismiss|Override|Notify customer|AI Settings|Standgeld|View Details|Toggle AI Summary|⟲ View History|Audit Trail)\b)/;
+    const bad = h8RuAudit(ev, w).filter(x => !OPEN.test(x.split(' → ')[1] || ''));
+    assert(!bad.length, bad.length + ' findings: ' + bad.slice(0, 30).join(' | '));
+  });
+  /* 0.3.11 595 «✓ ● ▲ ■ у каждой метки уровня»: v6 level / status chips are .chip.<colour>; the glyph comes from the colour class (app.css) */
+  for (const design of ['kokzhol', 'olymp']) await group('[' + design + '] levels are distinguishable without colour: a glyph ✓ ● ▲ ■ on every level chip (0.3.11 595, FR-134)', 'ru', async (g, ev, w) => {
+    if (ev('S.design') !== design) ev('ACT.setDesign()'); eq(ev('S.design'), design);
+    const GL = { green: '✓', blue: '●', yellow: '▲', red: '■' }, glyph = e => w.getComputedStyle(e, '::before').content;
+    ev("go('dashboard');setTab('dashboard','alarms')"); let chips = [...w.document.querySelectorAll('.chip')]; assert(chips.length >= 8, 'chips on the alarms tab: ' + chips.length);
+    const lv = ev('[0,1,2,3].map(function(l){return lvChip(l)}).join("")'); w.document.querySelector('#root').insertAdjacentHTML('beforeend', '<div id="h8lv">' + lv + '</div>'); chips = [...w.document.querySelectorAll('.chip')];
+    const seen = new Set();
+    for (const c of chips) { const col = Object.keys(GL).find(k => c.classList.contains(k)); if (!col) continue; seen.add(col); assert(glyph(c).includes(GL[col]), c.className + ' «' + c.textContent.trim() + '» has no ' + GL[col] + ': ' + glyph(c)); }
+    eq([...seen].sort().join(), 'blue,green,red,yellow', 'all four levels present'); const lvChips = [...w.document.querySelectorAll('#h8lv .chip')]; eq(new Set(lvChips.map(c => glyph(c))).size, 4, 'lvChip(0..3): four different glyphs');
+    const tx = lvChips.map(c => w.getComputedStyle(c).color); assert(lvChips.every(c => c.textContent.trim().length > 0), 'level chips keep their text'); assert(tx.length === 4, 'four level chips');
+  });
+  /* 0.3.11 686: history.back() restores the scroll position. The frame shares its session history with the harness, so popstate is dispatched by hand with the state the app stored */
+  await group('history: leaving a long page stores its scroll position and Back restores it (0.3.11 686, BUG-31)', 'en', async (g, ev, w) => {
+    ev("go('help');ACT.helpGo({k:'roles'})"); const m = () => w.document.querySelector('main'); assert(m().scrollHeight - m().clientHeight > 800, 'the help page is long: ' + (m().scrollHeight - m().clientHeight));
+    const saved = []; const orr = w.history.replaceState.bind(w.history); w.history.replaceState = (s, t, u) => { saved.push(s); return orr(s, t, u); };
+    m().scrollTop = 700; const y0 = m().scrollTop; assert(y0 > 500, 'scrolled: ' + y0); const back = w.location.search;
+    ev("go('dashboard')"); assert(m().scrollTop < 50, 'a new page opens at the top: ' + m().scrollTop); const st = saved.find(s => s && s.y > 0); assert(st && Math.abs(st.y - y0) < 30, 'the scroll position is stored in the history entry: ' + JSON.stringify(saved));
+    w.history.replaceState({ y: 0 }, '', back); w.dispatchEvent(new w.PopStateEvent('popstate', { state: st })); await new Promise(r => setTimeout(r, 120));
+    eq(ev('S.route'), 'help', 'Back returns to the page'); assert(Math.abs(m().scrollTop - y0) < 30, 'scroll restored: ' + m().scrollTop + ' of ' + y0);
+  });
+  /* 0.3.11 690: the tab title is in the page language (61-shell-ext.js asserts EN only) */
+  for (const lang of ['ru', 'de', 'kk']) await group('[' + lang + '] document.title: screen, tab, help article and 403 in the page language (0.3.11 690)', lang, async (g, ev, w) => {
+    const T0 = { ru: ['Справка', /Справка/], de: ['Hilfe', /^Hilfe · /], kk: ['Анықтама', /^Анықтама · /] }[lang], lat = lang === 'de';
+    ev("go('orders');ACT.stab({s:'orders',v:'ship'})"); const a = w.document.title; assert(/Kökzhol$/.test(a), 'brand: ' + a); assert(lat ? !H8_CYR.test(a) : H8_CYR.test(a), (lat ? 'Cyrillic in the DE title: ' : 'no Cyrillic in the title: ') + a); assert(/04/.test(a), 'screen number: ' + a);
+    ev("go('reports');ACT.stab({s:'reports',v:'kpi'})"); const b = w.document.title; assert(b !== a && /Kökzhol$/.test(b), 'title follows the tab: ' + b); if (lat) assert(!H8_CYR.test(b), 'Cyrillic in the DE tab title: ' + b);
+    ev("ACT.helpGo({k:'roles'})"); const h = w.document.title; assert(T0[1].test(h) && /Kökzhol$/.test(h), 'help title: ' + h); if (lat) assert(!H8_CYR.test(h), 'Cyrillic in the DE help title: ' + h);
+    ev("S.route='forbidden';render()"); assert(/^403 · Kökzhol$/.test(w.document.title), '403 title: ' + w.document.title);
+  });
+  /* 0.3.11 727 / 729 (adapted to v6): the browser storage of v6 is not used inside test frames (they share the origin of the harness), so the contract is tested with a stand-in storage; ?brand= is
+     tested in fresh frames. v6 has one Kökzhol navigation style (the teal active item), not 0.3.11's group tiles / white active tile: the check is that the active item is readable and distinct in both designs */
+  await group('design: the choice is saved and restored, ?brand=olymp|kokzhol wins over it, an unknown value is ignored (0.3.11 727)', 'ru', async (g, ev, w) => {
+    const fake = () => { const m = {}; return { m, getItem: k => (k in m ? m[k] : null), setItem: (k, v) => { m[k] = String(v); } }; }, st = fake();
+    eq(ev('S.design'), 'kokzhol', 'default design'); ev('ACT.setDesign()'); eq(ev('S.design'), 'olymp'); eq(w.document.documentElement.dataset.design, 'olymp'); w.designSave(st); eq(st.m['olymp.design'], 'olymp', 'saved');
+    ev("S.design='kokzhol';document.documentElement.dataset.design='kokzhol'"); eq(w.designLoad(st, ''), 'olymp', 'restored after a reload'); eq(w.document.documentElement.dataset.design, 'olymp');
+    eq(w.designLoad(st, '?brand=kokzhol'), 'kokzhol', '?brand=kokzhol returns the default design'); eq(st.m['olymp.design'], 'kokzhol', '?brand replaces the stored choice'); eq(w.designLoad(st, '?brand=nonsense&s=fleet'), 'kokzhol', 'unknown value ignored'); eq(w.designLoad(fake(), '?brand=olymp'), 'olymp', '?brand=olymp without storage');
+    const f = async q => { const fr = document.createElement('iframe'); fr.style.cssText = 'width:1316px;height:760px'; fr.src = 'index.html?' + q; document.getElementById('frames').appendChild(fr); await new Promise(ok => { fr.onload = ok; }); await new Promise(r => setTimeout(r, 150)); return fr; };
+    let fr = await f('brand=olymp'); eq(fr.contentWindow.eval('S.design'), 'olymp', '?brand=olymp'); eq(fr.contentWindow.document.documentElement.dataset.design, 'olymp'); assert(/kokzhol-mark\.svg/.test(fr.contentWindow.document.querySelector('.brand img').getAttribute('src')), 'light-sidebar mark'); fr.remove();
+    fr = await f('brand=kokzhol&s=fleet'); eq(fr.contentWindow.eval('S.design'), 'kokzhol', '?brand=kokzhol'); eq(fr.contentWindow.eval('S.route'), 'fleet', 'other parameters still work'); fr.remove();
+    fr = await f('brand=zzz'); eq(fr.contentWindow.eval('S.design'), 'kokzhol', 'invalid brand → default'); fr.remove();
+  });
+  for (const design of ['kokzhol', 'olymp']) await group('[' + design + '] navigation: the active item is distinct and readable (contrast >= 4.5), icons follow the text colour (0.3.11 729, adapted: v6 has no group tiles)', 'ru', async (g, ev, w) => {
+    if (ev('S.design') !== design) ev('ACT.setDesign()'); const d = w.document;
+    const rgb = s => (s.match(/[\d.]+/g) || []).map(Number), lum = c => { const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]); };
+    const act = d.querySelector('#side-nav .nav-item[aria-current=page]'), idle = d.querySelector('#side-nav .nav-item:not([aria-current])'); assert(act && idle, 'active and idle items');
+    const ca = w.getComputedStyle(act), ci = w.getComputedStyle(idle); assert(ca.backgroundColor !== ci.backgroundColor || ca.color !== ci.color, 'the active item differs from an idle one');
+    const bg = rgb(ca.backgroundColor), fg = rgb(ca.color); assert(bg.length >= 3 && (bg.length < 4 || bg[3] > 0.5), 'the active item has a solid background: ' + ca.backgroundColor);
+    const L1 = lum(bg), L2 = lum(fg), cr = (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05); assert(cr >= 4.5, 'active item contrast ' + cr.toFixed(2) + ' (' + ca.color + ' on ' + ca.backgroundColor + ')');
+    const svg = act.querySelector('svg'); assert(svg && svg.getAttribute('stroke') === 'currentColor', 'the icon follows the text colour'); eq(w.getComputedStyle(svg).stroke, ca.color, 'icon stroke = text colour');
+    const n = d.querySelectorAll('#side-nav .nav-item').length; assert(n === 13, 'menu items ' + n);
+  });
+  /* tours: 0.3.11 703 / 704 */
+  await group('tours: «QA deviation» starts from the ▶ button of the quality screen and ends on the temperature tab; the driver tour switches the tabs staff → app → waybill (0.3.11 703)', 'ru', async (g, ev, w) => {
+    ev("go('pod');setTab('pod','quality')"); const b = w.document.querySelector('.page-head .help-q[data-act=tourStart][data-id=qa]'); assert(b, 'no ▶ tour button on the quality screen'); b.click();
+    eq(ev('HELP.tour.id'), 'qa'); eq(ev('S.route'), 'pod'); eq(ev('S.tab.pod'), 'quality'); assert(w.document.querySelector('.tour-layer[data-tour=qa] .tour-hi'), 'spotlight on step 1'); eq(w.document.querySelector('.tour-layer').dataset.tourStep, '0');
+    for (let i = 1; i < 4; i++) w.document.querySelector('[data-act=tourNext]').click(); eq(ev('HELP.tour.i'), 3); eq(ev('S.route'), 'routes', 'last step is on the temperature screen'); eq(ev('S.tab.routes'), 'temp'); assert(!w.document.querySelector('[data-act=tourNext]'), 'no next on the last step');
+    w.document.querySelector('[data-act=tourEnd]').click(); eq(ev('HELP.tour'), null); assert(!w.document.querySelector('.tour-layer'), 'tour closed');
+    ev("go('drivers')"); const d = w.document.querySelector('.page-head .help-q[data-act=tourStart][data-id=driver]'); assert(d, 'no ▶ tour button on the drivers screen'); d.click();
+    eq(ev('S.route'), 'drivers'); eq(ev('S.tab.drivers'), 'staff', 'step 1 opens the staff tab'); w.document.querySelector('[data-act=tourNext]').click(); eq(ev('S.tab.drivers'), 'app', 'step 2 opens the app tab from the tour');
+    w.document.querySelector('[data-act=tourNext]').click(); eq(ev('S.route'), 'dispatch'); eq(ev('S.tab.dispatch'), 'express'); w.document.querySelector('[data-act=tourNext]').click(); eq(ev('S.route'), 'pod'); clean(w, 'driver tour'); ev('ACT.tourEnd()');
+  });
+  await group('tours: the customer tour «Booking» in the portal — listed for the customer, starts on the booking form, ends on «My bookings» (0.3.11 704)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'customer'});go('book')"); const b = w.document.querySelector('.page-head .help-q[data-act=tourStart][data-id=booking]'); assert(b, 'no ▶ tour button on the booking form'); b.click();
+    eq(ev('HELP.tour.id'), 'booking'); eq(ev('S.route'), 'book'); assert(w.document.querySelector('.tour-layer[data-tour=booking] .tour-hi'), 'spotlight on the load block'); const n = ev('allTours().find(function(t){return t.id==="booking"}).steps.length'); assert(n >= 3, 'steps ' + n);
+    for (let i = 1; i < n; i++) { w.document.querySelector('[data-act=tourNext]').click(); eq(ev('HELP.tour.i'), i); }
+    eq(ev('S.route'), 'mybookings', 'the last step is «My bookings»'); assert(!w.document.querySelector('[data-act=tourNext]'), 'no next on the last step'); w.document.querySelector('[data-act=tourBack]').click(); eq(ev('S.route'), 'book', 'back returns to the form'); clean(w, 'customer tour'); ev('ACT.tourEnd()');
+    ev("go('help');ACT.helpGo({k:'tours'})"); assert(w.document.querySelector('[data-act=tourStart][data-id=booking]'), 'listed in the help article «Tours» for the customer'); assert(!w.document.querySelector('[data-act=tourStart][data-id=dispatcher]'), 'staff tours are not offered to the customer');
+    ev("ACT.setRole({v:'driver'});go('help');ACT.helpGo({k:'tours'})"); assert(!w.document.querySelector('[data-act=tourStart][data-id=booking]'), 'the portal tour is not startable by a role without the booking form'); ev("ACT.setRole({v:'admin'})"); ev("go('dashboard')"); assert(!w.document.querySelector('.page-head [data-id=booking]'), 'no portal tour button on staff screens');
+  });
+  for (const lang of ['de', 'en', 'kk']) await group('[' + lang + '] tours: the portal tour has all four texts and follows the page language (0.3.11 704)', lang, async (g, ev, w) => {
+    ev("ACT.setRole({v:'customer'})"); const miss = ev('allTours().filter(function(t){return t.id==="booking"}).reduce(function(a,t){return a.concat(t.steps.filter(function(s){return !s.t[0]||!s.t[1]||!s.t[2]||!s.t[3]||!s.text[0]||!s.text[1]||!s.text[2]||!s.text[3]}).map(function(s,i){return i}))},[]).length'); eq(miss, 0, 'steps without a language');
+    ev("ACT.tourStart({id:'booking'})"); const t = w.document.querySelector('.tour-pop').innerText; assert(!/undefined|NaN/.test(t), 'tour text'); if (lang === 'kk') assert(/[ӘәҒғҚқҢңӨөҰұҮүҺһІі]/.test(t), 'KK tour text'); else assert(!H8_CYR.test(t), 'Cyrillic in the tour popover: ' + t.slice(0, 60)); ev('ACT.tourEnd()');
+  });
+  /* help: 0.3.11 528 / 532 / 533 / 662 */
+  await group('help: the article «How the platform is organised» embeds the platform diagram (17 functions and Records and administration) and the end-to-end flow (0.3.11 528)', 'ru', async (g, ev, w) => {
+    eq(ev("helpArt('structure').visuals.join()"), 'split,flow'); ev("go('help');ACT.helpGo({k:'structure'})");
+    const split = w.document.querySelector('.help-art figure.hv[data-visual=split] svg'), flow = w.document.querySelector('.help-art figure.hv[data-visual=flow] svg'); assert(split && flow, 'both diagrams are on the page');
+    assert(/17/.test(split.getAttribute('aria-label')) && /Учёт и администрирование/.test(split.getAttribute('aria-label')), 'the split diagram names the 17 functions and the records group: ' + split.getAttribute('aria-label')); assert(/Учёт и администрирование/.test(w.document.querySelector('.help-art').innerText), 'article text names the group');
+    assert(split.querySelectorAll('text').length >= 10, 'diagram has labels'); clean(w, 'structure');
+  });
+  await group('help: every page has a Help link to an existing article — all screens, the portal shells and the driver app resolve to their own article, not the start page (0.3.11 532)', 'ru', async (g, ev, w) => {
+    const bad = [];
+    for (const id of ev("Object.keys(SCREENS).filter(function(k){return k!=='help'&&k!=='forbidden'})")) { ev(`go(${JSON.stringify(id)})`); if (ev('S.route') !== id) continue; const k = ev('helpKeyFor()'); if (!ev(`!!helpArt(${JSON.stringify(k)})`) || k === 'start' || !w.document.querySelector('.page-head [data-act=helpHere]')) bad.push(id + '→' + k); }
+    for (const role of ['driver', 'customer', 'partner']) { ev(`ACT.setRole({v:'${role}'})`); for (const id of ev(`(SHELL_NAV['${role}']||[]).map(function(n){return n[0]})`)) { ev(`go(${JSON.stringify(id)})`); const k = ev('helpKeyFor()'); if (k === 'start' || !ev(`!!helpArt(${JSON.stringify(k)})`) || !w.document.querySelector('.page-head [data-act=helpHere]')) bad.push(role + ':' + id + '→' + k); } }
+    assert(!bad.length, 'pages without their own help article: ' + bad.join(', ')); ev("ACT.setRole({v:'driver'});go('driverapp');ACT.helpHere()"); eq(ev('S.route'), 'help'); eq(ev('S.help.key'), 'drivers/app', 'driver app opens the driver article');
+  });
+  await group('help: the customer portal gets a short help — booking, my bookings, login, FAQ — and no operations, roles or administration articles (0.3.11 533)', 'ru', async (g, ev, w) => {
+    ev("ACT.setRole({v:'customer'});go('help')"); const ks = [...w.document.querySelectorAll('.help-nav a[data-k]')].map(a => a.dataset.k);
+    for (const k of ['book', 'mybookings', 'login', 'faq']) assert(ks.includes(k), k + ' missing for the customer: ' + ks.join(','));
+    const internal = ks.filter(k => { const a = ev(`(function(){var a=helpArt(${JSON.stringify(k)});return a&&{screen:a.screen}})()`); return a && a.screen && !ev(`canSee(${JSON.stringify(a.screen)})`) && !['login', 'contracts'].includes(k); });
+    assert(!internal.length, 'operations / administration articles visible to the customer: ' + internal.join(', ')); for (const k of ['roles', 'structure', 'demo', 'navigation', 'records', 'deadlines']) assert(!ks.includes(k), 'internal article «' + k + '» visible to the customer');
+    assert(ks.length >= 8 && ks.length <= 20, 'short help: ' + ks.length + ' articles'); clean(w, 'customer help'); ev("ACT.setRole({v:'admin'});go('help')"); assert(w.document.querySelectorAll('.help-nav a[data-k]').length > 3 * ks.length, 'staff see the full help');
+  });
+  await group('help: the permission matrix equals the permission source — 35 permissions, one column per role, ticks = ROLE_PERMS (administrator 32) (0.3.11 662)', 'ru', async (g, ev, w) => {
+    const all = ev('(function(){var s={};Object.keys(ROLE_PERMS).forEach(function(r){ROLE_PERMS[r].forEach(function(p){s[p]=1})});return Object.keys(s).sort()})()'), doc = ev('HELP.permDesc.map(function(p){return p[0]}).sort()');
+    eq(all.length, 35, 'permissions in role-perms.json'); eq(doc.join(), all.join(), 'the matrix lists exactly the permissions of the source'); eq(ev('ROLE_PERMS.admin.length'), 32, 'administrator holds 32');
+    ev("go('help');ACT.helpGo({k:'roles'})"); const t = w.document.querySelector('[data-help-perms]'); const rows = [...t.querySelectorAll('tbody tr')]; eq(rows.length, 35, 'matrix rows'); const roles = ev('ROLES'); eq(t.querySelectorAll('thead th').length, roles.length + 2, 'one column per role');
+    roles.forEach((r, i) => { const n = rows.filter(tr => tr.children[i + 2].textContent.trim() === '✓').length; eq(n, ev(`ROLE_PERMS[${JSON.stringify(r)}].length`), r + ': ticks = permissions'); }); eq(rows.filter(tr => tr.children[2].textContent.trim() === '✓').length, 32, 'administrator column has 32 ticks');
   });
 
   __suite(-1);

@@ -526,11 +526,13 @@
     audit('Release', lid, 'Override release', reason.trim()); return null;
   }
   const REVOKE = { weather: T('погода / дорога', 'Wetter / Straße', 'weather / road', 'ауа райы / жол'), vehicle: T('транспорт', 'Fahrzeug', 'vehicle', 'көлік'), driver: T('водитель', 'Fahrer', 'driver', 'жүргізуші'), documents: T('документы', 'Dokumente', 'documents', 'құжаттар'), load: T('загрузка', 'Beladung', 'load', 'тиеу'), alarm: T('критическая тревога', 'kritischer Alarm', 'critical alarm', 'сыни дабыл'), planning: T('рейс изменён', 'Tour geändert', 'trip changed', 'рейс өзгерді'), other: T('другое', 'Sonstiges', 'other', 'басқа') };
-  function revoke(lid, why, alarmId) { const o = ops(load(lid)); if (!o.released) return false; o.released = null; o.revoked = { why: why || 'other', t: fdt(NOW).slice(-5), alarm: alarmId || null }; audit('Release', lid, 'Revoke', (REVOKE[why] || why) + (alarmId ? ' · #' + alarmId : '')); return true; }
+  /* 0.3.11 release.py: no release → 409, a reason outside the REVOKE list → 422; the same refusals here (message or null) */
+  const revokeErr = (lid, why) => !released(load(lid)) ? T('Рейс не выпущен', 'Fahrt nicht freigegeben', 'Trip is not released', 'Рейс шығарылмаған') : !Object.prototype.hasOwnProperty.call(REVOKE, why || 'other') ? T('Причина отзыва не из списка', 'Rücknahmegrund nicht in der Liste', 'Revoke reason is not in the list', 'Кері қайтару себебі тізімде жоқ') : null;
+  function revoke(lid, why, alarmId) { if (revokeErr(lid, why)) return false; const o = ops(load(lid)); o.released = null; o.revoked = { why: why || 'other', t: fdt(NOW).slice(-5), alarm: alarmId || null }; audit('Release', lid, 'Revoke', (REVOKE[why] || why) + (alarmId ? ' · #' + alarmId : '')); return true; }
   /* E-44 (0.3.11 release.py): a critical alarm (level 3) on a released trip before departure or on its vehicle withdraws the release automatically, reason "alarm" + alarm id */
   function alarmRevoke(a) { if (!a || a.lvl < 3) return 0; let n = 0; S.loads.forEach(l => { if ((a.load === l.id || (a.truck && a.truck === l.truck)) && ['assigned', 'loading'].includes(l.status) && ops(l).released && revoke(l.id, 'alarm', a.id)) n++; }); return n; }
   const released = l => !!ops(l).released;
-  Object.assign(globalThis, { gate, gateOk, release, revoke, released, REVOKE, alarmRevoke });
+  Object.assign(globalThis, { gate, gateOk, release, revoke, revokeErr, released, REVOKE, alarmRevoke });
   /* the status rule: loading → in_transit only with a valid release (FR-91); the dispatch drag & drop and the drawer button both go through canMove */
   const canMove0 = canMove;
   canMove = function (l, to) { const e = canMove0(l, to); if (e) return e; if (to === 'in_transit' && l.status === 'loading' && !released(l)) return LT('ops_model.go_no_go_release_required_tab_docume');

@@ -37,8 +37,15 @@
       ST('routes', 'temp', ['.pill-tab[data-v=temp]', '.pill-tabs'], HQ('Температура', 'Temperatur', 'Temperature', 'Температура'), HQ('Профиль камеры и правила тревог — основа решения по товару.', 'Kammerprofil und Alarmregeln — Grundlage der Entscheidung über die Ware.', 'The chamber profile and alarm rules are the basis for the goods decision.', 'Камера профилі мен дабыл ережелері — тауар бойынша шешім негізі.')),
     ] },
   );
+  /* customer portal tour (0.3.11 «Тур клиента Бронирование»): the booking form, the price block and the list of requests; steps sit on portal screens, so it lives in HELP.ptours */
+  HELP.ptours.push({ id: 'booking', at: 'book', title: HQ('Бронирование в портале', 'Buchung im Portal', 'Booking in the portal', 'Порталда брондау'), who: HQ('клиент (портал)', 'Kunde (Portal)', 'customer (portal)', 'клиент (портал)'), steps: [
+    ST('book', '', ['[data-load]', '.card'], HQ('Груз', 'Ware', 'Goods', 'Жүк'), HQ('Температурный класс, паллеты и вес: по ним считаются цена, вместимость и проверка нагрузки на ось.', 'Temperaturklasse, Paletten und Gewicht: daraus entstehen Preis, Kapazität und die Achslastprüfung.', 'Temperature class, pallets and weight: they drive the price, the capacity and the axle check.', 'Температура класы, паллеттер және салмақ: баға, сыйымдылық және ось жүктемесін тексеру солардан есептеледі.')),
+    ST('book', '', ['#bk_price'], HQ('Цена и слоты', 'Preis und Slots', 'Price and slots', 'Баға және слоттар'), HQ('Цена видна сразу, с НДС и страховкой; строка прайс-листа показывает вашу скидку. Выберите свободный рейс.', 'Der Preis steht sofort da, mit MwSt. und Versicherung; die Zeile der Preisliste zeigt Ihren Rabatt. Wählen Sie eine freie Abfahrt.', 'The price shows at once, with VAT and insurance; the price-list line shows your discount. Pick a free departure.', 'Баға бірден көрінеді, ҚҚС және сақтандырумен; прайс-тізім жолы жеңілдігіңізді көрсетеді. Бос рейсті таңдаңыз.')),
+    ST('book', '', ['[data-notify]', '#bk_price'], HQ('Подтверждение', 'Bestätigung', 'Confirmation', 'Растау'), HQ('Сводку бронирования можно получить по e-mail или SMS — без персональных данных.', 'Die Zusammenfassung der Buchung kommt per E-Mail oder SMS — ohne personenbezogene Daten.', 'The booking summary can arrive by e-mail or SMS — without personal data.', 'Брондау қорытындысын e-mail немесе SMS арқылы алуға болады — жеке деректерсіз.')),
+    ST('mybookings', '', ['.table', '.kpi-row'], HQ('Мои бронирования', 'Meine Buchungen', 'My bookings', 'Менің брондауларым'), HQ('Здесь статус каждой заявки: получена, подтверждена, отклонена или отменена; договоры подписываются тоже здесь.', 'Hier steht der Status jeder Anfrage: eingegangen, bestätigt, abgelehnt oder storniert; auch Verträge werden hier unterschrieben.', 'The status of every request is here: received, confirmed, rejected or cancelled; contracts are signed here too.', 'Әр өтінімнің күйі осында: алынды, расталды, қабылданбады немесе болдырылмады; шарттарға да осында қол қойылады.')),
+  ] });
   helpArt('tours'); HELP.tour = null;
-  const cur = () => { const t = HELP.tour && HELP.tours.find(x => x.id === HELP.tour.id); return t ? { t, i: HELP.tour.i, s: t.steps[HELP.tour.i] } : null; };
+  const cur = () => { const t = HELP.tour && allTours().find(x => x.id === HELP.tour.id); return t ? { t, i: HELP.tour.i, s: t.steps[HELP.tour.i] } : null; };
   const UI = { tour: T('Тур', 'Tour', 'Tour', 'Тур'), back: T('Назад', 'Zurück', 'Back', 'Артқа'), next: T('Далее', 'Weiter', 'Next', 'Келесі'), fin: T('Закончить', 'Beenden', 'Finish', 'Аяқтау'), miss: T('Этот элемент сейчас не виден (нет данных, нет права у вашей роли или он ещё не реализован) — шаг можно пропустить.', 'Dieses Element ist gerade nicht sichtbar (keine Daten, kein Recht Ihrer Rolle oder noch nicht umgesetzt) — der Schritt kann übersprungen werden.', 'This element is not visible right now (no data, your role has no access, or it is not implemented yet) — you can skip the step.', 'Бұл элемент қазір көрінбейді (дерек жоқ, рөліңізде құқық жоқ немесе әлі іске асырылмаған) — қадамды өткізіп жіберуге болады.') };
   function gotoStep() {
     const c = cur(); if (!c) return;
@@ -66,7 +73,7 @@
   }
   HELP.afterRender.push(tourLayer);
   Object.assign(ACT, {
-    tourStart: d => { const t = HELP.tours.find(x => x.id === d.id); if (!t) return; HELP.tour = { id: t.id, i: 0, moved: true }; gotoStep(); },
+    tourStart: d => { const t = allTours().find(x => x.id === d.id); if (!t) return; HELP.tour = { id: t.id, i: 0, moved: true }; gotoStep(); },
     tourNext: () => { const c = cur(); if (c && c.i < c.t.steps.length - 1) { HELP.tour.i++; gotoStep(); } },
     tourBack: () => { const c = cur(); if (c && c.i > 0) { HELP.tour.i--; gotoStep(); } },
     tourEnd: () => { HELP.tour = null; render(); },

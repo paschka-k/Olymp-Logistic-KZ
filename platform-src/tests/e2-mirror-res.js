@@ -31,10 +31,10 @@
     eq(ev("trk('t1').kg"), ev("typeOfTruck(trk('t1')).kg"), 'payload from type'); clean(w, 'fleet table');
   });
   await group('R2 F14/F10 registry: ID, capacity kg · pal, KASKO, ADR columns, logger ID in calibration, CSV and default view', 'en', async (g, ev, w) => {
-    const d = w.document; ev(R2REG); const th = [...d.querySelectorAll('#rg_table th')].map(x => x.innerText); assert(th.includes('ADR'), 'ADR column default ' + th); assert(th.some(x => /Logger/.test(x)), 'logger in calibration header');
+    const d = w.document; ev(R2REG); const th = [...d.querySelectorAll('#rg_table th')].map(x => x.innerText); assert(th.includes('ADR'), 'ADR column default ' + th); assert(th.some(x => /logger/i.test(x)), 'logger in calibration header');
     assert(d.querySelector('[data-logger=t1]'), 'logger cell');
     ev("ACT.rgCols()"); for (const k of ['code', 'kg', 'kasko']) { const cb = d.querySelector(`.rg_col[value=${k}]`); assert(cb && !cb.checked, k + ' optional column'); cb.checked = true; cb.dispatchEvent(new w.Event('change', { bubbles: true })); }
-    const th2 = [...d.querySelectorAll('#rg_table th')].map(x => x.innerText); assert(th2.includes('ID') && th2.includes('Capacity') && th2.includes('Comprehensive until'), 'added ' + th2);
+    const th2 = [...d.querySelectorAll('#rg_table th')].map(x => x.innerText); assert(th2.some(x => /^id$/i.test(x)) && th2.some(x => /^capacity$/i.test(x)) && th2.some(x => /^comprehensive until$/i.test(x)), 'added ' + th2);
     assert(/\d kg · \d+ pal/.test(d.querySelector('#rg_table').innerText), 'kg · pal cell'); ev("S.res.fleet.kasko.t1='2026-11-01';render()"); assert(d.querySelector('#rg_table').innerText.includes('01.11.2026'), 'kasko date');
     ev('ACT.rgCsv()'); const csv = ev('S.res.lastCsv'); const hd = csv.split(String.fromCharCode(13, 10))[0].replace(/^﻿/, '').split(';'); assert(hd.includes('ADR') && hd.includes('ID') && hd.includes('Capacity'), 'csv header ' + hd); assert(csv.includes(ev("trk('t1').logger")), 'csv logger');
     w.document.querySelector('#rg_vname').value = 'Mine'; ev('ACT.rgSave()'); eq(ev("S.res.views.find(v=>v.name==='Mine').def"), true, 'default view'); clean(w, 'registry columns');

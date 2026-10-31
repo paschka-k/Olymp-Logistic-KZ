@@ -10,7 +10,7 @@
   });
   await group('P4 partners: contact drawer masks numbers, Call (simulation) is audited, copy', 'ru', async (g, ev, w) => {
     ev("ACT.setRole({v:'admin'});" + PTAB + ";ACT.ptContact({id:'PL-01'})"); assert(w.document.querySelector('[data-contacts=PL-01]'), 'drawer'); clean(w, 'contact drawer');
-    const c = ev("partnerContacts(S.partners.find(p=>p.id==='PL-01'))"); eq(c.length, 2, 'two persons'); assert(/•/.test(w.document.querySelector('[data-contact]').innerText), 'masked'); assert(c[0].tel.indexOf('•') < 0 && !w.document.body.innerText.includes(c[0].mob), 'full number hidden before the call');
+    const c = ev("partnerContacts(S.partners.find(p=>p.id==='PL-01'))"); eq(c.length, 3, 'three persons'); assert(/•/.test(w.document.querySelector('[data-contact]').innerText), 'masked'); assert(c[0].tel.indexOf('•') < 0 && !w.document.body.innerText.includes(c[0].mob), 'full number hidden before the call');
     const a0 = ev('S.audit.length'); ev(`ACT.ptCall({id:'${c[0].id}'})`); assert(w.document.body.innerText.includes(c[0].mob), 'revealed after the call'); assert(ev('S.audit.length') >= a0 + 2, 'reveal + call audited'); assert(ev("S.audit.some(a=>/pii\\.read/.test(a.decision))"), 'pii.read audit entry'); assert(w.document.querySelector('[data-call]'), 'call log in the drawer');
     ev("ACT.ptCopy({id:'PL-01'})"); assert(ev('S.ptx.lastCopy').indexOf('СтепьЛогистик') >= 0, 'copy text'); ev("ACT.setRole({v:'viewer'})"); ev("ACT.ptCall({id:'PL-02:0'})"); assert(!ev("S.ptx.revealed['PL-02:0']"), 'no right -> no reveal');
   });

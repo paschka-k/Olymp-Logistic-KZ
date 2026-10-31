@@ -47,7 +47,7 @@ const mkDrivers = () => [
     docs: [D('lic', '2029-05-14'), D('med', '2027-02-03'), D('gdp', '2027-06-01')] },
   { id: 'd2', code: 'DRV-002', name: nm('Асхат Нургалиев'),    ini: nm('АН'), rto: 9,   status: 'available', lic: 'CE', exp: 8,  rating: 4.7, phone: '+7 702 234 56 78', hub: 'ALA', onDuty: 0,   week: 38,
     docs: [D('lic', '2028-09-22'), D('med', '2027-04-18'), D('gdp', '2026-11-02')] },
-  { id: 'd3', code: 'DRV-003', name: nm('Дмитрий Орлов'),      ini: nm('ДО'), rto: 3.5, status: 'available', lic: 'C',  exp: 12, rating: 4.8, phone: '+7 705 345 67 89', hub: 'AST', onDuty: 5.5, week: 51,
+  { id: 'd3', code: 'DRV-003', name: nm('Дмитрий Орлов'),      ini: nm('ДО'), rto: 3.5, status: 'available', lic: 'CE', exp: 12, rating: 4.8, phone: '+7 705 345 67 89', hub: 'AST', onDuty: 5.5, week: 51,
     docs: [D('lic', '2027-12-15'), D('med', '2027-08-22'), D('gdp', '2027-03-10')] },
   { id: 'd4', code: 'DRV-004', name: nm('Марат Жунусов'),      ini: nm('МЖ'), rto: 9,   status: 'busy',      lic: 'CE', exp: 6,  rating: 4.6, phone: '+7 707 456 78 90', hub: 'AST', onDuty: 4,   week: 33,
     docs: [D('lic', '2030-01-30'), D('med', '2027-01-12'), D('gdp', '2027-09-09')] },

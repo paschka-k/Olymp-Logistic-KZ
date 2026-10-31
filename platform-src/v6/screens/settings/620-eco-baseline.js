@@ -26,7 +26,7 @@
   const QST = { ok: ['green', T('учтено', 'umgesetzt', 'covered', 'ескерілді')], dev: ['blue', T('отклонение от v3', 'Abweichung zu v3', 'deviation from v3', 'v3-тен ауытқу')], q: ['yellow', T('вопрос к KDL', 'Frage an KDL', 'question to KDL', 'KDL-ге сұрақ')], gap: ['red', T('нет данных', 'keine Daten', 'no data', 'дерек жоқ')] };
   globalThis.ecoQuestions = () => { const out = []; SEC.forEach(s => { for (let n = s[1]; n <= s[2]; n++) { const c = s[0] + n, m = QMAP[c]; out.push({ code: c, sec: s[0], secT: s[3], st: m ? m.st : 'ok', f: m && m.f, g: m && m.g }); } }); return out; };
   const E = S.eco = S.eco || {};
-  const B = E.bl = { sub: 'q', qf: '', sec: '', clarified: {}, pv: {}, launch: { 0: 'done', 1: 'risk', 2: 'risk' }, west: {}, legal: {} };
+  const B = E.bl = { sub: 'q', qf: '', vf: '', sec: '', clarified: {}, pv: {}, launch: { 0: 'done', 1: 'risk', 2: 'risk' }, west: {}, legal: {} };
   /* planned values (FR-174): initial check status per area */
   const PVST = { checked: ['green', T('проверено', 'geprüft', 'checked', 'тексерілді')], assumption: ['yellow', T('допущение', 'Annahme', 'assumption', 'болжам')], open: ['red', T('проверить', 'zu prüfen', 'to verify', 'тексеру керек')] };
   const pvInit = p => B.pv[p.id] || (p.area === 'legal' || p.area === 'integration' ? 'open' : p.id === 'insurer' || p.id === 'handling_fee' || p.id === 'express_rate' || p.id === 'truck_planning' ? 'assumption' : 'checked');
@@ -52,7 +52,7 @@
   const who = () => ({ admin: 'Sarah Johnson', manager: 'A. Bekov', finance: 'G. Ospanova' }[S.role] || ROLE_NAME[S.role]);
   const AUD = T('Исходные данные', 'Basisdaten', 'Baseline data', 'Бастапқы деректер');
   Object.assign(ACT, {
-    blSub: d => { B.sub = d.v; render(); }, blQf: d => { B.qf = d.v; render(); },
+    blSub: d => { B.sub = d.v; render(); }, blQf: d => { B.qf = d.v; render(); }, blVf: d => { B.vf = d.v; render(); },
     blClar: d => { if (!canCheck()) return err(T('Нужно право costs:approve', 'Recht costs:approve nötig', 'Needs costs:approve', 'costs:approve құқығы қажет')); B.clarified[d.id] = !B.clarified[d.id]; audit(AUD, d.id, B.clarified[d.id] ? T('Уточнено с KDL', 'Mit KDL geklärt', 'Clarified with KDL', 'KDL-мен нақтыланды') : T('Снова открыто', 'Wieder offen', 'Reopened', 'Қайта ашылды'), ''); render(); },
     blPv: d => { if (!canCheck()) return err(T('Нужно право costs:approve', 'Recht costs:approve nötig', 'Needs costs:approve', 'costs:approve құқығы қажет')); B.pv[d.id] = d.v; audit(AUD, d.id, PVST[d.v][1], who()); render(); },
     blLaunch: d => { B.launch[d.i] = d.v; audit(AUD, T('Запуск · шаг ', 'Start · Schritt ', 'Launch · step ', 'Старт · қадам ') + (+d.i + 1), d.v, ''); render(); },
@@ -78,8 +78,9 @@
   }
   function valBody() {
     const fr = ecoFr49();
-    const rows = ECO_BL.BLV.map(v => `<tr style="cursor:default" data-finding="${v.id}"><td><b>${v.id}</b><div class="sub">${esc(v.ref)}</div></td><td><b>${esc(tq(v.area))}</b></td><td>${esc(tq(v.fk))}</td><td class="faint">${esc(tq(v.v3))}</td><td>${esc(tq(v.act))}</td><td>${lv(v.lvl)}${v.q ? `<div style="margin-top:6px"><button class="btn sm ${B.clarified[v.id] ? 'green' : 'grey'}" data-act="blClar" data-id="${v.id}">${esc(B.clarified[v.id] ? T('✓ уточнено с KDL', '✓ mit KDL geklärt', '✓ clarified with KDL', '✓ KDL-мен нақтыланды') : T('Уточнить с KDL', 'Mit KDL klären', 'Clarify with KDL', 'KDL-мен нақтылау'))}</button></div>` : ''}</td></tr>`).join('');
+    const rows = ECO_BL.BLV.filter(v => !B.vf || v.lvl >= 3).map(v => `<tr style="cursor:default" data-finding="${v.id}"><td><b>${v.id}</b><div class="sub">${esc(v.ref)}</div></td><td><b>${esc(tq(v.area))}</b></td><td>${esc(tq(v.fk))}</td><td class="faint">${esc(tq(v.v3))}</td><td>${esc(tq(v.act))}</td><td>${lv(v.lvl)}${v.q ? `<div style="margin-top:6px"><button class="btn sm ${B.clarified[v.id] ? 'green' : 'grey'}" data-act="blClar" data-id="${v.id}">${esc(B.clarified[v.id] ? T('✓ уточнено с KDL', '✓ mit KDL geklärt', '✓ clarified with KDL', '✓ KDL-мен нақтыланды') : T('Уточнить с KDL', 'Mit KDL klären', 'Clarify with KDL', 'KDL-мен нақтылау'))}</button></div>` : ''}</td></tr>`).join('');
     return `<div class="card card-body" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><b>FR-49 · ${esc(T('Закрыть расхождения Fragenkatalog с KDL', 'Abweichungen des Fragenkatalogs mit KDL klären', 'Close the Fragenkatalog discrepancies with KDL', 'Fragenkatalog сәйкессіздіктерін KDL-мен жабу'))}</b>${chip(fr.open ? 'yellow' : 'green', fr.open ? T('открыто · ', 'offen · ', 'open · ', 'ашық · ') + fr.open + '/' + fr.total : T('закрыт', 'geschlossen', 'closed', 'жабық'))}<span class="note">${esc(LT('eco_baseline.the_item_stays_open_until_every_ques'))}</span></div>
+<div class="filters" data-test="filters">${seg([['', T('Все', 'Alle', 'All', 'Барлығы') + ' · ' + ECO_BL.BLV.length], ['crit', T('Критично', 'Kritisch', 'Critical', 'Сыни') + ' · ' + ECO_BL.BLV.filter(v => v.lvl >= 3).length]], 'blVf', B.vf)}</div>
 ${KIT.table(['ID', T('Тема', 'Thema', 'Topic', 'Тақырып'), 'Fragenkatalog', T('Платформа v3', 'Plattform v3', 'Platform v3', 'Платформа v3'), T('Решение в v4–v6', 'Entscheidung v4–v6', 'Decision in v4–v6', 'v4–v6 шешімі'), T('Статус', 'Status', 'Status', 'Күйі')], rows, { empty: false })}
 <div class="card card-body"><h4 style="margin:0 0 8px">${esc(T('Нет данных в ответах — запросить у KDL Olymp', 'Keine Daten in den Antworten — bei KDL Olymp anfragen', 'No data in the answers — request from KDL Olymp', 'Жауаптарда дерек жоқ — KDL Olymp-тен сұрау'))}</h4><div class="actbar">${ECO_BL.BLG.map(g => chip('gray', tq(g.t) + ' · ' + g.ref)).join('')}</div></div>`;
   }
