@@ -4,10 +4,10 @@
 
 | ID | Из брифа (дословно) | Статус | Основание | Где |
 |----|---------------------|--------|-----------|-----|
-| R01 | «FR-191 Per-language build: The build keeps only the page language of every `T(ru, de, en, kk)` tuple.» | in-ticket | — | spec Истории (метка Rxx) → T02 |
+| R01 | «FR-191 Per-language build: The build keeps only the page language of every `T(ru, de, en, kk)` tuple.» | done | — | spec Истории (метка Rxx) → T02 → 7d024bb |
 | R02 | «FR-192 Lazy screen modules: Core + one chunk per menu area, loaded on first visit; single-file build kept for offline demos.» | in-ticket | — | spec Истории (метка Rxx) → T09 |
-| R03 | «FR-193 Partial re-render: Render only the region that changed (main, drawer, top bar); keep focus and scroll position.» | in-ticket | — | spec Истории (метка Rxx) → T01 |
-| R04 | «FR-194 Live-tick budget: The tick updates only `data-live` nodes (position, temperature, ETA); full render only on user action; < 4 ms per tick.» | in-ticket | — | spec Истории (метка Rxx) → T01 |
+| R03 | «FR-193 Partial re-render: Render only the region that changed (main, drawer, top bar); keep focus and scroll position.» | done | — | spec Истории (метка Rxx) → T01 → 9584ebb |
+| R04 | «FR-194 Live-tick budget: The tick updates only `data-live` nodes (position, temperature, ETA); full render only on user action; < 4 ms per tick.» | done | — | spec Истории (метка Rxx) → T01 → 9584ebb |
 | R05 | «FR-195 Virtualised long tables: Windowing / paging for collection points (600+), audit log, readings, inbound lists.» | in-ticket | — | spec Истории (метка Rxx) → T05 |
 | R06 | «FR-197 Lazy demo data: Generate data per area on first use, memoised and seeded; time to interactive < 1.5 s.» | in-ticket | — | spec Истории (метка Rxx) → T04 |
 | R07 | «FR-211 Command palette: Ctrl+K combines global search, navigation and actions.» | in-ticket | — | spec Истории (метка Rxx) → T06 |

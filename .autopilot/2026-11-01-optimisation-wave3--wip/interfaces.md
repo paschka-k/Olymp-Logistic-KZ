@@ -30,3 +30,17 @@
 
 ## Что построено
 (заполняется по ходу тикетов)
+
+### T02 (сборка языков)
+- `stripLangs(src, lang, stats?, {hq?, comments?})` и `async verifyStrip(before, after, lang, parse?)` — `platform-src/tools-build/strip-langs.mjs`. Флаги сборки: `--keep-langs` (без вырезания, для диагностики), `--strip-help` (вырезание HQ, выключено: тесты c0-help-content читают полные кортежи).
+- Сервер тестов должен иметь корнем корень репозитория (тесты i2 грузят `../platform-src/tools-build/strip-langs.mjs`).
+- Бюджет: `page_kb` 3100, perf raw 3100 / gzip 1000. Вес: ru 3,09 MB (−25,3 %), de −27,6 %, en −27,9 %, kk −25,7 %.
+
+### T01 (render-regions-live) — построено
+
+- `renderRegion(name)` (`base/45-region.js`): перерисовывает регион `topbar|side|main|…`; `REGION_COUNT[name]` — счётчик перерисовок (для тестов).
+- `liveBind(key, fn(node))`, `liveUpdate(root?)`: узлы с `data-live` обновляются точечно без пересборки страницы.
+- `actionRegion(name)`; в `ACTION_DEFS` / `registerAction` поле `region` (`'all'` по умолчанию, `'main'`, `'topbar'`); диспетчер `ACT` для объявленного региона вызывает `renderRegion`, а не `render()`. Объявлено: `stab`→main, `tbMore`→topbar. Остальные ≈95 ACT по-прежнему `'all'`.
+- `regionHook('before'|'after', prio, fn)` — хуки вокруг перерисовки региона (баннер использует их).
+- Оговорка: внутри ACT с объявленным регионом DOM сразу после `render()` ещё старый; `toast()` всё ещё делает полный `render()`.
+- Тик `liveTick`: медиана 0,10 мс (бюджет 4 мс); перерисовка региона 13–21 мс.

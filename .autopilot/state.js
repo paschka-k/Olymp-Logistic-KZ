@@ -11,9 +11,9 @@ window.STATE =
   "memoryFile": "AGENTS.md",
   "memoryOwner": "autopilot",
   "skillDir": "C:/Users/Pavel/.agents/skills/autopilot",
-  "baseCommit": null,
+  "baseCommit": "7c90d82",
   "startedAt": "2026-11-01T01:07:23+01:00",
-  "updatedAt": "2026-11-01T01:20:39+01:00",
+  "updatedAt": "2026-11-01T05:14:37+01:00",
   "finishedAt": null,
   "stages": [
     {
@@ -43,12 +43,14 @@ window.STATE =
     },
     {
       "id": "plan",
-      "status": "active",
-      "startedAt": "2026-11-01T01:20:26+01:00"
+      "status": "done",
+      "startedAt": "2026-11-01T01:20:26+01:00",
+      "finishedAt": "2026-11-01T01:21:40+01:00"
     },
     {
       "id": "build",
-      "status": "pending"
+      "status": "active",
+      "startedAt": "2026-11-01T01:21:40+01:00"
     },
     {
       "id": "review",
@@ -61,8 +63,8 @@ window.STATE =
   ],
   "requirements": {
     "total": 13,
-    "done": 0,
-    "inTicket": 13,
+    "done": 3,
+    "inTicket": 10,
     "inSpec": 0,
     "placeholder": 0,
     "deferred": 0,
@@ -89,9 +91,19 @@ window.STATE =
       ],
       "review": "да — фундамент",
       "model": "сильная",
-      "status": "pending",
+      "status": "done",
       "retries": 0,
-      "repairs": 0
+      "repairs": 1,
+      "startedAt": "2026-11-01T01:21:41+01:00",
+      "repairFindings": [
+        "ревью: баннер тревог после тика; ACT не использует region"
+      ],
+      "finishedAt": "2026-11-01T05:14:36+01:00",
+      "tests": {
+        "passed": 731,
+        "failed": 731
+      },
+      "commit": "9584ebb"
     },
     {
       "id": "02",
@@ -110,9 +122,16 @@ window.STATE =
       ],
       "review": "нет",
       "model": "сильная",
-      "status": "pending",
+      "status": "done",
       "retries": 0,
-      "repairs": 0
+      "repairs": 0,
+      "startedAt": "2026-11-01T01:21:41+01:00",
+      "finishedAt": "2026-11-01T05:14:37+01:00",
+      "tests": {
+        "passed": 731,
+        "failed": 731
+      },
+      "commit": "7d024bb"
     },
     {
       "id": "03",
@@ -285,7 +304,10 @@ window.STATE =
       "repairs": 0
     }
   ],
-  "tests": null,
+  "tests": {
+    "passed": 731,
+    "failed": 731
+  },
   "debt": {
     "placeholders": [],
     "assumptions": [],
@@ -298,7 +320,19 @@ window.STATE =
     "deferred": 0,
     "items": []
   },
-  "concerns": [],
+  "concerns": [
+    "core.js:374 — сбитый комментарий saveD и псевдо-действие filter с virtual:true",
+    "150-monitor.js:48 — thTick перерисовывает main на вкладке температуры каждые 2 с без проверки изменений",
+    "core.js:~290 — liveSig-перерисовка теперь идёт и при открытом drawer, теста нет",
+    "core.js toast(): показ тоста делает полный render()",
+    "45-region.js — bannerSync и fallback da_sig зашиты в renderRegion по id",
+    "Тест баннера (i1-render-regions.js:138) проверяет только наличие, не count==1 и не сохранность после второго тика",
+    "platform-src/tests/i1-render-regions.js:138",
+    "Тест «drawer не пересоздаётся при breach» не проверяет, что перерисовка реально случилась — может быть зелёным вхолостую",
+    "platform-src/tests/i1-render-regions.js:158",
+    "ACT с region, вызывающий toast(), получит renderRegion вместо показа тоста (core.js:389)",
+    "platform-src/v6/core.js:389"
+  ],
   "blind": null,
   "beats": [
     "2026-11-01T01:07:23+01:00",
@@ -316,9 +350,21 @@ window.STATE =
     "2026-11-01T01:20:28+01:00",
     "2026-11-01T01:20:29+01:00",
     "2026-11-01T01:20:38+01:00",
-    "2026-11-01T01:20:39+01:00"
+    "2026-11-01T01:20:39+01:00",
+    "2026-11-01T01:20:47+01:00",
+    "2026-11-01T01:21:40+01:00",
+    "2026-11-01T01:21:41+01:00",
+    "2026-11-01T01:48:15+01:00",
+    "2026-11-01T01:50:56+01:00",
+    "2026-11-01T01:50:58+01:00",
+    "2026-11-01T02:20:49+01:00",
+    "2026-11-01T05:10:13+01:00",
+    "2026-11-01T05:10:15+01:00",
+    "2026-11-01T05:10:17+01:00",
+    "2026-11-01T05:14:36+01:00",
+    "2026-11-01T05:14:37+01:00"
   ],
-  "rev": 17,
+  "rev": 29,
   "waiting": null,
   "waits": [],
   "log": [
@@ -428,13 +474,99 @@ window.STATE =
       "g": "G3",
       "ok": true,
       "problems": 0
+    },
+    {
+      "t": "2026-11-01T01:21:40+01:00",
+      "k": "stage",
+      "id": "build",
+      "act": "start"
+    },
+    {
+      "t": "2026-11-01T01:21:41+01:00",
+      "k": "ticket",
+      "ids": [
+        "01",
+        "02"
+      ],
+      "act": "start"
+    },
+    {
+      "t": "2026-11-01T01:48:15+01:00",
+      "k": "ticket",
+      "ids": [
+        "01"
+      ],
+      "act": "review"
+    },
+    {
+      "t": "2026-11-01T01:50:56+01:00",
+      "k": "ticket",
+      "ids": [
+        "01"
+      ],
+      "act": "repair",
+      "note": "ревью: баннер тревог после тика; ACT не использует region"
+    },
+    {
+      "t": "2026-11-01T01:50:58+01:00",
+      "k": "add",
+      "key": "concerns",
+      "n": 5
+    },
+    {
+      "t": "2026-11-01T02:20:49+01:00",
+      "k": "add",
+      "key": "report",
+      "n": 1
+    },
+    {
+      "t": "2026-11-01T05:10:13+01:00",
+      "k": "add",
+      "key": "concerns",
+      "n": 2
+    },
+    {
+      "t": "2026-11-01T05:10:15+01:00",
+      "k": "add",
+      "key": "concerns",
+      "n": 2
+    },
+    {
+      "t": "2026-11-01T05:10:17+01:00",
+      "k": "add",
+      "key": "concerns",
+      "n": 2
+    },
+    {
+      "t": "2026-11-01T05:14:36+01:00",
+      "k": "ticket",
+      "ids": [
+        "01"
+      ],
+      "act": "done",
+      "tests": {
+        "passed": 731,
+        "failed": 731
+      }
+    },
+    {
+      "t": "2026-11-01T05:14:37+01:00",
+      "k": "ticket",
+      "ids": [
+        "02"
+      ],
+      "act": "done",
+      "tests": {
+        "passed": 731,
+        "failed": 731
+      }
     }
   ],
   "reqList": [
     {
       "id": "R01",
       "text": "«FR-191 Per-language build: The build keeps only the page language of every T(ru, de, en, kk) tuple.»",
-      "status": "in-ticket"
+      "status": "done"
     },
     {
       "id": "R02",
@@ -444,12 +576,12 @@ window.STATE =
     {
       "id": "R03",
       "text": "«FR-193 Partial re-render: Render only the region that changed (main, drawer, top bar); keep focus and scroll position.»",
-      "status": "in-ticket"
+      "status": "done"
     },
     {
       "id": "R04",
       "text": "«FR-194 Live-tick budget: The tick updates only data-live nodes (position, temperature, ETA); full render only on user action; < 4 ms per tick.»",
-      "status": "in-ticket"
+      "status": "done"
     },
     {
       "id": "R05",
@@ -517,5 +649,8 @@ window.STATE =
       "deferred": 0
     }
   },
-  "result": null
+  "result": null,
+  "report": [
+    "Вес страницы: достигнут −25…28 % (ru 4,13→3,09 MB), цель ТЗ −60 % (~1,2 MB) не достигнута: четырёхъязычные тексты справки HQ (~690 KB) оставлены целиком из-за тестов справки; ещё около −10 пунктов даёт флаг --strip-help"
+  ]
 }
