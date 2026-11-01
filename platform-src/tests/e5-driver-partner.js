@@ -20,8 +20,9 @@
     eq(ev('R5.NETC.length'), 21, 'cities'); eq(ev('R5.LABS.length'), 27, 'lab complexes'); assert(ev('R5.PTS.length') >= 600, 'points ' + ev('R5.PTS.length'));
     assert(ev("!!LOCS.ZHE && LOCS.ZHE.hub==='KAR'"), 'Zhezkazgan in LOCS'); assert(ev("R5.NETC.every(c=>LOCS[c.k])"), 'every network city in LOCS'); assert(ev("routeFor('ZHE','ALA').km>0"), 'route to Zhezkazgan');
     assert(ev("R5.PTS.every(p=>R5.LABS.some(x=>x.id===p.lab&&x.city===p.city))"), 'every point belongs to a lab complex of its city');
-    ev(E5_TAB('orders', 'recipients')); eq(ev("document.querySelectorAll('[data-cp]').length"), 20, 'one page = 20 rows'); assert(/^1\/\d+$/.test(ev("document.querySelector('[data-r5-pager]').dataset.r5Pager")), 'pager');
-    ev("ACT.r5Page({v:2})"); assert(/^2\//.test(ev("document.querySelector('[data-r5-pager]').dataset.r5Pager")), 'page 2');
+    ev(E5_TAB('orders', 'recipients')); // FR-195: the table is a window over all points, no 20-row pages any more
+    assert(ev("document.querySelectorAll('[data-cp]').length") > 5 && ev("document.querySelectorAll('[data-cp]').length") < 70 && ev("!document.querySelector('[data-r5-pager]')"), 'window of rows, no pager');
+    ev("ACT.r5Page({v:2})"); assert(ev("!!document.querySelector('[data-cp=\"CP-0021\"]')"), 'page 2 call scrolls to row 21'); assert(ev("!document.querySelector('[data-cp=\"CP-0001\"]')"), 'CP-0001 left the window');
     ev("const i=document.querySelector('#r5_rq');i.value='CP-0042';i.dispatchEvent(new Event('input',{bubbles:true}))"); eq(ev("document.querySelectorAll('[data-cp]').length"), 1, 'search by number'); eq(ev("document.querySelector('[data-cp]').dataset.cp"), 'CP-0042');
     ev("S.r5.rq='';ACT.r5City({v:'ZHE'})"); eq(ev("document.querySelectorAll('[data-cp]').length"), 10, 'Zhezkazgan points');
     const pid = ev("R5.PTS.find(p=>p.city==='SHY').id"); ev(`ACT.r5UseRcp({id:'${pid}'})`); eq(ev("document.querySelector('#n_to').value"), 'SHY', 'destination hub from the point');
