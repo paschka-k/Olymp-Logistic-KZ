@@ -253,7 +253,8 @@ function shellHead() {
   const title = sc ? sc.title() : navLabel(S.route);
   return `<div class="page-head"><div>${typeof shellEyebrow === 'function' ? shellEyebrow() : ''}<h1 class="page-title">${esc(title)}</h1>${sc && sc.sub ? `<p class="page-sub">${esc(sc.sub())}</p>` : ''}</div><div class="actions">${sc && sc.actions ? sc.actions() : ''}</div></div>`;
 }
-const toastInner = () => `${S.toast ? `<div class="toast ${S.toast.kind}" data-test="toast">${esc(S.toast.msg)}</div>` : ''}`;
+/* FR-214: the undo toast (S.undo, base/47-undo.js) sits above the ordinary toast; its button is ACT.undoToast */
+const toastInner = () => `${S.undo ? `<div class="toast undo" data-test="toast-undo"><span>${esc(S.undo.msg)}</span><button type="button" class="btn sm grey" data-act="undoToast">${esc(LT('undo.action'))}</button></div>` : ''}${S.toast ? `<div class="toast ${S.toast.kind}" data-test="toast">${esc(S.toast.msg)}</div>` : ''}`;
 function shell() {
   const body = shellContent();
   return `<div class="app">${shellSide()}
@@ -401,3 +402,33 @@ Object.assign(ACT, {
   page: d => { S.f.page = +d.v; render(); },
   create: () => openDrawer({ type: 'create' }),
 });
+
+// FR-213/214
+Object.assign(ACT, {
+  resetFilters: () => {
+    Object.keys(S.f).forEach(k => { S.f[k] = k === 'page' ? 1 : ''; });
+    if (typeof RC === 'object') Object.keys(RC).forEach(k => { if (typeof RC[k] === 'string') RC[k] = ''; else if (typeof RC[k] === 'boolean') RC[k] = false; });
+    if (S.rf) Object.keys(S.rf).forEach(k => { S.rf[k] = ''; });
+    if (S.lv) Object.keys(S.lv).forEach(k => { if (S.lv[k]) { S.lv[k].c = {}; S.lv[k].cur = ''; S.lv[k].name = ''; } });
+    render();
+  },
+  retry: () => render(),
+  undoToast: () => { undoRun(); },
+  prefsReset: () => { PREFS.reset(); toast(LT('prefs.reset_done')); },
+});
+// FR-212: remembered language, hub filter, tabs, theme
+(function prefsWire() {
+  if (PREFS.enabled) try {
+    const l = PREFS.langPick(), q = new URLSearchParams(location.search).get('lang');
+    if (q && PREFS.get('lang', null) !== q && /^(ru|de|en|kk)$/.test(q)) PREFS.set('lang', q);
+    else if (!q && l && l !== LANG && LANG === 'ru' && /(^|\/)(index\.html)?$/.test(location.pathname)) location.replace(fileFor(l) + location.search + location.hash);
+  } catch (_) { /* no location */ }
+  let on = false;
+  document.addEventListener('DOMContentLoaded', () => { if (PREFS.restore()) render(); on = true; });
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('.langs a[href]'), t = a && a.textContent.trim().toLowerCase();
+    if (t && /^(ru|de|en|kk)$/.test(t)) PREFS.set('lang', t);
+    if (on) PREFS.capture();
+  });
+  window.addEventListener('pagehide', () => { if (on) PREFS.capture(); });
+})();

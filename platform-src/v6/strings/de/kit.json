@@ -1,3 +1,15 @@
 {
-  "kit.empty": "Keine Einträge"
+  "kit.empty": "Keine Einträge",
+  "state.loading_title": "Wird geladen …",
+  "state.error_title": "Laden fehlgeschlagen",
+  "state.error_hint": "Bitte erneut versuchen.",
+  "state.retry": "Erneut versuchen",
+  "state.nofilter_title": "Nichts gefunden",
+  "state.nofilter_hint": "Bedingungen ändern oder Filter zurücksetzen.",
+  "state.reset_filters": "Filter zurücksetzen",
+  "undo.action": "Rückgängig",
+  "undo.audit_decision": "Rückgängig gemacht",
+  "undo.done": "Rückgängig gemacht",
+  "prefs.reset": "Gespeicherte Einstellungen zurücksetzen",
+  "prefs.reset_done": "Gespeicherte Einstellungen zurückgesetzt"
 }

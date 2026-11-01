@@ -1,3 +1,15 @@
 {
-  "kit.empty": "Нет записей"
+  "kit.empty": "Нет записей",
+  "state.loading_title": "Загрузка…",
+  "state.error_title": "Не удалось загрузить",
+  "state.error_hint": "Повторите попытку.",
+  "state.retry": "Повторить",
+  "state.nofilter_title": "Ничего не найдено",
+  "state.nofilter_hint": "Измените условия или сбросьте фильтры.",
+  "state.reset_filters": "Сбросить фильтры",
+  "undo.action": "Отменить",
+  "undo.audit_decision": "Отмена",
+  "undo.done": "Отменено",
+  "prefs.reset": "Сбросить сохранённые настройки",
+  "prefs.reset_done": "Сохранённые настройки сброшены"
 }

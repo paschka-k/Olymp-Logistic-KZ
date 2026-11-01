@@ -1,3 +1,15 @@
 {
-  "kit.empty": "Жазба жоқ"
+  "kit.empty": "Жазба жоқ",
+  "state.loading_title": "Жүктелуде…",
+  "state.error_title": "Жүктеу мүмкін болмады",
+  "state.error_hint": "Қайталап көріңіз.",
+  "state.retry": "Қайталау",
+  "state.nofilter_title": "Ештеңе табылмады",
+  "state.nofilter_hint": "Шарттарды өзгертіңіз немесе сүзгілерді тастаңыз.",
+  "state.reset_filters": "Сүзгілерді тастау",
+  "undo.action": "Болдырмау",
+  "undo.audit_decision": "Қайтарылды",
+  "undo.done": "Қайтарылды",
+  "prefs.reset": "Сақталған баптауларды тастау",
+  "prefs.reset_done": "Сақталған баптаулар тасталды"
 }

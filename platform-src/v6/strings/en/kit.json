@@ -1,3 +1,15 @@
 {
-  "kit.empty": "No records"
+  "kit.empty": "No records",
+  "state.loading_title": "Loading…",
+  "state.error_title": "Could not load",
+  "state.error_hint": "Please try again.",
+  "state.retry": "Try again",
+  "state.nofilter_title": "Nothing found",
+  "state.nofilter_hint": "Change the conditions or reset the filters.",
+  "state.reset_filters": "Reset filters",
+  "undo.action": "Undo",
+  "undo.audit_decision": "Undone",
+  "undo.done": "Undone",
+  "prefs.reset": "Reset saved preferences",
+  "prefs.reset_done": "Saved preferences reset"
 }
