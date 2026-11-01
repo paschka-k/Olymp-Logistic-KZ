@@ -27,6 +27,7 @@
   /* ---------- FR-215: keyboard-shortcut list (also holds the FR-219 display switches) ---------- */
   const KEYS = () => [
     [['?'], LT('a11y.open_this_list')],
+    [['Ctrl+K', '⌘K'], typeof paletteKeyText === 'function' ? paletteKeyText() : ''],   // text from 090-palette.js
     [['/'], LT('a11y.jump_to_search')],
     [['Esc'], LT('a11y.close_a_dialog_card_or_menu_focus_re')],
     [['Tab', 'Shift+Tab'], LT('a11y.next_previous_control_inside_an_open')],
