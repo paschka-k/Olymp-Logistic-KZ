@@ -13,7 +13,7 @@ window.STATE =
   "skillDir": "C:/Users/Pavel/.agents/skills/autopilot",
   "baseCommit": "7c90d82",
   "startedAt": "2026-11-01T01:07:23+01:00",
-  "updatedAt": "2026-11-01T05:48:48+01:00",
+  "updatedAt": "2026-11-01T14:04:55+01:00",
   "finishedAt": null,
   "stages": [
     {
@@ -63,8 +63,8 @@ window.STATE =
   ],
   "requirements": {
     "total": 13,
-    "done": 5,
-    "inTicket": 8,
+    "done": 10,
+    "inTicket": 3,
     "inSpec": 0,
     "placeholder": 0,
     "deferred": 0,
@@ -215,9 +215,16 @@ window.STATE =
       ],
       "review": "да — фундамент",
       "model": "сильная",
-      "status": "pending",
+      "status": "done",
       "retries": 0,
-      "repairs": 0
+      "repairs": 1,
+      "startedAt": "2026-11-01T05:49:01+01:00",
+      "finishedAt": "2026-11-01T14:04:51+01:00",
+      "tests": {
+        "passed": 817,
+        "failed": 818
+      },
+      "commit": "5fab01f"
     },
     {
       "id": "06",
@@ -240,9 +247,16 @@ window.STATE =
       ],
       "review": "нет",
       "model": "обычная",
-      "status": "pending",
+      "status": "done",
       "retries": 0,
-      "repairs": 0
+      "repairs": 0,
+      "startedAt": "2026-11-01T05:49:02+01:00",
+      "finishedAt": "2026-11-01T14:04:53+01:00",
+      "tests": {
+        "passed": 817,
+        "failed": 818
+      },
+      "commit": "0bbcf62"
     },
     {
       "id": "07",
@@ -264,9 +278,16 @@ window.STATE =
       ],
       "review": "нет",
       "model": "обычная",
-      "status": "pending",
+      "status": "done",
       "retries": 0,
-      "repairs": 0
+      "repairs": 0,
+      "startedAt": "2026-11-01T05:49:04+01:00",
+      "finishedAt": "2026-11-01T14:04:55+01:00",
+      "tests": {
+        "passed": 817,
+        "failed": 818
+      },
+      "commit": "a9a4a65"
     },
     {
       "id": "08",
@@ -319,8 +340,8 @@ window.STATE =
     }
   ],
   "tests": {
-    "passed": 774,
-    "failed": 774
+    "passed": 817,
+    "failed": 818
   },
   "debt": {
     "placeholders": [],
@@ -361,7 +382,19 @@ window.STATE =
     "T04 ревью: assert TTI в i4-lazy-data.js:116 проходит без measured; порог 1500 мс на CI-ранере (2–3× медленнее) с малым запасом — возможен флейк",
     "platform-src/tests/i4-lazy-data.js:116",
     "T04 ревью: R5.PTS (lazyFn r5.points) не сбрасывается demoReset; нет теста «построена и изменена до snapshot»",
-    "platform-src/v6/screens/orders/760-r5-network.js:36"
+    "platform-src/v6/screens/orders/760-r5-network.js:36",
+    "T05: +4,6 КБ к ru-странице (50-vlist.js + кортежи T); тест веса I2 уже красный из-за суммы тасков (ru 3 140 802 Б > лимит 3 099 178 Б) — решать отдельным таском",
+    "platform-src/v6/base/50-vlist.js",
+    "T05: на неравной высоте строк прокрутка плавает; перф-тест i5 сравнивает тайминги (600 vs 5000 строк) — возможен флейк на нагруженной машине",
+    "platform-src/tests/i5-vlist.js",
+    "T05 ревью: ACT.r5Page и Q.rpage без UI (мёртвое состояние); VL держит rows ушедших таблиц; sig=JSON.stringify фильтра сбрасывает прокрутку на любое поле; CSV прочих списков не затронут",
+    "platform-src/v6/screens/orders/760-r5-network.js:134",
+    "T07: вес +20 КБ (011-role-home.js, 012-scenarios.js); домашние плитки над полным дашбордом (#dash-full) и в первом экране driver/customer/partner, homeRoute/SHELL_NAV/roles.js не менялись — отклонение от плана: отдельной страницы «Главная» нет",
+    "platform-src/v6/screens/dashboard/011-role-home.js",
+    "T05 ремонт-ревью: вторая половина теста фокуса (i5-vlist.js:~121) попадает в ранний return vlPaint — ветка «вернуть на ту же кнопку» не проверена; фокус в input внутри строки теряет курсор/выделение",
+    "platform-src/tests/i5-vlist.js:121",
+    "T06: +20,8 КБ к ru-странице; блок «Найти» палитры подменяет S.gs.q на один вызов (gsResults приватен в 001); строки inline T() в 090/095; состояние палитры и уведомлений только в памяти",
+    "platform-src/v6/screens/shell/090-palette.js"
   ],
   "blind": null,
   "beats": [
@@ -406,9 +439,23 @@ window.STATE =
     "2026-11-01T05:43:48+01:00",
     "2026-11-01T05:43:50+01:00",
     "2026-11-01T05:48:47+01:00",
-    "2026-11-01T05:48:48+01:00"
+    "2026-11-01T05:48:48+01:00",
+    "2026-11-01T05:49:01+01:00",
+    "2026-11-01T05:49:02+01:00",
+    "2026-11-01T05:49:04+01:00",
+    "2026-11-01T10:34:54+01:00",
+    "2026-11-01T10:34:56+01:00",
+    "2026-11-01T10:37:31+01:00",
+    "2026-11-01T10:37:32+01:00",
+    "2026-11-01T10:37:34+01:00",
+    "2026-11-01T10:43:00+01:00",
+    "2026-11-01T10:52:48+01:00",
+    "2026-11-01T13:32:48+01:00",
+    "2026-11-01T14:04:51+01:00",
+    "2026-11-01T14:04:53+01:00",
+    "2026-11-01T14:04:55+01:00"
   ],
-  "rev": 43,
+  "rev": 57,
   "waiting": null,
   "waits": [],
   "log": [
@@ -704,6 +751,118 @@ window.STATE =
         "passed": 774,
         "failed": 774
       }
+    },
+    {
+      "t": "2026-11-01T05:49:01+01:00",
+      "k": "ticket",
+      "ids": [
+        "05"
+      ],
+      "act": "start"
+    },
+    {
+      "t": "2026-11-01T05:49:02+01:00",
+      "k": "ticket",
+      "ids": [
+        "06"
+      ],
+      "act": "start"
+    },
+    {
+      "t": "2026-11-01T05:49:04+01:00",
+      "k": "ticket",
+      "ids": [
+        "07"
+      ],
+      "act": "start"
+    },
+    {
+      "t": "2026-11-01T10:34:54+01:00",
+      "k": "add",
+      "key": "concerns",
+      "n": 2
+    },
+    {
+      "t": "2026-11-01T10:34:56+01:00",
+      "k": "add",
+      "key": "concerns",
+      "n": 2
+    },
+    {
+      "t": "2026-11-01T10:37:31+01:00",
+      "k": "ticket",
+      "ids": [
+        "05"
+      ],
+      "act": "review"
+    },
+    {
+      "t": "2026-11-01T10:37:32+01:00",
+      "k": "ticket",
+      "ids": [
+        "05"
+      ],
+      "act": "repair"
+    },
+    {
+      "t": "2026-11-01T10:37:34+01:00",
+      "k": "add",
+      "key": "concerns",
+      "n": 2
+    },
+    {
+      "t": "2026-11-01T10:43:00+01:00",
+      "k": "add",
+      "key": "concerns",
+      "n": 2
+    },
+    {
+      "t": "2026-11-01T10:52:48+01:00",
+      "k": "add",
+      "key": "concerns",
+      "n": 2
+    },
+    {
+      "t": "2026-11-01T13:32:48+01:00",
+      "k": "add",
+      "key": "concerns",
+      "n": 2
+    },
+    {
+      "t": "2026-11-01T14:04:51+01:00",
+      "k": "ticket",
+      "ids": [
+        "05"
+      ],
+      "act": "done",
+      "tests": {
+        "passed": 817,
+        "failed": 818
+      }
+    },
+    {
+      "t": "2026-11-01T14:04:53+01:00",
+      "k": "ticket",
+      "ids": [
+        "06"
+      ],
+      "act": "done",
+      "tests": {
+        "passed": 817,
+        "failed": 818
+      }
+    },
+    {
+      "t": "2026-11-01T14:04:55+01:00",
+      "k": "ticket",
+      "ids": [
+        "07"
+      ],
+      "act": "done",
+      "tests": {
+        "passed": 817,
+        "failed": 818
+      }
     }
   ],
   "reqList": [
@@ -730,7 +889,7 @@ window.STATE =
     {
       "id": "R05",
       "text": "«FR-195 Virtualised long tables: Windowing / paging for collection points (600+), audit log, readings, inbound lists.»",
-      "status": "in-ticket"
+      "status": "done"
     },
     {
       "id": "R06",
@@ -740,7 +899,7 @@ window.STATE =
     {
       "id": "R07",
       "text": "«FR-211 Command palette: Ctrl+K combines global search, navigation and actions.»",
-      "status": "in-ticket"
+      "status": "done"
     },
     {
       "id": "R08",
@@ -760,17 +919,17 @@ window.STATE =
     {
       "id": "R11",
       "text": "«FR-216 Role home pages: Each role first sees its 4–6 most important tiles (dispatcher, warehouse, driver, finance, customer, partner).»",
-      "status": "in-ticket"
+      "status": "done"
     },
     {
       "id": "R12",
       "text": "«FR-217 Notification centre: Alarms, inbox and tasks in one list: read / unread, snooze, assign.»",
-      "status": "in-ticket"
+      "status": "done"
     },
     {
       "id": "R13",
       "text": "«FR-222 Demo scenario presets: \"Normal day\", \"Winter storm\", \"Peak season\", \"West route\" reset all data consistently.»",
-      "status": "in-ticket"
+      "status": "done"
     }
   ],
   "gates": {
