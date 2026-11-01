@@ -474,4 +474,14 @@
   }
   const render0 = render;
   render = function () { bannerSync(); render0(); shellAfter(); };
+  /* FR-193: a rebuilt page or drawer refreshes the document title, the URL and the diagram button like a full render does */
+  regionHook('after', 10, name => { if (name === 'main' || name === 'drawer') shellAfter(); });
+  /* FR-194: the tick redraws the page region instead of render(); a new level-2 alarm must still raise the "new alarms" banner (bannerSync + the banner overlay) */
+  regionHook('before', 10, name => { if (name === 'main' || name === 'topbar') bannerSync(); });
+  regionHook('after', 11, name => {
+    if (name !== 'main' && name !== 'topbar') return;
+    const b = banner(), old = document.querySelector('#root .app > .alarm-banner');
+    if (old) { if (b) old.outerHTML = b; else old.remove(); }
+    else if (b) { const back = document.querySelector('#root .app > .side-back'); (back || document.getElementById('main-content')).insertAdjacentHTML('afterend', b); }
+  });
 })();

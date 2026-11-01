@@ -90,8 +90,8 @@
     return (n || LT('a11y.field')).replace(/[:：]\s*$/, '').slice(0, 90);
   };
   const NATIVE = /^(A|BUTTON|INPUT|SELECT|TEXTAREA|SUMMARY|OPTION|LABEL)$/;
-  function a11yPass() {
-    const root = $('#root'); if (!root) return;
+  function a11yPass(scope) {
+    const root = scope || $('#root'); if (!root) return;
     /* 1. form fields without a name get one from the visible text next to them (label, column header, placeholder) */
     $$('select, textarea, input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset])', root).forEach(el => {
       if (el.closest('[aria-hidden="true"]') || hasName(el)) return;
@@ -125,11 +125,8 @@
 
   /* ---------- render wrapper: preferences, the a11y pass, focus into an opened dialog and back to its trigger.
      app.js installs it last (a11yInstall), so it wraps every other render hook (shell, driver app, help) ---------- */
-  globalThis.a11yInstall = () => { const render0 = render; render = function () {
-    const before = sigOf(document.activeElement), had = document.activeElement && document.activeElement !== document.body;
-    render0();
-    applyPrefs();
-    try { a11yPass(); } catch (e) { console.error(e); }
+  /* focus bookkeeping after a (full or region) render: into an opened dialog / drawer, back to its trigger, else back to the control that had it */
+  function focusSync(before, had) {
     const box = topBox(), ae = document.activeElement;
     if (S.kbd && !A.kbd) { A.kSig = last; const d = $('[data-a11y-dlg]'); focusEl((d && focusables(d)[0]) || d); }
     else if (!S.kbd && A.kbd) focusEl(findSig(A.kSig) || (S.drawer && $('.drawer.open')));
@@ -137,7 +134,22 @@
     else if (!S.drawer && A.drawer) { if (S.route === A.dRoute) focusEl(findSig(A.dSig)); }
     else if (had && (!ae || ae === document.body)) { const e = findSig(before); if (e && (!box || box.contains(e))) focusEl(e); else if (box) focusEl(box); }
     A.drawer = S.drawer; A.kbd = S.kbd;
+  }
+  globalThis.a11yInstall = () => { const render0 = render; render = function () {
+    const before = sigOf(document.activeElement), had = document.activeElement && document.activeElement !== document.body;
+    render0();
+    applyPrefs();
+    try { a11yPass(); } catch (e) { console.error(e); }
+    focusSync(before, had);
   }; };
+  /* FR-193: a region render runs the a11y pass over the rebuilt nodes and the same focus rules (an opened drawer takes the focus, a closed one gives it back) */
+  let regionPre = null;
+  regionHook('before', 90, () => { regionPre = { before: sigOf(document.activeElement), had: !!document.activeElement && document.activeElement !== document.body }; });
+  regionHook('after', 90, (name, st, fresh) => {
+    if (name === 'toast') return;
+    (fresh || []).forEach(n => { if (n) a11yPass(n); });
+    focusSync(regionPre.before, regionPre.had);
+  });
 
   /* ---------- keyboard: focus trap (Tab), shortcuts ---------- */
   const typing = t => t && (t.isContentEditable || /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName));

@@ -202,12 +202,13 @@ const NAV_BADGE = {};   // screen id -> () => number shown on the menu item (e.g
 function addTab(id, key, label, body, o) { const sc = SCREENS[id]; (sc.tabs = sc.tabs || []).push(Object.assign({ key, label, body }, o)); }
 const tabsOf = id => ((SCREENS[id] && SCREENS[id].tabs) || []).filter(t => !t.perm || canDo(t.perm));
 const curTab = id => { const ts = tabsOf(id), k = S.tab[id]; return ts.find(t => t.key === k) || ts[0]; };
-function setTab(id, k) { S.tab[id] = k; S.drawer = null; render(); }
+/* FR-193: a tab switch redraws the page (region declared by ACTION_DEFS.stab.region), plus the drawer when it was open; the side bar and top bar stay */
+function setTab(id, k) { const had = !!S.drawer; S.tab[id] = k; S.drawer = null; if (had) renderRegion('drawer'); renderRegion(actionRegion('stab')); }
 const tabBar = id => { const ts = tabsOf(id), cur = curTab(id); return ts.length < 2 ? '' : `<div class="pill-tabs" role="tablist">${ts.map(t => `<span class="pill-tab${t === cur ? ' active' : ''}" data-test="tab:${id}:${t.key}" role="tab" tabindex="0" aria-selected="${t === cur}" data-act="stab" data-s="${id}" data-v="${t.key}">${esc(t.label)}${t.badge && t.badge() ? ` <span class="n">${t.badge()}</span>` : ''}</span>`).join('')}</div>`; };
 const screenBody = id => { const sc = SCREENS[id]; if (!sc.tabs) return sc.body(); const t = curTab(id); return tabBar(id) + (t ? t.body() : ''); };
 const navLabel = id => (NAV.find(n => n[0] === id) || [])[2] || ((SCREENS[id] && SCREENS[id].title) ? SCREENS[id].title() : id);
 
-function toast(msg, kind) { S.toast = { msg, kind: kind || 'ok' }; render(); clearTimeout(toast.t); toast.t = setTimeout(() => { S.toast = null; render(); }, 3200); }
+function toast(msg, kind) { S.toast = { msg, kind: kind || 'ok' }; render(); clearTimeout(toast.t); toast.t = setTimeout(() => { S.toast = null; renderRegion('toast'); }, 3200); }   // FR-193: hiding the toast redraws only the toast
 function go(r) { if (!canSee(r)) return toast(LT('core.no_access_for_role') + ROLE_NAME[S.role], 'err'); S.route = r; S.sideOpen = false; S.tbMore = false; S.drawer = null; S.f.page = 1; if (S.gs) { S.gs.q = ''; S.gs.idx = 0; S.gsOpen = false; } render(); const m = $('main'); if (m) m.scrollTop = 0; }
 /* 0.3.11 Layout.tsx: below the off-canvas breakpoint the closed sidebar is out of the tab order and the accessibility tree (inert + aria-hidden) */
 const NARROW_MQ = '(max-width:1100px)';
@@ -216,13 +217,12 @@ function openDrawer(d) { S.drawer = d; render(); }
 const closeDrawer = () => { S.drawer = null; render(); };
 const alertsCount = () => S.loads.filter(l => tempState(l) === 'breach' && isActive(l)).length + S.drivers.filter(d => d.rto < 4 && d.status === 'available').length;
 
-function shell() {
-  const sc = SCREENS[S.route];
+/* FR-193: the shell is built from regions (side bar, top bar, page head, content, toast) so renderRegion() can rebuild one of them; shell() composes the same markup as before */
+function shellContent() { const sc = SCREENS[S.route]; return sc ? screenBody(S.route) : placeholder(S.route); }
+function shellSide() {
   const nav = navItems().map(n => `<div class="nav-item${n[0] === S.route ? ' active' : ''}" data-test="nav:${n[0]}" data-act="go" data-v="${n[0]}" role="link" tabindex="0"${n[0] === S.route ? ' aria-current="page"' : ''}>${ic(n[1])}<span>${esc(n[2])}</span>${NAV_BADGE[n[0]] && NAV_BADGE[n[0]]() ? `<span class="badge-count nav-n">${NAV_BADGE[n[0]]()}</span>` : ''}</div>`).join('');
   const ver = `<div class="ver"><a data-act="go" data-v="changes">v${VERSION}</a> · ${esc(BUILD)}${typeof wnLink === 'function' ? ' · ' + wnLink() : ''}</div>`;
   const lang = ['ru', 'de', 'en', 'kk'].map(l => `<a href="${fileFor(l)}" data-test="lang:${l}"${l === LANG ? ' class="on"' : ''}>${l.toUpperCase()}</a>`).join('');
-  const body = sc ? screenBody(S.route) : placeholder(S.route);
-  const title = sc ? sc.title() : navLabel(S.route);
   /* Kökzhol lock-up (brand §3.4): Shanyrak-Ö mark + wordmark (Cyrillic for RU / KK) + claim; the ink mark on the dark Kökzhol sidebar, the teal one on the light Olymp sidebar */
   const cyr = LANG === 'ru' || LANG === 'kk';
   const brand = `<div class="brand" data-test="brand" data-act="go" data-v="${homeRoute()}" role="link" tabindex="0"><img src="assets/brand/${S.design === 'kokzhol' ? 'kokzhol-mark-on-ink' : 'kokzhol-mark'}.svg" alt="Kökzhol" width="36" height="36"><span><span class="wordmark">${cyr ? 'көкжол' : 'kökzhol'}</span><span class="claim">${esc(LT('core.cold_chain_on_schedule'))}</span></span></div>`;
@@ -235,18 +235,31 @@ ${S.role !== 'partner' ? `<a class="side-link" data-act="setRole" data-v="partne
 ${S.role !== 'driver' ? `<a class="side-link" data-act="setRole" data-v="driver">${ic('user', 14)}<span>${esc(LT('core.driver_app'))}</span></a>` : ''}
 <a class="side-link" data-act="go" data-v="request">${ic('file', 14)}<span>${esc(LT('core.public_request_and_tracking'))}</span></a>
 ${shellRole ? '' : `<a class="side-link${S.route === 'help' ? ' on' : ''}" data-act="go" data-v="help">${ic('spark', 14)}<span>${esc(LT('core.help'))}</span></a>`}${typeof a11ySideLink === 'function' ? a11ySideLink() : ''}</div>`;
-  const USER = { admin: ['Sarah Johnson', 'SJ'], dispatcher: [nm('Айгерим Сапарова'), nm('АС')], warehouse: [nm('Болат Ермеков'), nm('БЕ')], driver: [nm('Ерлан Сейтқали'), nm('ЕС')], auditor: ['Olga Berg', 'OB'], viewer: ['Timur Akhmetov', 'TA'], manager: ['Max Keller', 'MK'], finance: [nm('Дана Жумабаева'), nm('ДЖ')], quality: ['Anna Schulz', 'AS'], customer: [nm('ТОО «Аптека Сервис»'), nm('АС')], partner: [nm('ТОО «ТрансХолод»'), nm('ТХ')] };
-  const usr = USER[S.role] || USER.admin;
   const hidden = isNarrow() && !S.sideOpen;
   const recordsNav = typeof recordsNavHtml === 'function' ? recordsNavHtml() : '';
-  return `<div class="app"><aside class="sidebar${S.sideOpen ? ' open' : ''}" id="side-nav" role="navigation" aria-label="${esc(LT('core.main_menu'))}"${hidden ? ' inert aria-hidden="true"' : ''}>${brand}${nav}${recordsNav}${tools}${typeof shellSideExtra === 'function' ? shellSideExtra() : ''}${liveBadge()}<div class="langs">${lang}</div>${ver}</aside>
-<main id="main-content">${typeof printHead === 'function' ? printHead() : ''}<header class="topbar"><button class="burger" data-test="burger" data-act="sideTog" aria-controls="side-nav" aria-label="${esc(S.sideOpen ? LT('shell.close_menu') : LT('shell.open_menu'))}" aria-expanded="${S.sideOpen ? 'true' : 'false'}">☰</button><span class="crumb"><a class="lnk" data-act="go" data-v="${homeRoute()}" role="link" tabindex="0">${esc(navLabel(homeRoute()))}</a> › <a class="lnk" data-act="crumb" role="link" tabindex="0"><b>${esc(navLabel(S.route))}</b></a></span>
+  return `<aside class="sidebar${S.sideOpen ? ' open' : ''}" id="side-nav" role="navigation" aria-label="${esc(LT('core.main_menu'))}"${hidden ? ' inert aria-hidden="true"' : ''}>${brand}${nav}${recordsNav}${tools}${typeof shellSideExtra === 'function' ? shellSideExtra() : ''}${liveBadge()}<div class="langs">${lang}</div>${ver}</aside>`;
+}
+function shellTop() {
+  const USER = { admin: ['Sarah Johnson', 'SJ'], dispatcher: [nm('Айгерим Сапарова'), nm('АС')], warehouse: [nm('Болат Ермеков'), nm('БЕ')], driver: [nm('Ерлан Сейтқали'), nm('ЕС')], auditor: ['Olga Berg', 'OB'], viewer: ['Timur Akhmetov', 'TA'], manager: ['Max Keller', 'MK'], finance: [nm('Дана Жумабаева'), nm('ДЖ')], quality: ['Anna Schulz', 'AS'], customer: [nm('ТОО «Аптека Сервис»'), nm('АС')], partner: [nm('ТОО «ТрансХолод»'), nm('ТХ')] };
+  const usr = USER[S.role] || USER.admin;
+  return `<header class="topbar"><button class="burger" data-test="burger" data-act="sideTog" aria-controls="side-nav" aria-label="${esc(S.sideOpen ? LT('shell.close_menu') : LT('shell.open_menu'))}" aria-expanded="${S.sideOpen ? 'true' : 'false'}">☰</button><span class="crumb"><a class="lnk" data-act="go" data-v="${homeRoute()}" role="link" tabindex="0">${esc(navLabel(homeRoute()))}</a> › <a class="lnk" data-act="crumb" role="link" tabindex="0"><b>${esc(navLabel(S.route))}</b></a></span>
 <div class="who">${typeof shellSearchBox === 'function' ? shellSearchBox() : `<label class="searchbox">${ic('search', 14)}<input id="gsearch" placeholder="${esc(LT('core.search_loads_trucks_drivers'))}" value="${esc(S.f.q)}"></label>`}${typeof shellTopExtra === 'function' ? shellTopExtra() : ''}
 <button type="button" class="btn grey sm tb-morebtn" data-act="tbMore" aria-expanded="${S.tbMore ? 'true' : 'false'}" aria-label="${esc(LT('core.more_hub_time_role_theme'))}">⋯</button><div class="tb-x${S.tbMore ? ' open' : ''}">${typeof shellTopMore === 'function' ? shellTopMore() : ''}
 <label class="rolebox" title="${esc(LT('core.switch_the_role_menu_and_permissions'))}">${ic('user', 14)}<span>${esc(LT('core.role'))}</span><select id="roleSel" data-test="role-select" class="select" aria-label="Role" style="height:32px">${ROLES.map(r => `<option value="${r}"${r === S.role ? ' selected' : ''}>${esc(ROLE_NAME[r])}</option>`).join('')}</select></label><button class="btn grey sm design-btn" data-act="setDesign" title="${S.design === 'kokzhol' ? 'Kökzhol → Olymp' : 'Olymp → Kökzhol'}">${S.design === 'olymp' ? '◐' : '◑'}</button>${typeof printBtn === 'function' ? printBtn() : ''}</div><button class="btn grey sm help-top" data-test="help" data-act="helpHere" aria-label="Help" title="${esc(LT('core.help_for_this_screen'))}">?</button><span class="bell">${ic('bell', 18)}${alertsCount() ? `<span class="badge-count">${alertsCount()}</span>` : ''}</span>
-<div class="usr" data-act="go" data-v="account" role="link" tabindex="0" title="${esc(LT('core.my_account'))}"><b>${esc(usr[0])}</b><small>${esc(ROLE_NAME[S.role])}</small></div><span class="avatar" style="background:var(--primary)">${esc(usr[1])}</span>${ACT.signOut ? `<button type="button" class="btn grey sm signout-btn" data-act="signOut" data-test="signout" title="${esc(LT('shell.sign_out_2'))}" aria-label="${esc(LT('shell.sign_out_2'))}">⎋</button>` : ''}</div></header>
-<div class="page-head"><div>${typeof shellEyebrow === 'function' ? shellEyebrow() : ''}<h1 class="page-title">${esc(title)}</h1>${sc && sc.sub ? `<p class="page-sub">${esc(sc.sub())}</p>` : ''}</div><div class="actions">${sc && sc.actions ? sc.actions() : ''}</div></div>
-<div class="content">${body}</div></main>${S.sideOpen ? '<div class="side-back" data-act="sideTog"></div>' : ''}${typeof shellOverlays === 'function' ? shellOverlays() : ''}${drawerHtml()}${typeof a11yOverlay === 'function' ? a11yOverlay() : ''}<div class="toast-live" role="status" aria-live="polite">${S.toast ? `<div class="toast ${S.toast.kind}" data-test="toast">${esc(S.toast.msg)}</div>` : ''}</div></div>`;
+<div class="usr" data-act="go" data-v="account" role="link" tabindex="0" title="${esc(LT('core.my_account'))}"><b>${esc(usr[0])}</b><small>${esc(ROLE_NAME[S.role])}</small></div><span class="avatar" style="background:var(--primary)">${esc(usr[1])}</span>${ACT.signOut ? `<button type="button" class="btn grey sm signout-btn" data-act="signOut" data-test="signout" title="${esc(LT('shell.sign_out_2'))}" aria-label="${esc(LT('shell.sign_out_2'))}">⎋</button>` : ''}</div></header>`;
+}
+function shellHead() {
+  const sc = SCREENS[S.route];
+  const title = sc ? sc.title() : navLabel(S.route);
+  return `<div class="page-head"><div>${typeof shellEyebrow === 'function' ? shellEyebrow() : ''}<h1 class="page-title">${esc(title)}</h1>${sc && sc.sub ? `<p class="page-sub">${esc(sc.sub())}</p>` : ''}</div><div class="actions">${sc && sc.actions ? sc.actions() : ''}</div></div>`;
+}
+const toastInner = () => `${S.toast ? `<div class="toast ${S.toast.kind}" data-test="toast">${esc(S.toast.msg)}</div>` : ''}`;
+function shell() {
+  const body = shellContent();
+  return `<div class="app">${shellSide()}
+<main id="main-content">${typeof printHead === 'function' ? printHead() : ''}${shellTop()}
+${shellHead()}
+<div class="content">${body}</div></main>${S.sideOpen ? '<div class="side-back" data-act="sideTog"></div>' : ''}${typeof shellOverlays === 'function' ? shellOverlays() : ''}${drawerHtml()}${typeof a11yOverlay === 'function' ? a11yOverlay() : ''}<div class="toast-live" role="status" aria-live="polite">${toastInner()}</div></div>`;
 }
 function placeholder(id) {
   const ph = NAV.find(n => n[0] === id)[3];
@@ -264,7 +277,7 @@ const DRAWERS = {};
    get no automatic tick — liveTick() stays callable. SIMULATION toggles the pause. */
 S.simOn = true; S.liveAt = null;
 const p2c = n => String(n).padStart(2, '0');
-const liveBadge = () => `<div class="live-badge" data-live><button type="button" class="simchip${S.simOn ? '' : ' off'}" data-act="simTog" aria-pressed="${S.simOn ? 'true' : 'false'}" title="${esc(LT('core.pause_start_the_telemetry_simulation'))}">SIMULATION</button><span class="live-note">${esc(LT('core.telemetry_every_2_s'))}</span><span class="live-line"><i class="live-dot${S.simOn ? ' on' : ''}"></i>${S.simOn ? 'Live' : esc(LT('core.paused'))} · <span data-live-at>${S.liveAt ? LF.time(S.liveAt) : '—'}</span></span></div>`;
+const liveBadge = () => `<div class="live-badge" data-live="badge"><button type="button" class="simchip${S.simOn ? '' : ' off'}" data-act="simTog" aria-pressed="${S.simOn ? 'true' : 'false'}" title="${esc(LT('core.pause_start_the_telemetry_simulation'))}">SIMULATION</button><span class="live-note">${esc(LT('core.telemetry_every_2_s'))}</span><span class="live-line"><i class="live-dot${S.simOn ? ' on' : ''}"></i>${S.simOn ? 'Live' : esc(LT('core.paused'))} · <span data-live-at>${S.liveAt ? LF.time(S.liveAt) : '—'}</span></span></div>`;
 let liveSeed = 7;
 const liveRnd = () => (liveSeed = (liveSeed * 1103515245 + 12345) % 2147483648) / 2147483648;
 function liveTick() {
@@ -275,10 +288,25 @@ function liveTick() {
     l.temp = Math.round(Math.min(z.hi + 3.5, Math.max(z.lo - 3.5, l.temp + (liveRnd() - 0.5) * 0.2)) * 10) / 10;
     if (l.status === 'in_transit') l.progress = Math.min(0.97, l.progress + 0.0006);
   });
-  const LIVE = { dashboard: 1, routes: 1, hubs: 1 };
-  if (LIVE[S.route] && !document.hidden && !S.drawer) render();
-  else { const b = $('[data-live-at]'); if (b) b.textContent = LF.time(S.liveAt); }
+  /* FR-194: the tick never renders. It updates the data-live nodes (position, temperature, ETA, progress, badge); only when a load changed its
+     temperature state or an alarm appeared — what the lists and colours of the screen are made of — the page region is redrawn, never render() */
+  liveUpdate();
+  const sig = liveSig();
+  if (sig !== liveSigAt) { const was = liveSigAt; liveSigAt = sig; if (was !== null && LIVE_SCREENS[S.route] && !document.hidden) { renderRegion('main'); renderRegion('topbar'); } }
 }
+const LIVE_SCREENS = { dashboard: 1, routes: 1, hubs: 1 };
+let liveSigAt = null;
+const liveSig = () => { let s = (S.alarms || []).length + ':' + alertsCount(); const L = S.loads; for (let i = 0; i < L.length; i++) { const l = L[i]; if (l.status === 'in_transit' || l.status === 'problem') s += tempState(l)[0]; } return s; };
+/* live nodes of the screens: data-live="pos|temp|tempchip|bar|pct|eta|done" + data-id="<load id>" */
+const livePct = l => Math.round((l.status === 'delivered' ? 1 : l.status === 'in_transit' || l.status === 'problem' ? l.progress : l.status === 'loading' ? 0.03 : 0) * 100);
+liveBind('pos', n => { const l = load(n.dataset.id); if (!l) return; const p = KZNET.along(KZNET.hubPath(l.from, l.to), l.progress); n.setAttribute('transform', n.getAttribute('transform').replace(/translate\([^)]*\)/, 'translate(' + p[0] + ',' + p[1] + ')')); });
+liveBind('temp', n => { const l = load(n.dataset.id); if (l) n.textContent = (l.temp > 0 ? '+' : '') + LF.dec(l.temp) + '°'; });
+liveBind('tempchip', n => { const l = load(n.dataset.id); if (l) n.innerHTML = tempChip(l); });
+liveBind('bar', n => { const l = load(n.dataset.id); if (!l) return; const p = livePct(l); n.style.width = p + '%'; const b = n.parentElement; if (b && b.hasAttribute('aria-label')) b.setAttribute('aria-label', p + ' %'); });
+liveBind('pct', n => { const l = load(n.dataset.id); if (l) n.textContent = livePct(l) + ' %'; });
+liveBind('eta', n => { const l = load(n.dataset.id); if (l) n.textContent = fdt(l.eta); });
+liveBind('done', n => { const l = load(n.dataset.id); if (!l) return; const km = dist(l.from, l.to); n.textContent = Math.round(km * l.progress) + ' / ' + km + ' ' + LF.unit('km'); });
+liveBind('badge', n => { const t = n.querySelector('[data-live-at]'); if (t) t.textContent = S.liveAt ? LF.time(S.liveAt) : '—'; });
 globalThis.liveTick = liveTick; globalThis.liveBadge = liveBadge;
 if (typeof window !== 'undefined' && !window.frameElement) setInterval(() => { if (S.simOn && !document.hidden) liveTick(); }, 2000);
 
@@ -341,16 +369,25 @@ const ACTION_DEFS = {
   adv: { area: 'orders', perm: 'trips:status', audit: { module: 'Dispatch', subject: d => d.id, watch: d => (load(d.id) || {}).status, decision: d => LT('actions.status_changed') + ': ' + ST[load(d.id).status].l } },
   addD: { area: 'drivers', perm: 'drivers:write' },
   saveD: { area: 'drivers', perm: 'drivers:write' },   // writes its own audit entry (driver.created, screens/drivers/050-drivers.js)
+  /* FR-193: the region an action redraws (default 'main'); the click dispatcher turns the render() calls of such an action into renderRegion(region) */
+  stab: { area: 'core', region: 'main' },
+  tbMore: { area: 'core', region: 'topbar' },
 };
 Object.entries(ACTION_DEFS).forEach(([name, meta]) => registerAction(name, meta));
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-act]'); if (!el) return;
   const p = (ACTION_REGISTRY[el.dataset.act] || {}).perm; if (p && !canDo(p)) return toast(LT('core.no_permission') + p, 'err');
-  const fn = ACT[el.dataset.act]; if (fn) { fn(el.dataset, el, e); }
+  const fn = ACT[el.dataset.act]; if (!fn) return;
+  /* FR-193: an action that declares a region (ACTION_REGISTRY[name].region, anything but 'all') redraws only that region: its render() calls are collected and answered by renderRegion() after it ran */
+  const rg = (ACTION_REGISTRY[el.dataset.act] || {}).region;
+  if (!rg || rg === 'all' || !REGIONS[rg]) return void fn(el.dataset, el, e);
+  const full = render, want = new Set(); render = function () { want.add(rg); };
+  try { fn(el.dataset, el, e); } finally { render = full; }
+  want.forEach(r => renderRegion(r));
 });
 document.addEventListener('input', e => {
   if (e.target.id === 'gsearch') { if (typeof gsInput === 'function') return gsInput(e.target.value); S.f.q = e.target.value; S.f.page = 1; if (S.route !== 'orders') S.route = 'orders'; render(); }
-  else if (e.target.dataset && e.target.dataset.f) { S.f[e.target.dataset.f] = e.target.value; S.f.page = 1; render(); }
+  else if (e.target.dataset && e.target.dataset.f) { S.f[e.target.dataset.f] = e.target.value; S.f.page = 1; renderRegion(actionRegion('filter')); }   // FR-193: a filter redraws the page only
 });
 Object.assign(ACT, {
   go: d => go(d.v), close: closeDrawer, stab: d => setTab(d.s, d.v),
