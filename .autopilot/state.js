@@ -13,7 +13,7 @@ window.STATE =
   "skillDir": "C:/Users/Pavel/.agents/skills/autopilot",
   "baseCommit": "7c90d82",
   "startedAt": "2026-11-01T01:07:23+01:00",
-  "updatedAt": "2026-11-01T05:14:37+01:00",
+  "updatedAt": "2026-11-01T05:48:48+01:00",
   "finishedAt": null,
   "stages": [
     {
@@ -63,8 +63,8 @@ window.STATE =
   ],
   "requirements": {
     "total": 13,
-    "done": 3,
-    "inTicket": 10,
+    "done": 5,
+    "inTicket": 8,
     "inSpec": 0,
     "placeholder": 0,
     "deferred": 0,
@@ -155,9 +155,16 @@ window.STATE =
       ],
       "review": "да — фундамент",
       "model": "сильная",
-      "status": "pending",
+      "status": "done",
       "retries": 0,
-      "repairs": 0
+      "repairs": 0,
+      "startedAt": "2026-11-01T05:14:55+01:00",
+      "finishedAt": "2026-11-01T05:48:47+01:00",
+      "tests": {
+        "passed": 774,
+        "failed": 774
+      },
+      "commit": "ea6fa2d"
     },
     {
       "id": "04",
@@ -178,9 +185,16 @@ window.STATE =
       ],
       "review": "да — фундамент",
       "model": "сильная",
-      "status": "pending",
+      "status": "done",
       "retries": 0,
-      "repairs": 0
+      "repairs": 0,
+      "startedAt": "2026-11-01T05:14:56+01:00",
+      "finishedAt": "2026-11-01T05:48:48+01:00",
+      "tests": {
+        "passed": 774,
+        "failed": 774
+      },
+      "commit": "a948667"
     },
     {
       "id": "05",
@@ -305,8 +319,8 @@ window.STATE =
     }
   ],
   "tests": {
-    "passed": 731,
-    "failed": 731
+    "passed": 774,
+    "failed": 774
   },
   "debt": {
     "placeholders": [],
@@ -331,7 +345,23 @@ window.STATE =
     "Тест «drawer не пересоздаётся при breach» не проверяет, что перерисовка реально случилась — может быть зелёным вхолостую",
     "platform-src/tests/i1-render-regions.js:158",
     "ACT с region, вызывающий toast(), получит renderRegion вместо показа тоста (core.js:389)",
-    "platform-src/v6/core.js:389"
+    "platform-src/v6/core.js:389",
+    "Запас теста веса (I2, ru ≥25% легче) после T03 всего ~98 Б; следующие таски добавят код — бюджет придётся решать (вырезание help или пересмотр порога)",
+    "platform-src/tests/i2-build-lang.js",
+    "T03: примитивы без миграции — ~22 пустых состояния, 2 confirm(), кнопка сброса настроек, saved views (kz-r4-views через патч Storage) остаются на таск 08/доработку",
+    "platform-src/v6/base/46-prefs.js",
+    "T04: до интерактивности 428/404 мс уже в старте (≈320 мс — компиляция); 7 из 10 ленивых коллекций не построены после первого экрана (alarms/inbox/audit читает дашборд); devs, bookings, S.res, S.express, S.orders, S.partners, ECO_BL оставлены энергичными",
+    "platform-src/v6/base/42-lazy.js",
+    "T03 ревью: F2 undoRun снимает слот/таймер до p.fn() — при исключении undoFn отмены нет, аудита нет (47-undo.js:24)",
+    "platform-src/v6/base/47-undo.js:24",
+    "T03 ревью: F5 ACT.resetFilters обнуляет все ключи S.f в '' (сорт., булевы), hub не трогает (core.js)",
+    "platform-src/v6/core.js",
+    "T03 ревью: F8 capture настроек только на click/pagehide; клавиатура/change не запоминаются; undo-тост без role=status",
+    "T03 ревью: F1/F3/F4/F6/F7 — нет кнопки сброса настроек и теста ACT.prefsReset; watch не обязателен; ACT.retry = render(); патч Storage.prototype для kz-r4-views скрыт и необратим; слабый тест аудита отмены",
+    "T04 ревью: assert TTI в i4-lazy-data.js:116 проходит без measured; порог 1500 мс на CI-ранере (2–3× медленнее) с малым запасом — возможен флейк",
+    "platform-src/tests/i4-lazy-data.js:116",
+    "T04 ревью: R5.PTS (lazyFn r5.points) не сбрасывается demoReset; нет теста «построена и изменена до snapshot»",
+    "platform-src/v6/screens/orders/760-r5-network.js:36"
   ],
   "blind": null,
   "beats": [
@@ -362,9 +392,23 @@ window.STATE =
     "2026-11-01T05:10:15+01:00",
     "2026-11-01T05:10:17+01:00",
     "2026-11-01T05:14:36+01:00",
-    "2026-11-01T05:14:37+01:00"
+    "2026-11-01T05:14:37+01:00",
+    "2026-11-01T05:14:55+01:00",
+    "2026-11-01T05:14:56+01:00",
+    "2026-11-01T05:39:01+01:00",
+    "2026-11-01T05:39:02+01:00",
+    "2026-11-01T05:40:07+01:00",
+    "2026-11-01T05:41:58+01:00",
+    "2026-11-01T05:41:59+01:00",
+    "2026-11-01T05:42:00+01:00",
+    "2026-11-01T05:42:01+01:00",
+    "2026-11-01T05:43:47+01:00",
+    "2026-11-01T05:43:48+01:00",
+    "2026-11-01T05:43:50+01:00",
+    "2026-11-01T05:48:47+01:00",
+    "2026-11-01T05:48:48+01:00"
   ],
-  "rev": 29,
+  "rev": 43,
   "waiting": null,
   "waits": [],
   "log": [
@@ -560,6 +604,106 @@ window.STATE =
         "passed": 731,
         "failed": 731
       }
+    },
+    {
+      "t": "2026-11-01T05:14:55+01:00",
+      "k": "ticket",
+      "ids": [
+        "03"
+      ],
+      "act": "start"
+    },
+    {
+      "t": "2026-11-01T05:14:56+01:00",
+      "k": "ticket",
+      "ids": [
+        "04"
+      ],
+      "act": "start"
+    },
+    {
+      "t": "2026-11-01T05:39:01+01:00",
+      "k": "add",
+      "key": "concerns",
+      "n": 2
+    },
+    {
+      "t": "2026-11-01T05:39:02+01:00",
+      "k": "add",
+      "key": "concerns",
+      "n": 2
+    },
+    {
+      "t": "2026-11-01T05:40:07+01:00",
+      "k": "add",
+      "key": "concerns",
+      "n": 2
+    },
+    {
+      "t": "2026-11-01T05:41:58+01:00",
+      "k": "add",
+      "key": "concerns",
+      "n": 2
+    },
+    {
+      "t": "2026-11-01T05:41:59+01:00",
+      "k": "add",
+      "key": "concerns",
+      "n": 2
+    },
+    {
+      "t": "2026-11-01T05:42:00+01:00",
+      "k": "add",
+      "key": "concerns",
+      "n": 1
+    },
+    {
+      "t": "2026-11-01T05:42:01+01:00",
+      "k": "add",
+      "key": "concerns",
+      "n": 1
+    },
+    {
+      "t": "2026-11-01T05:43:47+01:00",
+      "k": "add",
+      "key": "concerns",
+      "n": 2
+    },
+    {
+      "t": "2026-11-01T05:43:48+01:00",
+      "k": "add",
+      "key": "report",
+      "n": 2
+    },
+    {
+      "t": "2026-11-01T05:43:50+01:00",
+      "k": "add",
+      "key": "concerns",
+      "n": 2
+    },
+    {
+      "t": "2026-11-01T05:48:47+01:00",
+      "k": "ticket",
+      "ids": [
+        "03"
+      ],
+      "act": "done",
+      "tests": {
+        "passed": 774,
+        "failed": 774
+      }
+    },
+    {
+      "t": "2026-11-01T05:48:48+01:00",
+      "k": "ticket",
+      "ids": [
+        "04"
+      ],
+      "act": "done",
+      "tests": {
+        "passed": 774,
+        "failed": 774
+      }
     }
   ],
   "reqList": [
@@ -591,7 +735,7 @@ window.STATE =
     {
       "id": "R06",
       "text": "«FR-197 Lazy demo data: Generate data per area on first use, memoised and seeded; time to interactive < 1.5 s.»",
-      "status": "in-ticket"
+      "status": "done"
     },
     {
       "id": "R07",
@@ -601,7 +745,7 @@ window.STATE =
     {
       "id": "R08",
       "text": "«FR-212 Remembered preferences: Language, hub filter, saved views, last tab and theme remembered per viewer in the browser.»",
-      "status": "in-ticket"
+      "status": "done"
     },
     {
       "id": "R09",
@@ -651,6 +795,8 @@ window.STATE =
   },
   "result": null,
   "report": [
-    "Вес страницы: достигнут −25…28 % (ru 4,13→3,09 MB), цель ТЗ −60 % (~1,2 MB) не достигнута: четырёхъязычные тексты справки HQ (~690 KB) оставлены целиком из-за тестов справки; ещё около −10 пунктов даёт флаг --strip-help"
+    "Вес страницы: достигнут −25…28 % (ru 4,13→3,09 MB), цель ТЗ −60 % (~1,2 MB) не достигнута: четырёхъязычные тексты справки HQ (~690 KB) оставлены целиком из-за тестов справки; ещё около −10 пунктов даёт флаг --strip-help",
+    "Время до интерактивности почти не изменилось (≈0,4 с и раньше), ленивыми сделаны 10 коллекций; показания/брони/устройства/заказы остались энергичными — выигрыш мал",
+    "platform-src/v6/base/42-lazy.js"
   ]
 }
