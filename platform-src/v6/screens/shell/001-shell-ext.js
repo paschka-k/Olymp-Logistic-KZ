@@ -261,10 +261,11 @@
     authChange: () => { const A = S.auth, who = USERS[A.role] || A.role, e = !A.cur ? LT('shell.enter_the_current_password') : A.cur !== A.pw ? LT('shell.current_password_is_wrong') : A.np === A.cur ? LT('shell.the_new_password_equals_the_current_') : pwCheck(A.np, A.np2, who, A.cur); if (e) { A.err = e; return render(); } const u = accOf(A.role); if (u) u.mustChange = false; A.stored[A.role] = A.np; aud(who, LT('shell.password_change'), '', 'auth.password_changed'); finishLogin(); },
     acctPw: () => { const who = USERS[S.role] || S.role, st = S.auth.stored[S.role], e = !String(S.acct.cp || '').length ? LT('shell.enter_the_current_password') : st && S.acct.cp !== st ? LT('shell.current_password_is_wrong') : pwCheck(S.acct.np, S.acct.np2, who, S.acct.cp); S.acct.ok = !e; S.acct.msg = e || LT('shell.password_changed_demo'); if (!e) { S.auth.stored[S.role] = S.acct.np; S.acct.cp = ''; S.acct.np = ''; S.acct.np2 = ''; aud(who, LT('shell.password_change'), '', 'auth.password_changed'); } render(); },
     resetAsk: () => { S.resetAsk = !S.resetAsk; render(); },
-    resetGo: () => { demoReset(); },
+    resetGo: () => { const id = S.scenPick || scenarioCurrent(); S.scenPick = null; demoReset(id); },
   });
   document.addEventListener('input', e => { const t = e.target; if (!t.dataset || !t.dataset.au) return; S.auth[t.dataset.au] = t.value; S.auth.err = ''; });
   document.addEventListener('change', e => { const t = e.target; if (t.id === 'au_role') { S.auth.role = t.value; } });
+  document.addEventListener('change', e => { if (e.target.id === 'scenSel' && SCENARIOS[e.target.value]) { S.scenPick = e.target.value; render(); } });
   document.addEventListener('input', e => { const t = e.target; if (t.dataset && t.dataset.ac) { S.acct[t.dataset.ac] = t.value; S.acct.msg = ''; } });
   document.addEventListener('keydown', e => { if (e.key !== 'Enter' || !S.auth.on || !e.target.dataset || !e.target.dataset.au) return; e.preventDefault(); ({ password: ACT.authPw, enrol: ACT.authMfa, mfa: ACT.authMfa, change: ACT.authChange }[S.auth.step] || (() => {}))(); });
   /* Reset demo data (0.3.11 resetDemo restores the whole snapshot): the core arrays are re-seeded, every record store is restored from the
@@ -272,17 +273,21 @@
   HOOKS.reset = HOOKS.reset || [];
   const SNAP_KEYS = ['users', 'oncall', 'alarms', 'inbox', 'audit', 'bookings', 'apiKeys', 'integ', 'webhooks', 'claims', 'devs'];
   let SNAP = null;
-  const snapshot = () => { SNAP = {}; SNAP_KEYS.forEach(k => { try { if (!lazyBuilt(k)) { SNAP[k] = null; return; } /* FR-197: a collection nobody has read yet is still the seed - it is re-armed, not read (reading would build it) */ if (S[k] !== undefined) SNAP[k] = JSON.stringify(S[k]); } catch (_) { /* not plain data */ } }); SNAP.seq = typeof REC !== 'undefined' ? REC.seq : 0; };
-  function demoReset() {
+  const snapshot = () => { SNAP = {}; SNAP_KEYS.forEach(k => { try { if (!lazyBuilt(k)) { SNAP[k] = null; return; } /* FR-197: a collection nobody has read yet is still the seed - it is re-armed, not read (reading would build it) */ if (S[k] !== undefined) SNAP[k] = JSON.stringify(S[k]); } catch (_) { /* not plain data */ } }); SNAP.seq = typeof REC !== 'undefined' ? REC.seq : 0; scenarioCapture(); };
+  function demoReset(id) {
+    if (id !== undefined && !SCENARIOS[id]) throw new Error('unknown scenario: ' + id);
+    id = id || scenarioCurrent();
     S.loads = mkLoads(); S.drivers = mkDrivers(); S.trucks = mkTrucks(); S.hubs = mkHubs(); S.jobs = mkJobs();
     if (SNAP) { SNAP_KEYS.forEach(k => { if (SNAP[k] === null) lazyReset(k); else if (SNAP[k] !== undefined) S[k] = JSON.parse(SNAP[k]); }); if (typeof REC !== 'undefined') REC.seq = SNAP.seq; }
     HOOKS.reset.forEach(f => { try { f(); } catch (e) { console.error(e); } });
-    S.hub = ''; S.gs.q = ''; S.drawer = null; S.diag = null; S.resetAsk = false; S.f = { q: '', status: '', cust: '', zone: '', pri: '', hub: '', drv: '', page: 1 };
+    scenarioApply(id); try { PREFS.set('scen', id); } catch (_) { /* preferences off */ }
+    S.hub = ''; S.gs.q = ''; S.drawer = null; S.diag = null; S.resetAsk = false; S.route = homeRoute(); S.f = { q: '', status: '', cust: '', zone: '', pri: '', hub: '', drv: '', page: 1 };
     if (typeof audit === 'function') audit('Demo', 'reset', LT('shell.demo_data_reset'), '', 'demo.reset');
     if (typeof window !== 'undefined' && !window.frameElement) { location.reload(); return; }
     toast(LT('shell.demo_data_reset_2'));
   }
   globalThis.demoReset = demoReset;
+  globalThis.applyScenario = demoReset;   // FR-222: applyScenario(id) = demoReset(id); the presets live in screens/dashboard/012-scenarios.js
   const kv = KIT.kv;
   SCREENS.account = {
     title: () => LT('shell.my_account'),
@@ -294,7 +299,7 @@
       return `<div class="acct"><div class="card card-body" data-account><h3 style="margin:0 0 12px">${esc(LT('shell.account'))}</h3><div class="kv">${kv(LT('shell.username'), esc(USERS[S.role] || S.role))}${kv(LT('shell.name'), esc(USER[S.role] || '—'))}${kv(LT('shell.role'), esc(ROLE_NAME[S.role]))}${kv(LT('shell.default_hub'), S.hub ? esc(HUBS[S.hub].city) : esc(LT('shell.all')))}${kv('2FA', chip('green', LT('shell.on')))}${kv(LT('shell.session_until'), sessEnd())}${kv(LT('shell.last_sign_in'), last)}${kv(LT('shell.permissions'), (ROLE_PERMS[S.role] || []).length)}</div>
 <p class="note" style="margin-top:12px">${esc(LT('shell.the_session_ends_after_30_minutes_of'))} <a class="lnk" data-act="helpGo" data-k="roles" role="button" tabindex="0">${esc(LT('shell.open'))} →</a></p></div>
 <div><div class="card card-body" data-acct-pw><h3 style="margin:0 0 12px">${esc(LT('shell.change_password'))}</h3><label class="fl">${esc(LT('shell.current_password'))}<input class="inp" id="ac_cp" data-ac="cp" type="password" value="${esc(S.acct.cp || '')}" autocomplete="current-password" required></label><label class="fl">${esc(LT('shell.new_password_12_characters'))}<input class="inp" id="ac_np" data-ac="np" type="password" value="${esc(S.acct.np)}" autocomplete="new-password" minlength="12" maxlength="128" required></label><label class="fl">${esc(LT('shell.repeat'))}<input class="inp" id="ac_np2" data-ac="np2" type="password" value="${esc(S.acct.np2)}" autocomplete="new-password" minlength="12" maxlength="128" required></label><p class="note">${esc(LT('shell.at_least_12_characters_a_passphrase_'))}</p>${S.acct.msg ? `<p class="note ${S.acct.ok ? 'tone-g' : 'tone-r'}" data-acct-msg>${esc(S.acct.msg)}</p>` : ''}<button class="btn primary" data-act="acctPw">${esc(LT('shell.save'))}</button></div>
-<div class="card card-body" style="margin-top:var(--gap)" data-demo-reset><h3 style="margin:0 0 8px">${esc(LT('shell.online_demo'))}</h3><p class="note">${esc(LT('shell.simulated_data_no_server_reset_retur'))}</p>${S.resetAsk ? `<div class="actbar"><button class="btn red" data-act="resetGo">${esc(LT('shell.yes_reset'))}</button><button class="btn grey" data-act="resetAsk">${esc(LT('shell.cancel'))}</button></div>` : `<button class="btn grey" data-act="resetAsk">${esc(LT('shell.reset_demo_data'))}</button>`}</div></div></div>`;
+<div class="card card-body" style="margin-top:var(--gap)" data-demo-reset><h3 style="margin:0 0 8px">${esc(LT('shell.online_demo'))}</h3><p class="note">${esc(LT('shell.simulated_data_no_server_reset_retur'))}</p>${scenarioPicker(S.scenPick)}${S.resetAsk ? `<div class="actbar"><button class="btn red" data-act="resetGo">${esc(LT('shell.yes_reset'))}</button><button class="btn grey" data-act="resetAsk">${esc(LT('shell.cancel'))}</button></div>` : `<button class="btn grey" data-act="resetAsk">${esc(LT('shell.reset_demo_data'))}</button>`}</div></div></div>`;
     },
   };
 
@@ -449,6 +454,7 @@
     H.home = S.route;
     if (ACT.qDev) { const q = ACT.qDev; ACT.qDev = d => { S.selDev = d.id; return q(d); }; }   // the quality screen keeps its selection private: remember it for the URL
     snapshot(); restoreState();
+    { const sc = PREFS.get('scen', 'normal'); if (sc !== 'normal' && SCENARIOS[sc]) scenarioApply(sc); }   // the preset chosen before the page reload
     applying = true; try { applyUrl(); } finally { applying = false; }
     H.key = null; started = true; syncUrl();
   });
