@@ -7,6 +7,7 @@ import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync } from 
 import { execSync } from 'node:child_process';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { stripLangs, verifyStrip } from './tools-build/strip-langs.mjs';
 import { whatsNewData, optimiseAssets, finishDelivery } from './delivery.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -15,6 +16,8 @@ const arg = (k, d) => {
   return i > 0 ? process.argv[i + 1] : d;
 };
 const outDir = resolve(arg('out', join(here, '..', 'platform')));
+const stripHelp = process.argv.includes('--strip-help'); // opt-in: also reduce the help text quads HQ(ru,de,en,kk); off, because help tests read the quads of the page language whole
+const keepLangs = process.argv.includes('--keep-langs'); // diagnostic: the unstripped bundle (every T() keeps all four languages)
 const langs = arg('lang', 'ru,de,en,kk').split(',');
 const rd = (...p) => readFileSync(join(here, ...p), 'utf8').replace(/\r\n/g, '\n'); // FR-204: sources are LF; a stray CRLF checkout must not reach the bundle
 const list = (dir, ext) =>
@@ -36,10 +39,11 @@ const screenFiles = () => {
   if (new Set(names).size !== names.length) throw new Error('screens: file names must be unique across area folders (build order is by name)');
   return out.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)).map(o => o[1]);
 };
-const css =
+const cssSrc =
   ['tokens.css', 'shell.css', 'components.css', 'components-kz.css', 'theme-kokzhol.css'].map(f => rd('shared', 'design', f)).join('\n') +
   '\n' +
   rd('v6', 'app.css');
+const css = keepLangs ? cssSrc : cssSrc.replace(/\/\*[\s\S]*?\*\//g, c => (c.length <= 40 ? c : c.slice(0, 40).split('\n')[0].replace(/\*\/?$/, '') + ' */')); // R01: stylesheet comments are cut to a landmark (tests find the print block by its comment)
 const js = [
   ...list('v6/base', '.js').map(f => rd('v6', 'base', f)), // S4: language, locale (FR-221), strings (FR-199), kit (FR-200), export (FR-201), state (FR-202)
   rd('v6', 'core.js'),
@@ -117,7 +121,8 @@ if (existsSync(join(outDir, 'assets'))) optimiseAssets(outDir);
 const preload = '<link rel="preload" as="image" type="image/svg+xml" href="assets/brand/kokzhol-mark-on-ink.svg">';
 for (const lang of langs) {
   // FR-204: data placeholders are written as /*@@NAME@@*/{} so the sources stay valid JavaScript for ESLint / Prettier
-  const code = js
+  const stripStats = {};
+  const code = (keepLangs ? js : stripLangs(js, lang, stripStats, { hq: stripHelp, comments: true }))
     .replace(/\/\*@@STRINGS@@\*\/\s*\{\}/, () => JSON.stringify(strings[lang]))
     .replace(/\/\*@@STRINGS_MT@@\*\/\s*\{\}/, () => JSON.stringify(lang === 'kk' ? kkOpen : {}))
     .replaceAll('/*@@ROLEPERMS@@*/{}', () => rolePerms)
@@ -129,9 +134,11 @@ for (const lang of langs) {
     .replaceAll('@@REGISTER@@', () => regFor(lang))
     .replaceAll('@@WHATSNEW@@', () => whatsNew)
     .replace(/<\/script/gi, '<\\/script');
+  if (!keepLangs) await verifyStrip(js, code, lang); // R01.1: same number of T( calls, result parses
   const html = `<!doctype html><html lang="${lang}" data-design="kokzhol"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kökzhol · Platform v6 (${lang})</title><link rel="icon" type="image/svg+xml" href="assets/brand/kokzhol-favicon.svg">${preload}<style>\n${css}\n</style></head><body><a class="skip" href="#main-content">${({ ru: "Перейти к содержимому", de: "Zum Inhalt springen", en: "Skip to content", kk: "Мазмұнға өту" })[lang] || "Skip to content"}</a><div id="root"></div><script>\n${code}\n</script></body></html>\n`;
   const file = join(outDir, lang === 'ru' ? 'index.html' : `${lang}.html`);
   writeFileSync(file, html);
+  if (!keepLangs) console.log('  T(): ' + stripStats.calls + ' calls, ' + stripStats.stripped + ' stripped, ' + stripStats.skipped.length + ' kept as is');
   console.log(`${lang}: ${file} (${(html.length / 1024).toFixed(0)} KB)`);
 }
 // tests.html = harness + every suite in tests/NN-*.js. Each file starts with __suite(i) so the harness can run one shard
