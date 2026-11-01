@@ -31,23 +31,25 @@
   const LABS = [];
   NETC.forEach(c => { const n = LABN[c.k] || 1; for (let i = 1; i <= n; i++) LABS.push({ id: 'LC-' + c.k + (n > 1 ? '-' + i : ''), city: c.k, hub: c.hub, n: T('Лабораторный комплекс ', 'Laborkomplex ', 'Lab complex ', 'Зертханалық кешен ') + c.n + (n > 1 ? ' ' + i : '') }); });
   const STR = ['Абая', 'Достык', 'Республики', 'Толе би', 'Жибек жолы', 'Сейфуллина', 'Байтурсынова', 'Кунаева', 'Сатпаева', 'Момышулы', 'Гагарина', 'Женис'];
-  const PTS = []; let pn = 0;
-  NETC.forEach(c => { const labs = LABS.filter(x => x.city === c.k); for (let i = 0; i < c.w; i++) { pn++; PTS.push({ id: 'CP-' + String(pn).padStart(4, '0'), city: c.k, lab: labs[i % labs.length].id, no: i + 1, street: nm(STR[(pn * 7) % STR.length]), house: 1 + (pn * 13) % 180, hours: i % 5 === 0 ? '08:00–14:00' : '07:30–17:00', sat: i % 3 === 0 }); } });
+  const PTS_BUILD = () => { const PTS = []; let pn = 0;
+  NETC.forEach(c => { const labs = LABS.filter(x => x.city === c.k); for (let i = 0; i < c.w; i++) { pn++; PTS.push({ id: 'CP-' + String(pn).padStart(4, '0'), city: c.k, lab: labs[i % labs.length].id, no: i + 1, street: nm(STR[(pn * 7) % STR.length]), house: 1 + (pn * 13) % 180, hours: i % 5 === 0 ? '08:00–14:00' : '07:30–17:00', sat: i % 3 === 0 }); } }); return PTS; };
+  const pts = lazyFn('r5.points', PTS_BUILD);   // FR-197: ~600 collection points are built on first use
   const cityOf = k => NETC.find(c => c.k === k) || { n: k, hub: 'AST' };
   const labOf = id => LABS.find(x => x.id === id) || { n: id, city: '' };
-  const ptOf = id => PTS.find(p => p.id === id);
+  const ptOf = id => pts().find(p => p.id === id);
   const ptName = p => T('Пункт забора № ', 'Entnahmestelle Nr. ', 'Collection point no. ', 'Сынама алу пункті № ') + p.no + ' · ' + cityOf(p.city).n;
   const ptAddr = p => T(`ул. ${p.street}, ${p.house}`, `${p.street}-Str. ${p.house}`, `${p.house} ${p.street} St`, `${p.street} көш., ${p.house}`);
   const hay = p => (p.id + ' ' + ptName(p) + ' ' + ptAddr(p) + ' ' + labOf(p.lab).n + ' ' + cityOf(p.city).n).toLowerCase();
-  const search = (q, city, lab) => { const s = String(q || '').trim().toLowerCase(); return PTS.filter(p => (!city || p.city === city) && (!lab || p.lab === lab) && (!s || hay(p).includes(s))); };
-  Object.assign(R5, { NETC, LABS, PTS, ptOf, ptName, ptAddr, labOf, cityOf, search });
+  const search = (q, city, lab) => { const s = String(q || '').trim().toLowerCase(); return pts().filter(p => (!city || p.city === city) && (!lab || p.lab === lab) && (!s || hay(p).includes(s))); };
+  Object.assign(R5, { NETC, LABS, ptOf, ptName, ptAddr, labOf, cityOf, search });
+  Object.defineProperty(R5, 'PTS', { get: pts, enumerable: true, configurable: true });
 
   function recipients() {
     const all = search(Q.rq, Q.rcity, Q.rlab), per = 20, pages = Math.max(1, Math.ceil(all.length / per)), pg = Math.min(Math.max(1, Q.rpage), pages), rows = all.slice((pg - 1) * per, pg * per);
-    const cityRows = NETC.map(c => `<tr data-r5-city="${c.k}"${Q.rcity === c.k ? ' class="is-selected"' : ''}><td><a class="lnk" data-act="r5City" data-v="${c.k}">${esc(c.n)}</a></td><td>${esc(HUBS[c.hub].city)}</td><td>${LABS.filter(x => x.city === c.k).length}</td><td>${PTS.filter(p => p.city === c.k).length}</td></tr>`).join('');
+    const cityRows = NETC.map(c => `<tr data-r5-city="${c.k}"${Q.rcity === c.k ? ' class="is-selected"' : ''}><td><a class="lnk" data-act="r5City" data-v="${c.k}">${esc(c.n)}</a></td><td>${esc(HUBS[c.hub].city)}</td><td>${LABS.filter(x => x.city === c.k).length}</td><td>${pts().filter(p => p.city === c.k).length}</td></tr>`).join('');
     const labs = LABS.filter(x => !Q.rcity || x.city === Q.rcity);
     const trs = rows.map(p => `<tr data-cp="${p.id}"><td><b>${p.id}</b><div class="sub">${esc(ptName(p))}</div></td><td>${esc(labOf(p.lab).n)}</td><td>${esc(ptAddr(p))}<div class="sub">${p.hours}${p.sat ? ' · ' + esc(T('сб до 13:00', 'Sa bis 13:00', 'Sat until 13:00', 'сн 13:00 дейін')) : ''}</div></td><td>${esc(HUBS[cityOf(p.city).hub].city)}</td><td>${canDo('orders:write') ? `<button class="btn sm grey" data-act="r5UseRcp" data-id="${p.id}">${esc(T('Рейс сюда', 'Fahrt hierher', 'Load to here', 'Осында рейс'))}</button>` : ''}</td></tr>`).join('');
-    return `<div class="kpi-row k4">${tk('blue', 'route', NETC.length, T('Городов', 'Städte', 'Cities', 'Қалалар'))}${tk('purple', 'warehouse', LABS.length, T('Лабораторных комплексов', 'Laborkomplexe', 'Lab complexes', 'Зертханалық кешендер'))}${tk('green', 'package', PTS.length, T('Пунктов забора', 'Entnahmestellen', 'Collection points', 'Сынама алу пункттері'))}${tk('yellow', 'truck', Object.keys(HUBS).length, T('Хабов доставки', 'Liefer-Hubs', 'Delivery hubs', 'Жеткізу хабтары'))}</div>
+    return `<div class="kpi-row k4">${tk('blue', 'route', NETC.length, T('Городов', 'Städte', 'Cities', 'Қалалар'))}${tk('purple', 'warehouse', LABS.length, T('Лабораторных комплексов', 'Laborkomplexe', 'Lab complexes', 'Зертханалық кешендер'))}${tk('green', 'package', pts().length, T('Пунктов забора', 'Entnahmestellen', 'Collection points', 'Сынама алу пункттері'))}${tk('yellow', 'truck', Object.keys(HUBS).length, T('Хабов доставки', 'Liefer-Hubs', 'Delivery hubs', 'Жеткізу хабтары'))}</div>
 ${howNote('recNet')}
 <div class="grid2"><div class="card tcard" id="r5_rcp"><div class="card-body" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end">
 <label class="fl" style="flex:1;min-width:180px;margin:0">${esc(T('Поиск: номер, адрес, комплекс', 'Suche: Nummer, Adresse, Komplex', 'Search: number, address, complex', 'Іздеу: нөмір, мекенжай, кешен'))}<input class="inp" id="r5_rq" data-r5="rq" value="${esc(Q.rq)}" placeholder="${esc(T('например, CP-0042 или Абая', 'z. B. CP-0042 oder Abaya', 'e.g. CP-0042 or Abaya', 'мысалы, CP-0042'))}"></label>

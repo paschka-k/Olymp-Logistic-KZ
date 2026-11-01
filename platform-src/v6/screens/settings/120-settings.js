@@ -46,7 +46,7 @@
     ['leak', 'chart', 'yellow', T('Поиск утечек затрат', 'Kostenlecks erkennen', 'Cost-leak detection', 'Шығын ағып кетуін іздеу'), T('Простои, порожние пробеги, топливо', 'Standzeiten, Leerfahrten, Treibstoff', 'Detention, empty legs, fuel', 'Тұрып қалу, бос жүріс, отын')],
     ['anom', 'receipt', 'green', T('Аномалии ЭСФ и счетов', 'ESF-/Rechnungsanomalien', 'ESF / invoice anomalies', 'ЭШФ және шот ауытқулары'), T('Дубли, расхождения, пропущенные позиции', 'Dubletten, Abweichungen, fehlende Positionen', 'Duplicates, mismatches, missing lines', 'Қайталанулар, айырмашылықтар')]];
   globalThis.CFG = { cur: dup(base), saved: JSON.stringify(base), live: { shift: 9 }, tab: false, auditOpen: false };
-  S.audit = [];
+  lazy('audit', () => []);   // FR-197
   globalThis.audit = (module, subject, decision, reason) => { const d = clockNow(); S.audit.unshift({ t: LF.time(d), user: 'Sarah Johnson', module, subject, decision, reason: reason || '' }); };
   const getp = (p) => p.split('.').reduce((o, k) => o[k], CFG.cur);
   const setp = (p, v) => { const a = p.split('.'), k = a.pop(); a.reduce((o, x) => o[x], CFG.cur)[k] = v; };

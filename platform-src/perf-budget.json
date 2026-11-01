@@ -2,6 +2,8 @@
   "_doc": "FR-198 performance budget, checked by tools/ci/perf-budget.cjs in CI (UI tests → perf job; page weight also in build-platform.yml). Raise a number only on purpose, in the same commit as the change that needs it. Weight after FR-191 (build-time language strip, 2026-11-01): ru 3009 KB raw / 938 KB gzip, the ceilings follow it (before: 4200 / 1400). Local reference (browser pane, 2026-10-20, before the strip): ru 3764 KB raw / 1208 KB gzip, start 254 ms, tick 13–20 ms, renders 8–35 ms; the GitHub runner is about 2–3x slower, hence the timing headroom.",
   "pageKB": { "raw": 3100, "gzip": 1000 },
   "startMs": 1500,
+  "interactiveMs": 1500,
+  "measured": { "ru": 428, "en": 404, "_note": "FR-197 time to interactive (navigation to v6-ready mark), ms, median of 5 headless Chrome loads on the dev machine, 2026-11-01" },
   "tickMs": 80,
   "renderMs": {
     "screens": ["dashboard", "orders", "dispatch", "fleet", "drivers", "routes", "hubs", "pod", "billing", "reports", "ai", "baseline", "settings"],

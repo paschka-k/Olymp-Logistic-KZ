@@ -272,10 +272,10 @@
   HOOKS.reset = HOOKS.reset || [];
   const SNAP_KEYS = ['users', 'oncall', 'alarms', 'inbox', 'audit', 'bookings', 'apiKeys', 'integ', 'webhooks', 'claims', 'devs'];
   let SNAP = null;
-  const snapshot = () => { SNAP = {}; SNAP_KEYS.forEach(k => { try { if (S[k] !== undefined) SNAP[k] = JSON.stringify(S[k]); } catch (_) { /* not plain data */ } }); SNAP.seq = typeof REC !== 'undefined' ? REC.seq : 0; };
+  const snapshot = () => { SNAP = {}; SNAP_KEYS.forEach(k => { try { if (!lazyBuilt(k)) { SNAP[k] = null; return; } /* FR-197: a collection nobody has read yet is still the seed - it is re-armed, not read (reading would build it) */ if (S[k] !== undefined) SNAP[k] = JSON.stringify(S[k]); } catch (_) { /* not plain data */ } }); SNAP.seq = typeof REC !== 'undefined' ? REC.seq : 0; };
   function demoReset() {
     S.loads = mkLoads(); S.drivers = mkDrivers(); S.trucks = mkTrucks(); S.hubs = mkHubs(); S.jobs = mkJobs();
-    if (SNAP) { SNAP_KEYS.forEach(k => { if (SNAP[k] !== undefined) S[k] = JSON.parse(SNAP[k]); }); if (typeof REC !== 'undefined') REC.seq = SNAP.seq; }
+    if (SNAP) { SNAP_KEYS.forEach(k => { if (SNAP[k] === null) lazyReset(k); else if (SNAP[k] !== undefined) S[k] = JSON.parse(SNAP[k]); }); if (typeof REC !== 'undefined') REC.seq = SNAP.seq; }
     HOOKS.reset.forEach(f => { try { f(); } catch (e) { console.error(e); } });
     S.hub = ''; S.gs.q = ''; S.drawer = null; S.diag = null; S.resetAsk = false; S.f = { q: '', status: '', cust: '', zone: '', pri: '', hub: '', drv: '', page: 1 };
     if (typeof audit === 'function') audit('Demo', 'reset', LT('shell.demo_data_reset'), '', 'demo.reset');

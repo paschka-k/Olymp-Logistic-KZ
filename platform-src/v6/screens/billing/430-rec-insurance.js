@@ -9,10 +9,10 @@
   const addD = (iso, n) => new Date(new Date(iso).getTime() + n * DAY).toISOString().slice(0, 10);
   let seq = 0;
   const mk = o => Object.assign({ id: 'CLM-2026-' + String(++seq).padStart(3, '0'), dev: '', load: '', booking: '', amount: 0, status: 'open', deadline: addD(NOW.toISOString(), 30), note: '', hist: [], created: NOW.toISOString() }, o);
-  S.claims = [
+  lazy('claims', () => { seq = 0; return [
     mk({ dev: 'DEV-0011', load: 'LD-2026-001844', booking: 'BK-26-000004', amount: 4200000, status: 'submitted', note: T('Отклонение +14 °C 40 мин, партия уничтожена', 'Abweichung +14 °C 40 Min, Charge vernichtet', 'Excursion +14 °C for 40 min, batch destroyed', 'Ауытқу +14 °C 40 мин, партия жойылды'), deadline: '2026-11-02', created: '2026-10-10T10:00:00+05:00', hist: [{ at: '2026-10-12T09:30:00+05:00', st: 'submitted', note: T('передано страховщику, пакет документов: акт, температурный лог', 'an den Versicherer übergeben, Unterlagen: Protokoll, Temperaturlog', 'handed to the insurer, documents: report, temperature log', 'сақтандырушыға берілді, құжаттар: акт, температура журналы'), who: 'quality' }] }),
     mk({ dev: 'DEV-0009', load: 'LD-2026-001799', booking: 'BK-26-000001', amount: 950000, status: 'settled', note: T('Подмораживание 2–8 °C, частичная утрата', 'Anfrieren 2–8 °C, Teilverlust', 'Freezing of 2–8 °C goods, partial loss', '2–8 °C жүгінің тоңуы, ішінара жоғалту'), deadline: '2026-10-05', created: '2026-09-08T10:00:00+05:00', hist: [{ at: '2026-09-10T09:00:00+05:00', st: 'submitted', note: T('передано страховщику', 'an den Versicherer übergeben', 'handed to the insurer', 'сақтандырушыға берілді'), who: 'quality' }, { at: '2026-10-01T12:00:00+05:00', st: 'settled', note: 'выплата 945 250 ₸ за вычетом франшизы', who: 'finance' }] }),
-  ];
+  ]; });
   const declared = c => { const b = S.bookings.find(x => x.id === c); return b ? bookingValue(b) : 0; };   // D4: b.value (desk) or b.declared (portal)
   const insuredBookings = () => S.bookings.filter(b => b.insured && b.status === 'confirmed');
   globalThis.claimOpen = o => {
@@ -22,7 +22,7 @@
     if (amt > bookingValue(b)) return T('Сумма выше объявленной стоимости ', 'Betrag über dem deklarierten Wert ', 'Amount above the declared value ', 'Сома мәлімделген құннан жоғары ') + nf(bookingValue(b)) + ' ₸';
     if (!noteOk(o.note, 10)) return T('Описание: минимум 10 символов, без персональных данных', 'Beschreibung: mindestens 10 Zeichen, ohne personenbezogene Daten', 'Description: at least 10 characters, no personal data', 'Сипаттама: кемінде 10 таңба');
     if (S.claims.some(c => c.dev === d.id && ['open', 'submitted'].includes(c.status))) return T('По этому отклонению уже есть открытый случай', 'Zu dieser Abweichung gibt es schon einen offenen Fall', 'A claim for this deviation is already open', 'Бұл ауытқу бойынша ашық іс бар');
-    const c = mk({ dev: d.id, load: b.load || d.load || '', booking: b.id, amount: amt, note: o.note.trim() }); S.claims.unshift(c); audit('Insurance', c.id, T('Страховой случай открыт', 'Schadenfall angelegt', 'Claim opened', 'Сақтандыру жағдайы ашылды'), d.id + ' · ' + nf(amt) + ' ₸'); return c;
+    lazyForce('claims'); const c = mk({ dev: d.id, load: b.load || d.load || '', booking: b.id, amount: amt, note: o.note.trim() }); S.claims.unshift(c); audit('Insurance', c.id, T('Страховой случай открыт', 'Schadenfall angelegt', 'Claim opened', 'Сақтандыру жағдайы ашылды'), d.id + ' · ' + nf(amt) + ' ₸'); return c;
   };
   globalThis.claimStep = (id, st, note) => {
     const c = S.claims.find(x => x.id === id); if (!c) return '—';

@@ -37,7 +37,7 @@ ${KIT.table([T('Уровень', 'Stufe', 'Level', 'Деңгей'), T('Смен�
   const FN_REQUIRED = ['head_logistics', 'fin_controller', 'ceo', 'head_analytics', 'head_purchasing', 'qa_manager'];
   globalThis.FN_L = FN;
   const U = (username, name, role, hub, fn, o) => Object.assign({ username, name, role, hub, fn: fn || [], mfa: true, active: true, locked: false, last: plusH(-Math.round(Math.random() * 0 + 3)), ref: '' }, o);
-  S.users = [
+  lazy('users', () => [
     U('admin', nm('Сара Джонсон'), 'admin', null, ['ceo', 'head_security'], { last: plusH(-0.2) }),
     U('dispatcher.ast', nm('Айгерим Бекова'), 'dispatcher', 'AST', ['head_logistics'], { last: plusH(-1) }), U('dispatcher.ala', nm('Руслан Ибраев'), 'dispatcher', 'ALA', [], { last: plusH(-26) }), U('dispatcher.kar', nm('Олег Смирнов'), 'dispatcher', 'KAR', [], { mfa: false, last: plusH(-50) }),
     U('warehouse.ast', nm('Данияр Абенов'), 'warehouse', 'AST', [], { last: plusH(-3) }), U('driver.001', nm('Ерлан Сейтқали'), 'driver', 'KAR', [], { last: plusH(-5) }),
@@ -45,7 +45,7 @@ ${KIT.table([T('Уровень', 'Stufe', 'Level', 'Деңгей'), T('Смен�
     U('manager', nm('Бауыржан Кенжебаев'), 'manager', null, ['head_analytics', 'head_purchasing'], { last: plusH(-8) }), U('finance', nm('Елена Ким'), 'finance', null, ['fin_controller'], { last: plusH(-9) }),
     U('quality', nm('Асель Нуртазина'), 'quality', 'ALA', ['qa_manager'], { last: plusH(-12), locked: true }), U('security.head', nm('Нурбек Жолдасов'), 'manager', null, ['head_security'], { last: plusH(-30) }),
     U('cust.apteka', nm('ТОО «Аптека Сервис»'), 'customer', null, [], { ref: 'c1', mfa: false, last: plusH(-40) }), U('partner.pl01', nm('ТОО «СтепьЛогистик»'), 'partner', null, [], { ref: 'PL-01', mfa: false, last: plusH(-70) }),
-  ];
+  ]);
   const userOf = role => S.users.find(u => u.role === role && u.active);
   globalThis.userOf = userOf;
   const missingFn = () => FN_REQUIRED.filter(fn => !S.users.some(u => u.active && u.fn.includes(fn)));
@@ -155,7 +155,7 @@ ${KIT.table(['#', T('Время', 'Zeit', 'Time', 'Уақыт'), T('Пользо
   const API = { public: T('публичный API', 'öffentliche API', 'public API', 'ашық API'), contract: T('API по договору', 'API per Vertrag', 'API on contract', 'шарт бойынша API'), open_data: T('открытые данные', 'Open Data', 'open data', 'ашық деректер'), none: T('нет API · вручную', 'keine API · manuell', 'no API · manual', 'API жоқ · қолмен') };
   const CON = { configured: ['green', T('подключено', 'verbunden', 'configured', 'қосылған')], not_configured: ['yellow', T('нет доступа', 'nicht konfiguriert', 'not configured', 'бапталмаған')], manual: ['blue', T('вручную', 'manuell', 'manual', 'қолмен')], planned: ['gray', T('в плане', 'geplant', 'planned', 'жоспарда')] };
   const Y = (key, name, op, cat, mand, basis, deadline, api, conn, feeds, o) => Object.assign({ key, name, op, cat, mand, basis, deadline, api, conn, feeds: feeds || [], sync: conn === 'configured' ? plusH(-0.3) : '' }, o);
-  S.integ = [
+  lazy('integ', () => [
     Y('esf', LT('rec_admin.is_esf_e_invoices'), 'KGD MinFin', 'government', 'yes', LT('rec_admin.tax_code_e_invoice_for_every_transpo'), '', 'public', 'manual', ['doc_status']),
     Y('snt', LT('rec_admin.is_esf_snt_consignment_notes'), 'KGD MinFin', 'government', 'conditional', LT('rec_admin.minfin_order_no_657_tax_code_art_179'), '2026-01-01', 'public', 'manual', ['doc_status']),
     Y('esutd', LT('rec_admin.esutd_e_ttn_and_e_trip_sheet'), T('Минтранс', 'Verkehrsministerium', 'Ministry of Transport', 'Көлік министрлігі'), 'government', 'yes', LT('rec_admin.mid_order_no_546_suspended_by_order_'), '2027-06-01', 'none', 'manual', ['doc_status']),
@@ -204,8 +204,8 @@ ${KIT.table(['#', T('Время', 'Zeit', 'Time', 'Уақыт'), T('Пользо
     Y('della', 'Della.kz', 'Della', 'leads', 'no', '', '', 'none', 'manual', ['lead'], { note: T('Нет API.', 'Keine API.', 'No API.', 'API жоқ.') }),
     Y('indrive_cargo', 'inDrive Cargo', 'inDrive', 'leads', 'no', '', '', 'none', 'manual', ['lead'], { note: T('Нет бизнес-API.', 'Keine Business-API.', 'No business API.', 'Бизнес API жоқ.') }),
     Y('partner_api', T('Партнёрский REST API v1 + вебхуки', 'Partner-REST-API v1 + Webhooks', 'Partner REST API v1 + webhooks', 'Серіктес REST API v1'), 'Olymp', 'finance', 'no', LT('rec_admin.customer_erp_slots_offers_bookings_s'), '', 'public', 'configured', []),
-  ];
-  S.apiKeys = [{ id: 'k1', name: nm('ERP ТОО «МедФарм Дистрибьюшн»'), prefix: 'olk_3f9a1c2d', cust: 'c3', hook: 'https://erp.medpharm.example/olymp/hook', scopes: ['slots:read', 'quotes:write', 'bookings:write', 'bookings:read', 'shipments:read'], created: '2026-09-01', last: plusH(-2), active: true }, { id: 'k2', name: 'Wialon push', prefix: 'olk_b71c04e9', cust: '', hook: '', scopes: ['inbox:write'], created: '2026-08-12', last: plusH(-0.1), active: true }, { id: 'k3', name: 'Test (revoked)', prefix: 'olk_00aa7f31', cust: 'c1', hook: '', scopes: ['bookings:read'], created: '2026-07-01', last: '', active: false }];
+  ]);
+  lazy('apiKeys', () => [{ id: 'k1', name: nm('ERP ТОО «МедФарм Дистрибьюшн»'), prefix: 'olk_3f9a1c2d', cust: 'c3', hook: 'https://erp.medpharm.example/olymp/hook', scopes: ['slots:read', 'quotes:write', 'bookings:write', 'bookings:read', 'shipments:read'], created: '2026-09-01', last: plusH(-2), active: true }, { id: 'k2', name: 'Wialon push', prefix: 'olk_b71c04e9', cust: '', hook: '', scopes: ['inbox:write'], created: '2026-08-12', last: plusH(-0.1), active: true }, { id: 'k3', name: 'Test (revoked)', prefix: 'olk_00aa7f31', cust: 'c1', hook: '', scopes: ['bookings:read'], created: '2026-07-01', last: '', active: false }]);
   const SCOPES = ['slots:read', 'quotes:write', 'bookings:write', 'bookings:read', 'shipments:read'], SCOPES_X = ['tracking:read', 'inbox:write', 'invoices:read'];
   const hex = n => { let s = ''; for (let i = 0; i < n; i++) s += '0123456789abcdef'[Math.floor(Math.random() * 16)]; return s; };
   const custName = id => { const c = (S.customers || CUSTOMERS).find(x => x.id === id); return c ? c.name : '—'; };
@@ -222,7 +222,7 @@ ${KIT.table(['#', T('Время', 'Zeit', 'Time', 'Уақыт'), T('Пользо
     audit('Integrations', 'apikey ' + prefix, T('Ключ создан', 'Schlüssel erstellt', 'Key created', 'Кілт құрылды'), 'api_client.created · ' + o.cust + ' · ' + sc.join(','));
     return { key, secret };
   };
-  S.webhooks = [{ id: 'w1', url: 'https://erp.medpharm.example/olymp/hook', events: ['booking.confirmed', 'shipment.status', 'pod.approved'], secret: 'whsec_•••• 7c21', active: true, log: [{ at: plusH(-1), ev: 'shipment.status', code: 200 }, { at: plusH(-5), ev: 'booking.confirmed', code: 200 }] }, { id: 'w2', url: 'https://alarms.secure-kz.example/in', events: ['alarm.level3'], secret: 'whsec_•••• 91af', active: true, log: [{ at: plusH(-20), ev: 'alarm.level3', code: 500 }] }];
+  lazy('webhooks', () => [{ id: 'w1', url: 'https://erp.medpharm.example/olymp/hook', events: ['booking.confirmed', 'shipment.status', 'pod.approved'], secret: 'whsec_•••• 7c21', active: true, log: [{ at: plusH(-1), ev: 'shipment.status', code: 200 }, { at: plusH(-5), ev: 'booking.confirmed', code: 200 }] }, { id: 'w2', url: 'https://alarms.secure-kz.example/in', events: ['alarm.level3'], secret: 'whsec_•••• 91af', active: true, log: [{ at: plusH(-20), ev: 'alarm.level3', code: 500 }] }]);
   const daysLeft = iso => Math.ceil((new Date(iso + 'T00:00:00+05:00') - NOW) / 864e5);
   const EVENTS = ['booking.confirmed', 'booking.rejected', 'shipment.status', 'pod.approved', 'invoice.issued', 'alarm.level3', 'temperature.excursion'];
   /* I3 (0.3.9 EsutdPanel): readiness for the ESUTD duties per hub — open trips and the last 30 days.
