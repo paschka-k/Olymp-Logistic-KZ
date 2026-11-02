@@ -143,6 +143,31 @@ async function group1(name, lang, fn) {
   log(name, err, quar ? 'quar' : '');
 }
 async function group(name, lang, fn) { const t0 = performance.now(); if (__runs(__CUR)) UI.cur(name); try { await group1(name, lang, fn); } finally { const ms = Math.round(performance.now() - t0); (window.__TESTS.times = window.__TESTS.times || []).push([name, ms]); if (__runs(__CUR)) UI.ms(ms); } }
+/* rows(name, lang, items, fn): one scenario PER RECORD inside ONE iframe (0.3.11 listed «Место #1…#22», «Город #1…#23» as separate rows; group() folds them into one).
+   name is a string (row = name + ' #' + (i + 1)) or (item, i) => title (it must cope with item === null: used when the page cannot load or the list is empty); items is an array or
+   (ev, w) => array read from the loaded page; fn(item, i, ev, w, g) throws to fail only its own row, so a failing record names itself.
+   Every row goes through log(): it counts in __TESTS.total / passed / failed / failures, is skipped by ?suite / ?shard like a group, is retried in place
+   (?retries, flaky report), is quarantined by its title and is timed in __TESTS.times. The iframe is loaded once and shared by the rows of the call, so rows must
+   not change page state (a scenario that does belongs in a group). An empty item list fails: a vanished dataset must not pass silently. */
+async function rows(name, lang, items, fn) {
+  if (!__runs(__CUR)) return;
+  const title = (it, i) => (typeof name === 'function' ? name(it, i) : name + ' #' + (i + 1)), T = window.__TESTS, mark = (t, ms) => { (T.times = T.times || []).push([t, ms]); UI.ms(ms); };
+  let g, kept = false;
+  try { g = await fresh(lang || 'ru'); } catch (e) { log(title(null, 0), 'cannot load: ' + e.message); return; }
+  try {
+    if (typeof items === 'function') { try { items = items(g.ev, g.w); } catch (e) { log(title(null, 0), 'cannot list the records: ' + e.message); return; } }
+    if (!items.length) { log(title(null, 0), 'no records to walk'); return; }
+    for (let i = 0; i < items.length; i++) {
+      const t = title(items[i], i), t0 = performance.now(); UI.cur(t);
+      const r = await __HARNESS.attempts(async () => { await fn(items[i], i, g.ev, g.w, g); }, __RETRIES);
+      if (r.ok) { if (r.errs.length) T.flaky.push({ name: t, attempts: r.errs.length + 1, errors: r.errs }); log(t, null, r.errs.length ? 'flaky' : ''); mark(t, Math.round(performance.now() - t0)); continue; }
+      const err = r.errs[0] + (r.errs.length > 1 ? ' (also failed on ' + (r.errs.length - 1) + ' retr' + (r.errs.length > 2 ? 'ies' : 'y') + ')' : ''), quar = __HARNESS.quarantined(t);
+      if (quar) T.quarantined.push({ name: t, error: r.errs[0] });
+      if (!quar && !kept) kept = keepFail(g, t, r.errs[0]);
+      log(t, err, quar ? 'quar' : ''); mark(t, Math.round(performance.now() - t0));
+    }
+  } finally { if (!kept) g.done(); }
+}
 const clean = (w, where) => { const t = w.document.querySelector('#root').innerText; const m = t.match(/.{0,20}(undefined|NaN|\[object|\bnull\b).{0,20}/); assert(!m, where + ' contains "' + (m && m[0]) + '"'); assert(!w.__errs.length, where + ' threw: ' + w.__errs[0]); };
 
 (async () => {

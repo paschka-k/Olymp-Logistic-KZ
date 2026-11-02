@@ -1100,3 +1100,24 @@ Failed / not passed scenarios: 10
 | 703 | FR-159 / FR-160 Учёт и туры | Тур «Отклонение QA» с кнопки «Тур» экрана 09 и тур водителя (вкладки приложения из ссылки) | ОШИБКА | вкладка «Маршрут» не открыта: #/s/driver?view=route |
 
 Notes on the failures (not investigated, this is a single run on 2026-10-31 in a shared browser pane): 414-416 are the express request EX-0311 (signing deadline 01.11 16:00 is one day after the run date, error 414 is a DOM dump of the express card), 427 the thermochron import TH-02, 504 / 506-508 the vehicle-plan scenarios of module `Загрузка · типы ТС` (state is stored on the shared demo origin, so results may depend on what other sessions did before), 661 / 682 / 703 registry and driver-app tab checks. 9 of the 10 are in modules whose behaviour is covered by v6 groups (`73-ops-dispatch.js` express, `83-res-thermo.js`/`d0-v6-parity.js` thermochron, `70-ops-load.js` plan, `80-res-fleet-staff.js`, `81-res-driver-app.js`); a re-run on a clean browser profile is needed before treating them as 0.3.11 defects. The full run reported 747 / 757 passed.
+
+## 5. Status after 6.5.3 (per-record rows, trace)
+
+Cause of the 757 vs 696 difference: 0.3.11 counted one scenario per record (`Место #1..#22`, `Город #1..#23`, `Партнёр #1..#22`), v6 `group()` walked all records of a family in one iframe. 6.5.3 adds the harness helper `rows(name, lang, items, fn)` (template.html): one result row per record in the SAME iframe (own `log()` row, sharding, retries, quarantine and `__TESTS` totals as for a group) and `platform-src/tests/h9-0311-rows.js` with 14 record families + 5 baseline rings + menu items in RU / DE / EN, every title tagged `(0.3.11 #n)`.
+
+| | scenarios on the tests page |
+|---|---:|
+| before (this tree, 4 shards, 6.5.2 + h1..h8 + open tickets) | 853 |
+| h9 rows | +1116 |
+| after (sum of the 4 shards) | 1969 |
+
+Rows follow the v6 seed: 306 places (SSCC, truck/ADR fit, shelf life = 3 x 306), 7 trucks (plates, fees, 7), 6 thermo vehicles, 7 drivers (plan, driver report), 3 fines, 23 forecast cities, 37 current article lines, 17 partners (directory, contacts), 23 baseline cities, 5 rings, 13 menu items x 3 languages.
+
+Traceability: `docs/parity-0311/autotests-trace.tsv` maps all 757 numbers; `node tools/check-autotest-trace.mjs` fails when a number is unmapped or a target does not exist.
+
+| status | scenarios |
+|---|---:|
+| ROW (an h9 row answers the number) | 265 |
+| GROUP (an existing v6 group covers it, incl. all former PARTIAL / MISSING closed by h1..h8; numbers whose family has fewer v6 records than 0.3.11, e.g. fines 94-97, drivers 105-110, partners 249-253 / 271-275, are covered by the rule applied to every v6 record) | 465 |
+| NA (reason in the trace: v5 fixtures, backend API codes, harness resets, FR-163, BUG-37) | 27 |
+| total | 757 |
