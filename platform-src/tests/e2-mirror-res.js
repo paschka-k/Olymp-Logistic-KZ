@@ -560,8 +560,10 @@
     ev("ACT.cmLead({id:'L-103',v:'lost'})"); eq(ev("S.leads.find(l=>l.id==='L-103').status"), 'new', 'stage button lost without reason'); eq(ev('S.drawer.st'), 'lost', 'drawer opened at lost');
     ev("ACT.cmLeadOpen({id:'L-101'})"); w.document.querySelector('#ld_tk_title').value = 'Позвонить'; w.document.querySelector('#ld_tk_due').value = '2026-10-25'; const tk = ev('S.tasks.length'); ev("ACT.cmLeadTask({id:'L-101'})"); eq(ev('S.tasks.length'), tk + 1, 'task'); eq(ev('S.tasks[S.tasks.length-1].who'), 'Sarah Johnson', 'assignee = owner'); eq(ev('S.tasks[S.tasks.length-1].due'), '2026-10-25');
     ev("ACT.cmLeadTask({id:'L-101',title:'x'})"); eq(ev('S.tasks.length'), tk + 1, 'one-char task accepted');
-    w.confirm = () => false; ev("ACT.cmLeadErase({id:'L-101'})"); eq(ev("S.leads.find(l=>l.id==='L-101').email"), 'tender@example.kz', 'erased without confirm');
-    w.confirm = () => true; ev("ACT.cmLeadErase({id:'L-101'})"); const e = ev("S.leads.find(l=>l.id==='L-101')"); eq(e.email, ''); eq(e.contact, '—'); eq(e.msg, ''); eq(e.erased, '2026-10-18'); eq(ev('S.audit[0].decision'), 'PD erased');
+    /* FR-213/214: erasing is irreversible, so it keeps a confirmation - an in-page one: the first call only asks, the force call (the "Yes" button) erases */
+    ev("ACT.cmLeadErase({id:'L-101'})"); eq(ev("S.leads.find(l=>l.id==='L-101').email"), 'tender@example.kz', 'not erased without confirmation'); eq(ev('S.leadAsk'), 'L-101', 'asks first');
+    ev("ACT.cmLeadEraseNo({})"); eq(ev('S.leadAsk'), null, 'cancel closes the question'); eq(ev("S.leads.find(l=>l.id==='L-101').email"), 'tender@example.kz', 'cancel keeps the data');
+    ev("ACT.cmLeadErase({id:'L-101',force:'1'})"); const e = ev("S.leads.find(l=>l.id==='L-101')"); eq(e.email, ''); eq(e.contact, '—'); eq(e.msg, ''); eq(e.erased, '2026-10-18'); eq(ev('S.audit[0].decision'), 'PD erased');
     ev("ACT.close?ACT.close():closeDrawer()"); ev(CM('crm')); assert(w.document.querySelector('.kcard[data-lead="L-101"] [data-lead-erased]'), 'card marked erased');
     assert(!w.document.querySelector('#cm_ld_src option[value="web"]'), 'web source in manual select'); assert(w.document.querySelector('#cm_ld_email') && w.document.querySelector('#cm_ld_phone') && w.document.querySelector('textarea#cm_ld_msg'), 'new lead e-mail / phone / message');
     const n = ev('S.leads.length'); ev("COMM.q.ld_company='ТОО «Почта»';COMM.q.ld_email='bad';ACT.cmLeadAdd()"); eq(ev('S.leads.length'), n, 'invalid e-mail accepted');

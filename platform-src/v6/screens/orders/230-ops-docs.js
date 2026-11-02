@@ -64,7 +64,7 @@ ${howNote('gate')}${o.inbox.length ? `<h4 style="margin:12px 0 6px;font-size:13p
     return `<div class="card lw-card" data-gonogo="${ok ? 'go' : 'nogo'}"><h3 class="lw-h" style="margin-top:0">${esc(T('Допуск к рейсу · Go / No-Go', 'Fahrtfreigabe · Go / No-Go', 'Trip release · Go / No-Go', 'Рейске рұқсат · Go / No-Go'))}</h3>${howNote('gonogo')}<p class="note">${esc(LT('ops_docs.every_control_checks_data_vehicle_av'))}</p>${rows}${fix}${act}</div>`;
   }
   function body() {
-    const l = curLoad(); if (!l) return `<div class="card card-body"><p class="note">${esc(T('Нет рейсов', 'Keine Fahrten', 'No loads', 'Рейс жоқ'))}</p></div>`;
+    const l = curLoad(); if (!l) return `<div class="card card-body">${KIT.state('empty', { title: T('Нет рейсов', 'Keine Fahrten', 'No loads', 'Рейс жоқ') })}</div>`;
     const chips = `<div class="lw-chips">${docLoads().map(x => `<span class="lw-chip${x.id === l.id ? ' on' : ''}" data-act="dkSel" data-id="${x.id}">${x.id} · ${esc(HUBS[x.from].city)} → ${esc(HUBS[x.to].city)} · ${esc(ST[x.status].l)}${released(x) ? ' · Go' : ''}</span>`).join('')}</div>`;
     return chips + `<div class="dk-grid">${docsCard(l)}${gateCard(l)}</div>`;
   }

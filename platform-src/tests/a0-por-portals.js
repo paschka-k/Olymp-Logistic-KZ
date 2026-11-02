@@ -13,7 +13,8 @@
     eq(c1.discount, Math.floor(base * 0.10 / 100) * 100, 'discount 10 %'); eq(c1.freight, base - c1.discount); assert(c1.fuel > 0, 'fuel surcharge (diesel 340 > base 300)'); eq(c1.terms.kind, 'framework');
     assert(!ev("priceFor({from:'AST',to:'ALA',zone:'pharma',pallets:10,kg:4000,cust:'c2'}).discount"), 'spot has no discount'); assert(!ev("termsOf('c4')"), 'c4 line tariff');
     ev("go('orders');ACT.stab({s:'orders',v:'commercial'});ACT.cmSec({v:'prices'});COMM.q.pl_cust='c4';COMM.q.pl_kind='framework';COMM.q.pl_disc='20';COMM.q.pl_base='300';ACT.cmPlAdd()"); eq(ev("termsOf('c4').disc"), 20, 'new list in force'); clean(w, 'prices');
-    ev("ACT.cmPlOff({id:String(termsOf('c4').id)});ACT.cmPlOffYes({id:String(termsOf('c4').id)})"); assert(!ev("termsOf('c4')"), 'deactivated → line tariff'); assert(ev("S.audit.some(a=>/Price list/.test(a.decision))"), 'audited');
+    /* FR-213/214: the deactivation is applied by the first call (no cmPlOffYes step any more) */
+    ev("ACT.cmPlOff({id:String(termsOf('c4').id)})"); assert(!ev("termsOf('c4')"), 'deactivated → line tariff'); assert(ev("S.audit.some(a=>/Price list/.test(a.decision))"), 'audited');
     eq(ev("chargeable(2, 1500)"), 3, 'chargeable by weight');
   });
   await group('por: offers lock the price for 14 days and accept into S.bookings (FR-147)', 'ru', async (g, ev, w) => {
@@ -148,7 +149,8 @@
     ev("go('orders');ACT.stab({s:'orders',v:'commercial'});ACT.cmSec({v:'prices'})"); const n = ev('S.priceLists.length');
     ev("COMM.q.pl_cust='c4';COMM.q.pl_kind='framework';COMM.q.pl_disc='5';COMM.q.pl_base='300';COMM.q.pl_from='2026-10-01';ACT.cmPlAdd()"); eq(ev('S.priceLists.length'), n, 'back-dated list refused');
     ev("COMM.q.pl_from='';COMM.q.pl_kind='spot';COMM.q.pl_disc='5';ACT.cmPlAdd()"); eq(ev('S.priceLists.length'), n, 'spot with a discount refused');
-    ev("ACT.cmPlOff({id:'1'})"); assert(w.document.querySelector('[data-pl-ask]'), 'deactivation asks first'); assert(ev('S.priceLists.find(p=>p.id===1).active'), 'still active');
+    /* FR-213/214: no "are you sure" step any more - the deactivation is applied at once and the Undo toast brings the list back */
+    ev("ACT.cmPlOff({id:'1'})"); assert(!w.document.querySelector('[data-pl-ask]'), 'no ask step'); assert(!ev('S.priceLists.find(p=>p.id===1).active'), 'deactivated at once'); assert(ev('S.undo'), 'undo toast offered'); ev('ACT.undoToast({})'); assert(ev('S.priceLists.find(p=>p.id===1).active'), 'undo reactivates');
     ev("ACT.cmSec({v:'contracts'});COMM.q.ct_cust='c1';COMM.q.ct_kind='framework';COMM.q.ct_disc='';COMM.q.ct_base='';ACT.cmCtAdd()"); eq(ev('S.contracts[0].disc'), 10, 'discount from the customer price list'); eq(ev('S.contracts[0].base'), 300, 'diesel base from the price list');
     const nt = ev('S.tasks.length'); ev("addLead({company:'ТОО «Тендер 2»',bin:'',contact:'A',email:'',phone:'',src:'tender',from:'AST',to:'ALA',zone:'pharma',pallets:1,msg:'',tender:'T-9',deadline:'2026-11-10'})"); eq(ev('S.tasks.length'), nt + 1, 'bid task'); eq(ev('S.tasks[S.tasks.length-1].due'), '2026-11-07', 'deadline − 3 days');
     ev("COMM.q.fx_day='2026-10-18';COMM.q.fx_eur='640';COMM.q.fx_usd='545';ACT.cmSec({v:'fx'});ACT.cmFxAdd()"); assert(/вручную|manual/i.test(ev('fxLine(1000000)')) || /руч/.test(ev('fxLine(1000000)')), 'manual source named'); ev("S.fx.forEach(r=>{r.manual=false});S.fx=S.fx.filter(r=>r.day==='2026-10-05')"); assert(/устарел/.test(ev('fxLine(1000000)')), 'stale sentence');

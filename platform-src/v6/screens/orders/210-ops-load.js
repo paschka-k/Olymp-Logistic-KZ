@@ -198,7 +198,7 @@ ${sq.rows.map(r => `<div class="lw-row${r.over ? ' nofit' : ''}" style="grid-tem
 ${rc.map(r => `<div class="lw-row" style="grid-template-columns:80px minmax(110px,1fr) auto auto auto" data-rec="${r.id}" data-ok="${r.ok ? 1 : 0}"><b>${r.id}</b><span>${esc(r.to)}</span><span>${r.n} / ${r.exp} SSCC</span><span>${chip(r.lvl === 0 ? 'green' : r.lvl === 3 ? 'red' : 'yellow', r.mark)}</span><span>${r.n < r.exp && canDo('orders:write') ? `<button class="btn sm grey" data-act="lwRescan" data-id="${l.id}" data-o="${r.id}">${esc(T('Досканировать место', 'Packstück nachscannen', 'Rescan package', 'Орынды қайта сканерлеу'))}</button>` : ''}</span></div>`).join('')}</div>`;
   }
   function body() {
-    const l = curLoad(); if (!l) return `<div class="card card-body"><p class="note">${esc(T('Нет активных рейсов', 'Keine aktiven Fahrten', 'No active loads', 'Белсенді рейс жоқ'))}</p></div>`;
+    const l = curLoad(); if (!l) return `<div class="card card-body">${KIT.state('empty', { title: T('Нет активных рейсов', 'Keine aktiven Fahrten', 'No active loads', 'Белсенді рейс жоқ') })}</div>`;
     const p = typeFor(l), r = calcOf(l, p);
     return chips() + typeCard(l, p, r) + `<div class="lw-grid" style="margin-top:16px">${ordersCard(l, p, r)}${diagramCard(l, p, r)}</div><div class="lw-grid" style="margin-top:16px">${barsCard(l, p, r)}<div>${cogCard(l, p, r)}<div style="margin-top:16px">${reconCard(l)}</div><div style="margin-top:16px">${weighCard(l)}</div></div></div><div style="margin-top:16px">${matchCard(l)}</div><div style="margin-top:16px">${finderCard(l)}</div><div style="margin-top:16px">${seqCard(l, p)}</div>`;
   }

@@ -25,7 +25,7 @@ ${issueTag(l)}${l.status === 'problem' ? `<div class="prob">${ic('alert', 14)} $
     const f = S.f;
     const ls = ownLoads(hubFilter(S.loads, hubOfLoad)).filter(l => (!f.pri || l.priority === f.pri) && (!f.hub || l.from === f.hub || l.to === f.hub) && (!f.drv || (l.driver && drv(l.driver).status === f.drv)));
     return `<div class="board">${ORDER.map(s => { const c = ls.filter(l => l.status === s);
-      return `<div class="col" data-col="${s}"><div class="colh"><span class="d ${ST[s].c}"></span><b>${esc(ST[s].l)}</b><span class="cnt">${c.length}</span></div><div class="colb">${c.map(card).join('') || `<div class="empty">—</div>`}</div></div>`; }).join('')}</div>`;
+      return `<div class="col" data-col="${s}"><div class="colh"><span class="d ${ST[s].c}"></span><b>${esc(ST[s].l)}</b><span class="cnt">${c.length}</span></div><div class="colb">${c.map(card).join('') || `<div class="empty">${KIT.state('empty', {})}</div>`}</div></div>`; }).join('')}</div>`;
   }
   function planning() {
     const un = ownLoads(hubFilter(S.loads, hubOfLoad)).filter(l => l.status === 'unassigned');

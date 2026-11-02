@@ -80,8 +80,9 @@
     for (const k in bad) assert(typeof ev(`orderCreate(${bad[k]})`) === 'string', 'refused: ' + k); assert(ev("orderCreate({site:'kos', goods:'Reagent', pal:0.5, kg:20000, lot:'L'.repeat(40)}).ok"), '0.5 pallets, 20 000 kg, LOT 40 ok');
     ev('ACT.orNew()'); assert(d.querySelector('#of_pal').step === '0.1' && d.querySelector('#of_pal').min === '0.1' && d.querySelector('#of_kg').max === '20000', 'input ranges'); ev('ACT.orNew()');
     const id = 'O-26-0102', t0 = ev(`orderToken(findOrder('${id}').o)`), q = d.querySelector(`[data-order="${id}"] [data-act=orRenew]`); eq(q.title, 'Invalidate the old tracking link and create a new one?', 'tooltip = confirm text');
-    let asked = ''; w.confirm = m => { asked = m; return false; }; q.click(); eq(asked, 'Invalidate the old tracking link and create a new one?'); eq(ev(`orderToken(findOrder('${id}').o)`), t0, 'cancelled confirm keeps the token');
-    w.confirm = () => true; d.querySelector(`[data-order="${id}"] [data-act=orRenew]`).click(); assert(ev(`orderToken(findOrder('${id}').o)`) !== t0, 'renewed after confirm');
+    /* FR-213/214: no native confirm() - the link is renewed at once, the Undo toast (10 s) brings the old one back */
+    let asked = ''; w.confirm = m => { asked = m; return false; }; q.click(); eq(asked, '', 'no native confirm'); assert(ev(`orderToken(findOrder('${id}').o)`) !== t0, 'renewed at once'); assert(ev('S.undo'), 'undo toast');
+    ev('ACT.undoToast({})'); eq(ev(`orderToken(findOrder('${id}').o)`), t0, 'undo restores the old token'); d.querySelector(`[data-order="${id}"] [data-act=orRenew]`).click(); assert(ev(`orderToken(findOrder('${id}').o)`) !== t0, 'renewed again');
     ev("for (let i = 0; i < 110; i++) orderCreate({site:'pav', goods:'Bulk test ' + i, pal:1, kg:100}); render()"); const n = ev("allOrders().length"); const pg = d.querySelector('[data-pager]'); assert(pg, 'pager'); eq(pg.querySelector('[data-pager-range]').innerText.trim(), '1–100 of ' + n); eq(d.querySelectorAll('[data-order]').length, 100, '100 per page');
     assert(pg.querySelector('button').disabled && /← Previous/.test(pg.innerText) && /Next →/.test(pg.innerText), 'labels'); pg.querySelectorAll('button')[1].click(); eq(d.querySelector('[data-pager-range]').innerText.trim(), '101–' + Math.min(200, n) + ' of ' + n, 'next page'); clean(w, 'orders records');
   });

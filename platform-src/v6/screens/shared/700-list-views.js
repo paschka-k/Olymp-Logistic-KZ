@@ -37,7 +37,7 @@
     const L = byKey(key), p = L && parse(L, html); if (!p) return html;
     const st = LV[key];
     p.data.filter(r => !p.keep.includes(r)).forEach(r => r.remove());
-    if (p.act.length && !p.keep.length && !L.rows) { const tr = document.createElement('tr'); tr.innerHTML = `<td colspan="${p.ths.length}" class="empty">${esc(T('Нет строк под фильтры столбцов', 'Keine Zeilen für die Spaltenfilter', 'No rows match the column filters', 'Баған сүзгілеріне жол жоқ'))}</td>`; p.tb.tBodies[0].appendChild(tr); }
+    if (p.act.length && !p.keep.length && !L.rows) { const tr = document.createElement('tr'); tr.innerHTML = `<td colspan="${p.ths.length}" class="empty">${KIT.state('nofilter', { title: T('Нет строк под фильтры столбцов', 'Keine Zeilen für die Spaltenfilter', 'No rows match the column filters', 'Баған сүзгілеріне жол жоқ') })}</td>`; p.tb.tBodies[0].appendChild(tr); }
     const fr = document.createElement(L.rows ? 'div' : 'tr'); fr.className = L.rows ? p.tb.className + ' lv-f' : 'lv-f';
     p.ths.forEach((th, i) => { const h = document.createElement(L.rows ? 'span' : 'td'), lab = th.textContent.trim(); if (lab) h.innerHTML = `<input class="lv-in" id="lv_${key}_${i}" data-lv="${key}" data-c="${i}" value="${esc(st.c[i] || '')}" placeholder="${esc(T('фильтр', 'Filter', 'filter', 'сүзгі'))}" aria-label="${esc(T('Фильтр: ', 'Filter: ', 'Filter: ', 'Сүзгі: ') + lab)}">`; fr.appendChild(h); });
     if (L.rows) { p.tb.after(fr); p.tb.parentElement.setAttribute('data-lv-table', key); }
