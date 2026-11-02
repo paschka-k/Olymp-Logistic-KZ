@@ -233,5 +233,6 @@
   "shell.help_article": "Анықтама мақаласы →",
   "shell.attempts_left": "Қалған әрекеттер: ",
   "shell.recovery_code_hint": "немесе резервтік код XXXX-XXXX",
-  "shell.design_switch": "Дизайн: Olymp / Kökzhol"
+  "shell.design_switch": "Дизайн: Olymp / Kökzhol",
+  "shell.embed_demo": "Демо · симуляцияланған деректер"
 }

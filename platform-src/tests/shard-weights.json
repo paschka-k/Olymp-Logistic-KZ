@@ -11,6 +11,7 @@
     "c0-help-content.js": 3125, "c1-help-visuals.js": 1756, "c2-notes.js": 2682, "d0-v6-parity.js": 3193,
     "e1-mirror-ops-a.js": 2411, "e1-mirror-ops-b.js": 1870, "e1-mirror-ops-c.js": 3096, "e1-mirror-ops.js": 5006,
     "e2-mirror-res.js": 15641, "e3-hub-inbound.js": 1449, "e4-rules-sla.js": 1977, "e5-driver-partner.js": 1798,
-    "f0-ci-infra.js": 3922
+    "f0-ci-infra.js": 3922,
+    "j0-embed.js": 3000
   }
 }

@@ -233,5 +233,6 @@
   "shell.help_article": "Help article →",
   "shell.attempts_left": "Attempts left: ",
   "shell.recovery_code_hint": "or a recovery code XXXX-XXXX",
-  "shell.design_switch": "Design: Olymp / Kökzhol"
+  "shell.design_switch": "Design: Olymp / Kökzhol",
+  "shell.embed_demo": "Demo · simulated data"
 }

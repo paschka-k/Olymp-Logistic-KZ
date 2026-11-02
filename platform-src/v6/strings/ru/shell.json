@@ -233,5 +233,6 @@
   "shell.help_article": "Статья справки →",
   "shell.attempts_left": "Осталось попыток: ",
   "shell.recovery_code_hint": "или резервный код XXXX-XXXX",
-  "shell.design_switch": "Дизайн: Olymp / Kökzhol"
+  "shell.design_switch": "Дизайн: Olymp / Kökzhol",
+  "shell.embed_demo": "Демо · симуляция данных"
 }

@@ -406,3 +406,8 @@ tr.au-bad td{background:var(--chip-red-bg,rgba(220,38,38,.08))}
 .chip.blue::before{content:"●" / "";margin-right:5px;font-size:.8em}
 .chip.yellow::before{content:"▲" / "";margin-right:5px;font-size:.8em}
 .chip.red::before{content:"■" / "";margin-right:5px;font-size:.8em}
+/* embed mode (?embed=customer, screens/shell/004-embed.js): the customer portal without operator chrome, data marked as a simulation */
+html[data-embed] .help-q,html[data-embed] .topbar .who,html[data-embed] .side-tools,html[data-embed] .alarm-banner,html[data-embed] .login-layer{display:none!important}
+html[data-embed] .topbar{justify-content:flex-start}
+.embed-demo{position:fixed;right:10px;bottom:10px;z-index:60;padding:3px 10px;border-radius:999px;background:var(--bg-surface,#fff);color:var(--text-muted);border:1px solid var(--border);font-size:11px;letter-spacing:.04em;text-transform:uppercase;pointer-events:none}
+@media (max-width:700px){.embed-demo{bottom:68px}}
