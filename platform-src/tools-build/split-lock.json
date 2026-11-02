@@ -1,0 +1,21 @@
+{
+  "_note": "R02 split build: files that must stay out of the core. Written by `node platform-src/build-v6.mjs --split --split-update`; the build fails when a dependency pulls one of them into the core.",
+  "chunks": {
+    "ai": {
+      "routes": [
+        "ai"
+      ],
+      "files": [
+        "ai/130-ai.js"
+      ]
+    },
+    "settings": {
+      "routes": [
+        "changes"
+      ],
+      "files": [
+        "settings/460-rec-changes.js"
+      ]
+    }
+  }
+}

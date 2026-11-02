@@ -352,6 +352,7 @@ function render() {
   if (keep.f) { const e = document.getElementById(keep.f); if (e) { e.focus(); try { e.setSelectionRange(pos, pos); } catch (_) {} } }
 }
 const ACT = {};
+const RETRY = Object.create(null);   // R02.2: handlers of "Try again" buttons, by the name the button carries in data-v / data-id (the split build registers chunk:<id>)
 /* keyboard (R6 · 0.3.9 FR-134): Enter / Space on a focused role=link / tab / button element that is not a native control acts like a click */
 document.addEventListener('keydown', e => {
   if ((e.key !== 'Enter' && e.key !== ' ') || e.defaultPrevented) return;
@@ -412,7 +413,7 @@ Object.assign(ACT, {
     if (S.lv) Object.keys(S.lv).forEach(k => { if (S.lv[k]) { S.lv[k].c = {}; S.lv[k].cur = ''; S.lv[k].name = ''; } });
     render();
   },
-  retry: () => render(),
+  retry: d => { const h = d && RETRY[d.v != null ? d.v : d.id]; if (typeof h === 'function') h(d); else render(); },   // R02.2: a "Try again" button names its handler in data-v / data-id (RETRY[name]); none named = redraw
   undoToast: () => { undoRun(); },
   prefsReset: () => { PREFS.reset(); toast(LT('prefs.reset_done')); },
 });

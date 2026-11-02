@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Assemble the v6 platform (standalone vanilla JS, no template engine) into platform/: index.html (RU), de.html, en.html, kk.html + tests.html
-//   node platform-src/build-v6.mjs [--out <dir>] [--lang ru,de,en,kk]
+//   node platform-src/build-v6.mjs [--out <dir>] [--lang ru,de,en,kk] [--split [--split-update]]
+// --split additionally writes <out>/split/<lang>/ (core.js + area-<id>.js chunks loaded on the first visit of a section; see tools-build/split-build.mjs). The pages above are unchanged.
 // Bundle order: v6/base/*.js -> core -> roles -> data -> v6/screens/*.js (file-name order, NN-name.js) -> v6/help/*.js -> app.
 // Areas add their own files (screens/NNN-area.js, help/area.js, tests/NN-area.js); no manifest to edit. Placeholders: @@LANG@@ @@BUILD@@ @@ROLEPERMS@@.
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync } from 'node:fs';
@@ -8,6 +9,7 @@ import { execSync } from 'node:child_process';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { stripLangs, verifyStrip } from './tools-build/strip-langs.mjs';
+import { buildSplit, planChunks, LOCK_FILE } from './tools-build/split-build.mjs';
 import { whatsNewData, optimiseAssets, finishDelivery } from './delivery.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -17,6 +19,7 @@ const arg = (k, d) => {
 };
 const outDir = resolve(arg('out', join(here, '..', 'platform')));
 const stripHelp = process.argv.includes('--strip-help'); // opt-in: also reduce the help text quads HQ(ru,de,en,kk); off, because help tests read the quads of the page language whole
+const split = process.argv.includes('--split'), splitUpdate = process.argv.includes('--split-update'); // R02: extra output platform/split/<lang>/, the single-file pages stay the main build
 const keepLangs = process.argv.includes('--keep-langs'); // diagnostic: the unstripped bundle (every T() keeps all four languages)
 const langs = arg('lang', 'ru,de,en,kk').split(',');
 const rd = (...p) => readFileSync(join(here, ...p), 'utf8').replace(/\r\n/g, '\n'); // FR-204: sources are LF; a stray CRLF checkout must not reach the bundle
@@ -44,15 +47,17 @@ const cssSrc =
   '\n' +
   rd('v6', 'app.css');
 const css = keepLangs ? cssSrc : cssSrc.replace(/\/\*[\s\S]*?\*\//g, c => (c.length <= 40 ? c : c.slice(0, 40).split('\n')[0].replace(/\*\/?$/, '') + ' */')); // R01: stylesheet comments are cut to a landmark (tests find the print block by its comment)
-const js = [
-  ...list('v6/base', '.js').map(f => rd('v6', 'base', f)), // S4: language, locale (FR-221), strings (FR-199), kit (FR-200), export (FR-201), state (FR-202)
-  rd('v6', 'core.js'),
-  rd('v6', 'roles.js'),
-  rd('v6', 'data.js'),
-  ...screenFiles().map(f => rd('v6', 'screens', f)),
-  ...list('v6/help', '.js').map(f => rd('v6', 'help', f)),
-  rd('v6', 'app.js'),
-].join('\n');
+// the bundle as a list of files (name, text, menu area, whether it can never leave the core): the single page joins them, the split build places them (tools-build/split-graph.mjs)
+const bundleFiles = [
+  ...list('v6/base', '.js').map(f => ({ name: 'base/' + f, src: rd('v6', 'base', f), fixed: true })), // S4: language, locale (FR-221), strings (FR-199), kit (FR-200), export (FR-201), state (FR-202)
+  { name: 'core.js', src: rd('v6', 'core.js'), fixed: true },
+  { name: 'roles.js', src: rd('v6', 'roles.js'), fixed: true },
+  { name: 'data.js', src: rd('v6', 'data.js'), fixed: true },
+  ...screenFiles().map(f => ({ name: f, src: rd('v6', 'screens', f), area: f.split('/')[0], fixed: f.startsWith('shell/') || f.startsWith('shared/') })),
+  ...list('v6/help', '.js').map(f => ({ name: 'help/' + f, src: rd('v6', 'help', f), fixed: true })),
+  { name: 'app.js', src: rd('v6', 'app.js'), fixed: true },
+];
+const js = bundleFiles.map(f => f.src).join('\n');
 let build = new Date().toISOString().slice(0, 16).replace('T', ' ');
 try {
   build = execSync('git log -1 --format=%cI', { cwd: here }).toString().trim().slice(0, 16).replace('T', ' ');
@@ -119,10 +124,11 @@ const whatsNew = JSON.stringify(whatsNewData(join(here, '..')));
 const VERSION = (rd('v6', 'roles.js').match(/VERSION = '([^']+)'/) || [])[1] || '6';
 if (existsSync(join(outDir, 'assets'))) optimiseAssets(outDir);
 const preload = '<link rel="preload" as="image" type="image/svg+xml" href="assets/brand/kokzhol-mark-on-ink.svg">';
-for (const lang of langs) {
+const skipText = lang => ({ ru: "Перейти к содержимому", de: "Zum Inhalt springen", en: "Skip to content", kk: "Мазмұнға өту" })[lang] || "Skip to content";
+// the text of a part of the bundle (or all of it) as the page of `lang` carries it
+const finish = (src, lang, stats) =>
   // FR-204: data placeholders are written as /*@@NAME@@*/{} so the sources stay valid JavaScript for ESLint / Prettier
-  const stripStats = {};
-  const code = (keepLangs ? js : stripLangs(js, lang, stripStats, { hq: stripHelp, comments: true }))
+  (keepLangs ? src : stripLangs(src, lang, stats, { hq: stripHelp, comments: true }))
     .replace(/\/\*@@STRINGS@@\*\/\s*\{\}/, () => JSON.stringify(strings[lang]))
     .replace(/\/\*@@STRINGS_MT@@\*\/\s*\{\}/, () => JSON.stringify(lang === 'kk' ? kkOpen : {}))
     .replaceAll('/*@@ROLEPERMS@@*/{}', () => rolePerms)
@@ -134,8 +140,11 @@ for (const lang of langs) {
     .replaceAll('@@REGISTER@@', () => regFor(lang))
     .replaceAll('@@WHATSNEW@@', () => whatsNew)
     .replace(/<\/script/gi, '<\\/script');
+for (const lang of langs) {
+  const stripStats = {};
+  const code = finish(js, lang, stripStats);
   if (!keepLangs) await verifyStrip(js, code, lang); // R01.1: same number of T( calls, result parses
-  const html = `<!doctype html><html lang="${lang}" data-design="kokzhol"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kökzhol · Platform v6 (${lang})</title><link rel="icon" type="image/svg+xml" href="assets/brand/kokzhol-favicon.svg">${preload}<style>\n${css}\n</style></head><body><a class="skip" href="#main-content">${({ ru: "Перейти к содержимому", de: "Zum Inhalt springen", en: "Skip to content", kk: "Мазмұнға өту" })[lang] || "Skip to content"}</a><div id="root"></div><script>\n${code}\n</script></body></html>\n`;
+  const html = `<!doctype html><html lang="${lang}" data-design="kokzhol"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kökzhol · Platform v6 (${lang})</title><link rel="icon" type="image/svg+xml" href="assets/brand/kokzhol-favicon.svg">${preload}<style>\n${css}\n</style></head><body><a class="skip" href="#main-content">${skipText(lang)}</a><div id="root"></div><script>\n${code}\n</script></body></html>\n`;
   const file = join(outDir, lang === 'ru' ? 'index.html' : `${lang}.html`);
   writeFileSync(file, html);
   if (!keepLangs) console.log('  T(): ' + stripStats.calls + ' calls, ' + stripStats.stripped + ' stripped, ' + stripStats.skipped.length + ' kept as is');
@@ -163,3 +172,21 @@ if (existsSync(join(outDir, 'assets')))
 // FR-218: axe-core (MPL-2.0) is a test-only file next to tests.html; the product pages never load it
 mkdirSync(join(outDir, 'test-vendor'), { recursive: true });
 for (const f of list('tests/vendor', '')) writeFileSync(join(outDir, 'test-vendor', f), rd('tests', 'vendor', f));
+// R02: EVERY build (with or without --split) leaves the split plan and the lock next to tests.html, so the plan tests always have something to check
+{
+  let data;
+  try {
+    const p = planChunks(bundleFiles);
+    data = { splitBuilt: split, core: { files: p.core }, chunks: p.chunks, reasons: p.notes, lock: existsSync(LOCK_FILE) ? JSON.parse(readFileSync(LOCK_FILE, 'utf8')) : null };
+  } catch (e) {
+    data = { splitBuilt: split, error: String(e.message).slice(0, 2000) };
+  }
+  writeFileSync(join(outDir, 'split-plan.json'), JSON.stringify(data, null, 2) + '\n');
+}
+// R02 / FR-192: the split build is an extra output; it runs after every single-file page is written and cannot change them
+if (split)
+  await buildSplit({
+    files: bundleFiles, langs, outDir, css, skipText, update: splitUpdate,
+    prepare: (src, lang, stats) => finish(src, lang, stats),
+    verify: async (before, after, lang) => { if (!keepLangs) await verifyStrip(before, after, lang); },
+  });
