@@ -1,18 +1,18 @@
 {
- "version": "6.5.3",
+ "version": "6.6.0",
  "budget": {
-  "_": "FR-196 weight budget per page, checked by build-v6.mjs (exit code 1 when exceeded) and by the delivery tests. Lower page_kb when FR-191 (per-language build) lands.",
-  "page_kb": 4400,
+  "_": "FR-196 weight budget per page, checked by build-v6.mjs (exit code 1 when exceeded) and by the delivery tests. FR-191 (per-language build, R01) landed: index 3009 KB, de 2828, en 2805, kk 2995 (-25..-28 % against 4.0-4.1 MB); the ceiling is the largest page plus about 3 %.",
+  "page_kb": 3100,
   "tests_kb": 1000,
   "assets_kb": 40,
   "asset_file_kb": 12
  },
  "pages": {
-  "index.html": 4134780,
-  "de.html": 4013846,
-  "en.html": 3994853,
-  "kk.html": 4140507,
-  "tests.html": 815215
+  "index.html": 3152588,
+  "de.html": 2965330,
+  "en.html": 2941915,
+  "kk.html": 3140293,
+  "tests.html": 971442
  },
  "assets_bytes": 15176,
  "assets": [

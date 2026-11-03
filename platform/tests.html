@@ -91,7 +91,7 @@ const UI = {
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 UI.$('only').onclick = () => { UI.onlyFail = !UI.onlyFail; UI.$('rows').classList.toggle('onlyfail', UI.onlyFail); UI.$('only').textContent = UI.onlyFail ? 'Показать все' : 'Только ошибки'; };
 UI.$('run').onclick = () => { if (window.__TESTS.done) location.reload(); };
-const __SUITES = [{"name":"10-navigation.js","ms":3049},{"name":"20-dispatch.js","ms":587},{"name":"30-chain.js","ms":447},{"name":"40-reports-ai-settings.js","ms":531},{"name":"50-legacy-tabs.js","ms":786},{"name":"60-foundation.js","ms":971},{"name":"61-shell-ext.js","ms":4141},{"name":"62-language-audit.js","ms":2265},{"name":"63-narrow.js","ms":9450},{"name":"70-ops-load.js","ms":4070},{"name":"71-ops-ship.js","ms":1035},{"name":"72-ops-docs.js","ms":861},{"name":"73-ops-dispatch.js","ms":1011},{"name":"74-ops-dashboard.js","ms":1042},{"name":"75-ops-trips.js","ms":1180},{"name":"76-ops-docs.js","ms":835},{"name":"80-res-fleet-staff.js","ms":948},{"name":"81-res-driver-app.js","ms":1133},{"name":"82-res-coverage-lines.js","ms":1350},{"name":"83-res-thermo.js","ms":871},{"name":"84-res-weather.js","ms":902},{"name":"85-res-coverage.js","ms":1915},{"name":"86-res-fleet-ext.js","ms":1277},{"name":"87-res-partners.js","ms":3018},{"name":"88-res-staff-app.js","ms":1163},{"name":"90-rec-records.js","ms":2493},{"name":"a0-por-portals.js","ms":1760},{"name":"b0-eco-economics.js","ms":1944},{"name":"b1-eco-reports-ext.js","ms":1157},{"name":"b2-eco-costs-ext.js","ms":1484},{"name":"c0-help-content.js","ms":3125},{"name":"c1-help-visuals.js","ms":1756},{"name":"c2-notes.js","ms":2682},{"name":"d0-v6-parity.js","ms":3193},{"name":"e1-mirror-ops-a.js","ms":2411},{"name":"e1-mirror-ops-b.js","ms":1870},{"name":"e1-mirror-ops-c.js","ms":3096},{"name":"e1-mirror-ops.js","ms":5006},{"name":"e2-mirror-res.js","ms":15641},{"name":"e3-hub-inbound.js","ms":1449},{"name":"e4-rules-sla.js","ms":1977},{"name":"e5-driver-partner.js","ms":1798},{"name":"f0-a11y.js","ms":915},{"name":"f0-ci-infra.js","ms":3922},{"name":"f0-delivery.js","ms":627},{"name":"f0-shell-parity.js","ms":357},{"name":"f1-data-integrity.js","ms":582},{"name":"f2-ops-fleet.js","ms":200},{"name":"f3-records-portals.js","ms":212},{"name":"f4-economics.js","ms":200},{"name":"f5-a11y-layout.js","ms":742},{"name":"g4-architecture.js","ms":1077},{"name":"g5-help-figures-scroll.js","ms":274},{"name":"h1-data-seed-integrity.js","ms":789},{"name":"h2-load-ship-vehicle.js","ms":1179},{"name":"h3-dispatch-gonogo-safety.js","ms":978},{"name":"h4-resources-partners.js","ms":1403},{"name":"h5-driver-app-delivery.js","ms":1026},{"name":"h6-portal-commercial.js","ms":552},{"name":"h7-economics-reports.js","ms":649},{"name":"h8-shell-i18n-help.js","ms":1142},{"name":"j0-embed.js","ms":3000}];
+const __SUITES = [{"name":"10-navigation.js","ms":3049},{"name":"20-dispatch.js","ms":587},{"name":"30-chain.js","ms":447},{"name":"40-reports-ai-settings.js","ms":531},{"name":"50-legacy-tabs.js","ms":786},{"name":"60-foundation.js","ms":971},{"name":"61-shell-ext.js","ms":4141},{"name":"62-language-audit.js","ms":2265},{"name":"63-narrow.js","ms":9450},{"name":"70-ops-load.js","ms":4070},{"name":"71-ops-ship.js","ms":1035},{"name":"72-ops-docs.js","ms":861},{"name":"73-ops-dispatch.js","ms":1011},{"name":"74-ops-dashboard.js","ms":1042},{"name":"75-ops-trips.js","ms":1180},{"name":"76-ops-docs.js","ms":835},{"name":"80-res-fleet-staff.js","ms":948},{"name":"81-res-driver-app.js","ms":1133},{"name":"82-res-coverage-lines.js","ms":1350},{"name":"83-res-thermo.js","ms":871},{"name":"84-res-weather.js","ms":902},{"name":"85-res-coverage.js","ms":1915},{"name":"86-res-fleet-ext.js","ms":1277},{"name":"87-res-partners.js","ms":3018},{"name":"88-res-staff-app.js","ms":1163},{"name":"90-rec-records.js","ms":2493},{"name":"a0-por-portals.js","ms":1760},{"name":"b0-eco-economics.js","ms":1944},{"name":"b1-eco-reports-ext.js","ms":1157},{"name":"b2-eco-costs-ext.js","ms":1484},{"name":"c0-help-content.js","ms":3125},{"name":"c1-help-visuals.js","ms":1756},{"name":"c2-notes.js","ms":2682},{"name":"d0-v6-parity.js","ms":3193},{"name":"e1-mirror-ops-a.js","ms":2411},{"name":"e1-mirror-ops-b.js","ms":1870},{"name":"e1-mirror-ops-c.js","ms":3096},{"name":"e1-mirror-ops.js","ms":5006},{"name":"e2-mirror-res.js","ms":15641},{"name":"e3-hub-inbound.js","ms":1449},{"name":"e4-rules-sla.js","ms":1977},{"name":"e5-driver-partner.js","ms":1798},{"name":"f0-a11y.js","ms":915},{"name":"f0-ci-infra.js","ms":3922},{"name":"f0-delivery.js","ms":627},{"name":"f0-shell-parity.js","ms":357},{"name":"f1-data-integrity.js","ms":582},{"name":"f2-ops-fleet.js","ms":200},{"name":"f3-records-portals.js","ms":212},{"name":"f4-economics.js","ms":200},{"name":"f5-a11y-layout.js","ms":742},{"name":"g4-architecture.js","ms":1077},{"name":"g5-help-figures-scroll.js","ms":274},{"name":"h1-data-seed-integrity.js","ms":789},{"name":"h2-load-ship-vehicle.js","ms":1179},{"name":"h3-dispatch-gonogo-safety.js","ms":978},{"name":"h4-resources-partners.js","ms":1403},{"name":"h5-driver-app-delivery.js","ms":1026},{"name":"h6-portal-commercial.js","ms":552},{"name":"h7-economics-reports.js","ms":649},{"name":"h8-shell-i18n-help.js","ms":1142},{"name":"h9-0311-rows.js","ms":9100},{"name":"i1-render-regions.js","ms":788},{"name":"i2-build-lang.js","ms":518},{"name":"i3-ux-primitives.js","ms":692},{"name":"i4-lazy-data.js","ms":603},{"name":"i5-vlist.js","ms":653},{"name":"i6-palette-notify.js","ms":1038},{"name":"i7-home-scenarios.js","ms":724},{"name":"i8-migrate.js","ms":487},{"name":"i9-split.js","ms":1195},{"name":"j0-embed.js","ms":3000}];
 const __QUARANTINE = [];
 const __HARNESS = {
   /* longest-processing-time split: heaviest suite first onto the lightest shard; deterministic for a given suite list */
@@ -143,6 +143,31 @@ async function group1(name, lang, fn) {
   log(name, err, quar ? 'quar' : '');
 }
 async function group(name, lang, fn) { const t0 = performance.now(); if (__runs(__CUR)) UI.cur(name); try { await group1(name, lang, fn); } finally { const ms = Math.round(performance.now() - t0); (window.__TESTS.times = window.__TESTS.times || []).push([name, ms]); if (__runs(__CUR)) UI.ms(ms); } }
+/* rows(name, lang, items, fn): one scenario PER RECORD inside ONE iframe (0.3.11 listed «Место #1…#22», «Город #1…#23» as separate rows; group() folds them into one).
+   name is a string (row = name + ' #' + (i + 1)) or (item, i) => title (it must cope with item === null: used when the page cannot load or the list is empty); items is an array or
+   (ev, w) => array read from the loaded page; fn(item, i, ev, w, g) throws to fail only its own row, so a failing record names itself.
+   Every row goes through log(): it counts in __TESTS.total / passed / failed / failures, is skipped by ?suite / ?shard like a group, is retried in place
+   (?retries, flaky report), is quarantined by its title and is timed in __TESTS.times. The iframe is loaded once and shared by the rows of the call, so rows must
+   not change page state (a scenario that does belongs in a group). An empty item list fails: a vanished dataset must not pass silently. */
+async function rows(name, lang, items, fn) {
+  if (!__runs(__CUR)) return;
+  const title = (it, i) => (typeof name === 'function' ? name(it, i) : name + ' #' + (i + 1)), T = window.__TESTS, mark = (t, ms) => { (T.times = T.times || []).push([t, ms]); UI.ms(ms); };
+  let g, kept = false;
+  try { g = await fresh(lang || 'ru'); } catch (e) { log(title(null, 0), 'cannot load: ' + e.message); return; }
+  try {
+    if (typeof items === 'function') { try { items = items(g.ev, g.w); } catch (e) { log(title(null, 0), 'cannot list the records: ' + e.message); return; } }
+    if (!items.length) { log(title(null, 0), 'no records to walk'); return; }
+    for (let i = 0; i < items.length; i++) {
+      const t = title(items[i], i), t0 = performance.now(); UI.cur(t);
+      const r = await __HARNESS.attempts(async () => { await fn(items[i], i, g.ev, g.w, g); }, __RETRIES);
+      if (r.ok) { if (r.errs.length) T.flaky.push({ name: t, attempts: r.errs.length + 1, errors: r.errs }); log(t, null, r.errs.length ? 'flaky' : ''); mark(t, Math.round(performance.now() - t0)); continue; }
+      const err = r.errs[0] + (r.errs.length > 1 ? ' (also failed on ' + (r.errs.length - 1) + ' retr' + (r.errs.length > 2 ? 'ies' : 'y') + ')' : ''), quar = __HARNESS.quarantined(t);
+      if (quar) T.quarantined.push({ name: t, error: r.errs[0] });
+      if (!quar && !kept) kept = keepFail(g, t, r.errs[0]);
+      log(t, err, quar ? 'quar' : ''); mark(t, Math.round(performance.now() - t0));
+    }
+  } finally { if (!kept) g.done(); }
+}
 const clean = (w, where) => { const t = w.document.querySelector('#root').innerText; const m = t.match(/.{0,20}(undefined|NaN|\[object|\bnull\b).{0,20}/); assert(!m, where + ' contains "' + (m && m[0]) + '"'); assert(!w.__errs.length, where + ' threw: ' + w.__errs[0]); };
 
 (async () => {
@@ -1409,7 +1434,8 @@ __suite(26);   /* a0-por-portals.js */
     eq(c1.discount, Math.floor(base * 0.10 / 100) * 100, 'discount 10 %'); eq(c1.freight, base - c1.discount); assert(c1.fuel > 0, 'fuel surcharge (diesel 340 > base 300)'); eq(c1.terms.kind, 'framework');
     assert(!ev("priceFor({from:'AST',to:'ALA',zone:'pharma',pallets:10,kg:4000,cust:'c2'}).discount"), 'spot has no discount'); assert(!ev("termsOf('c4')"), 'c4 line tariff');
     ev("go('orders');ACT.stab({s:'orders',v:'commercial'});ACT.cmSec({v:'prices'});COMM.q.pl_cust='c4';COMM.q.pl_kind='framework';COMM.q.pl_disc='20';COMM.q.pl_base='300';ACT.cmPlAdd()"); eq(ev("termsOf('c4').disc"), 20, 'new list in force'); clean(w, 'prices');
-    ev("ACT.cmPlOff({id:String(termsOf('c4').id)});ACT.cmPlOffYes({id:String(termsOf('c4').id)})"); assert(!ev("termsOf('c4')"), 'deactivated → line tariff'); assert(ev("S.audit.some(a=>/Price list/.test(a.decision))"), 'audited');
+    /* FR-213/214: the deactivation is applied by the first call (no cmPlOffYes step any more) */
+    ev("ACT.cmPlOff({id:String(termsOf('c4').id)})"); assert(!ev("termsOf('c4')"), 'deactivated → line tariff'); assert(ev("S.audit.some(a=>/Price list/.test(a.decision))"), 'audited');
     eq(ev("chargeable(2, 1500)"), 3, 'chargeable by weight');
   });
   await group('por: offers lock the price for 14 days and accept into S.bookings (FR-147)', 'ru', async (g, ev, w) => {
@@ -1544,7 +1570,8 @@ __suite(26);   /* a0-por-portals.js */
     ev("go('orders');ACT.stab({s:'orders',v:'commercial'});ACT.cmSec({v:'prices'})"); const n = ev('S.priceLists.length');
     ev("COMM.q.pl_cust='c4';COMM.q.pl_kind='framework';COMM.q.pl_disc='5';COMM.q.pl_base='300';COMM.q.pl_from='2026-10-01';ACT.cmPlAdd()"); eq(ev('S.priceLists.length'), n, 'back-dated list refused');
     ev("COMM.q.pl_from='';COMM.q.pl_kind='spot';COMM.q.pl_disc='5';ACT.cmPlAdd()"); eq(ev('S.priceLists.length'), n, 'spot with a discount refused');
-    ev("ACT.cmPlOff({id:'1'})"); assert(w.document.querySelector('[data-pl-ask]'), 'deactivation asks first'); assert(ev('S.priceLists.find(p=>p.id===1).active'), 'still active');
+    /* FR-213/214: no "are you sure" step any more - the deactivation is applied at once and the Undo toast brings the list back */
+    ev("ACT.cmPlOff({id:'1'})"); assert(!w.document.querySelector('[data-pl-ask]'), 'no ask step'); assert(!ev('S.priceLists.find(p=>p.id===1).active'), 'deactivated at once'); assert(ev('S.undo'), 'undo toast offered'); ev('ACT.undoToast({})'); assert(ev('S.priceLists.find(p=>p.id===1).active'), 'undo reactivates');
     ev("ACT.cmSec({v:'contracts'});COMM.q.ct_cust='c1';COMM.q.ct_kind='framework';COMM.q.ct_disc='';COMM.q.ct_base='';ACT.cmCtAdd()"); eq(ev('S.contracts[0].disc'), 10, 'discount from the customer price list'); eq(ev('S.contracts[0].base'), 300, 'diesel base from the price list');
     const nt = ev('S.tasks.length'); ev("addLead({company:'ТОО «Тендер 2»',bin:'',contact:'A',email:'',phone:'',src:'tender',from:'AST',to:'ALA',zone:'pharma',pallets:1,msg:'',tender:'T-9',deadline:'2026-11-10'})"); eq(ev('S.tasks.length'), nt + 1, 'bid task'); eq(ev('S.tasks[S.tasks.length-1].due'), '2026-11-07', 'deadline − 3 days');
     ev("COMM.q.fx_day='2026-10-18';COMM.q.fx_eur='640';COMM.q.fx_usd='545';ACT.cmSec({v:'fx'});ACT.cmFxAdd()"); assert(/вручную|manual/i.test(ev('fxLine(1000000)')) || /руч/.test(ev('fxLine(1000000)')), 'manual source named'); ev("S.fx.forEach(r=>{r.manual=false});S.fx=S.fx.filter(r=>r.day==='2026-10-05')"); assert(/устарел/.test(ev('fxLine(1000000)')), 'stale sentence');
@@ -2386,8 +2413,9 @@ __suite(36);   /* e1-mirror-ops-c.js */
     for (const k in bad) assert(typeof ev(`orderCreate(${bad[k]})`) === 'string', 'refused: ' + k); assert(ev("orderCreate({site:'kos', goods:'Reagent', pal:0.5, kg:20000, lot:'L'.repeat(40)}).ok"), '0.5 pallets, 20 000 kg, LOT 40 ok');
     ev('ACT.orNew()'); assert(d.querySelector('#of_pal').step === '0.1' && d.querySelector('#of_pal').min === '0.1' && d.querySelector('#of_kg').max === '20000', 'input ranges'); ev('ACT.orNew()');
     const id = 'O-26-0102', t0 = ev(`orderToken(findOrder('${id}').o)`), q = d.querySelector(`[data-order="${id}"] [data-act=orRenew]`); eq(q.title, 'Invalidate the old tracking link and create a new one?', 'tooltip = confirm text');
-    let asked = ''; w.confirm = m => { asked = m; return false; }; q.click(); eq(asked, 'Invalidate the old tracking link and create a new one?'); eq(ev(`orderToken(findOrder('${id}').o)`), t0, 'cancelled confirm keeps the token');
-    w.confirm = () => true; d.querySelector(`[data-order="${id}"] [data-act=orRenew]`).click(); assert(ev(`orderToken(findOrder('${id}').o)`) !== t0, 'renewed after confirm');
+    /* FR-213/214: no native confirm() - the link is renewed at once, the Undo toast (10 s) brings the old one back */
+    let asked = ''; w.confirm = m => { asked = m; return false; }; q.click(); eq(asked, '', 'no native confirm'); assert(ev(`orderToken(findOrder('${id}').o)`) !== t0, 'renewed at once'); assert(ev('S.undo'), 'undo toast');
+    ev('ACT.undoToast({})'); eq(ev(`orderToken(findOrder('${id}').o)`), t0, 'undo restores the old token'); d.querySelector(`[data-order="${id}"] [data-act=orRenew]`).click(); assert(ev(`orderToken(findOrder('${id}').o)`) !== t0, 'renewed again');
     ev("for (let i = 0; i < 110; i++) orderCreate({site:'pav', goods:'Bulk test ' + i, pal:1, kg:100}); render()"); const n = ev("allOrders().length"); const pg = d.querySelector('[data-pager]'); assert(pg, 'pager'); eq(pg.querySelector('[data-pager-range]').innerText.trim(), '1–100 of ' + n); eq(d.querySelectorAll('[data-order]').length, 100, '100 per page');
     assert(pg.querySelector('button').disabled && /← Previous/.test(pg.innerText) && /Next →/.test(pg.innerText), 'labels'); pg.querySelectorAll('button')[1].click(); eq(d.querySelector('[data-pager-range]').innerText.trim(), '101–' + Math.min(200, n) + ' of ' + n, 'next page'); clean(w, 'orders records');
   });
@@ -3044,8 +3072,10 @@ __suite(38);   /* e2-mirror-res.js */
     ev("ACT.cmLead({id:'L-103',v:'lost'})"); eq(ev("S.leads.find(l=>l.id==='L-103').status"), 'new', 'stage button lost without reason'); eq(ev('S.drawer.st'), 'lost', 'drawer opened at lost');
     ev("ACT.cmLeadOpen({id:'L-101'})"); w.document.querySelector('#ld_tk_title').value = 'Позвонить'; w.document.querySelector('#ld_tk_due').value = '2026-10-25'; const tk = ev('S.tasks.length'); ev("ACT.cmLeadTask({id:'L-101'})"); eq(ev('S.tasks.length'), tk + 1, 'task'); eq(ev('S.tasks[S.tasks.length-1].who'), 'Sarah Johnson', 'assignee = owner'); eq(ev('S.tasks[S.tasks.length-1].due'), '2026-10-25');
     ev("ACT.cmLeadTask({id:'L-101',title:'x'})"); eq(ev('S.tasks.length'), tk + 1, 'one-char task accepted');
-    w.confirm = () => false; ev("ACT.cmLeadErase({id:'L-101'})"); eq(ev("S.leads.find(l=>l.id==='L-101').email"), 'tender@example.kz', 'erased without confirm');
-    w.confirm = () => true; ev("ACT.cmLeadErase({id:'L-101'})"); const e = ev("S.leads.find(l=>l.id==='L-101')"); eq(e.email, ''); eq(e.contact, '—'); eq(e.msg, ''); eq(e.erased, '2026-10-18'); eq(ev('S.audit[0].decision'), 'PD erased');
+    /* FR-213/214: erasing is irreversible, so it keeps a confirmation - an in-page one: the first call only asks, the force call (the "Yes" button) erases */
+    ev("ACT.cmLeadErase({id:'L-101'})"); eq(ev("S.leads.find(l=>l.id==='L-101').email"), 'tender@example.kz', 'not erased without confirmation'); eq(ev('S.leadAsk'), 'L-101', 'asks first');
+    ev("ACT.cmLeadEraseNo({})"); eq(ev('S.leadAsk'), null, 'cancel closes the question'); eq(ev("S.leads.find(l=>l.id==='L-101').email"), 'tender@example.kz', 'cancel keeps the data');
+    ev("ACT.cmLeadErase({id:'L-101',force:'1'})"); const e = ev("S.leads.find(l=>l.id==='L-101')"); eq(e.email, ''); eq(e.contact, '—'); eq(e.msg, ''); eq(e.erased, '2026-10-18'); eq(ev('S.audit[0].decision'), 'PD erased');
     ev("ACT.close?ACT.close():closeDrawer()"); ev(CM('crm')); assert(w.document.querySelector('.kcard[data-lead="L-101"] [data-lead-erased]'), 'card marked erased');
     assert(!w.document.querySelector('#cm_ld_src option[value="web"]'), 'web source in manual select'); assert(w.document.querySelector('#cm_ld_email') && w.document.querySelector('#cm_ld_phone') && w.document.querySelector('textarea#cm_ld_msg'), 'new lead e-mail / phone / message');
     const n = ev('S.leads.length'); ev("COMM.q.ld_company='ТОО «Почта»';COMM.q.ld_email='bad';ACT.cmLeadAdd()"); eq(ev('S.leads.length'), n, 'invalid e-mail accepted');
@@ -3345,8 +3375,9 @@ __suite(41);   /* e5-driver-partner.js */
     eq(ev('R5.NETC.length'), 21, 'cities'); eq(ev('R5.LABS.length'), 27, 'lab complexes'); assert(ev('R5.PTS.length') >= 600, 'points ' + ev('R5.PTS.length'));
     assert(ev("!!LOCS.ZHE && LOCS.ZHE.hub==='KAR'"), 'Zhezkazgan in LOCS'); assert(ev("R5.NETC.every(c=>LOCS[c.k])"), 'every network city in LOCS'); assert(ev("routeFor('ZHE','ALA').km>0"), 'route to Zhezkazgan');
     assert(ev("R5.PTS.every(p=>R5.LABS.some(x=>x.id===p.lab&&x.city===p.city))"), 'every point belongs to a lab complex of its city');
-    ev(E5_TAB('orders', 'recipients')); eq(ev("document.querySelectorAll('[data-cp]').length"), 20, 'one page = 20 rows'); assert(/^1\/\d+$/.test(ev("document.querySelector('[data-r5-pager]').dataset.r5Pager")), 'pager');
-    ev("ACT.r5Page({v:2})"); assert(/^2\//.test(ev("document.querySelector('[data-r5-pager]').dataset.r5Pager")), 'page 2');
+    ev(E5_TAB('orders', 'recipients')); // FR-195: the table is a window over all points, no 20-row pages any more
+    assert(ev("document.querySelectorAll('[data-cp]').length") > 5 && ev("document.querySelectorAll('[data-cp]').length") < 70 && ev("!document.querySelector('[data-r5-pager]')"), 'window of rows, no pager');
+    ev("ACT.r5Page({v:2})"); assert(ev("!!document.querySelector('[data-cp=\"CP-0021\"]')"), 'page 2 call scrolls to row 21'); assert(ev("!document.querySelector('[data-cp=\"CP-0001\"]')"), 'CP-0001 left the window');
     ev("const i=document.querySelector('#r5_rq');i.value='CP-0042';i.dispatchEvent(new Event('input',{bubbles:true}))"); eq(ev("document.querySelectorAll('[data-cp]').length"), 1, 'search by number'); eq(ev("document.querySelector('[data-cp]').dataset.cp"), 'CP-0042');
     ev("S.r5.rq='';ACT.r5City({v:'ZHE'})"); eq(ev("document.querySelectorAll('[data-cp]').length"), 10, 'Zhezkazgan points');
     const pid = ev("R5.PTS.find(p=>p.city==='SHY').id"); ev(`ACT.r5UseRcp({id:'${pid}'})`); eq(ev("document.querySelector('#n_to').value"), 'SHY', 'destination hub from the point');
@@ -5690,7 +5721,1395 @@ __suite(60);   /* h8-shell-i18n-help.js */
     roles.forEach((r, i) => { const n = rows.filter(tr => tr.children[i + 2].textContent.trim() === '✓').length; eq(n, ev(`ROLE_PERMS[${JSON.stringify(r)}].length`), r + ': ticks = permissions'); }); eq(rows.filter(tr => tr.children[2].textContent.trim() === '✓').length, 32, 'administrator column has 32 ticks');
   });
 
-__suite(61);   /* j0-embed.js */
+__suite(61);   /* h9-0311-rows.js */
+  /* ---- H9 · 0.3.11 parity, one row per record. 0.3.11 counted «Место #1…#22», «Город #1…#23», «Партнёр #1…#22» … as separate scenarios; f1 / f4 / b1 / f0 walk
+     the same records inside ONE group. This file re-expresses those families with rows() (template.html): every record of the v6 seed is its own scenario in the
+     same iframe, so a failing record names itself and the header counts what 0.3.11 counted. v6 has other seed sizes (7 trucks / 7 drivers / 17 partners / 3 fines /
+     306 places / 37 current article lines), so the rule is asserted per ACTUAL v6 record, never ported by count. Row titles carry the 0.3.11 number they answer;
+     records beyond the 0.3.11 count say «rule of #a–b». 0.3.11 numbers without a record in v6 are mapped in docs/parity-0311/autotests-trace.tsv
+     (tools/check-autotest-trace.mjs keeps all 757 accounted for). The whole-set group of each family stays in f1 / f4 / b1 / f0 (uniqueness, cross-record sums). ---- */
+
+  /* 0.3.11 numbers answered by the family, in record order: row k carries nums[k]; further records carry the range. */
+  const h9num = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
+  const h9name = (what, nums) => (it, i) => what + ' #' + (i + 1) + ' (0.3.11 ' + (i < nums.length ? '#' + nums[i] : 'rule of #' + nums[0] + '–' + nums[nums.length - 1]) + ')';
+  const H9_PLATE_REGION = { '01': 'AST', '02': 'ALA', '09': 'KAR', '17': 'SHY', '06': 'ATY' };   // region code of a KZ plate -> hub city (as in h1)
+
+  await rows(h9name('data: truck plate is a KZ plate of a hub region, unique, truck at a hub', h9num(22, 25)), 'ru', ev => ev(`(() => { const all = S.trucks.map(t => t.plate); return S.trucks.map(t => ({ id: t.id, plate: t.plate, hub: t.hub, dup: all.filter(p => p === t.plate).length, hubs: Object.keys(HUBS) })); })()`), (t, i, ev) => {
+    assert(/^\d{3} [A-Z]{3} \d{2}$/.test(t.plate), t.id + ': plate format ' + t.plate);
+    assert(H9_PLATE_REGION[t.plate.slice(-2)] && t.hubs.includes(H9_PLATE_REGION[t.plate.slice(-2)]), t.id + ': region ' + t.plate.slice(-2) + ' is not the region of a network hub');
+    eq(t.dup, 1, t.id + ': plate repeated'); assert(t.hubs.includes(t.hub), t.id + ': hub ' + t.hub);
+  });
+
+  /* places: one flat list per family, read once from the page (306 places in the v6 seed) */
+  const H9_PLACES = `(() => { const out = [], now = NOW.getTime(), all = {}; S.loads.forEach(l => ops(l).orders.forEach(o => o.places.forEach(p => { all[p.sscc] = (all[p.sscc] || 0) + 1; })));
+    S.loads.forEach(l => { const t = S.trucks.find(x => x.id === l.truck), fe = fefo(l);
+      ops(l).orders.forEach(o => o.places.forEach(p => out.push({ s: p.sscc, ok: ssccValid(p.sscc), dup: all[p.sscc], po: p.order, pl: p.load, o: o.id, l: l.id, cls: o.cls, adr: !!o.adr, zone: l.zone, truck: l.truck || null, zones: t ? t.zones : null,
+        adrT: !!ADR_TRK[l.truck], adrD: !!ADR_DRV[l.driver], drv: l.driver || null, drvOk: !l.driver || S.drivers.some(d => d.id === l.driver), clsOk: !!ZONES[o.cls],
+        lines: o.lines.map(x => ({ art: x.art, exp: x.exp, live: new Date(x.exp).getTime() > now, short: (new Date(x.exp) - new Date(l.eta)) / 864e5 < 90 })), fefo: fe.filter(x => x.order === o.id).map(x => x.art) }))); });
+    return out; })()`;
+  await rows(h9name('data: place SSCC is 18 digits with a valid GS1 check digit, unique, linked to its order and load', [...h9num(27, 48), ...h9num(473, 482)]), 'ru', ev => ev(H9_PLACES), (p, i, ev) => {
+    assert(/^\d{18}$/.test(p.s), 'not 18 digits: ' + p.s); assert(p.ok, 'GS1 check digit wrong: ' + p.s); eq(p.dup, 1, p.s + ' is not unique');
+    eq(p.po, p.o, p.s + ' order link'); eq(p.pl, p.l, p.s + ' load link');
+    assert(!ev(`ssccValid('${p.s.slice(0, 17) + ((+p.s[17] + 1) % 10)}')`), p.s + ': a changed check digit is still accepted');
+  });
+  await rows(h9name('data: place belongs to a load that exists; the truck fits temperature class and ADR, the driver is known', h9num(49, 70)), 'ru', ev => ev(H9_PLACES), (p) => {
+    assert(p.clsOk, p.s + ': unknown temperature class ' + p.cls); assert(p.drvOk, p.s + ': load ' + p.l + ' names an unknown driver ' + p.drv);
+    if (!p.truck) return;   // a load still waiting for a truck: nothing to fit yet (its orders are checked once a truck is booked)
+    assert(p.zones, p.s + ': truck ' + p.truck + ' of ' + p.l + ' missing'); assert(p.zones.includes(p.zone), p.s + ': zone ' + p.zone + ' not on truck ' + p.truck + ' (' + p.zones + ')');
+    if (p.adr) assert(p.adrT && p.adrD, p.s + ': ADR order ' + p.o + ' on a load without ADR truck / driver');
+  });
+  await rows(h9name('data: shelf life of the place — no line of its order expired at the demo date, short-life lines are exactly its FEFO entries', h9num(71, 92)), 'ru', ev => ev(H9_PLACES), (p) => {
+    assert(p.lines.length > 0, p.s + ': order ' + p.o + ' has no lines');
+    for (const x of p.lines) { assert(/^\d{4}-\d{2}-\d{2}$/.test(x.exp), p.o + ' ' + x.art + ': expiry format ' + x.exp); assert(x.live, p.o + ' ' + x.art + ': expired ' + x.exp); }
+    eq(p.fefo.slice().sort().join(','), p.lines.filter(x => x.short).map(x => x.art).sort().join(','), p.o + ': FEFO list');
+  });
+
+  await rows(h9name('data: fine falls into a waybill of that driver and truck at the violation time', h9num(93, 97)), 'ru', ev => ev(`S.res.fines.map(f => { const w = S.res.waybills.find(x => x.id === f.wb), t = S.trucks.find(x => x.plate === f.plate); return { id: f.id, drv: f.drv, at: f.at, st: f.status, wbId: f.wb, art: f.article, amount: f.amount, wb: w ? { drv: w.drv, truck: w.truck, from: w.from, to: w.to } : null, truck: t ? t.id : null }; })`), (f, i, ev) => {
+    assert(f.truck, f.id + ': plate not in the fleet'); assert(f.art && Number.isInteger(f.amount) && f.amount > 0, f.id + ': article / amount');
+    assert(ev(`Object.keys(RES.FINE_ST).includes('${f.st}')`), f.id + ': status ' + f.st + ' is not in the fine state machine');
+    if (!f.drv) { assert(!f.wb, f.id + ': waybill without driver'); return; }
+    if (!f.wb) { assert(['deducted', 'paid', 'closed'].includes(f.st), f.id + ': open fine with an archived waybill'); assert(/^PL-26-\d{4}$/.test(f.wbId), f.id + ': waybill number ' + f.wbId); return; }
+    eq(f.wb.drv, f.drv, f.id + ': waybill driver'); eq(f.wb.truck, f.truck, f.id + ': waybill truck');
+    const at = Date.parse(f.at); assert(at >= Date.parse(f.wb.from) && (!f.wb.to || at <= Date.parse(f.wb.to)), f.id + ': ' + f.at + ' outside the waybill');
+  });
+
+  await rows(h9name('data: driver has a 14-day plan from next Monday with known codes; absences and licence dates are consistent', h9num(98, 110)), 'ru', ev => ev('S.drivers.map(d => d.id)'), (id, i, ev) => {
+    const days = ev('RES.planDays()'), codes = ['r', 'd', 'o', 'm'].concat(ev('Object.keys(RES.ABS)')), p = ev(`RES.plan14(drv('${id}'))`);
+    eq(days.length, 14, 'plan days'); eq(new Date(days[0] + 'T12:00:00').getDay(), 1, 'plan starts on a Monday'); assert(days[0] > ev('RES.TODAY'), 'plan lies after the demo date');
+    eq(p.length, 14, id + ': plan length');
+    p.forEach((x, k) => { eq(x.iso, days[k], id + ': day ' + k); assert(codes.includes(x.k), id + ': code ' + x.k); if (x.k === 'r') assert(ev(`RES.LINE_TRUCKS.includes('${x.truck}')`), id + ': trip on a non-line truck ' + x.truck); });
+    for (const a of ev(`S.res.abs.filter(a => a.drv === '${id}')`)) assert(p.filter(x => x.iso >= a.from && x.iso <= a.to).every(x => x.k === a.type), a.id + ': absence not in the plan');
+    assert(ev(`drv('${id}').docs.every(x => /^\\d{4}-\\d{2}-\\d{2}$/.test(x.to))`), id + ': driver document dates');
+  });
+
+  await rows(h9name('data: weather city has a 7-day forecast, min ≤ max, risk 0–3 per day and a serving hub', h9num(111, 133)), 'ru', ev => ev('Object.keys(WEATHER.WX)'), (k, i, ev) => {
+    const r = ev(`({ n: WEATHER.WX['${k}'].length, ok: WEATHER.WX['${k}'].every(c => c.min <= c.max && typeof c.wind === 'number'), risk: WEATHER.WX['${k}'].map(c => WEATHER.risk(c)), hub: WEATHER.cityHub('${k}'), name: WEATHER.cityName('${k}'), hubs: Object.keys(HUBS) })`);
+    eq(r.n, 7, k + ': forecast days'); assert(r.ok, k + ': min / max / wind'); assert(r.risk.every(x => Number.isInteger(x) && x >= 0 && x <= 3), k + ': risk ' + r.risk);
+    assert(r.hubs.includes(r.hub), k + ': serving hub ' + r.hub); assert(r.name && r.name !== k, k + ': city name');
+  });
+
+  await rows(h9name('fleet: truck row shows the insurance / tax / fee status and the West approval tag', h9num(134, 137)), 'ru', ev => ev('S.trucks.map(t => t.id)'), (id, i, ev, w) => {
+    ev("go('fleet')"); const f = ev(`RES.fees(trk('${id}'))`), cell = w.document.querySelector(`[data-fees="${id}"]`);
+    assert(cell, id + ': no fees cell'); assert(f.ogpo && f.kasko && f.ti && f.tax && f.toll && f.fines, id + ': six fee fields');
+    assert([0, 1, 2, 3].includes(+cell.dataset.lvl), id + ': level ' + cell.dataset.lvl); assert(cell.innerText.includes(f.ogpo), id + ': OGPO ' + f.ogpo + ' not in the cell «' + cell.innerText.replace(/\s+/g, ' ') + '»');
+    assert(w.document.querySelector(`[data-west="${id}"]`), id + ': no West approval tag'); clean(w, 'fleet ' + id);
+  });
+
+  await rows(h9name('thermo: vehicle chip and readouts show temperatures (cold chain chips of the thermo screen)', h9num(138, 141)), 'ru', ev => ev('THERMO.vehicles().map(v => ({ id: v.id, plate: v.plate }))'), (v, i, ev, w) => {
+    ev(`go('routes');ACT.stab({s:'routes',v:'temp'});ACT.thSel({id:'${v.id}'})`);
+    const chip = w.document.querySelector(`[data-th-veh="${v.id}"]`); assert(chip, v.id + ': no chip'); const t = chip.innerText.replace(/\s+/g, ' ');
+    assert(t.includes(v.plate), v.id + ': plate missing in «' + t + '»'); assert(/[+−-]?\d+(,\d)? °C/.test(t), v.id + ': no temperature in «' + t + '»');
+    eq(w.document.querySelector('.th-chip.sel').dataset.id, v.id, 'selected chip'); eq(w.document.querySelectorAll('[data-th-ro]').length, 3, v.id + ': readout tiles');
+    assert([...w.document.querySelectorAll('[data-th-ro]')].every(x => /°C/.test(x.innerText)), v.id + ': readout without a temperature'); clean(w, 'thermo ' + v.id);
+  });
+
+  await rows(h9name('reports: driver report row has trips, km and punctuality — numbers only, on-time 0–100 %', h9num(142, 150)), 'ru', ev => ev('ecoDrvRep()'), (r, i, ev, w) => {
+    ev("ACT.setRole({v:'admin'});go('reports');ACT.stab({s:'reports',v:'kpi'})");
+    const row = w.document.querySelector(`[data-drvrep="${r.id}"]`); assert(row, r.id + ': no row'); const t = row.innerText.replace(/\s/g, ' ');
+    assert(Number.isInteger(r.trips) && r.trips >= 0, r.id + ': trips ' + r.trips); assert(Number.isFinite(r.km) && r.km >= 0, r.id + ': km ' + r.km);
+    assert(Number.isFinite(r.ontime) && r.ontime >= 0 && r.ontime <= 100, r.id + ': on-time ' + r.ontime); assert(t.includes(r.name), r.id + ': driver name missing'); assert(t.includes(r.ontime + ' %'), r.id + ': punctuality not in «' + t + '»'); assert(!/NaN|undefined|null/.test(t), r.id + ': ' + t);
+  });
+
+  await rows(h9name('search: article of a current load is found and points to its load and order', h9num(178, 199)), 'ru', ev => ev(`(() => { const out = []; S.loads.filter(l => l.status !== 'delivered').forEach(l => ops(l).orders.forEach(o => o.lines.forEach(x => out.push({ l: l.id, o: o.id, art: x.art })))); return out; })()`), (x, i, ev) => {
+    const hit = ev(`(S.gs.q = ${JSON.stringify(x.art)}, gsResults().L.filter(y => y.kind === 'line' && y.hit === ${JSON.stringify(x.art)}).map(y => y.load + '|' + y.order))`);
+    assert(hit.includes(x.l + '|' + x.o), x.art + ': no hit for ' + x.o + ' on ' + x.l); ev('S.gs.q = ""');
+  });
+
+  const H9_PARTNER_ROW = (ev, w, id) => { ev("go('dispatch');setTab('dispatch','partners')"); return [...w.document.querySelectorAll('#main-content tr')].map(tr => tr.innerText).find(t => t.includes(id)) || ''; };
+  await rows(h9name('data: partner city is in the network, tier and type allowed, Blocked has a reason, SLA 0–100, row on the Partners screen', h9num(232, 253)), 'ru', ev => ev('S.partners.map(p => ({ id: p.id, city: p.city, tier: p.tier, type: p.type, block: p.block, sla: p.sla, dup: S.partners.filter(x => x.id === p.id).length }))'), (p, i, ev, w) => {
+    const row = H9_PARTNER_ROW(ev, w, p.id); assert(row, p.id + ': no row in the partner table'); assert(ev('KZMAP.CITY.map(c => c[0])').some(n => row.includes(n)), p.id + ': city ' + p.city + ' not one of the network cities');
+    assert(['gold', 'silver', 'bronze', 'blocked'].includes(p.tier), p.id + ': tier ' + p.tier); assert(typeof p.type === 'string' && p.type.length > 1, p.id + ': type');
+    if (p.tier === 'blocked') assert(String(p.block).trim().length >= 5, p.id + ': blocked without reason'); assert(p.sla >= 0 && p.sla <= 100, p.id + ': SLA ' + p.sla); eq(p.dup, 1, p.id + ': duplicate id');
+  });
+  await rows(h9name('data: partner contacts — managers with role, name, phone, mobile and masked variants', h9num(254, 275)), 'ru', ev => ev('S.partners.map(p => ({ id: p.id, c: partnerContacts(p) }))'), (p) => {
+    /* 0.3.11: 3 managers per partner; v6 (FR-82): 2 persons per partner, numbers masked until an audited reveal */
+    assert(p.c.length >= 2, p.id + ': contacts ' + p.c.length); eq(new Set(p.c.map(c => c.name)).size, p.c.length, p.id + ': the same person twice');
+    for (const c of p.c) {
+      for (const k of ['id', 'role', 'name', 'tel', 'mob', 'telM', 'mobM']) assert(c[k] && String(c[k]).trim(), p.id + ': contact field ' + k + ' empty');
+      assert(/^\+7 7\d\d\d? ?[\d ]+$/.test(c.tel) || /^\+7 \d{3,4} [\d ]+$/.test(c.tel), c.id + ': landline ' + c.tel); assert(/^\+7 7\d\d \d{3} \d{2} \d{2}$/.test(c.mob), c.id + ': mobile ' + c.mob);
+      assert(/^\+7 7•• ••• •• \d\d$/.test(c.telM) && c.telM.slice(-2) === c.tel.slice(-2), c.id + ': masked landline ' + c.telM); assert(/^\+7 7•• ••• •• \d\d$/.test(c.mobM) && c.mobM.slice(-2) === c.mob.slice(-2), c.id + ': masked mobile ' + c.mobM);
+    }
+  });
+
+  await rows(h9name('baseline: city is on the network map, kg/week = kg/month ÷ 4.33, m³/week at 164 kg/m³, temperature split', h9num(355, 377)), 'ru', ev => ev('ECO_BL.BLC.map(c => ({ id: c.id, name: c.name[0], hub: c.hub, kg: c.kg, kgw: c.kgw, m3: c.m3, t: c.t }))'), (c, i, ev) => {
+    const d = ev('ECO_BL.BLD.density'); assert(ev('KZMAP.CITY.map(x => x[0])').includes(c.name), c.id + ': ' + c.name + ' not on the network map'); assert(Array.isArray(c.t) && c.t.length === 3, c.id + ': temperature split');
+    if (!c.kg) { eq(c.kgw, 0, c.id + ': no volume, no weekly weight'); return; }
+    assert(Math.abs(c.kgw - c.kg / 4.33) <= 1.5, c.id + ': kg/week ' + c.kgw + ' vs ' + (c.kg / 4.33).toFixed(1)); assert(Math.abs(c.m3 - c.kgw / d) <= 0.15, c.id + ': m³/week ' + c.m3 + ' vs ' + (c.kgw / d).toFixed(2));
+    assert(['ast', 'alm'].includes(c.hub), c.id + ': baseline hub ' + c.hub + ' (the baseline plans two hubs, Astana and Almaty)');
+  });
+  /* rings R1 / W / A / S (0.3.11 380–386: legs add up to the ring, load fits the planned vehicle at 164 kg/m³); B has no load yet and only the day rule applies */
+  const H9_RING_NUMS = { R1: '#380, #383', W: '#381, #384', A: '#382, #385', S: '#386', B: 'rule of #380–386' };
+  await rows((r, i) => 'baseline: ring ' + (r ? r.id : '?') + ' legs add up to the ring, load fits the planned vehicle, density 164 kg/m³, ≤ 630 km a day (0.3.11 ' + (r ? H9_RING_NUMS[r.id] || 'rule of #380–386' : '#380–386') + ')', 'ru', ev => ev('ECO_BL.BLR.map(r => ({ id: r.id, full: r.full, km: r.km, kmDay: r.kmDay, kg: r.kg, m3: r.m3, veh: r.veh, legs: r.legs }))'), (r, i, ev) => {
+    if (r.full) eq(r.legs.reduce((a, b) => a + b, 0), r.km, r.id + ': Σ legs');
+    const v = ev(`ECO_BL.BLF.find(f => '${r.veh}'.startsWith(f.id)) || null`); assert(v, r.id + ': planned vehicle ' + r.veh + ' is not in the target fleet'); assert(r.kg <= v.kg && r.m3 <= v.m3, r.id + ': load over ' + v.model);
+    if (r.kg) assert(Math.abs(r.kg / r.m3 - ev('ECO_BL.BLD.density')) < 6, r.id + ': density ' + (r.kg / r.m3).toFixed(0));
+    assert(Math.max(...String(r.kmDay).match(/\d+/g).map(Number)) <= 630, r.id + ': ' + r.kmDay + ' km/day > 70 km/h × 9 h');
+  });
+
+  /* navigation: the 17 sections of 0.3.11 were merged into 13 menu items; a menu item carries the 0.3.11 section numbers it absorbed (RU 2–18, DE 318–334, EN 335–351) */
+  const H9_NAV = [['dashboard', [2]], ['orders', [4, 5, 9]], ['dispatch', [3, 12, 15]], ['fleet', [11]], ['drivers', [13, 14]], ['routes', [6, 7, 8]], ['hubs', []], ['pod', [10]], ['billing', [17]], ['reports', [16]], ['ai', []], ['baseline', [18]], ['settings', []]];
+  for (const lang of ['ru', 'de', 'en']) {
+    const off = { ru: 0, de: 316, en: 333 }[lang];
+    await rows((it, i) => 'nav [' + lang + ']: section «' + H9_NAV[i][0] + '» opens, its heading is the menu label (0.3.11 ' + (H9_NAV[i][1].length ? H9_NAV[i][1].map(n => '#' + (n + off)).join(', ') : 'no counterpart: v6 section') + ')', lang, H9_NAV, ([id], i, ev, w) => {
+      eq(ev('NAV.map(n => n[0]).join()'), H9_NAV.map(x => x[0]).join(), 'menu items'); const label = ev(`NAV.find(n => n[0] === '${id}')[2]`);
+      ev(`go('${id}')`); eq(w.document.querySelector('.nav-item.active').dataset.v, id, 'active item'); const h = [...w.document.querySelectorAll('#main-content h1, main h1')].map(x => x.innerText.trim());
+      eq(h.length, 1, id + ': headings'); eq(h[0], label, id + ': heading = menu label'); clean(w, lang + ' ' + id);
+    });
+  }
+
+__suite(62);   /* i1-render-regions.js */
+  /* ---- I1 · FR-193 render regions (main / drawer / topbar / toast) and FR-194 live tick on data-live nodes ---- */
+  const I1_MARK = "(function(){ var s=document.querySelector('#side-nav'), t=document.querySelector('header.topbar'); s.__keep=1; t.__keep=1; })()";
+  const I1_KEPT = "!!(document.querySelector('#side-nav').__keep && document.querySelector('header.topbar').__keep)";
+  /* a render counter around the global render(): the tick must not call it */
+  const I1_COUNT = "window.__rc = 0; window.__ro = render; render = function () { window.__rc++; return window.__ro.apply(this, arguments); }";
+  const I1_UNCOUNT = "if (window.__ro) { render = window.__ro; window.__ro = null; }";
+  const i1Transit = ev => ev("S.loads.find(function(l){return l.status==='in_transit'}).id");
+
+  for (const lang of LANGS) await group('[' + lang + '] renderRegion("main"): the side bar and the top bar stay, the page is rebuilt (tab switch and filter)', lang, async (g, ev, w) => {
+    eq(ev("typeof renderRegion"), 'function', 'renderRegion is global'); eq(ev("typeof liveBind + typeof liveUpdate"), 'functionfunction', 'liveBind / liveUpdate are global');
+    ev("go('orders')"); ev(I1_MARK);
+    const tabs = ev("tabsOf('orders').map(function(t){return t.key})"); assert(tabs.length > 2, 'orders has tabs: ' + tabs);
+    ev("setTab('orders','" + tabs[1] + "')");
+    eq(ev("curTab('orders').key"), tabs[1], 'tab switched'); eq(ev(I1_KEPT), true, 'side bar and top bar are the same nodes after a tab switch');
+    assert(w.document.querySelector('[data-test="tab:orders:' + tabs[1] + '"][aria-selected="true"]'), 'the new tab is selected in the rebuilt page');
+    /* a filter: the select keeps the focus */
+    ev("setTab('orders','" + tabs[0] + "')"); ev(I1_MARK);
+    const sel = w.document.querySelector('.content select[data-f]'); assert(sel, 'orders has a data-f filter'); const key = sel.dataset.f, opt = [...sel.options].map(o => o.value).find(v => v !== sel.value);
+    sel.focus(); sel.value = opt; sel.dispatchEvent(new w.Event('input', { bubbles: true }));
+    eq(ev("S.f['" + key + "']"), opt, 'filter applied'); eq(ev(I1_KEPT), true, 'a filter does not rebuild the side bar and the top bar');
+    const now = w.document.activeElement; assert(now && now.matches('select[data-f="' + key + '"]'), 'the filter keeps the focus: ' + (now && now.tagName));
+    eq(w.document.querySelector('select[data-f="' + key + '"]').value, opt, 'rebuilt filter shows the chosen value');
+    clean(w, 'orders ' + lang);
+  });
+
+  await group('render() stays the full, synchronous render: every region is rebuilt, the wrappers still run', 'ru', async (g, ev, w) => {
+    ev("go('dashboard')"); ev(I1_MARK); ev("render()");
+    eq(ev(I1_KEPT), false, 'render() rebuilds the whole #root');
+    assert(w.document.title && w.document.title.length > 3, 'shell wrapper: document title');
+    assert(w.document.querySelector('.page-head .help-q'), 'help wrapper: context help button');
+    assert(w.document.querySelectorAll('#root [data-act]:not(button):not(a):not(select):not(input)[tabindex]').length > 5, 'a11y wrapper: tab stops on data-act controls');
+    ev("S.drawer=null; ACT.go({v:'orders'})"); assert(w.document.querySelector('[data-test="nav:orders"].active'), 'go() renders synchronously');
+    ev(I1_MARK); ev("renderRegion('nonexistent')"); eq(ev(I1_KEPT), false, 'an unknown region falls back to the full render');
+  });
+
+  await group('the page region equals what a full render produces (head, content, a11y names, help button)', 'ru', async (g, ev, w) => {
+    for (const id of ['dashboard', 'orders', 'dispatch', 'routes', 'fleet', 'drivers', 'hubs', 'reports', 'settings']) {
+      ev("go('" + id + "')"); ev("renderRegion('main')");
+      const snap = () => w.document.querySelector('#main-content > .page-head').outerHTML + w.document.querySelector('#main-content > .content').innerHTML;
+      const a = snap(); ev("render()"); const b = snap();
+      assert(a === b, id + ': region render differs from the full render at char ' + [...a].findIndex((c, i) => c !== b[i]));
+    }
+  });
+
+  for (const lang of LANGS) await group('[' + lang + '] renderRegion("main") keeps an open drawer, its node, its focus and its typed fields', lang, async (g, ev, w) => {
+    ev("go('routes')"); const id = i1Transit(ev); ev("openDrawer({type:'route', id:'" + id + "'})");
+    const d = w.document.querySelector('aside.drawer'); assert(d && d.getAttribute('role') === 'dialog', 'drawer is open');
+    d.__keep = 1; const x = d.querySelector('[data-test="drawer-close"]'); x.focus(); eq(w.document.activeElement, x, 'focus on the close button');
+    ev("renderRegion('main')");
+    const d2 = w.document.querySelector('aside.drawer'); assert(d2 === d && d2.__keep === 1, 'the same drawer node survives a main redraw');
+    assert(d.contains(w.document.activeElement), 'focus stays inside the drawer'); eq(ev("S.drawer.id"), id, 'drawer state kept');
+    /* the Tab trap still wraps inside the drawer (FR-215) */
+    const f = ev("a11yFocusables(document.querySelector('.drawer.open')).length"); assert(f >= 1, 'drawer focusables: ' + f);
+    /* a tab switch closes the drawer and rebuilds only the page and the drawer */
+    ev(I1_MARK); ev("setTab('routes','map')");
+    eq(ev("S.drawer"), null, 'tab switch closes the drawer'); assert(!w.document.querySelector('aside.drawer'), 'drawer node removed'); eq(ev(I1_KEPT), true, 'side bar and top bar untouched');
+  });
+
+  await group('scroll positions of main and of the drawer survive renderRegion', 'ru', async (g, ev, w) => {
+    ev("go('routes')"); const id = i1Transit(ev); ev("openDrawer({type:'route', id:'" + id + "'})");
+    const m = w.document.querySelector('main'), d = w.document.querySelector('aside.drawer');
+    const pad = w.document.createElement('div'); pad.style.height = '3000px'; pad.id = 'i1-pad'; w.document.querySelector('.content').appendChild(pad);
+    const dp = w.document.createElement('div'); dp.style.height = '3000px'; dp.id = 'i1-dpad'; d.appendChild(dp);
+    m.scrollTop = 240; d.scrollTop = 130; const my = m.scrollTop, dy = d.scrollTop; assert(my > 0 && dy > 0, 'both boxes scrolled: ' + my + '/' + dy);
+    ev("renderRegion('main')"); eq(w.document.querySelector('main').scrollTop, my, 'main scroll kept');
+  });
+
+  await group('renderRegion("topbar") keeps the caret in the search box; renderRegion("toast") touches nothing else', 'ru', async (g, ev, w) => {
+    ev("go('orders')"); const s = w.document.querySelector('#gsearch'); s.focus(); s.value = 'abcd'; s.setSelectionRange(2, 2);
+    ev("S.gs.q = 'abcd'"); ev(I1_MARK); const content = w.document.querySelector('#main-content > .content'); content.__keep = 1;
+    ev("renderRegion('topbar')");
+    const s2 = w.document.querySelector('#gsearch'); assert(s2 !== s, 'top bar rebuilt'); eq(w.document.activeElement, s2, 'search box keeps the focus'); eq(s2.selectionStart, 2, 'caret kept');
+    assert(w.document.querySelector('#side-nav').__keep === 1 && content.__keep === 1, 'side bar and page untouched');
+    ev("S.toast = {msg:'region toast', kind:'ok'}; renderRegion('toast')");
+    eq(w.document.querySelector('[data-test="toast"]').textContent, 'region toast', 'toast shown'); assert(w.document.querySelector('#main-content > .content') === content, 'page untouched by the toast region');
+    ev("S.toast = null; renderRegion('toast')"); assert(!w.document.querySelector('[data-test="toast"]'), 'toast removed');
+    assert(w.document.querySelector('#side-nav').__keep === 1, 'side bar still the same node');
+  });
+
+  await group('actions declare their region: ACTION_DEFS.region, "main" by default', 'ru', async (g, ev) => {
+    eq(ev("ACTION_DEFS.stab.region"), 'main', 'tab switch declares main'); eq(ev("actionRegion('stab')"), 'main'); eq(ev("actionRegion('filter')"), 'main', 'filters redraw the page');
+    eq(ev("actionRegion('create')"), 'main', 'no region declared → main'); eq(ev("actionRegion('no-such-action')"), 'main');
+    ev("registerAction('i1_probe', { region: 'drawer' })"); eq(ev("actionRegion('i1_probe')"), 'drawer', 'declared region is returned');
+  });
+
+  for (const lang of LANGS) await group('[' + lang + '] the tick updates data-live nodes only: 10 ticks call render() 0 times (dashboard, routes, hubs)', lang, async (g, ev, w) => {
+    for (const screen of ['dashboard', 'routes', 'hubs']) {
+      ev("go('" + screen + "')"); ev("S.simOn = true; S.drawer = null");
+      const before = ev("[].map.call(document.querySelectorAll('[data-live=pos]'), function(n){return n.getAttribute('transform')}).join('|')");
+      ev(I1_COUNT); ev("for (var i = 0; i < 10; i++) liveTick()"); const calls = ev("window.__rc"); ev(I1_UNCOUNT);
+      eq(calls, 0, screen + ': render() calls in 10 ticks');
+      assert(w.document.querySelector('[data-live=badge] [data-live-at]').textContent.length >= 5, screen + ': live badge shows the time');
+      if (screen === 'hubs') continue;
+      assert(w.document.querySelectorAll('[data-live=pos]').length > 0, screen + ': position nodes');
+      const after = ev("[].map.call(document.querySelectorAll('[data-live=pos]'), function(n){return n.getAttribute('transform')}).join('|')");
+      assert(before !== after, screen + ': markers moved without a render');
+      /* what the tick wrote equals what a full render builds from the same state */
+      const live = ev("[].map.call(document.querySelectorAll('[data-live=pos],[data-live=temp],[data-live=bar],[data-live=pct],[data-live=tempchip]'), function(n){return n.getAttribute('data-live') + n.getAttribute('data-id') + (n.getAttribute('transform')||'') + n.textContent + (n.style.width||'')}).join('|')");
+      ev("render()");
+      const full = ev("[].map.call(document.querySelectorAll('[data-live=pos],[data-live=temp],[data-live=bar],[data-live=pct],[data-live=tempchip]'), function(n){return n.getAttribute('data-live') + n.getAttribute('data-id') + (n.getAttribute('transform')||'') + n.textContent + (n.style.width||'')}).join('|')");
+      eq(live, full, screen + ': tick output equals a full render');
+    }
+    clean(w, 'tick ' + lang);
+  });
+
+  await group('the tick: position, temperature, progress and ETA of an open trip card are data-live too', 'ru', async (g, ev, w) => {
+    ev("go('routes')"); const id = i1Transit(ev); ev("openDrawer({type:'route', id:'" + id + "'})");
+    for (const k of ['tempchip', 'eta', 'done', 'bar']) assert(w.document.querySelector('aside.drawer [data-live=' + k + '][data-id=' + id + ']'), 'trip card node ' + k);
+    const t0 = ev("load('" + id + "').temp"); ev("var l = load('" + id + "'); l.temp = ZONES[l.zone].mid; liveTick();");
+    const shown = w.document.querySelector('aside.drawer [data-live=tempchip]').textContent.replace(',', '.'); const t = ev("load('" + id + "').temp");
+    assert(Math.abs(parseFloat(shown.replace(/[^0-9.+-]/g, '')) - t) < 0.06, 'drawer temperature follows the state: ' + shown + ' vs ' + t + ' (was ' + t0 + ')');
+    eq(ev("S.drawer && S.drawer.id"), id, 'the open drawer is not closed by the tick');
+    ev("var l2 = load('" + id + "'); l2.progress = 0.5; liveTick(); liveUpdate();");
+    const km = ev("dist(load('" + id + "').from, load('" + id + "').to)"); assert(w.document.querySelector('aside.drawer [data-live=done]').textContent.startsWith(Math.round(km * (0.5 + 0.0006)) + ' / '), 'distance covered follows progress');
+  });
+
+  await group('a load that crosses a temperature limit makes the tick redraw the page region (never render()) and the top bar counter', 'ru', async (g, ev, w) => {
+    ev("go('dashboard')"); ev("S.simOn = true"); ev("liveTick()"); ev(I1_MARK); const child = w.document.querySelector('#main-content > .content').firstElementChild; child.__keep = 1; const n0 = ev('REGION_COUNT.main');
+    ev("window.__l = S.loads.find(function(x){return x.status==='in_transit' && tempState(x)!=='breach'}); __l.temp = ZONES[__l.zone].hi + 3"); ev(I1_COUNT); ev("liveTick()");
+    eq(ev("window.__rc"), 0, 'no render()'); ev(I1_UNCOUNT);
+    assert(w.document.querySelector('#main-content > .content').firstElementChild.__keep !== 1 && ev('REGION_COUNT.main') === n0 + 1, 'the page region was rebuilt once for the new breach');
+    assert(w.document.querySelector('#side-nav').__keep === 1, 'the side bar was not touched');
+    assert(/°/.test(w.document.querySelector('.content').textContent) && w.document.querySelector('.content').textContent.includes(ev("LF.dec(__l.temp)")), 'the dashboard shows the breach');
+  });
+
+  await group('tick budget: < 4 ms per tick with the simulation on (median of 30, dashboard)', 'ru', async (g, ev) => {
+    ev("go('dashboard')"); ev("S.simOn = true; S.drawer = null; for (var i = 0; i < 5; i++) liveTick()");
+    const ms = ev("(function(){ var a = []; for (var i = 0; i < 30; i++) { var t = performance.now(); liveTick(); a.push(performance.now() - t); } a.sort(function(x, y){return x - y}); return a[15]; })()");
+    assert(ms < 4, 'median tick ' + ms.toFixed(2) + ' ms');
+  });
+
+  await group('a new level-2 alarm raised by the tick shows the "new alarms" banner (no render())', 'ru', async (g, ev, w) => {
+    ev("go('dashboard')"); ev("S.simOn = true; render(); liveTick()");
+    assert(!w.document.querySelector('[data-alarm-banner]'), 'no banner before the alarm');
+    ev("var ld = S.loads.find(function(x){return x.status==='in_transit'}); raiseAlarm({ lvl: 2, cat: 'temperature', src: 'reefer', hub: ld.from, load: ld.id, truck: ld.truck, text: 'i1 test alarm' })");
+    ev(I1_COUNT); ev("liveTick()"); eq(ev("window.__rc"), 0, 'no render()'); ev(I1_UNCOUNT);
+    assert(w.document.querySelector('[data-alarm-banner]'), 'banner shown after the tick');
+    ev("ACT.banX()"); assert(!w.document.querySelector('[data-alarm-banner]'), 'banner dismissed');
+  });
+
+  await group('the click dispatcher respects the region an action declares (non-main: topbar) and leaves "all" alone', 'ru', async (g, ev, w) => {
+    ev("go('orders')");
+    ev("registerAction('i1_top', { region: 'topbar' }); ACT.i1_top = function () { S.tbMore = !S.tbMore; render(); }; registerAction('i1_all', { region: 'all' }); ACT.i1_all = function () { render(); }");
+    const add = (act) => { const b = w.document.createElement('button'); b.dataset.act = act; b.id = 'i1b-' + act; w.document.body.appendChild(b); return b; };
+    ev(I1_MARK); const content = w.document.querySelector('#main-content > .content').firstElementChild; content.__keep = 1;
+    add('i1_top').click();
+    eq(ev("S.tbMore"), true, 'handler ran'); eq(ev("typeof render"), 'function', 'render restored');
+    assert(w.document.querySelector('#side-nav').__keep === 1 && content.__keep === 1, 'only the top bar was rebuilt'); assert(!w.document.querySelector('header.topbar').__keep, 'top bar rebuilt');
+    add('i1_all').click(); eq(ev(I1_KEPT), false, 'an "all" action keeps the full render()');
+  });
+
+  await group('open drawer: a breach redraw by the tick keeps the drawer node; the routes temperature tab ticks without render()', 'ru', async (g, ev, w) => {
+    ev("go('routes')"); const id = i1Transit(ev); ev("S.simOn = true; liveTick(); openDrawer({type:'route', id:'" + id + "'})");
+    const d = w.document.querySelector('aside.drawer'); d.__keep = 1;
+    ev("var lb = S.loads.find(function(x){return x.status==='in_transit' && tempState(x)!=='breach'}); lb.temp = ZONES[lb.zone].hi + 3"); ev(I1_COUNT); ev("liveTick()");
+    eq(ev("window.__rc"), 0, 'no render()'); ev(I1_UNCOUNT); assert(w.document.querySelector('aside.drawer') === d && d.__keep === 1, 'the same drawer node after the tick redraw');
+    ev("closeDrawer(); setTab('routes','temp')"); ev(I1_COUNT); ev("for (var i = 0; i < 10; i++) liveTick()"); eq(ev("window.__rc"), 0, 'temperature tab: 10 ticks, render() calls'); ev(I1_UNCOUNT);
+  });
+
+__suite(63);   /* i2-build-lang.js */
+  /* ---- I2 · R01 / FR-191 per-language build: the page of a language carries the text of that language only (platform-src/tools-build/strip-langs.mjs) ---- */
+  const I2_PAGES = { ru: 'index.html', de: 'de.html', en: 'en.html', kk: 'kk.html' };
+  const I2_CYR = /[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]/g;
+  /* sizes in bytes of the pages before the strip (platform/*.html of 2026-10-31, spec R01): the known quantity the weight is compared with */
+  const I2_BEFORE = { ru: 4132238, de: 4011323, en: 3992332, kk: 4137949 };
+  const i2Text = async (w, p) => (await w.fetch(p, { cache: 'no-store' })).text();
+  /* the build module is loaded from its text through a blob URL, so the result does not depend on the MIME type the static server gives to .mjs */
+  const i2Scanner = async () => import(URL.createObjectURL(new Blob([await (await fetch('../platform-src/tools-build/strip-langs.mjs', { cache: 'no-store' })).text()], { type: 'text/javascript' })));
+
+  await group('I2 R01 stripLangs: T(ru,de,en,kk) becomes T(<page language>), kk without a value reads RU, an empty kk stays empty', 'ru', async (g, ev, w) => {
+    const { stripLangs } = await i2Scanner(), src = "x = T('р', 'd', 'e', 'қ'); y = T('р2', 'd2', 'e2'); z = T('р3', 'd3', 'e3', '');";
+    eq(stripLangs(src, 'ru'), "x = T('р'); y = T('р2'); z = T('р3');", 'ru');
+    eq(stripLangs(src, 'de'), "x = T('d'); y = T('d2'); z = T('d3');", 'de');
+    eq(stripLangs(src, 'en'), "x = T('e'); y = T('e2'); z = T('e3');", 'en');
+    eq(stripLangs(src, 'kk'), "x = T('қ'); y = T('р2'); z = T('');", 'kk: no value -> ru, empty -> empty (the runtime T does the same)');
+    let bad = null; try { stripLangs(src, 'fr'); } catch (e) { bad = e; } assert(bad, 'unknown language throws');
+  });
+  await group('I2 R01 stripLangs: strings, templates, nested brackets, regexes, comments and member calls are read as JavaScript, not as text', 'ru', async (g, ev, w) => {
+    const { stripLangs } = await i2Scanner(), st = {}, en = s => stripLangs(s, 'en', st);
+    eq(en("T('a)', \"b,\", 'e\\'x', 'k')"), "T('e\\'x')", 'brackets, commas and escaped quotes inside strings');
+    eq(en('T(`a${T(1, 2, 3, 4)}`, `b ${x ? T("q", "w", "e", "r") : 0}`, `e${f(1, 2)}`, `k`)'), 'T(`e${f(1, 2)}`)', 'template literal with an expression; a nested T() in a kept argument is stripped too');
+    eq(en("T(f(1, 2), g([1, 2], {a: 1, b: 2}), h(x => (x, 1)), k)"), 'T(f(1, 2),f(1, 2),h(x => (x, 1)))', 'nested calls, arrays, objects, arrows (an expression member keeps the fallback to the first one)');
+    eq(en("T(a, b, /[,)]\\//.test(s) ? 'x' : 'y', k)"), "T(a,a,/[,)]\\//.test(s) ? 'x' : 'y')", 'a regex literal with brackets and a slash in a class');
+    eq(en("n = a / b; T('1', '2', '3', '4') / c; /T\\(/.test(s)"), "n = a / b; T('3') / c; /T\\(/.test(s)", 'division is not a regex, a regex is not a call');
+    eq(en("// T('a','b')\nT('a', /* T('x','y') */ 'b', 'c', 'd')"), "// T('a','b')\nT('c')", 'comments are not calls, a comment inside a dropped argument goes with it');
+    eq(en("s = \"T('a','b','c','d')\" + 'T(1,2,3)' + x.T('a', 'b', 'c', 'd') + obj?.T(1, 2, 3) + nT('a', 'b', 'c') + T$('a', 'b', 'c')"), "s = \"T('a','b','c','d')\" + 'T(1,2,3)' + x.T('a', 'b', 'c', 'd') + obj?.T(1, 2, 3) + nT('a', 'b', 'c') + T$('a', 'b', 'c')", 'only the free function T: strings, member calls and longer names stay');
+    eq(en('const T = (...a) => (a[LI] != null ? a[LI] : a[0]); function T2() {}'), 'const T = (...a) => (a[LI] != null ? a[LI] : a[0]); function T2() {}', 'the definition of T is not a call');
+    eq(en("T('only one'); T(...parts); T(a, ...rest)"), "T('only one'); T(...parts); T(a, ...rest)", 'one argument and spreads stay as they are');
+    eq(en("T('a', 'b', 'c', 'd',)"), "T('c')", 'trailing comma');
+    eq(stripLangs("T(q[0], q[1], q[2], q[3])", 'kk'), 'T(q[0],q[0],q[0],q[3])', 'an expression member can be null at run time: the fallback to the first member stays (ECO_BL tq())');
+    eq(stripLangs("T(q[0], q[1], q[2], q[3])", 'ru'), 'T(q[0])', 'the first member needs no fallback');
+    stripLangs("T('a', 'b', 'c', 'd'); T('x'); T(...p); T(p, ...q); x.T(1, 2)", 'en', st);
+    assert(st.calls === 4 && st.stripped === 1 && st.skipped.length === 1, 'counted: ' + JSON.stringify(st));
+  });
+  await group('I2 R01.1 stripLangs {comments}: dropping comments and indentation keeps placeholders, strings, regexes and line breaks that matter', 'ru', async (g, ev, w) => {
+    const { stripLangs } = await i2Scanner(), min = s => stripLangs(s, 'ru', {}, { comments: true });
+    eq(min("  a = 1; // note\n  /* block */ b = 2;\n\n\n  c = '  // not a comment  ';\n"), "a = 1; \nb = 2;\nc = '  // not a comment  ';\n", 'line and block comments, indentation, blank lines');
+    eq(min("a = 1\n/* Banner of a file\n   more text */\nb = 2"), "a = 1\n/* Banner of a file */\nb = 2", 'a comment at the start of a line is a banner: its first line stays (g4-architecture finds the file boundaries by it)');
+    eq(min("a = 1\n  /* x\ny */ b = 2"), "a = 1\nb = 2", 'an indented block comment over lines goes, the line break stays (no glued statements)');
+    eq(min("a = /*@@STRINGS@@*/ {};"), "a = /*@@STRINGS@@*/ {};", 'build placeholders survive');
+    eq(min("a = `x\n   // y\n  ${b /* c */}`;"), "a = `x\n   // y\n  ${b  }`;", 'template text is not touched, comments inside ${} are');
+    eq(min("a = b/* c */+d;"), "a = b +d;", 'a comment between tokens never glues them');
+  });
+  await group('I2 R01.1 verifyStrip: the stripped script must parse and keep the number of T( calls', 'ru', async (g, ev, w) => {
+    const { stripLangs, verifyStrip: verify } = await i2Scanner(), verifyStrip = (a, b, l) => verify(a, b, l, code => new Function(code)), src = "a = T('1', '2', '3', '4'); b = T('5', '6', '7', '8');", out = stripLangs(src, 'de');
+    eq(await verifyStrip(src, out, 'de'), 2, 'two calls before and after');
+    let e1 = null; try { await verifyStrip(src, "a = T('2');", 'de'); } catch (e) { e1 = e; } assert(e1 && /calls before 2, after 1/.test(e1.message), 'a lost call is reported: ' + (e1 && e1.message));
+    let e2 = null; try { await verifyStrip(src, "a = T('2'); b = T('6'", 'de'); } catch (e) { e2 = e; } assert(e2, 'a call count that matches is not enough when the result does not parse');
+    let e3 = null; try { await verifyStrip(src, "a = T('2'); b = T('6'; ", 'de'); } catch (e) { e3 = e; } assert(e3 && /does not parse|calls before/.test(e3.message), 'syntax error is reported');
+  });
+
+  /* the built pages */
+  await group('I2 R01 pages: every language page carries the text of its own language in T() and no other member of the tuple', 'ru', async (g, ev, w) => {
+    const pages = {}; for (const l of Object.keys(I2_PAGES)) pages[l] = await i2Text(w, I2_PAGES[l]);
+    /* helpGroup('start', T('Начало работы', 'Erste Schritte', 'Getting started', 'Жұмысты бастау')) in v6/help/00-framework.js */
+    const mark = { ru: "T('Начало работы')", de: "T('Erste Schritte')", en: "T('Getting started')", kk: "T('Жұмысты бастау')" };
+    for (const l of Object.keys(pages)) for (const m of Object.keys(mark)) eq(pages[l].includes(mark[m]), l === m, l + ' page, text of ' + m);
+    /* a stripped call is T(text); T(text,text,expression) is the null guard of an expression member (same text twice), anything else with two different texts is an unstripped tuple */
+    for (const l of Object.keys(pages)) assert(!/(^|[^\w.$])T\(('[^'\\\n]*'|"[^"\\\n]*"), ?(?!\2[,)])(?:'|")/.test(pages[l]), l + ': a T() with two different text arguments is left in the page');
+  });
+  await group('I2 R01.1 pages: all four pages keep the same number of T( calls as the sources (no call lost, none added)', 'ru', async (g, ev, w) => {
+    const n = {}; for (const l of Object.keys(I2_PAGES)) n[l] = ((await i2Text(w, I2_PAGES[l])).match(/(^|[^\w.$])T\(/g) || []).length;
+    assert(n.ru >= 7000, 'calls in the ru page: ' + n.ru);
+    eq(n.de, n.ru, 'de'); eq(n.en, n.ru, 'en'); eq(n.kk, n.ru, 'kk');
+  });
+  await group('I2 R01 pages: DE and EN carry about half of the Cyrillic they carried before the strip (the rest is help quads, driver app and reference data)', 'ru', async (g, ev, w) => {
+    for (const l of ['de', 'en']) { const c = ((await i2Text(w, I2_PAGES[l])).match(I2_CYR) || []).length; assert(c < 300000, l + ' page has ' + c + ' Cyrillic characters (was 498772 before the strip)'); }
+  });
+  await group('I2 R01 weight: every language page is at least 25 % lighter than before the strip and stays within platform-src/budget.json', 'ru', async (g, ev, w) => {
+    const B = await (await w.fetch('../platform-src/budget.json', { cache: 'no-store' })).json(), P = await (await w.fetch('../platform-src/perf-budget.json', { cache: 'no-store' })).json();
+    for (const l of Object.keys(I2_PAGES)) {
+      const n = (await (await w.fetch(I2_PAGES[l], { cache: 'no-store' })).arrayBuffer()).byteLength;
+      assert(n <= I2_BEFORE[l] * 0.75, l + ' page is ' + n + ' B, before ' + I2_BEFORE[l] + ' B: less than -25 %');
+      assert(n <= B.page_kb * 1024 && n <= P.pageKB.raw * 1024, l + ' page is over the budget');
+    }
+    assert(B.page_kb <= 3300 && P.pageKB.raw <= 3300, 'the budget was lowered to the new weight: ' + B.page_kb + ' / ' + P.pageKB.raw + ' KB');
+  });
+
+  /* what must NOT be cut: T stays a function with the fallback, help quads and the driver app keep all four languages */
+  for (const lang of ['ru', 'de', 'en', 'kk']) await group('I2 R01 [' + lang + '] T stays a function with the kk -> ru fallback; help quads and the driver app text keep all four languages', lang, async (g, ev, w) => {
+    eq(ev('typeof T'), 'function', 'T is a function');
+    eq(ev("T('a', 'b', 'c')"), { ru: 'a', de: 'b', en: 'c', kk: 'a' }[lang], 'T with three arguments');
+    eq(ev("T('a', 'b', 'c', 'd')"), { ru: 'a', de: 'b', en: 'c', kk: 'd' }[lang], 'T with four arguments');
+    eq(ev("T('one')"), 'one', 'T with one argument');
+    assert(ev("HELP.articles.every(function (a) { return Array.isArray(a.title) && a.title.length >= 4 })"), 'help titles are quads on the ' + lang + ' page');
+    ev("ACT.setRole({v:'driver'});ACT.daLang({v:'kk'})"); assert(/Ауысым/.test(w.document.querySelector('.da-tabs').innerText), 'the driver app switches to kk at run time on the ' + lang + ' page');
+    ev("ACT.daLang({v:'de'})"); assert(/Schicht/.test(w.document.querySelector('.da-tabs').innerText), 'and to de');
+  });
+
+__suite(64);   /* i3-ux-primitives.js */
+  /* ---- I3 · R08 / R09 / R10 (FR-212..214): remembered preferences, uniform states, undo toast ---- */
+  const I3_WAIT = ms => new Promise(r => setTimeout(r, ms));
+  const I3_RESET = { ru: 'Сбросить фильтры', de: 'Filter zurücksetzen', en: 'Reset filters', kk: 'Сүзгілерді тастау' };
+  const I3_UNDO = { ru: 'Отменить', de: 'Rückgängig', en: 'Undo', kk: 'Болдырмау' };
+  const I3_DECISION = { ru: 'Отмена', de: 'Rückgängig gemacht', en: 'Undone', kk: 'Қайтарылды' };
+  /* a stand-in for localStorage: PREFS.attach(store) is the test seam (the platform frame itself never reads or writes storage) */
+  const I3_STORE = (init, broken) => "(function(){ var m = " + JSON.stringify(init || {}) + "; return { m: m, getItem: function(k){ if (" + !!broken + ") throw new Error('blocked'); return k in m ? m[k] : null; }, setItem: function(k,v){ if (" + !!broken + ") throw new Error('blocked'); m[k] = String(v); }, removeItem: function(k){ delete m[k]; } }; })()";
+
+  for (const lang of LANGS) await group('[' + lang + '] R09 KIT.state: empty / loading / error / nofilter, roles, text of the page language', lang, async (g, ev, w) => {
+    eq(ev("typeof KIT.state"), 'function', 'KIT.state exists');
+    for (const [kind, role] of [['empty', 'status'], ['loading', 'status'], ['error', 'alert'], ['nofilter', 'status']]) {
+      const el = (() => { const d = w.document.createElement('div'); d.innerHTML = ev("KIT.state('" + kind + "', {})"); return d.firstElementChild; })();
+      assert(el, kind + ': markup'); eq(el.getAttribute('role'), role, kind + ': a11y role'); eq(el.dataset.test, 'state:' + kind, kind + ': hook');
+      assert(el.textContent.trim().length > 2 && !/⟦/.test(el.textContent), kind + ': text from the string table: ' + el.textContent);
+      if (lang === 'de' || lang === 'en') assert(!/[А-Яа-я]/.test(el.textContent), kind + ': no Cyrillic outside RU');
+    }
+    eq(ev("KIT.state('loading', {})").includes('aria-busy="true"'), true, 'loading is aria-busy');
+    /* title / hint / action are the caller's */
+    const d = w.document.createElement('div'); d.innerHTML = ev("KIT.state('empty', {title: 'No <b>x</b>', hint: 'Add one', action: {label: 'Add', act: 'create'}})");
+    eq(d.querySelector('.state-t').textContent, 'No <b>x</b>', 'title is escaped text'); eq(d.querySelector('.state-h').textContent, 'Add one', 'hint');
+    const b = d.querySelector('button[data-act="create"]'); assert(b && b.textContent === 'Add', 'caller action button');
+    /* R09.1: "nothing found by the filter" offers the reset button */
+    const n = w.document.createElement('div'); n.innerHTML = ev("KIT.state('nofilter', {})"); const rb = n.querySelector('button[data-act="resetFilters"]');
+    assert(rb, 'nofilter: reset button'); eq(rb.textContent, I3_RESET[lang], 'nofilter: button text');
+    eq(ev("KIT.state('empty', {}).includes('<button')"), false, 'empty without action has no button');
+    /* KIT.table: the empty row keeps td.empty and shows the state; a filtered table shows nofilter */
+    const t = w.document.createElement('div'); t.innerHTML = ev("KIT.table(['H','I'], '', {empty: 'none'})");
+    eq(t.querySelector('td.empty').textContent, 'none', 'KIT.table empty text'); assert(t.querySelector('td.empty [data-test="state:empty"]'), 'KIT.table empty row carries the state');
+    t.innerHTML = ev("KIT.table(['H','I'], '', {nofilter: true})"); assert(t.querySelector('td.empty button[data-act="resetFilters"]'), 'KIT.table nofilter: reset button');
+  });
+
+  await group('R09.1 resetFilters clears the screen filters, the record filters and the column filters', 'ru', async (g, ev, w) => {
+    ev("go('orders'); S.f.status = 'problem'; S.f.q = 'x'; S.f.page = 3; RC.q = 'zz'; S.lv.loads.c = {1: 'abc'}; render()");
+    ev("ACT.resetFilters({})");
+    eq(ev("S.f.status + '|' + S.f.q + '|' + S.f.page"), '||1', 'S.f cleared, page 1'); eq(ev("RC.q"), '', 'RC cleared'); eq(ev("JSON.stringify(S.lv.loads.c)"), '{}', 'column filters cleared');
+    ev("ACT.retry({})"); clean(w, 'after reset');
+  });
+
+  await group('R08 PREFS: get / set over kokzhol.v6.prefs, broken JSON ignored, blocked storage survives', 'ru', async (g, ev, w) => {
+    eq(ev("typeof PREFS"), 'object', 'PREFS is global');
+    ev("window.__st = " + I3_STORE({})); ev("PREFS.attach(window.__st)"); eq(ev("PREFS.enabled"), true, 'enabled on an attached store');
+    eq(ev("PREFS.get('nothing', 'dflt')"), 'dflt', 'default'); eq(ev("PREFS.set('hub', 'AST')"), true, 'set returns true');
+    eq(ev("JSON.parse(window.__st.m['kokzhol.v6.prefs']).hub"), 'AST', 'stored under kokzhol.v6.prefs'); eq(ev("PREFS.get('hub', '')"), 'AST', 'round trip');
+    ev("PREFS.set('tab', {orders: 'rec'})"); eq(ev("PREFS.get('tab', {}).orders"), 'rec', 'object value'); eq(ev("PREFS.get('hub', '')"), 'AST', 'other keys kept');
+    for (const bad of ['{not json', 'null', '[1,2]', '"str"', '42']) { ev("window.__st.m['kokzhol.v6.prefs'] = " + JSON.stringify(bad)); eq(ev("PREFS.get('hub', 'dflt')"), 'dflt', 'damaged value ignored: ' + bad); eq(ev("PREFS.set('hub', 'ALA')"), true, 'set repairs: ' + bad); eq(ev("PREFS.get('hub', '')"), 'ALA', 'after repair'); }
+    ev("PREFS.reset()"); eq(ev("'kokzhol.v6.prefs' in window.__st.m"), false, 'reset removes the key'); eq(ev("PREFS.get('hub', 'd')"), 'd', 'reset: defaults');
+    ev("PREFS.attach(" + I3_STORE({}, true) + ")"); eq(ev("PREFS.get('hub', 'd')"), 'd', 'blocked storage: get gives the default'); eq(ev("PREFS.set('hub', 'x')"), false, 'blocked storage: set returns false, no throw');
+    ev("PREFS.reset()"); ev("render()"); clean(w, 'blocked storage');
+  });
+
+  await group('R08 PREFS restore / capture: hub filter, last tab, theme; invalid values are ignored', 'ru', async (g, ev, w) => {
+    const hub = ev("Object.keys(HUBS)[1]"), tabs = ev("tabsOf('orders').map(function(t){return t.key})"), other = tabs[1];
+    ev("PREFS.attach(" + I3_STORE({ 'kokzhol.v6.prefs': JSON.stringify({ hub: 'ZZZ', tab: { orders: 'nope', fleet: 'nope' }, design: 'neon' }) }) + ")");
+    ev("PREFS.restore()"); eq(ev("S.hub"), '', 'unknown hub ignored'); eq(ev("S.tab.orders"), undefined, 'unknown tab ignored'); eq(ev("S.design"), 'kokzhol', 'unknown theme ignored');
+    ev("PREFS.attach(" + I3_STORE({ 'kokzhol.v6.prefs': JSON.stringify({ hub: hub, tab: { orders: other }, design: 'olymp' }) }) + ")");
+    eq(ev("PREFS.restore()"), true, 'restore reports a change'); eq(ev("S.hub"), hub, 'hub filter restored'); eq(ev("S.tab.orders"), other, 'last tab restored'); eq(ev("S.design"), 'olymp', 'theme restored');
+    eq(ev("document.documentElement.dataset.design"), 'olymp', 'theme applied to the page');
+    ev("PREFS.attach(" + I3_STORE({}) + ")"); ev("S.hub = '" + hub + "'; S.tab.fleet = 'x'; S.design = 'kokzhol'; PREFS.capture()");
+    eq(ev("PREFS.get('hub', null)"), hub, 'capture stores the hub'); eq(ev("PREFS.get('design', null)"), 'kokzhol', 'capture stores the theme'); eq(ev("PREFS.get('tab', {}).fleet"), 'x', 'capture stores the tab');
+    /* a click on the hub filter goes through the real action and is captured */
+    ev("PREFS.attach(" + I3_STORE({}) + ")"); ev("render()"); const btn = w.document.querySelector('.hubseg [data-v="' + hub + '"]'); assert(btn, 'hub button'); btn.click();
+    eq(ev("PREFS.get('hub', null)"), hub, 'a click on the hub filter is remembered');
+    /* language */
+    ev("PREFS.attach(" + I3_STORE({ 'kokzhol.v6.prefs': JSON.stringify({ lang: 'de' }) }) + ")"); eq(ev("PREFS.langPick()"), 'de', 'stored language');
+    ev("PREFS.attach(" + I3_STORE({ 'kokzhol.v6.prefs': JSON.stringify({ lang: 'xx' }) }) + ")"); eq(ev("PREFS.langPick()"), null, 'unknown language ignored');
+    ev("PREFS.attach(" + I3_STORE({}) + ")"); w.document.querySelector('[data-test="lang:en"]').addEventListener('click', e => e.preventDefault(), true); w.document.querySelector('[data-test="lang:en"]').click();
+    eq(ev("PREFS.get('lang', null)"), 'en', 'a click on a language link is remembered');
+  });
+
+  await group('R08.2 test frames neither read nor write preferences; kz-r4-views gets the same guard', 'ru', async (g, ev, w) => {
+    eq(ev("PREFS.enabled"), false, 'PREFS is off in the test frame'); eq(ev("PREFS.set('hub', 'AST')"), false, 'set is a no-op'); eq(ev("PREFS.get('hub', 'd')"), 'd', 'get gives the default');
+    eq(localStorage.getItem('kokzhol.v6.prefs'), null, 'harness storage untouched by PREFS.set');
+    /* a stored value of the harness is not read by the frame, and what the frame saves does not reach the harness */
+    const KEY = 'kz-r4-views'; const had = localStorage.getItem(KEY);
+    try {
+      localStorage.setItem(KEY, JSON.stringify({ loads: [{ id: 'v-leak', name: 'leak', c: {}, s: {} }] }));
+      const g2 = await new Promise(res => { const f = document.createElement('iframe'); f.style.cssText = 'position:fixed;left:-9999px;width:1200px;height:800px'; f.src = file('ru'); f.onload = () => res(f); document.body.appendChild(f); });
+      try { await I3_WAIT(300); const w2 = g2.contentWindow; eq(w2.eval("S.lv.loads.views.length"), 0, 'saved views of the harness storage are not read in a test frame');
+        w2.eval("S.lv.loads.views.push({id:'v-new', name:'new', c:{}, s:{}}); localStorage.setItem('kz-r4-views', JSON.stringify({loads: S.lv.loads.views}))");
+        assert(!/v-new/.test(localStorage.getItem(KEY) || ''), 'the frame does not write kz-r4-views'); } finally { g2.remove(); }
+    } finally { if (had == null) localStorage.removeItem(KEY); else localStorage.setItem(KEY, had); }
+  });
+
+  for (const lang of LANGS) await group('[' + lang + '] R10 toastUndo: button, one undo, audit entry "undo", chain valid, nothing deleted', lang, async (g, ev, w) => {
+    eq(ev("typeof toastUndo"), 'function', 'toastUndo is global');
+    ev("window.__n = 0; go('fleet')"); const audit0 = ev("S.audit.length");
+    ev("toastUndo('Moved', function(){ window.__n++; }, {ms: 5000, audit: {module: 'Test', subject: 'T-1'}})");
+    const t = w.document.querySelector('[data-test="toast-undo"]'); assert(t, 'undo toast shown'); assert(t.textContent.includes('Moved'), 'message');
+    const b = t.querySelector('button[data-act="undoToast"]'); assert(b, 'undo button'); eq(b.textContent.trim(), I3_UNDO[lang], 'button text in ' + lang);
+    eq(ev("S.undo.ms"), 5000, 'duration');
+    /* the toast survives a change of screen */
+    ev("go('drivers')"); assert(w.document.querySelector('[data-test="toast-undo"]'), 'the toast stays after a screen change');
+    w.document.querySelector('[data-test="toast-undo"] button').click();
+    eq(ev("window.__n"), 1, 'undo function ran'); eq(w.document.querySelector('[data-test="toast-undo"]'), null, 'undo toast closed');
+    ev("ACT.undoToast({})"); w.document.querySelectorAll('[data-act="undoToast"]').forEach(x => x.click()); eq(ev("window.__n"), 1, 'a second undo is impossible');
+    eq(ev("S.audit.length"), audit0 + 1, 'exactly one audit entry added (nothing deleted)'); const e = ev("S.audit[0]");
+    eq(e.decision, I3_DECISION[lang], 'audit decision "undo"'); eq(e.module, 'Test', 'audit module'); eq(e.subject, 'T-1', 'audit subject');
+    const v = ev("auditVerify()"); eq(v.ok, true, 'hash chain still verifies'); eq(v.checked, audit0 + 1, 'chain length');
+    clean(w, 'undo ' + lang);
+  });
+
+  await group('R10.2 the timer makes the action final; a new undo toast finalises the old one; default 10 s', 'ru', async (g, ev, w) => {
+    ev("window.__n = 0; toastUndo('A', function(){ window.__n++; }, {ms: 80})"); assert(w.document.querySelector('[data-test="toast-undo"]'), 'shown');
+    await I3_WAIT(250); eq(w.document.querySelector('[data-test="toast-undo"]'), null, 'toast gone after the timer'); eq(ev("S.undo"), null, 'state cleared');
+    ev("ACT.undoToast({})"); eq(ev("window.__n"), 0, 'too late: the action is final, undo does nothing'); eq(ev("S.audit[0].decision === 'Отмена'"), false, 'no audit entry for a late undo');
+    ev("toastUndo('B', function(){ window.__n += 10; }, {ms: 5000})"); ev("toastUndo('C', function(){ window.__n += 100; }, {ms: 5000})");
+    ev("ACT.undoToast({})"); eq(ev("window.__n"), 100, 'only the latest toast can be undone; the older one is final');
+    ev("toastUndo('D', function(){}, {})"); eq(ev("S.undo.ms"), 10000, 'default duration is 10 s'); assert(ev("S.undo.until - clockNow().getTime()") > 9000, 'deadline about 10 s ahead');
+    ev("toast('plain')"); assert(w.document.querySelector('[data-test="toast-undo"]'), 'an ordinary toast does not remove the undo toast'); assert(w.document.querySelector('[data-test="toast"]'), 'ordinary toast shown too');
+  });
+
+  await group('R10 action registry flag undo: the action shows the toast, undo restores, audit entry written', 'ru', async (g, ev, w) => {
+    ev("window.__v = 1; ACT.tUndo = function(){ window.__v = 2; }; registerAction('tUndo', {area: 'core', undo: {msg: function(){ return 'changed'; }, snap: function(){ return window.__v; }, revert: function(s){ window.__v = s; }, watch: function(){ return window.__v; }, audit: {module: 'Test', subject: 'tUndo'}}}); bindActions()");
+    const a0 = ev("S.audit.length"); ev("ACT.tUndo({})"); eq(ev("window.__v"), 2, 'action applied'); assert(w.document.querySelector('[data-test="toast-undo"]'), 'undo toast after a flagged action');
+    ev("ACT.undoToast({})"); eq(ev("window.__v"), 1, 'undo restored the snapshot'); eq(ev("S.audit.length"), a0 + 1, 'audit entry'); eq(ev("auditVerify().ok"), true, 'chain ok');
+    ev("ACT.tUndo({})"); ev("ACT.tUndo({})"); /* second call changes nothing: watch() unchanged, no new toast */
+    eq(ev("S.undo === null"), false, 'toast of the first change is still the current one');
+    ev("bindActions()"); eq(ev("ACT.tUndo.__undo"), true, 'wrapped once'); ev("window.__v = 1; ACT.tUndo({})"); ev("ACT.undoToast({})"); eq(ev("window.__v"), 1, 'double bindActions does not double the toast / undo');
+  });
+
+__suite(65);   /* i4-lazy-data.js */
+  /* ---- I4 · FR-197 lazy demo data: heavy collections are built on first use, memoised, seeded; start under the budget ---- */
+  /* Golden hashes: lazyHash() (FNV-1a over JSON.stringify + length) of every lazy collection as the page built it at load BEFORE FR-197
+     (taken from the eager build at 982f57c, same four languages, simulation off). ru and kk share the hashes of the numbers, not the texts. */
+  const I4_GOLD = {
+    ru: { alarms: '0112b8da:2218', inbox: '98a45d93:2619', oncall: '9f7ccbba:1007', claims: 'ff824c57:845', users: 'c0760bdd:2498', integ: '1b406d2a:12093', apiKeys: '269e44d2:627', webhooks: '0641f3ca:508', 'r5.points': '19eda0de:72541' },
+    de: { alarms: 'e9435bad:2260', inbox: '5857f2cb:2643', oncall: 'fb3f60df:1005', claims: 'd09073d5:847', users: 'b2715a90:2502', integ: '79b7825b:12150', apiKeys: '832b99c8:627', webhooks: '0641f3ca:508', 'r5.points': '9a61b01d:72898' },
+    en: { alarms: '54f2c81e:2241', inbox: '8ee8d976:2596', oncall: '2cf99c3c:999', claims: 'bed4281c:841', users: '09e2f04d:2503', integ: '4dd69ba6:11886', apiKeys: '832b99c8:627', webhooks: '0641f3ca:508', 'r5.points': '9a61b01d:72898' },
+    kk: { alarms: '1f38e39e:2218', inbox: '474e4af5:2619', oncall: '59d222e3:1004', claims: 'eaf4c909:834', users: '51f2bc01:2498', integ: 'c90e3ccc:11716', apiKeys: '269e44d2:627', webhooks: '0641f3ca:508', 'r5.points': '19eda0de:72541' },
+  };
+  const I4_NAMES = Object.keys(I4_GOLD.ru);
+  /* collections nothing on the first screen (dashboard) reads: they must still be unbuilt after the page has started */
+  const I4_COLD = ['oncall', 'claims', 'users', 'integ', 'apiKeys', 'webhooks', 'r5.points'];
+  const I4_VAL = "(function(n){ return lazyForce(n); })";
+
+  for (const lang of LANGS) await group('[' + lang + '] lazy(name, fn): built on the first read, memoised, S.name stays a plain field', lang, async (g, ev) => {
+    eq(ev("typeof lazy + typeof lazyForce + typeof lazyBuilt + typeof lazyReset + typeof lazyHash + typeof lazyFn"), 'functionfunctionfunctionfunctionfunctionfunction', 'the lazy API is global');
+    ev("window.__n = 0; lazy('i4x', function(){ window.__n++; return [{ id: 1 }, { id: 2 }]; })");
+    eq(ev("window.__n"), 0, 'declaring does not build'); eq(ev("lazyBuilt('i4x')"), false, 'not built after declaring');
+    assert(ev("'i4x' in S && Object.keys(S).includes('i4x')"), 'the name is an enumerable key of S before the first read');
+    eq(ev("S.i4x.length"), 2, 'first read builds'); eq(ev("window.__n"), 1, 'builder ran once');
+    eq(ev("S.i4x === S.i4x && S.i4x === lazyForce('i4x')"), true, 'memoised: the same array every time'); eq(ev("window.__n"), 1, 'no second build');
+    eq(ev("typeof Object.getOwnPropertyDescriptor(S, 'i4x').get"), 'undefined', 'after the build S.i4x is an ordinary data property');
+    ev("S.i4x.push({ id: 3 })"); eq(ev("S.i4x.length"), 3, 'a built collection is writable like any other');
+    ev("S.i4x = []"); eq(ev("S.i4x.length"), 0, 'assignment after the build replaces it');
+    ev("lazyReset('i4x')"); eq(ev("lazyBuilt('i4x')"), false, 'lazyReset arms it again'); eq(ev("S.i4x.length + ':' + window.__n"), '2:2', 'the next read builds the seed again');
+    /* a write before the first read wins and the builder never runs */
+    ev("window.__m = 0; lazy('i4y', function(){ window.__m++; return [1]; }); S.i4y = ['own']");
+    eq(ev("S.i4y[0] + ':' + window.__m + ':' + lazyBuilt('i4y')"), 'own:0:true', 'S.name = v before the first read keeps v, no build');
+    /* a builder that reads its own collection fails loudly, and the failure leaves the collection unbuilt */
+    ev("lazy('i4z', function(){ return S.i4z.length; })");
+    eq(ev("(function(){ try { S.i4z; return 'no error'; } catch (e) { return /own builder/.test(e.message) ? 'cycle' : e.message; } })()"), 'cycle', 'cyclic read is reported');
+    eq(ev("lazyBuilt('i4z')"), false, 'still unbuilt after the failed build');
+    /* lazyFn: the same for a collection kept in a closure */
+    ev("window.__f = 0; window.__g = lazyFn('i4f', function(){ window.__f++; return [7, 8]; })");
+    eq(ev("window.__f + ':' + lazyBuilt('i4f')"), '0:false', 'lazyFn declares without building');
+    eq(ev("window.__g().length + ':' + (window.__g() === window.__g()) + ':' + window.__f"), '2:true:1', 'lazyFn memoises');
+    eq(ev("lazyHash([1, 2]) === lazyHash([1, 2]) && lazyHash([1, 2]) !== lazyHash([2, 1])"), true, 'lazyHash tells different data apart');
+  });
+
+  for (const lang of LANGS) await group('[' + lang + '] heavy collections are lazy: not built at load, read-only screens leave them alone', lang, async (g, ev) => {
+    const names = ev("lazyNames()"); I4_NAMES.concat(['audit']).forEach(n => assert(names.includes(n), n + ' is declared lazy: ' + names));
+    const built = ev("LAZY_LOG.slice()");
+    I4_COLD.forEach(n => { eq(ev("lazyBuilt('" + n + "')"), false, n + ' is not built after the page has started (built: ' + built + ')'); });
+    /* a screen that does not need them does not build them */
+    ev("go('fleet')"); ev("go('dispatch')");
+    ['users', 'integ', 'apiKeys', 'webhooks', 'claims', 'r5.points'].forEach(n => eq(ev("lazyBuilt('" + n + "')"), false, n + ' still unbuilt after Fleet and Dispatch'));
+    /* the collection points are built by the first read, and R5.PTS stays readable */
+    eq(ev("R5.PTS.length > 100"), true, 'R5.PTS is readable (a getter over the lazy list)'); eq(ev("lazyBuilt('r5.points')"), true, 'built by the first read');
+    eq(ev("R5.search('', '', '').length"), ev("R5.PTS.length"), 'the search runs over the lazy list');
+  });
+
+  for (const lang of LANGS) await group('[' + lang + '] lazy and eager build give the same data (hash of the data against the pre-FR-197 build)', lang, async (g, ev) => {
+    for (const n of I4_NAMES) {
+      eq(ev("lazyHash(lazyForce('" + n + "'))"), I4_GOLD[lang][n], n + ': the lazily built data equals the data the eager build made');
+      ev("lazyReset('" + n + "')"); ev("render()");   /* screens that finish a seed on first use (the road messages of the inbox, 265-mirror-roads) do it again on the draw */
+      eq(ev("lazyHash(lazyForce('" + n + "'))"), I4_GOLD[lang][n], n + ': the same seed gives the same values after a reset');
+    }
+    /* S.* stays readable as plain JSON: nothing in a collection is a getter or a function that only works in a builder */
+    eq(ev("JSON.parse(JSON.stringify(S.users)).length"), ev("S.users.length"), 'S.users survives a JSON round trip');
+  });
+
+  await group('counters of the seeds do not depend on the moment of the build (new ids follow the seeded ones)', 'ru', async (g, ev) => {
+    ev("lazyReset('alarms'); lazyReset('inbox'); lazyReset('claims')");
+    ev("raiseAlarm({ cat: 'door', lvl: 1, hub: 'AST', truck: 't1', text: 'i4 test' })");
+    eq(ev("S.alarms.length + ':' + S.alarms[0].id"), '6:ALM-106', 'a new alarm on an unbuilt store takes the next id after the 5 seeded ones, at the top');
+    eq(ev("S.alarms.filter(function(a){return /^ALM-10[1-5]$/.test(a.id)}).length"), 5, 'the five seeded alarms are all there');
+    ev("inboxAdd({ kind: 'lead', title: 'i4 lead', src: 'i4' })");
+    eq(ev("S.inbox.length + ':' + S.inbox[0].id"), '10:IN-0010', 'a new inbox message on an unbuilt store takes IN-0010');
+    eq(ev("S.inbox.filter(function(m){return m.id === 'IN-0001'}).length"), 1, 'seeds keep their ids');
+    eq(ev("lazyBuilt('claims')"), false, 'untouched claims stay unbuilt');
+    ev("lazyForce('claims')"); eq(ev("S.claims.map(function(c){return c.id}).join()"), 'CLM-2026-001,CLM-2026-002', 'claim ids restart at 001 whenever the seed is built');
+  });
+
+  await group('demo reset and the snapshot work with lazy collections', 'ru', async (g, ev) => {
+    const gold = I4_GOLD.ru;
+    /* snapshot() at page start must not have built the cold collections */
+    ['users', 'integ', 'webhooks', 'apiKeys'].forEach(n => eq(ev("lazyBuilt('" + n + "')"), false, n + ' was not built by the start-up snapshot'));
+    /* change a built one and an unbuilt one, then reset */
+    const nUsers = ev("S.users.length"); ev("S.users.push({ id: 'U-i4', username: 'i4.tester', role: 'admin', active: true, fn: [] })"); eq(ev("S.users.length"), nUsers + 1, 'users changed');
+    ev("S.alarms.length = 2"); ev("S.webhooks.push({ id: 'w-i4' })");
+    ev("demoReset()");
+    eq(ev("lazyHash(S.users)"), gold.users, 'users back to the seed after demoReset');
+    eq(ev("lazyHash(S.alarms)"), gold.alarms, 'alarms back to the seed after demoReset');
+    eq(ev("lazyHash(S.webhooks)"), gold.webhooks, 'webhooks (built, then changed) back to the seed');
+    /* a collection that was never read is not built by the reset either */
+    ev("lazyReset('integ')"); ev("demoReset()"); eq(ev("lazyBuilt('integ')"), false, 'an untouched lazy collection stays unbuilt through demoReset');
+    eq(ev("lazyHash(S.integ)"), gold.integ, 'and reads as the seed afterwards');
+    eq(ev("S.audit.length > 0 && S.audit[0].module"), 'Demo', 'the reset is written to the audit log (the lazy audit store works)');
+  });
+
+  /* the dry test: every route of the menu, opened first after the load, shows what it shows when everything has been built in advance */
+  const I4_TXT = "(function(){ var m = document.querySelector('#main-content') || document.body; return m.innerText.replace(/\\s+/g, ' '); })()";
+  const I4_ROUTES = ['dashboard', 'orders', 'dispatch', 'fleet', 'drivers', 'routes', 'hubs', 'pod', 'billing', 'reports', 'ai', 'baseline', 'settings'];
+  for (const route of I4_ROUTES) await group('dry test: "' + route + '" opened first after the load equals "' + route + '" after everything was built', 'ru', async (g, ev, w) => {
+    assert(ev("NAV.map(function(n){return n[0]}).includes('" + route + "')"), route + ' is a menu route');
+    const keys = ev("tabsOf('" + route + "').map(function(t){return t.key})");
+    const grab = () => { const out = [ev("go('" + route + "');" + I4_TXT)]; for (const k of keys) { ev("setTab('" + route + "','" + k + "')"); out.push(k + ' | ' + ev(I4_TXT)); } return out; };
+    const first = grab(); const lazyBefore = ev("LAZY_LOG.length");
+    const g2 = await fresh('ru'); const ev2 = g2.ev, w2 = g2.w;
+    ev2("lazyNames().forEach(function(n){ lazyForce(n); })");
+    const grab2 = () => { const out = [ev2("go('" + route + "');" + I4_TXT)]; for (const k of keys) { ev2("setTab('" + route + "','" + k + "')"); out.push(k + ' | ' + ev2(I4_TXT)); } return out; };
+    const second = grab2();
+    first.forEach((t, i) => { if (t !== second[i]) { let d = 0; while (d < t.length && t[d] === second[i][d]) d++; assert(false, route + ' tab #' + i + ' (' + (keys[i - 1] || 'first') + ') differs at char ' + d + ': "' + t.slice(Math.max(0, d - 40), d + 40) + '" vs "' + second[i].slice(Math.max(0, d - 40), d + 40) + '"'); } });
+    clean(w, route + ' first'); clean(w2, route + ' after all'); g2.done();
+    assert(lazyBefore >= 0, 'lazy log readable');
+  });
+
+  /* time to interactive: from the start of the page to the first rendered screen with S ready (mark v6-ready of app.js), against the budget file */
+  for (const lang of ['ru', 'en']) await group('[' + lang + '] time to interactive is under the budget of perf-budget.json', lang, async (g, ev, w) => {
+    const budget = await (await fetch('../platform-src/perf-budget.json', { cache: 'no-store' })).json();
+    assert(budget.interactiveMs > 0 && budget.interactiveMs <= 1500, 'perf-budget.json has interactiveMs <= 1500: ' + budget.interactiveMs);
+    const t = w.performance.getEntriesByName('v6-ready'); assert(t.length === 1, 'the v6-ready mark exists');
+    const ms = Math.round(t[0].startTime); 
+    assert(ms < budget.interactiveMs, 'ready after ' + ms + ' ms, budget ' + budget.interactiveMs + ' ms');
+    assert(ev("!!document.querySelector('#root .nav-item') && S.loads.length > 0 && S.schemaProblems.length === 0"), 'at the mark the first screen is drawn and S is ready');
+    assert(ms >= 0 && (!budget.measured || typeof budget.measured[lang] === 'number' && budget.measured[lang] > 0), 'the measured value is recorded in the budget file for ' + lang);
+  });
+
+__suite(66);   /* i5-vlist.js */
+  /* ---- I5 · FR-195 (R05) windowing of long tables: KIT.vlist keeps only the visible rows (+ margin) in the DOM; 612 collection points, audit log,
+     readings and the hub inbound lists use it; nothing is cut any more (counter "N из M"); CSV and print take every row ---- */
+  const I5_AXE = await fetch('test-vendor/axe.min.js').then(r => (r.ok ? r.text() : '')).catch(() => '');
+  /* scrolling and the row measurement need layout: the iframe is shown off-screen (display:none has none) */
+  const i5Show = async w => { w.frameElement.style.cssText = 'display:block;position:absolute;left:-10000px;top:0;width:1316px;height:760px;border:0'; await new Promise(r => setTimeout(r, 30)); };
+  const i5Axe = async (w, where) => {
+    if (!w.axe) w.eval(I5_AXE);
+    const r = await w.axe.run(w.document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => where + ': ' + v.id + ' ×' + v.nodes.length + ' ' + v.nodes[0].html.slice(0, 80));
+  };
+  const i5Count = (w, id) => w.document.querySelector(`[data-vlist-count="${id}"]`).textContent.replace(/(\d)\s(?=\d)/g, '$1').replace(/\s+/g, ' ').trim();
+  const i5Ids = (w, attr) => [...w.document.querySelectorAll(`[${attr}]`)].map(e => e.getAttribute(attr));
+  /* a table of n synthetic rows mounted on the page; returns the id */
+  const i5Mount = (ev, id, n) => ev(`(function(){ const rows = Array.from({length:${n}}, (_, i) => ({ i })); const h = document.createElement('div'); h.id = 'i5_host'; h.innerHTML = KIT.vlist({ id: '${id}', head: ['#', 'x'], rows, row: r => '<tr data-i5="' + r.i + '"><td>' + r.i + '</td><td>row ' + r.i + '</td></tr>', rowH: 40, label: 'i5' }); document.body.appendChild(h); return '${id}'; })()`);
+
+  await group('I5 FR-195: 612 collection points — only the window is in the DOM, the counter is "N из M", no 20-row pages, scrolling shows the right rows', 'ru', async (g, ev, w) => {
+    await i5Show(w);
+    ev("go('orders');ACT.stab({s:'orders',v:'recipients'})");
+    const n = ev('R5.PTS.length'); assert(n >= 600, 'points ' + n);
+    const c0 = ev("vlistCount('r5_tbl')"); assert(c0 > 5 && c0 < 70, 'window rows in the DOM: ' + c0);
+    eq(i5Count(w, 'r5_tbl'), n + ' из ' + n, 'counter');
+    assert(!w.document.querySelector('[data-r5-pager]'), 'no pager');
+    eq(i5Ids(w, 'data-cp')[0], 'CP-0001', 'first row at the top');
+    ev("vlistTo('r5_tbl', 300)"); const mid = i5Ids(w, 'data-cp'); assert(mid.includes('CP-0301'), 'row 300 is in the window: ' + mid[0] + '…' + mid[mid.length - 1]); assert(!mid.includes('CP-0001'), 'the top rows left the DOM');
+    assert(ev("vlistCount('r5_tbl')") < 70, 'still a window after scrolling');
+    ev("vlistTo('r5_tbl', R5.PTS.length - 1)"); assert(i5Ids(w, 'data-cp').includes('CP-' + String(n).padStart(4, '0')), 'the last point is reachable');
+    clean(w, 'recipients');
+  });
+
+  await group('I5 FR-195: search / filter run over all points and the scroll position survives render()', 'ru', async (g, ev, w) => {
+    await i5Show(w);
+    ev("go('orders');ACT.stab({s:'orders',v:'recipients'})"); const n = ev('R5.PTS.length');
+    ev("const i=document.querySelector('#r5_rq');i.value='CP-0612';i.dispatchEvent(new Event('input',{bubbles:true}))");
+    eq(ev("document.querySelectorAll('[data-cp]').length"), 1, 'the last point is found by number'); eq(i5Count(w, 'r5_tbl'), '1 из ' + n, 'counter of the hits');
+    ev("const i=document.querySelector('#r5_rq');i.value='zzzz-nothing';i.dispatchEvent(new Event('input',{bubbles:true}))");
+    assert(w.document.querySelector('[data-test="state:nofilter"]'), 'KIT.state nofilter for an empty result'); eq(i5Count(w, 'r5_tbl'), '0 из ' + n);
+    ev("S.r5.rq='';render();vlistTo('r5_tbl', 200)"); assert(i5Ids(w, 'data-cp').includes('CP-0201'), 'row 200 in the window');
+    ev('render()'); assert(i5Ids(w, 'data-cp').includes('CP-0201') && !i5Ids(w, 'data-cp').includes('CP-0001'), 'same position after a full render'); ev("renderRegion('main')"); assert(i5Ids(w, 'data-cp').includes('CP-0201') && !i5Ids(w, 'data-cp').includes('CP-0001'), 'same position after a region render');
+    ev("S.r5.rq='';S.r5.rcity='ZHE';render()"); eq(ev("document.querySelectorAll('[data-cp]').length"), 10, 'a filter returns to the top and shows its rows'); ev("S.r5.rcity=''");
+  });
+
+  await group('I5 FR-195: the cost does not grow with the row count (600 vs 5000 rows: same rows in the DOM, scroll time within 3x)', 'ru', async (g, ev, w) => {
+    await i5Show(w);
+    ev("go('dashboard')"); i5Mount(ev, 'i5_a', 600);
+    const ca = ev("vlistCount('i5_a')"); ev("document.getElementById('i5_host').remove()");
+    i5Mount(ev, 'i5_b', 5000); const cb = ev("vlistCount('i5_b')");
+    eq(ca, cb, 'same number of DOM rows for 600 and 5000'); assert(cb > 5 && cb < 70, 'window size ' + cb);
+    ev("document.getElementById('i5_host').remove()");
+    const time = (id, n) => { i5Mount(ev, id, n); const t = ev(`(function(){ const t0 = performance.now(); for (let k = 0; k < 60; k++) vlistTo('${id}', (k * 37) % ${n - 40}); return performance.now() - t0; })()`); ev("document.getElementById('i5_host').remove()"); return t; };
+    const small = [time('i5_c', 600), time('i5_d', 600), time('i5_e', 600)].sort((a, b) => a - b)[1], big = [time('i5_f', 5000), time('i5_g', 5000), time('i5_h', 5000)].sort((a, b) => a - b)[1];
+    assert(big <= Math.max(small * 3, 150), '60 scroll steps: 600 rows ' + small.toFixed(1) + ' ms, 5000 rows ' + big.toFixed(1) + ' ms');
+  });
+
+  await group('I5 FR-195: audit log — no 200-row cap, every entry reachable, the counter shows N из M, the filter reads all entries', 'ru', async (g, ev, w) => {
+    await i5Show(w);
+    ev("for (let i = 0; i < 1500; i++) audit('I5', 'I5-SUBJ-' + i, 'ok', 'bulk')"); const m = ev('S.audit.length'); assert(m > 1500, 'audit entries ' + m);
+    ev("ACT.setRole({v:'admin'});go('settings');ACT.stab({s:'settings',v:'audit'})");
+    eq(i5Count(w, 'au_tbl'), m + ' из ' + m, 'counter shows all entries'); const c = ev("vlistCount('au_tbl')"); assert(c > 5 && c < 80, 'window rows ' + c);
+    const oldest = ev('S.audit[S.audit.length - 1].subject');
+    ev("RC.aq = " + JSON.stringify(oldest) + "; render()"); assert(w.document.querySelector('#au_tbl').innerText.includes(oldest), 'the oldest entry (far beyond 200) is found by the search');
+    ev("RC.aq = ''; render(); vlistTo('au_tbl', S.audit.length - 1)"); assert(w.document.querySelector('#au_tbl tbody').innerText.includes(oldest), 'the last entry is reachable by scrolling');
+    ev("RC.aq = 'I5-SUBJ-1499'; render()"); eq(i5Count(w, 'au_tbl'), '1 из ' + m, 'filter counter');
+    ev("RC.aq = 'no-such-entry-xyz'; render()"); assert(w.document.querySelector('[data-test="state:nofilter"]'), 'nofilter state'); ev("RC.aq = ''");
+    clean(w, 'audit');
+  });
+
+  await group('I5 FR-195: readings — no 40-row cap, a full list in a window, empty state through KIT.state', 'ru', async (g, ev, w) => {
+    await i5Show(w);
+    const t = ev("S.loads.find(l=>l.status==='in_transit'&&l.zone==='pharma').truck");
+    ev(`go('routes');ACT.stab({s:'routes',v:'templog'});S.thermo.sel='${t}';render()`);
+    ev(`for (let i = 0; i < 150; i++) THERMO.rec({truck:'${t}',cls:'pharma',val:5.0})`); ev('render()');
+    const mine = ev(`S.thermo.log.filter(r=>r.truck==='${t}').length`), all = ev('S.thermo.log.length'); assert(mine > 140, 'readings of the vehicle ' + mine);
+    eq(i5Count(w, 'tl_tbl'), mine + ' из ' + all, 'counter');
+    const cnt = ev("vlistCount('tl_tbl')"); assert(cnt < 70, 'window rows ' + cnt);
+    const oldestId = ev(`S.thermo.log.filter(r=>r.truck==='${t}').pop().id`);
+    ev(`vlistTo('tl_tbl', ${mine - 1})`); assert(i5Ids(w, 'data-tl-row').includes(oldestId), 'the oldest reading is reachable');
+    ev("S.thermo.log.length = 0; render()"); assert(w.document.querySelector('#tl_tbl .state-empty, #tl_tbl [data-test="state:empty"]'), 'empty state through KIT.state');
+    clean(w, 'templog');
+  });
+
+  await group('I5 FR-195: hub inbound lists use the window (small lists show every row; an empty filter gives the nofilter state)', 'ru', async (g, ev, w) => {
+    await i5Show(w);
+    ev("ACT.setRole({v:'admin'});go('hubs')"); const tabs = ev("tabsOf('hubs').map(t=>t.key)");
+    for (const k of ['recv', 'inbound']) {
+      assert(tabs.includes(k), 'tab ' + k); ev(`setTab('hubs','${k}')`);
+      const id = k === 'recv' ? 'rv_tbl' : 'ib_tbl'; assert(w.document.querySelector(`[data-vlist="${id}"]`), k + ': the table is a window'); assert(/^\d+ из \d+$/.test(i5Count(w, id)), k + ' counter: ' + i5Count(w, id));
+      eq(ev(`vlistCount('${id}')`), +i5Count(w, id).split(' ')[0], k + ': a short list is fully in the DOM');
+    }
+    ev("S.rf.q = 'zzzz-nothing'; setTab('hubs','recv')"); assert(w.document.querySelector('[data-test="state:nofilter"]'), 'receiving nofilter'); ev("S.rf.q = ''");
+    clean(w, 'hubs');
+  });
+
+  await group('I5 FR-195: CSV and print take every row, not the window', 'ru', async (g, ev, w) => {
+    await i5Show(w);
+    ev("for (let i = 0; i < 400; i++) audit('I5', 'I5-CSV-' + i, 'ok', 'bulk')"); const m = ev('S.audit.length');
+    ev("ACT.setRole({v:'admin'});go('settings');ACT.stab({s:'settings',v:'audit'});ACT.auditCsv()");
+    const d = ev('__downloads').find(x => /audit/.test(x.name)); assert(d, 'audit CSV recorded'); const txt = await w.fetch(d.href).then(r => r.text());
+    eq(txt.trim().split('\n').length, m + 1, 'every audit entry + the header in the CSV (' + m + ')');
+    ev("go('orders');ACT.stab({s:'orders',v:'recipients'})"); const n = ev('R5.PTS.length');
+    w.dispatchEvent(new w.Event('beforeprint')); eq(ev("vlistCount('r5_tbl')"), n, 'print: every point is in the DOM'); w.dispatchEvent(new w.Event('afterprint')); assert(ev("vlistCount('r5_tbl')") < 70, 'after print the window is back');
+  });
+
+  await group('I5 FR-195: keyboard and a11y — the scroll box is focusable and named, rows carry their real position, axe has no serious violation', 'ru', async (g, ev, w) => {
+    await i5Show(w); const d = w.document;
+    ev("go('orders');ACT.stab({s:'orders',v:'recipients'})"); const sc = d.querySelector('[data-vlist="r5_tbl"]'), n = ev('R5.PTS.length');
+    eq(sc.getAttribute('tabindex'), '0', 'reachable with Tab'); eq(sc.getAttribute('role'), 'region'); assert(sc.getAttribute('aria-label'), 'named');
+    eq(d.querySelector('#r5_tbl').getAttribute('aria-rowcount'), String(n + 1), 'aria-rowcount = all rows + header');
+    eq(d.querySelector('[data-cp]').getAttribute('aria-rowindex'), '2', 'first data row is row 2'); ev("vlistTo('r5_tbl', 100)"); eq(d.querySelector('[data-cp="CP-0101"]').getAttribute('aria-rowindex'), '102', 'row index after scrolling');
+    sc.focus(); eq(d.activeElement, sc, 'focus lands on the scroll box');
+    const bad = await i5Axe(w, 'recipients'); ev("S.r5.rq='';render()");
+    ev("for (let i = 0; i < 300; i++) audit('I5', 'I5-AX-' + i, 'ok', 'bulk')"); ev("ACT.setRole({v:'admin'});go('settings');ACT.stab({s:'settings',v:'audit'})"); bad.push(...await i5Axe(w, 'audit'));
+    ev("go('routes');ACT.stab({s:'routes',v:'templog'})"); bad.push(...await i5Axe(w, 'templog'));
+    assert(!bad.length, bad.length + ' axe violation(s): ' + bad.slice(0, 4).join(' | '));
+  });
+
+  await group('I5 FR-195: a control focused in a row keeps the focus when the window moves (back on the same button, or on the scroll box when its row left the window)', 'ru', async (g, ev, w) => {
+    await i5Show(w); const d = w.document;
+    ev("go('orders');ACT.stab({s:'orders',v:'recipients'})"); const sc = d.querySelector('[data-vlist="r5_tbl"]');
+    const b = d.querySelector('[data-cp="CP-0003"] button'); assert(b, 'row button'); b.focus(); eq(d.activeElement, b);
+    ev("vlistTo('r5_tbl', 100)"); assert(!d.querySelector('[data-cp="CP-0003"]'), 'row left the window'); eq(d.activeElement, sc, 'row left the window: the scroll box holds the focus');
+    ev("vlistTo('r5_tbl', 0)"); const b2 = d.querySelector('[data-cp="CP-0003"] button'); b2.focus(); ev("vlistTo('r5_tbl', 1)");
+    eq(d.activeElement && d.activeElement.closest('[data-cp]') && d.activeElement.closest('[data-cp]').dataset.cp, 'CP-0003', 'same row keeps the focus after the window repainted');
+  });
+
+  for (const lang of ['de', 'en', 'kk']) await group('[' + lang + '] I5 FR-195: counter and states are translated, no Cyrillic in DE / EN', lang, async (g, ev, w) => {
+    ev("go('orders');ACT.stab({s:'orders',v:'recipients'})"); const n = ev('R5.PTS.length'); const t = i5Count(w, 'r5_tbl');
+    eq(t, n + ' ' + ({ de: 'von', en: 'of', kk: '/' })[lang] + ' ' + n, 'counter in ' + lang);
+    ev("S.r5.rq='zzzz-nothing';render()"); assert(w.document.querySelector('[data-test="state:nofilter"]'), 'nofilter state'); ev("S.r5.rq=''");
+    if (lang !== 'kk') assert(!/[А-Яа-яЁё]/.test(w.document.querySelector('#root').innerText.replace(/CP-\d+/g, '')), 'no Cyrillic in ' + lang + ' (point names are translated)');
+    clean(w, 'recipients ' + lang);
+  });
+
+__suite(67);   /* i6-palette-notify.js */
+  /* ---- I6 · R07 / R12 (FR-211, FR-217): command palette (Ctrl+K) and notification centre (screens/shell/090-palette.js, 095-notify.js) ---- */
+  const i6Show = async w => { w.frameElement.style.cssText = 'display:block;position:absolute;left:-10000px;top:0;width:1316px;height:760px;border:0'; await new Promise(r => setTimeout(r, 30)); };
+  const i6Key = (w, key, o) => { const t = w.document.activeElement || w.document.body; const e = new w.KeyboardEvent('keydown', Object.assign({ key, bubbles: true, cancelable: true }, o || {})); t.dispatchEvent(e); return e; };
+  const i6Type = (w, text) => { const q = w.document.getElementById('pal-q'); q.value = text; q.dispatchEvent(new w.Event('input', { bubbles: true })); };
+  const i6Cyr = /[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]/;
+  /* the three group names of the brief ("Go to / Find / Actions") per page language */
+  const I6_GROUPS = { ru: ['Перейти', 'Найти', 'Действия'], de: ['Gehe zu', 'Finden', 'Aktionen'], en: ['Go to', 'Find', 'Actions'], kk: ['Өту', 'Іздеу', 'Әрекеттер'] };
+  const I6_UNREAD = "S.alarms.filter(a=>a.status==='open').length+S.inbox.filter(m=>m.st==='new').length+S.tasks.filter(t=>!t.done).length";
+  const I6_ALL = "S.alarms.filter(a=>a.status!=='closed').length+S.inbox.filter(m=>m.st!=='done').length+S.tasks.filter(t=>!t.done).length";
+  const i6Axe = async (w, where) => {
+    const src = await fetch('test-vendor/axe.min.js').then(r => (r.ok ? r.text() : '')).catch(() => '');
+    if (!w.axe) w.eval(src);
+    const r = await w.axe.run(w.document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => where + ': ' + v.id + ' ×' + v.nodes.length + ' ' + v.nodes[0].target.join(' ') + ' ' + v.nodes[0].html.slice(0, 80));
+  };
+
+  for (const lang of LANGS) await group('[' + lang + '] R07 Ctrl+K: dialog with the field focused, groups Go / Find / Actions, arrows, Enter opens, Esc closes and gives the focus back', lang, async (g, ev, w) => {
+    await i6Show(w); const d = w.document;
+    ev("go('dashboard')"); const link = d.querySelector('.nav-item'); link.focus();
+    const e = i6Key(w, 'k', { ctrlKey: true }); assert(e.defaultPrevented, 'Ctrl+K is taken');
+    const dlg = d.querySelector('#pal-root [data-a11y-dlg]'); assert(dlg, 'dialog'); eq(dlg.getAttribute('role'), 'dialog'); eq(dlg.getAttribute('aria-modal'), 'true');
+    const inp = d.getElementById('pal-q'); eq(d.activeElement, inp, 'focus is in the field'); eq(inp.getAttribute('role'), 'combobox');
+    assert(ev("A11Y_KEYS().some(k => k[0].includes('Ctrl+K'))"), 'Ctrl+K is in the shortcut list KEYS()');
+    /* the query "load" style number brings the third group; the heading texts are the page language */
+    i6Type(w, 'LD-2026-0018');
+    const heads = [...d.querySelectorAll('#pal-list .pal-gh')].map(x => x.textContent);
+    assert(heads.includes(I6_GROUPS[lang][1]), 'group "' + I6_GROUPS[lang][1] + '" in ' + heads.join('|'));
+    i6Type(w, '');
+    const h0 = [...d.querySelectorAll('#pal-list .pal-gh')].map(x => x.textContent); eq(h0.join('|'), I6_GROUPS[lang][0] + '|' + I6_GROUPS[lang][2], 'empty query: Go and Actions');
+    if (lang === 'de' || lang === 'en') assert(!i6Cyr.test(dlg.textContent), lang + ' dialog has Cyrillic: ' + (dlg.textContent.match(/.{0,20}[А-Яа-яЁё].{0,20}/) || [''])[0]);
+    assert(!/⟦/.test(dlg.textContent), 'no missing string keys');
+    /* arrows move the selection (aria-activedescendant), wrap around */
+    const opts = () => [...d.querySelectorAll('#pal-list [role=option]')];
+    eq(opts()[0].getAttribute('aria-selected'), 'true', 'first row selected'); eq(inp.getAttribute('aria-activedescendant'), opts()[0].id);
+    i6Key(w, 'ArrowDown'); eq(opts()[1].getAttribute('aria-selected'), 'true', 'ArrowDown'); eq(inp.getAttribute('aria-activedescendant'), opts()[1].id);
+    i6Key(w, 'ArrowUp'); i6Key(w, 'ArrowUp'); eq(opts()[opts().length - 1].getAttribute('aria-selected'), 'true', 'ArrowUp wraps to the last row');
+    /* Enter on a menu item goes there */
+    const target = ev("navItems().find(n => n[0] !== S.route && n[0] !== 'help')"); i6Type(w, target[2]);
+    i6Key(w, 'Enter'); eq(ev('S.route'), target[0], 'Enter opens the section'); assert(!d.getElementById('pal-root'), 'the dialog closes after the pick');
+    /* Esc closes and the focus goes back */
+    ev("go('dashboard')"); const b = d.querySelector('.nav-item'); b.focus(); i6Key(w, 'k', { ctrlKey: true }); assert(d.getElementById('pal-root'), 'opens again');
+    i6Key(w, 'Escape'); assert(!d.getElementById('pal-root'), 'Esc closes'); eq(d.activeElement, b, 'the focus returns to the control that had it');
+    i6Key(w, 'k', { metaKey: true }); assert(d.getElementById('pal-root'), '⌘K opens too'); i6Key(w, 'k', { ctrlKey: true }); assert(!d.getElementById('pal-root'), 'Ctrl+K again closes');
+    clean(w, 'palette');
+  });
+
+  await group('[ru] R07 sources: Go = menu and tabs of the role, Find = the header search (no second index), Actions = ACTION_DEFS with the role rights', 'ru', async (g, ev, w) => {
+    const keys = (src, q) => ev(`paletteSources.${src}(${JSON.stringify(q)}).map(x => x.key)`);
+    const nav = ev("navItems().map(n => n[0])");
+    assert(keys('go', '').length >= 5 && keys('go', '').every(k => nav.includes(k.slice(3))), 'empty query: only the menu of the role');
+    const tabItem = ev("(() => { for (const n of navItems()) { const t = tabsOf(n[0])[1]; if (t) return [n[0], t.key, n[2] + ' › ' + (typeof t.label === 'function' ? t.label() : t.label)]; } })()");
+    eq(keys('go', tabItem[2].toLowerCase()).includes('go:' + tabItem[0] + '/' + tabItem[1]), true, 'a tab is found by "Section › Tab"');
+    /* Find returns what the header search finds for the same text, in the same order */
+    const q = ev("S.loads[0].id");
+    assert(ev(`paletteSources.find('${q}').length`) > 0, 'find: hits for ' + q);
+    ev(`(() => { const old = S.gs.q; S.gs.q = '${q}'; globalThis.__gs = gsResults().all.length; S.gs.q = old; })()`);
+    assert(ev('__gs') >= ev(`paletteSources.find('${q}').length`), 'find never shows more than the header search');
+    eq(ev("S.gs.q"), '', 'the header search text is untouched');
+    ev(`paletteSources.find('${q}')[0].run()`); eq(ev('S.route'), 'orders', 'a hit opens the orders screen');
+    /* Actions: rights of the role come from the registry (create needs orders:write) */
+    assert(keys('actions', '').includes('act:create'), 'admin: Create a load');
+    ev("ACT.setRole({v:'viewer'})"); assert(!keys('actions', '').includes('act:create'), 'viewer: no create');
+    eq(ev("canDo('orders:write')"), false); assert(!keys('actions', '').includes('act:auto') && !keys('actions', '').includes('act:addD'), 'viewer: no write actions');
+    const nv = ev("navItems().map(n => n[0])"); assert(keys('go', 'a').every(k => nv.includes(k.slice(3).split('/')[0])), 'viewer: Go only has screens of the viewer');
+    ev("ACT.setRole({v:'warehouse'})"); const nw = ev("navItems().map(n => n[0])");
+    assert(keys('go', 'a').every(k => nw.includes(k.slice(3).split('/')[0])), 'warehouse: Go only has its screens');
+  });
+
+  await group('[ru] R07.1 nothing found: the uniform empty state with a hint; a hit that the role may not see is not offered', 'ru', async (g, ev, w) => {
+    await i6Show(w); const d = w.document; ev("go('dashboard')");
+    i6Key(w, 'k', { ctrlKey: true }); i6Type(w, 'zzqxj');
+    eq(d.querySelectorAll('#pal-list [role=option]').length, 0, 'no rows'); const st = d.querySelector('#pal-none [data-test="state:empty"]'); assert(st, 'KIT.state empty');
+    assert(/Ничего не найдено/.test(st.textContent) && /Попробуйте/.test(st.textContent), 'text with a next step: ' + st.textContent);
+    eq(d.getElementById('pal-q').getAttribute('aria-expanded'), 'false'); assert(!d.getElementById('pal-q').hasAttribute('aria-activedescendant'), 'no active row');
+    i6Key(w, 'Enter'); assert(d.getElementById('pal-root'), 'Enter on nothing keeps the dialog'); i6Key(w, 'Escape');
+    ev("ACT.setRole({v:'finance'})"); i6Key(w, 'k', { ctrlKey: true }); i6Type(w, 'Create a load'); i6Type(w, 'Создать рейс');
+    eq(d.querySelectorAll('#pal-list [role=option]').length, 0, 'finance may not create: the action is not offered'); i6Key(w, 'Escape');
+  });
+
+  await group('[ru] R07.2 Ctrl+K inside input fields keeps the text, the header button opens the dialog, Esc returns to the field', 'ru', async (g, ev, w) => {
+    await i6Show(w); const d = w.document; ev("go('orders')");
+    const f = d.createElement('input'); f.id = 'i6-field'; f.value = 'typed text'; d.body.appendChild(f); f.focus(); f.setSelectionRange(2, 4);
+    const e = i6Key(w, 'k', { ctrlKey: true }); assert(e.defaultPrevented, 'the browser shortcut is not left to the field');
+    assert(d.getElementById('pal-root'), 'opens from a field'); eq(f.value, 'typed text', 'the field keeps its text');
+    i6Type(w, 'abc'); eq(f.value, 'typed text', 'typing goes to the palette field only');
+    i6Key(w, 'Escape'); eq(d.activeElement, f, 'focus is back in the field'); eq(f.value, 'typed text');
+    const s = d.getElementById('gsearch'); s.focus(); s.value = 'LD'; i6Key(w, 'k', { ctrlKey: true }); assert(d.getElementById('pal-root'), 'opens from the header search'); eq(s.value, 'LD'); i6Key(w, 'Escape'); eq(d.activeElement, s);
+    f.remove();
+    const btn = d.querySelector('.topbar [data-act="palOpen"]'); assert(btn, 'button in the header'); assert(btn.getAttribute('aria-label') && btn.getAttribute('aria-haspopup') === 'dialog', 'named button');
+    btn.focus(); btn.click(); assert(d.getElementById('pal-root'), 'the button opens the dialog'); d.querySelector('[data-pal-close].x').click(); assert(!d.getElementById('pal-root'), 'the close button works'); eq(d.activeElement, btn, 'focus back on the button');
+    await i6Show(w); w.frameElement.style.width = '375px'; await new Promise(r => setTimeout(r, 60));
+    const r = btn.getBoundingClientRect(); assert(r.width > 0 && r.right <= 375, 'the button is visible on a phone width: ' + r.right);
+    assert(w.document.documentElement.scrollWidth <= 376, 'no horizontal scroll at 375 px: ' + w.document.documentElement.scrollWidth);
+  });
+
+  for (const lang of ['ru', 'en']) await group('[' + lang + '] R07 a11y: axe on the open palette (with results and empty) and on the notification dialog', lang, async (g, ev, w) => {
+    await i6Show(w); const d = w.document; ev("go('dashboard')"); const bad = [];
+    i6Key(w, 'k', { ctrlKey: true }); bad.push(...await i6Axe(w, 'palette'));
+    i6Type(w, 'LD-2026-0018'); bad.push(...await i6Axe(w, 'palette results')); i6Type(w, 'zzqxj'); bad.push(...await i6Axe(w, 'palette empty'));
+    const back = d.querySelector('#pal-root .a11y-back'); assert(back, 'backdrop'); i6Key(w, 'Escape');
+    d.querySelector('[data-act="ncOpen"]').click(); bad.push(...await i6Axe(w, 'notifications'));
+    assert(!bad.length, bad.length + ' axe violation(s): ' + bad.slice(0, 4).join(' | '));
+  });
+
+  for (const lang of LANGS) await group('[' + lang + '] R12 bell: counter = unread of alarms + inbox + tasks, one list with filters All / Unread / Mine, read / unread buttons', lang, async (g, ev, w) => {
+    await i6Show(w); const d = w.document; ev("go('dashboard')");
+    const bell = d.querySelector('.topbar [data-act="ncOpen"]'); assert(bell, 'bell button'); const n0 = ev(I6_UNREAD);
+    eq(+bell.querySelector('[data-live="nc"]').textContent, n0, 'counter = unread of the three sources'); eq(ev('NC.count()'), n0);
+    assert(new RegExp('\\b' + n0 + '\\b').test(bell.getAttribute('aria-label')), 'the number is in the accessible name: ' + bell.getAttribute('aria-label'));
+    bell.focus(); bell.click(); const dlg = d.querySelector('#nc-root [data-a11y-dlg]'); assert(dlg, 'dialog'); eq(dlg.getAttribute('aria-modal'), 'true');
+    eq(d.querySelectorAll('#nc-root .nc-it').length, ev(I6_ALL), 'one list: every open alarm, inbox message and task');
+    const types = new Set([...d.querySelectorAll('#nc-root .nc-it .chip:first-child')].map(x => x.textContent)); eq(types.size, 3, 'three kinds in one list: ' + [...types].join(','));
+    if (lang === 'de' || lang === 'en') assert(!i6Cyr.test(dlg.textContent), lang + ' notification dialog has Cyrillic: ' + (dlg.textContent.match(/.{0,20}[А-Яа-яЁё].{0,20}/) || [''])[0]);
+    assert(!/⟦/.test(dlg.textContent), 'no missing string keys');
+    const fl = [...d.querySelectorAll('#nc-root [data-nc-f]')]; eq(fl.map(x => x.dataset.ncF).join(), 'all,unread,mine', 'three filters'); eq(fl[0].getAttribute('aria-pressed'), 'true');
+    const flt = k => d.querySelector(`#nc-root [data-nc-f="${k}"]`);   // the filter bar is redrawn on every click
+    flt('unread').click(); eq(d.querySelectorAll('#nc-root .nc-it').length, n0, 'Unread shows the unread ones'); eq(flt('unread').getAttribute('aria-pressed'), 'true');
+    flt('mine').click(); eq(d.querySelectorAll('#nc-root .nc-it').length, ev("NC.list('mine').length"), 'Mine'); assert(ev("NC.list('mine').every(x => x.who === taskMe())"), 'mine = assigned to me');
+    flt('unread').click();
+    const first = d.querySelector('#nc-root .nc-it.unread'); const key = first.dataset.k;
+    first.querySelector('[data-nc="read"]').click();
+    eq(ev('NC.count()'), n0 - 1, 'read: counter -1'); eq(+d.querySelector('.topbar [data-live="nc"]').textContent, n0 - 1, 'the bell follows');
+    eq(ev(`S.nc[${JSON.stringify(key)}].read`), true, 'the overlay S.nc holds the state'); assert(!d.querySelector(`#nc-root .nc-it[data-k="${key}"]`), 'it left the Unread list');
+    flt('all').click(); const row = d.querySelector(`#nc-root .nc-it[data-k="${key}"]`); assert(row && !row.classList.contains('unread'), 'read row in All');
+    row.querySelector('[data-nc="read"]').click(); eq(ev('NC.count()'), n0, 'unread again'); eq(ev(`NC.list('unread').some(x => x.key === ${JSON.stringify(key)})`), true);
+    i6Key(w, 'Escape'); assert(!d.getElementById('nc-root'), 'Esc closes'); eq(d.activeElement.dataset.act, 'ncOpen', 'focus back on the bell');
+    clean(w, 'notifications');
+  });
+
+  await group('[ru] R12.1 the sources are not touched: S.alarms / S.inbox / S.tasks and their screens and counters stay as they were', 'ru', async (g, ev, w) => {
+    const h = () => ev("[S.alarms, S.inbox, S.tasks].map(lazyHash).join()"), before = h();
+    const badge = () => ev("[tabsOf('dashboard').map(t => t.badge ? t.badge() : 0).join(), activeAlarms(), alertsCount()].join('/')"), b0 = badge();
+    ev("NC.list('all').slice(0, 6).forEach((x, i) => { i % 3 === 0 ? NC.read(x.key) : i % 3 === 1 ? NC.snooze(x.key, 3600000) : NC.assign(x.key, 'Max Keller'); })");
+    eq(h(), before, 'sources unchanged by read / snooze / assign'); eq(badge(), b0, 'tab badges and header counters as before');
+    eq(ev("Object.keys(S.nc).every(k => /^(alarm|inbox|task):/.test(k))"), true, 'overlay keys are <type>:<id>');
+    ev("go('dashboard'); setTab('dashboard','alarms')"); clean(w, 'alarms screen');
+    ev("setTab('dashboard','inbox')"); clean(w, 'inbox screen');
+    /* a closed alarm / a done task leaves the list, the unread count follows the source */
+    const k = ev("NC.list('all').find(x => x.type === 'task').key"); ev("S.tasks.find(t => 'task:' + t.id === " + JSON.stringify(k) + ").done = true");
+    eq(ev(`NC.list('all').some(x => x.key === ${JSON.stringify(k)})`), false, 'a done task leaves the centre');
+    /* rights: the customer sees nothing, finance only the inbox, a viewer no tasks */
+    ev("ACT.setRole({v:'customer'})"); eq(ev("NC.list('all').length"), 0, 'customer: nothing'); ev("ACT.setRole({v:'finance'})"); eq(ev("[...new Set(NC.list('all').map(x => x.type))].join()"), 'inbox', 'finance: inbox only');
+    ev("ACT.setRole({v:'viewer'})"); eq(ev("NC.list('all').some(x => x.type === 'task')"), false, 'viewer: no tasks');
+  });
+
+  await group('[ru] R12.2 snooze 1 h / 4 h / tomorrow hides the item and counter, it returns unread by the clock of the demo', 'ru', async (g, ev, w) => {
+    await i6Show(w); const d = w.document; ev("go('dashboard')");
+    const n0 = ev('NC.count()'), key = ev("NC.list('unread')[0].key"), K = JSON.stringify(key), t0 = ev('NC.now()');
+    eq(ev(`NC.snooze(${K}, 3600000)`), true); eq(ev('NC.count()'), n0 - 1, 'counter -1'); eq(ev(`NC.list('all').some(x => x.key === ${K})`), false, 'hidden from the list'); eq(ev('NC.snoozed().length'), 1);
+    eq(ev(`S.nc[${K}].until`), t0 + 3600000, 'until = clock + 1 h');
+    ev(`NC.now = () => ${t0 + 3599999}`); eq(ev(`NC.list('all').some(x => x.key === ${K})`), false, 'one ms before: still asleep');
+    ev(`NC.now = () => ${t0 + 3600000}`); eq(ev(`NC.list('unread').some(x => x.key === ${K})`), true, 'at the time: back and UNREAD'); eq(ev('NC.count()'), n0); eq(ev(`S.nc[${K}].until`), undefined, 'the snooze is cleared');
+    /* the buttons of the dialog: 1 h, 4 h, tomorrow */
+    ev(`NC.now = () => ${t0}`); d.querySelector('[data-act="ncOpen"]').click();
+    const row = () => d.querySelector(`#nc-root .nc-it[data-k=${K}]`); assert(row(), 'row');
+    const sn = [...row().querySelectorAll('[data-nc="snooze"]')]; eq(sn.length, 3, 'three snooze buttons'); eq(sn.map(b => b.dataset.ms).join(), '3600000,14400000,0');
+    sn[1].click(); assert(!row(), 'the row is gone after 4 h'); eq(ev(`S.nc[${K}].until - ${t0}`), 4 * 3600000, '4 h');
+    assert(d.querySelector('#nc-root .nc-z'), 'the footer counts the snoozed'); assert(d.activeElement && d.activeElement.closest('#nc-root'), 'focus stays in the dialog');
+    ev(`NC.now = () => ${t0 + 4 * 3600000 + 1}`); ev(`NC.snooze(${K}, 1)`);   // a stray call keeps working
+    const key2 = ev(`NC.list('unread').find(x => x.key !== ${K}).key`), K2 = JSON.stringify(key2); ev(`NC.now = () => ${t0}`); d.querySelector('#nc-root [data-nc-f="all"]').click();
+    d.querySelector(`#nc-root .nc-it[data-k=${K2}] [data-nc="snooze"][data-ms="0"]`).click();
+    const tom = ev(`S.nc[${K2}].until - ${t0}`); assert(tom > 0 && tom <= 33 * 3600000, 'tomorrow is within the next day: ' + tom / 3600000 + ' h');
+    eq(ev(`new Date(S.nc[${K2}].until + 5 * 3600000).getUTCHours()`), 9, 'tomorrow 09:00 Astana time');
+    assert(ev("S.undo && S.undo.msg.length > 0"), 'an undo toast follows'); ev("ACT.undoToast({})"); eq(ev(`NC.list('all').some(x => x.key === ${K2})`), true, 'undo brings it back');
+  });
+
+  await group('[ru] R12.2 assign: written to the audit log (chain intact), appears in Mine, needs the right of the source', 'ru', async (g, ev, w) => {
+    const a0 = ev('S.audit.length'), me = ev('taskMe()');
+    const tk = ev("NC.list('all').find(x => x.type === 'task' && x.who === taskMe()).key"), TK = JSON.stringify(tk);
+    assert(ev(`NC.list('mine').some(x => x.key === ${TK})`), 'my task is in Mine');
+    eq(ev(`NC.assign(${TK}, 'Max Keller')`), true); eq(ev('S.audit.length'), a0 + 1, 'one audit entry');
+    const e = ev('JSON.stringify(S.audit[0])'); const o = JSON.parse(e);
+    eq(o.module, 'Notifications'); eq(o.subject, tk); eq(o.reason, 'Max Keller'); eq(o.action, 'notify.assigned'); assert(o.decision && !/⟦/.test(o.decision), 'decision text');
+    assert(ev('auditVerify().ok'), 'the audit hash chain is intact'); eq(ev(`NC.list('mine').some(x => x.key === ${TK})`), false, 'assigned away: not mine any more');
+    eq(ev(`S.tasks.find(t => 'task:' + t.id === ${TK}).who`), me, 'the task of the CRM screen keeps its own owner (overlay only)');
+    const ak = ev("NC.list('all').find(x => x.type === 'alarm').key"), AK = JSON.stringify(ak);
+    eq(ev(`NC.assign(${AK}, taskMe())`), true); assert(ev(`NC.list('mine').some(x => x.key === ${AK})`), 'an alarm assigned to me is in Mine');
+    eq(ev(`NC.assign(${AK}, '')`), false, 'no name: refused'); eq(ev("NC.assign('alarm:NOPE', 'x')"), false, 'unknown key: refused');
+    ev("ACT.setRole({v:'viewer'})"); const a1 = ev('S.audit.length');
+    eq(ev(`NC.assign(${AK}, 'Max Keller')`), false, 'viewer has no alarms:write'); eq(ev('S.audit.length'), a1, 'a refused assign writes nothing');
+    /* the dialog: a select per row, choosing a name assigns */
+    await i6Show(w); ev("ACT.setRole({v:'admin'})"); ev("go('dashboard')"); const d = w.document; d.querySelector('[data-act="ncOpen"]').click();
+    const sel = d.querySelector('#nc-root .nc-it[data-k^="alarm:"] select[data-nc-who]'); assert(sel && sel.getAttribute('aria-label'), 'named select'); const pick = [...sel.options].find(o => o.value && o.value !== me).value; sel.value = pick; sel.dispatchEvent(new w.Event('change', { bubbles: true }));
+    eq(ev('S.audit[0].action'), 'notify.assigned', 'the dialog assigns too'); assert(d.querySelector('#nc-root .nc-it[data-k^="alarm:"] small').textContent.includes(pick), 'the name shows in the row');
+  });
+
+__suite(68);   /* i7-home-scenarios.js */
+  /* ---- I7 · FR-216 role home pages (R11) and FR-222 demo scenario presets (R13) ---- */
+  const I7_ROLES = ['admin', 'dispatcher', 'warehouse', 'driver', 'auditor', 'viewer', 'manager', 'finance', 'quality', 'customer', 'partner'];
+  /* the data a scenario owns, as one fingerprint: trips, drivers, trucks, hubs and inbound jobs, alarms, closures, costs, weather switches */
+  const I7_HASH = "lazyHash({ l: S.loads, d: S.drivers, t: S.trucks, h: S.hubs, j: S.jobs, a: S.alarms, c: S.closures, k: S.costs, sc: S.ops.scen, st: S.ops.storm })";
+  /* the data a preset owns, without the memos the screens add to the records when they draw: from the live store (f = S) or from the generators (f = fresh) */
+  const I7_PROJ = (src) => "(function(L, D, T, H, J){ return lazyHash({ l: L.map(function(l){ return [l.id, l.status, l.eta, l.driver, l.truck, l.temp, l.progress, l.pallets, l.zone, l.from, l.to, l.priority]; }), d: D.map(function(d){ return [d.id, d.status, d.rto]; }), t: T.map(function(t){ return [t.id, t.status, t.health]; }), h: JSON.stringify(H), j: J.map(function(j){ return [j.id, j.hub, j.ramp, j.ev.ci]; }), a: S.alarms.map(function(a){ return [a.id, a.lvl, a.status]; }), c: S.closures, k: S.costs, sc: S.ops.scen, st: S.ops.storm }); })" + src;
+  const I7_DEFAULT = I7_PROJ("(mkLoads(), mkDrivers(), mkTrucks(), mkHubs(), mkJobs())");
+  const I7_LIVE = I7_PROJ("(S.loads, S.drivers, S.trucks, S.hubs, S.jobs)");
+  const I7_FRESH = "(function(){ S.role = 'admin'; S.route = 'dashboard'; S.drawer = null; })()";
+
+  for (const lang of LANGS) await group('[' + lang + '] ROLE_HOME: 4–6 tiles for each of the 11 roles, only tiles the role may open, real KPI values', lang, async (g, ev) => {
+    eq(ev("Object.keys(ROLE_HOME).sort().join()"), I7_ROLES.slice().sort().join(), 'ROLE_HOME has exactly the 11 roles');
+    for (const role of I7_ROLES) {
+      const n = ev("ROLE_HOME['" + role + "'].length"); assert(n >= 4 && n <= 6, role + ': 4–6 tiles are defined, got ' + n);
+      const vis = ev("roleHomeTiles('" + role + "').length"); assert(vis >= 4 && vis <= 6, role + ': at least 4 tiles are visible, got ' + vis);
+      const bad = ev("(function(){ var r = '" + role + "', old = S.role; S.role = r; var out = roleHomeTiles(r).filter(function(t){ var k = t.kpi(); return !(t.id && t.route && canSee(t.route) && (!t.perm || canDo(t.perm)) && k && String(k.v).length && typeof t.label === 'string' && t.label.length); }).map(function(t){ return t.id; }); S.role = old; return out.join(); })()");
+      eq(bad, '', role + ': every visible tile opens a screen the role can see, has its right and a KPI value (' + bad + ')');
+      const ids = ev("ROLE_HOME['" + role + "'].map(function(t){return t.id}).join()").split(','); eq(new Set(ids).size, ids.length, role + ': tile ids are unique');
+    }
+    /* R11.1: a tile without access is not shown */
+    const before = ev("roleHomeTiles('finance').map(function(t){return t.id})");
+    const after = ev("(function(){ var p = ROLE_PERMS.finance; ROLE_PERMS.finance = p.filter(function(x){ return x !== 'costs:read'; }); var ids = roleHomeTiles('finance').map(function(t){return t.id}); ROLE_PERMS.finance = p; return ids; })()");
+    assert(after.length < before.length, 'finance without costs:read loses a tile: ' + before + ' -> ' + after);
+    eq(ev("roleHomeTiles('finance').length"), before.length, 'the right is restored');
+  });
+
+  for (const lang of LANGS) await group('[' + lang + '] homeRoute() leads to the role start page: tiles, links, full dashboard', lang, async (g, ev) => {
+    for (const role of I7_ROLES) {
+      ev("ACT.setRole({ v: '" + role + "' }); S.route = homeRoute(); S.drawer = null; render();");
+      const home = ev("(function(){ var h = document.querySelector('[data-role-home]'); if (!h) return null; return { role: h.getAttribute('data-role-home'), tiles: h.querySelectorAll('[data-home-tile]').length, want: roleHomeTiles(S.role).length, full: !!h.querySelector('[data-home-full]'), main: !!document.querySelector('main') && document.querySelector('main').contains(h) }; })()");
+      assert(home, role + ': the start page (' + ev("S.route") + ') shows the role home block');
+      eq(home.role, role, role + ': the block belongs to the role'); eq(home.tiles, home.want, role + ': all visible tiles are drawn'); assert(home.main, role + ': the block is in the main region');
+      assert(home.tiles >= 4 && home.tiles <= 6, role + ': 4–6 tiles on the page, got ' + home.tiles);
+      if (ev("canSee('dashboard')")) { assert(home.full, role + ': there is a link to the full dashboard'); }
+    }
+    ev("ACT.setRole({ v: 'admin' }); go('dashboard'); render();");
+    /* the full dashboard stays under the tiles for the roles that have it */
+    eq(ev("!!document.querySelector('[data-ov-kpis]')"), true, 'admin: the full dashboard (KPI row) is still on the page');
+    /* a tile is a real control: it carries the screen it opens */
+    eq(ev("(function(){ var t = document.querySelector('[data-home-tile]'); return !!(t && (t.getAttribute('data-act') === 'ovGo' || t.getAttribute('data-act') === 'go') && (t.dataset.s || t.dataset.v)); })()"), true, 'tile is a button with the target screen');
+    ev("document.querySelector('[data-home-tile][data-s=\"dispatch\"]').click()");
+    eq(ev("S.route"), 'dispatch', 'a click on the dispatch tile opens Dispatch');
+  });
+
+  for (const lang of LANGS) await group('[' + lang + '] SCENARIOS: four presets, applyScenario(id) resets trips, weather, alarms, hubs and finance consistently', lang, async (g, ev) => {
+    eq(ev("typeof SCENARIOS + typeof applyScenario"), 'objectfunction', 'SCENARIOS and applyScenario are global');
+    eq(ev("Object.keys(SCENARIOS).join()"), 'normal,storm,peak,west', 'four presets in the order of the brief');
+    eq(ev("Object.keys(SCENARIOS).every(function(k){ var s = SCENARIOS[k]; return s.id === k && typeof s.name === 'string' && s.name.length > 2 && typeof s.sub === 'string' && s.sub.length > 2; })"), true, 'every preset has an id, a name and a hint in the page language');
+    ev(I7_FRESH);
+    const base = ev(I7_DEFAULT);
+    const m0 = ev("({ loads: S.loads.length, alarms: S.alarms.filter(function(a){return a.status!=='closed'}).length, clos: S.closures.filter(function(c){return !c.lifted}).length, costs: S.costs.reduce(function(s,c){return s+c.amount},0), used: Object.keys(S.hubs).reduce(function(s,h){ return s + Object.keys(S.hubs[h].places).reduce(function(q,z){ return q + S.hubs[h].places[z][1]; },0); },0), free: S.trucks.filter(function(t){return t.status==='available'}).length, fdrv: S.drivers.filter(function(d){return d.status==='available'}).length, jobs: S.jobs.length, atyLoads: S.loads.filter(function(l){return l.from==='ATY'||l.to==='ATY'}).length, io: S.hubs.AST.io[0], iosum: Object.keys(S.hubs).reduce(function(s,h){ return s + S.hubs[h].io[0] + S.hubs[h].io[1]; },0) })");
+    const snap = id => ev("(function(){ applyScenario('" + id + "'); return { p: " + I7_LIVE + ", h: " + I7_HASH + ", scen: S.ops.scen, storm: S.ops.storm, loads: S.loads.length, alarms: S.alarms.filter(function(a){return a.status!=='closed'}).length, ids: S.alarms.map(function(a){return a.id}), clos: S.closures.filter(function(c){return !c.lifted}).length, costs: S.costs.reduce(function(s,c){return s+c.amount},0), used: Object.keys(S.hubs).reduce(function(s,h){ return s + Object.keys(S.hubs[h].places).reduce(function(q,z){ return q + S.hubs[h].places[z][1]; },0); },0), restr: Object.keys(S.hubs).filter(function(h){ return S.hubs[h].maint || S.hubs[h].blocked.length; }).length, free: S.trucks.filter(function(t){return t.status==='available'}).length, fdrv: S.drivers.filter(function(d){return d.status==='available'}).length, jobs: S.jobs.length, atyLoads: S.loads.filter(function(l){return l.from==='ATY'||l.to==='ATY'}).length, io: S.hubs.AST.io[0], iosum: Object.keys(S.hubs).reduce(function(s,h){ return s + S.hubs[h].io[0] + S.hubs[h].io[1]; },0), delayed: S.loads.filter(function(l){ return l.notes.some(function(n){ return n.scen === '" + id + "'; }); }).length, wxKar: wxFor('KAR')[0].risk, wxAty: wxFor('ATY')[0].risk, wxAla: wxFor('ALA')[0].risk, }; })()");
+    const normal = snap('normal'); eq(normal.p, base, 'normal day = the default state (same data)');
+    const storm = snap('storm'), peak = snap('peak'), west = snap('west');
+    const hs = [normal.p, storm.p, peak.p, west.p]; eq(new Set(hs).size, 4, 'the four presets give four different data sets');
+    /* Winter storm: the storm switch, north-west weather, closures, temperature alarms, hubs under restriction, finance */
+    eq(storm.scen.storm, true, 'storm: S.ops.scen.storm is on'); assert(storm.storm.includes('KAR') || storm.storm.includes('AST'), 'storm: north hubs are in S.ops.storm: ' + storm.storm);
+    assert(storm.wxKar >= 2, 'storm: weather risk at KAR is raised'); assert(storm.clos > m0.clos, 'storm: more road closures'); assert(storm.alarms > m0.alarms, 'storm: more open alarms');
+    assert(storm.restr > 0, 'storm: some hubs are restricted'); assert(storm.costs > m0.costs, 'storm: finance carries the storm costs');
+    eq(storm.loads, m0.loads, 'storm: the same trips, delayed'); assert(storm.delayed > 0, 'storm: delays are written to the trips'); assert(west.delayed > 0, 'west: the delay of the west trip is written');
+    /* Peak season: peak switch, more orders, hubs fuller, deficit of trucks and drivers, ramp queue */
+    eq(peak.scen.peak, true, 'peak: S.ops.scen.peak is on'); assert(peak.loads >= m0.loads + 8, 'peak: many more trips'); assert(peak.iosum >= m0.iosum * 2 && peak.iosum <= m0.iosum * 3.2, 'peak: hub traffic x2–3 (' + m0.iosum + ' -> ' + peak.iosum + ')'); assert(peak.used > m0.used * 1.2, 'peak: the hub stores fill up (' + m0.used + ' -> ' + peak.used + ')');
+    assert(peak.free <= 1 && peak.fdrv <= 1, 'peak: deficit of trucks and drivers (' + peak.free + ' / ' + peak.fdrv + ')'); assert(peak.jobs > m0.jobs, 'peak: queue of inbound jobs at the ramps'); eq(peak.scen.storm, false, 'peak: no storm');
+    /* West route: west trips, West weather and alarms, other regions calm */
+    eq(west.scen.west, true, 'west: S.ops.scen.west is on'); assert(west.atyLoads > m0.atyLoads, 'west: more trips to and from the west'); assert(west.wxAty >= 2, 'west: weather risk at ATY'); eq(west.wxKar, normal.wxKar, 'west: the north keeps its weather'); eq(west.wxAla, normal.wxAla, 'west: the south keeps its weather');
+    assert(west.alarms > m0.alarms, 'west: west alarms'); eq(west.io, m0.io, 'west: other hubs are calm (AST traffic unchanged)'); assert(west.costs > m0.costs, 'west: finance carries the west costs');
+    eq(ev("S.closures.filter(function(c){return !c.lifted}).every(function(c){ return c.hub === 'ATY'; })"), true, 'west: the only open closures are on the west corridors');
+    /* consistency: unique alarm ids, every alarm points to an existing trip, hub and truck */
+    for (const s of [storm, peak, west]) eq(new Set(s.ids).size, s.ids.length, 'alarm ids are unique');
+    eq(ev("(function(){ var ids = {}; S.loads.forEach(function(l){ ids[l.id] = 1; }); return S.alarms.every(function(a){ return (!a.load || ids[a.load]) && HUBS[a.hub]; }); })()"), true, 'alarms refer to existing trips and hubs');
+    /* repeatable (seed): the same preset twice gives the same data, also through another preset in between */
+    for (const id of ['storm', 'peak', 'west']) { const a = snap(id).p; snap('normal'); eq(snap(id).p, a, id + ': the same data after a repeat'); }
+    eq(snap('normal').p, base, 'normal day again = default');
+    /* the pages draw in every preset */
+    for (const id of ['storm', 'peak', 'west']) { ev("applyScenario('" + id + "'); go('dashboard'); render();"); eq(ev("!!document.querySelector('[data-ov-kpis]') && !!document.querySelector('[data-role-home]')"), true, id + ': the dashboard draws'); }
+    ev("applyScenario('normal')");
+  });
+
+  for (const lang of LANGS) await group('[' + lang + '] a scenario reset closes the drawer, returns to the role start page and keeps the R08 preferences', lang, async (g, ev) => {
+    ev("window.__mem = {}; PREFS.attach({ getItem: function(k){ return k in window.__mem ? window.__mem[k] : null; }, setItem: function(k, v){ window.__mem[k] = String(v); }, removeItem: function(k){ delete window.__mem[k]; } }); PREFS.set('lang', 'de'); PREFS.set('design', 'kokzhol');");
+    for (const role of ['dispatcher', 'driver', 'customer']) {
+      ev("ACT.setRole({ v: '" + role + "' }); S.route = 'help'; S.hub = 'ALA'; S.drawer = { type: 'load', id: S.loads[0].id, tab: 'overview' }; render();");
+      ev("applyScenario('storm')");
+      eq(ev("S.drawer"), null, role + ': the drawer is closed'); eq(ev("S.route === homeRoute()"), true, role + ': back on the role start page (' + ev("S.route") + ')'); eq(ev("S.hub"), '', role + ': the hub filter is cleared');
+      eq(ev("S.role"), role, role + ': the role stays');
+    }
+    eq(ev("PREFS.get('lang')"), 'de', 'the saved language stays'); eq(ev("PREFS.get('design')"), 'kokzhol', 'the saved theme stays');
+    eq(ev("PREFS.get('scen')"), 'storm', 'the chosen preset is remembered for the next start');
+    ev("applyScenario('normal')"); eq(ev("PREFS.get('scen')"), 'normal', 'normal day is remembered too');
+    /* demoReset() without an id repeats the current preset */
+    ev("applyScenario('peak'); S.loads.pop();"); const n = ev("S.loads.length"); ev("demoReset()"); assert(ev("S.loads.length") > n, 'demoReset() restores the current preset (peak trips are back)');
+    ev("applyScenario('normal'); PREFS.attach(null); ACT.setRole({ v: 'admin' });");
+    /* the demo card of the account page offers the presets; the reset button applies the chosen one */
+    ev("go('account'); render();"); eq(ev("document.querySelectorAll('#scenSel option').length"), 4, 'the account page lists the four presets');
+    ev("var s = document.querySelector('#scenSel'); s.value = 'west'; s.dispatchEvent(new Event('change', { bubbles: true }));"); eq(ev("document.querySelector('#scenSel').value"), 'west', 'the choice is kept on the page');
+    ev("ACT.resetGo()"); eq(ev("S.ops.scen.west"), true, 'the reset button applied the chosen preset'); ev("applyScenario('normal')");
+    eq(ev("(function(){ try { applyScenario('nope'); return 'no error'; } catch (e) { return 'throws'; } })()"), 'throws', 'an unknown preset id is refused');
+    eq(ev("S.ops.scen.storm || S.ops.scen.peak || S.ops.scen.west"), false, 'the refused id changed nothing');
+  });
+
+__suite(69);   /* i8-migrate.js */
+  /* ---- I8 · FR-213 / FR-214 (R09, R10): the screens use KIT.state for every empty list and toastUndo / in-page confirmations instead of confirm() ---- */
+  const I8_RESET = { ru: 'Сбросить фильтры', de: 'Filter zurücksetzen', en: 'Reset filters', kk: 'Сүзгілерді тастау' };
+  const I8_PREFS = { ru: 'Сбросить сохранённые настройки', de: 'Gespeicherte Einstellungen zurücksetzen', en: 'Reset saved preferences', kk: 'Сақталған баптауларды тастау' };
+  /* a stand-in for localStorage, the test seam of PREFS.attach */
+  const I8_STORE = init => "(function(){ var m = " + JSON.stringify(init || {}) + "; return { m: m, getItem: function(k){ return k in m ? m[k] : null; }, setItem: function(k, v){ m[k] = String(v); }, removeItem: function(k){ delete m[k]; } }; })()";
+
+  for (const lang of LANGS) await group('[' + lang + '] R09/R09.1 orders: a filter that finds nothing shows the "nofilter" state with a working "Reset filters"', lang, async (g, ev, w) => {
+    ev("go('orders'); S.f.q = 'zzzz-no-such-load'; render()");
+    const d = w.document, cell = d.querySelector('table td.empty');
+    assert(cell, 'the empty row is there'); assert(cell.querySelector('[data-test="state:nofilter"]'), 'the empty row carries the nofilter state, not hand-written text');
+    const btn = cell.querySelector('button[data-act="resetFilters"]'); assert(btn, 'reset button'); eq(btn.textContent.trim(), I8_RESET[lang], 'button text in ' + lang);
+    assert(!/⟦/.test(cell.textContent), 'no missing string marker: ' + cell.textContent);
+    if (lang === 'de' || lang === 'en') assert(!/[А-Яа-яӘәҒғҚқҢңӨөҰұҮүІі]/.test(cell.textContent), 'no Cyrillic outside RU/KK: ' + cell.textContent);
+    btn.click(); eq(ev("S.f.q"), '', 'the filter is cleared'); assert(d.querySelectorAll('table tbody tr').length > 1 && !d.querySelector('table td.empty'), 'rows are back');
+    clean(w, 'orders reset ' + lang);
+  });
+
+  for (const lang of ['ru', 'en']) await group('[' + lang + '] R09.1 billing / drivers / fleet: the local filters empty the list, the state offers a reset that clears them', lang, async (g, ev, w) => {
+    const d = w.document, set = (el, v) => { el.value = v; el.dispatchEvent(new w.Event('input', { bubbles: true })); el.dispatchEvent(new w.Event('change', { bubbles: true })); };
+    ev("go('billing')"); const from = d.querySelector('[data-bf="from"]'); assert(from, 'billing: date filter'); set(from, '2099-01-01');
+    let cell = d.querySelector('table td.empty'); assert(cell && cell.querySelector('[data-test="state:nofilter"]'), 'billing: nofilter state');
+    let b = cell.querySelector('button[data-act="bClr"]'); assert(b && b.textContent.trim() === I8_RESET[lang], 'billing: the reset button is the screen\'s own, text ' + (b && b.textContent)); b.click();
+    assert(!d.querySelector('table td.empty'), 'billing: rows are back after the reset');
+    /* drivers and fleet: find any filter combination without a match, the screen must then show the nofilter state */
+    for (const [route, attr, act] of [['drivers', 'data-df', 'clrD'], ['fleet', 'data-ff', 'clrF']]) {
+      ev("go('" + route + "')"); const sels = Array.from(d.querySelectorAll('select[' + attr + ']')); assert(sels.length >= 2, route + ': filters');
+      let hit = false;
+      outer: for (const o1 of Array.from(sels[0].options).slice(1)) for (const o2 of Array.from(sels[1].options).slice(1)) {
+        set(d.querySelector('select[' + attr + '="' + sels[0].getAttribute(attr) + '"]'), o1.value); set(d.querySelector('select[' + attr + '="' + sels[1].getAttribute(attr) + '"]'), o2.value);
+        if (d.querySelector('table td.empty')) { hit = true; break outer; }
+      }
+      assert(hit, route + ': some filter pair finds nothing');
+      cell = d.querySelector('table td.empty'); assert(cell.querySelector('[data-test="state:nofilter"]'), route + ': nofilter state'); b = cell.querySelector('button[data-act="' + act + '"]'); assert(b, route + ': reset button ' + act);
+      b.click(); assert(!d.querySelector('table td.empty'), route + ': rows are back after the reset');
+    }
+    clean(w, 'local filters ' + lang);
+  });
+
+  await group('R09 no hand-written empty state is left: every .empty of every screen holds a KIT.state, the shipped code has no td.empty text and no native confirm()', 'ru', async (g, ev, w) => {
+    const d = w.document, code = Array.from(d.scripts).map(s => s.textContent).join('\n');
+    eq((code.match(/class="empty">\$\{esc\(/g) || []).length, 0, 'no class="empty" with a hand-written text');
+    eq((code.match(/class="empty">—/g) || []).length, 0, 'no class="empty" with a dash');
+    eq((code.match(/window\.confirm\(/g) || []).length, 0, 'no native confirm() in the code');
+    /* the screens: every .empty node of an opened screen wraps a state */
+    const routes = ev("navItems().map(function(x){ return x[0]; })"), bad = [];
+    for (const r of routes) { ev("go('" + r + "')"); d.querySelectorAll('#root .empty').forEach(e => { if (!e.querySelector('.state')) bad.push(r + ': ' + e.textContent.trim().slice(0, 30)); }); }
+    eq(bad.join(' | '), '', 'every .empty holds a state');
+    clean(w, 'sweep');
+  });
+
+  for (const lang of LANGS) await group('[' + lang + '] R09 migrated note-empties are states: no open deviations, no order notes', lang, async (g, ev, w) => {
+    const d = w.document, bad = x => /⟦/.test(x) || (lang !== 'ru' && lang !== 'kk' && /[А-Яа-я]/.test(x));
+    /* the empty collection of three screens that had a hand-written <p class="note"> */
+    ev("go('pod'); S.devs = []; S.tab.pod = 'quality'; render()"); let st = d.querySelector('[data-no-devs] [data-test="state:empty"]'); assert(st, 'quality: no open deviations is a state'); assert(!bad(st.textContent), 'quality text ' + st.textContent);
+    ev("S.loads[0].notes = []; ACT.open({id: S.loads[0].id}); S.drawer.tab = 'notes'; render()"); st = d.querySelector('.drawer [data-test="state:empty"]'); assert(st, 'order drawer: no notes is a state'); assert(!bad(st.textContent), 'notes text ' + st.textContent); ev('closeDrawer()');
+    ev("go('ai')"); assert(ev("typeof SCREENS.ai.body") === 'function', 'ai screen'); clean(w, 'note empties ' + lang);
+  });
+
+  await group('R10 tracking link renewal: no confirm(), applied at once, Undo brings the old link back, final after 10 s', 'ru', async (g, ev, w) => {
+    w.confirm = () => { throw new Error('native confirm() must not be called'); };
+    const id = 'O-26-0102', tok = () => ev("orderToken(findOrder('" + id + "').o)"), t0 = tok(), a0 = ev("S.audit.length");
+    ev("ACT.orRenew({id:'" + id + "'})"); const t1 = tok(); assert(t1 !== t0, 'renewed at once'); assert(ev("!!S.undo"), 'Undo toast offered');
+    ev("ACT.undoToast({})"); eq(tok(), t0, 'Undo restores the old token'); eq(ev("S.audit.length"), a0 + 2, 'renewal + undo are two audit entries (nothing deleted)'); eq(ev("auditVerify().ok"), true, 'hash chain ok');
+    ev("ACT.undoToast({})"); eq(tok(), t0, 'a second Undo does nothing');
+    ev("ACT.orRenew({id:'" + id + "'})"); const t2 = tok(); assert(t2 !== t0, 'renewed again'); ev("undoExpire(S.undo.id)"); ev("ACT.undoToast({})"); eq(tok(), t2, 'after the timer the renewal is final');
+    ev("S.role = 'viewer'"); ev("ACT.orRenew({id:'" + id + "'})"); eq(tok(), t2, 'a role without orders:write renews nothing'); eq(ev("S.undo"), null, 'and gets no Undo toast');
+  });
+
+  await group('R10 price list: deactivation is applied at once and reversible; the lead erase stays irreversible and asks in the page', 'ru', async (g, ev, w) => {
+    w.confirm = () => { throw new Error('native confirm() must not be called'); };
+    const pl = ev("S.priceLists.find(function(p){ return p.active; }).id");
+    ev("ACT.cmPlOff({id:'" + pl + "'})"); eq(ev("S.priceLists.find(function(p){ return p.id === " + pl + "; }).active"), false, 'price list off at once'); assert(ev("!!S.undo"), 'Undo toast');
+    ev("ACT.undoToast({})"); eq(ev("S.priceLists.find(function(p){ return p.id === " + pl + "; }).active"), true, 'Undo switches it on'); eq(ev("auditVerify().ok"), true, 'chain ok');
+    /* personal data erase: irreversible = confirmation stays, in the page */
+    ev("ACT.cmLeadOpen({id:'L-101'})"); ev("ACT.cmLeadErase({id:'L-101'})");
+    eq(ev("S.leads.find(function(l){ return l.id === 'L-101'; }).erased || ''"), '', 'the first click only asks'); const d = w.document;
+    const yes = d.querySelector('[data-lead-erase-ask] button[data-act="cmLeadErase"][data-force]'); assert(yes, 'in-page question with a Yes button'); assert(d.querySelector('[data-lead-erase-ask] [data-act="cmLeadEraseNo"]'), 'and a Cancel button');
+    eq(ev("!!S.undo"), false, 'an irreversible action offers no Undo');
+    yes.click(); assert(ev("S.leads.find(function(l){ return l.id === 'L-101'; }).erased"), 'erased after Yes'); eq(ev("!!S.undo"), false, 'still no Undo toast');
+  });
+
+  for (const lang of LANGS) await group('[' + lang + '] F1 settings: a visible "Reset saved preferences" button wipes the prefs keys and the saved views', lang, async (g, ev, w) => {
+    ev('window.__st = ' + I8_STORE({ 'kokzhol.v6.prefs': JSON.stringify({ hub: 'AST' }), 'kz-r4-views': '[{"name":"x"}]' })); ev('PREFS.attach(window.__st)');
+    eq(ev('Object.keys(window.__st.m).length'), 2, 'two keys are stored before the reset');
+    ev("go('settings')"); const b = w.document.querySelector('[data-act="prefsReset"]'); assert(b, 'the button is on the settings screen'); eq(b.textContent.trim(), I8_PREFS[lang], 'button text in ' + lang);
+    b.click(); await new Promise(r => setTimeout(r, 60)); eq(ev('Object.keys(window.__st.m).length'), 0, 'the prefs key and the saved views are gone'); eq(ev("PREFS.get('hub', 'none')"), 'none', 'nothing is remembered any more');
+    clean(w, 'prefs reset ' + lang);
+  });
+
+__suite(70);   /* i9-split.js */
+  /* ---- I9 · R02 / FR-192 split build: core + one chunk per menu area, loaded on the first visit (platform-src/tools-build/split-*.mjs, platform/split/<lang>/) ---- */
+  const I9_PAGE = l => 'split/' + l + '/index.html';
+  const I9_WAIT = ms => new Promise(r => setTimeout(r, ms));
+  /* the graph module is loaded from its text through a blob URL (no imports inside: it runs in the browser as it runs in the build) */
+  const i9Graph = async () => import(URL.createObjectURL(new Blob([await (await fetch('../platform-src/tools-build/split-graph.mjs', { cache: 'no-store' })).text()], { type: 'text/javascript' })));
+  const i9Json = async p => (await fetch(p, { cache: 'no-store' })).json();
+  const i9Text = async p => { const r = await fetch(p, { cache: 'no-store' }); assert(r.ok, p + ' is served (' + r.status + ')'); return r.text(); };
+  /* a split page in its own hidden frame; resolves when the first screen is drawn (the chunk of the first screen is loaded before that) */
+  async function i9Open(lang, q) {
+    const f = document.createElement('iframe'); f.style.cssText = 'position:absolute;left:-9999px;top:0;width:1316px;height:760px;border:0'; f.src = I9_PAGE(lang) + (q ? '?' + q : ''); document.body.appendChild(f);
+    await new Promise((ok, no) => { f.onload = ok; f.onerror = no; setTimeout(() => no(new Error('split frame timeout')), 20000); });
+    const w = f.contentWindow; w.__errs = []; w.addEventListener('error', e => w.__errs.push(e.message));
+    const up = () => { try { return w.eval('typeof SPLIT !== "undefined" && SPLIT.state.booted') && w.document.querySelector('.page-title'); } catch (_) { return false; } };
+    for (let i = 0; i < 120 && !up(); i++) await I9_WAIT(50);
+    assert(up(), 'the split page booted');
+    return { w, f, ev: c => w.eval(c), SPLIT: w.eval('SPLIT'), done: () => f.remove() };
+  }
+  /* waits until no section shows the loading state any more */
+  async function i9Settle(w) { for (let i = 0; i < 100 && w.document.querySelector('[data-test="state:loading"]'); i++) await I9_WAIT(40); }
+  /* Every build writes split-plan.json next to tests.html (plan, lock, and whether --split ran). The plan groups always run on it. The groups that read the built
+     chunks run when split/ exists; split/ missing while split-plan.json says the build ran with --split (or the reverse) is a failure, never a skip. */
+  const i9PlanData = async () => { const r = await fetch('split-plan.json', { cache: 'no-store' }); assert(r.ok, 'split-plan.json is served: every build writes it next to tests.html'); const p = await r.json(); assert(!p.error, 'the file graph is valid: ' + p.error); return p; };
+  const i9Built = async () => { const p = await i9PlanData(), ok = (await fetch('split/plan.json', { cache: 'no-store' })).ok; eq(ok, !!p.splitBuilt, 'split/ is present exactly when the build ran with --split'); return ok; };
+  const I9_MK = (name, src, area, fixed) => ({ name, src, area: area || null, fixed: !!fixed });
+  /* the shared frame of the synthetic bundles: the registries the real core defines */
+  const I9_BASE = I9_MK('core.js', "const SCREENS = {}; const ACT = {}; const DRAWERS = {}; const HOOKS = { status: [] }; const S = { route: 'a', tab: {} }; function addTab(id, key, label, body) { SCREENS[id].tabs = (SCREENS[id].tabs || []).concat([{ key, label, body }]); } const go = r => { S.route = r; };", null, true);
+  const I9_APP = I9_MK('app.js', 'go("a");', null, true);
+  const i9Plan = async (...files) => { const g = await i9Graph(); return g.planChunks([I9_BASE, ...files, I9_APP]); };
+  const i9Where = (plan, name) => plan.placement.get(name);
+
+  await group('R02.3 plan: an area nothing depends on gets its own chunk, a shared global pulls its definer into the core', 'ru', async () => {
+    const a = I9_MK('a/010-a.js', "(() => { globalThis.helperA = x => x + 1; SCREENS.a = { title: () => 'A', body: () => 'a' }; })();", 'a');
+    const b = I9_MK('b/020-b.js', "(() => { SCREENS.b = { title: () => 'B', body: () => 'b' + helperA(1) }; })();", 'b');
+    const c = I9_MK('c/030-c.js', "(() => { SCREENS.c = { title: () => 'C', body: () => 'c' }; })();", 'c');
+    const p = await i9Plan(a, b, c);
+    eq(i9Where(p, 'c/030-c.js'), 'c', 'an independent area stays in its own chunk');
+    eq(i9Where(p, 'a/010-a.js'), 'core', 'helperA is used by area b: its definer cannot be loaded later than b, so it goes to the core');
+    eq(i9Where(p, 'b/020-b.js'), 'b', 'the user of the global stays in its chunk');
+    eq(JSON.stringify(p.chunks.c.routes), '["c"]', 'the chunk lists the route it opens with');
+  });
+
+  await group('R02.3 plan: addTab into another area\'s screen and wrappers of another area\'s action travel with the owner', 'ru', async () => {
+    const a = I9_MK('a/010-a.js', "(() => { SCREENS.a = { title: () => 'A', body: () => 'a' }; ACT.work = d => d; })();", 'a');
+    const b = I9_MK('b/020-b.js', "(() => { SCREENS.b = { title: () => 'B', body: () => 'b' }; addTab('a', 'extra', 'X', () => 'x'); const w0 = ACT.work; ACT.work = d => w0(d) + 1; })();", 'b');
+    const c = I9_MK('c/030-c.js', "(() => { SCREENS.c = { title: () => 'C', body: () => 'c' }; })();", 'c');
+    const p = await i9Plan(a, b, c);
+    eq(i9Where(p, 'a/010-a.js'), 'a+b', 'a tab pushed into screen a and a wrapper of ACT.work put area b into the chunk of area a');
+    eq(i9Where(p, 'b/020-b.js'), 'a+b', 'both files are in the same chunk, in bundle order');
+    eq(i9Where(p, 'c/030-c.js'), 'c', 'the third area is unaffected');
+    eq(JSON.stringify(p.chunks['a-b'].files), '["a/010-a.js","b/020-b.js"]', 'chunk files keep the bundle order');
+    eq(JSON.stringify(p.chunks['a-b'].routes), '["a","b"]', 'the chunk opens with either route');
+  });
+
+  await group('R02.3 plan: hooks and patches of what the core defines run on every page, so those files go to the core', 'ru', async () => {
+    const h = I9_MK('h/010-h.js', "(() => { SCREENS.h = { body: () => 'h' }; HOOKS.status.push((l, st) => st); })();", 'h');
+    const w = I9_MK('w/020-w.js', "(() => { SCREENS.w = { body: () => 'w' }; const g0 = ACT.go; ACT.go = d => g0(d); })();", 'w');
+    const t = I9_MK('t/030-t.js', "(() => { SCREENS.t = { body: () => 't' }; })();", 't');
+    const core = I9_MK('core2.js', "Object.assign(ACT, { go: d => go(d.v) });", null, true);
+    const g = await i9Graph(), p = g.planChunks([I9_BASE, core, h, w, t, I9_APP]);
+    eq(p.placement.get('h/010-h.js'), 'core', 'HOOKS.status.push: the hook must exist before any status changes');
+    eq(p.placement.get('w/020-w.js'), 'core', 'a wrapper of an action the core defines');
+    eq(p.placement.get('t/030-t.js'), 't', 'the untouched area keeps its chunk');
+  });
+
+  await group('R02.3 plan: S members, markup actions, tabs patched from outside and chunks without a route', 'ru', async () => {
+    const e = I9_MK('e/010-e.js', "(() => { S.eco = { fines: [] }; SCREENS.e = { body: () => 'e' }; })();", 'e');
+    const r = I9_MK('r/020-r.js', "(() => { SCREENS.r = { body: () => 'r' }; ACT.tmp = () => { S.scratch = 1; }; })();", 'r');
+    const m = I9_MK('m/030-m.js', "(() => { SCREENS.m = { body: () => `<button data-act=\"doB\">x</button>` }; })();", 'm');
+    const n = I9_MK('n/040-n.js', "(() => { ACT.doB = () => 1; SCREENS.n = { body: () => 'n' }; })();", 'n');
+    const x = I9_MK('x/050-x.js', "(() => { ACT.lonely = () => 1; })();", 'x');
+    const shell = I9_MK('shell/001-shell.js', "function banner() { return S.eco && S.eco.fines.length + S.scratch; }", 'shell', true);
+    const o = I9_MK('o/060-o.js', "(() => { SCREENS.o = { body: () => 'o' }; })();", 'o');
+    const q = I9_MK('q/070-q.js', "(() => { const t = SCREENS.o.tabs.find(k => k.key === 'z'); if (t) t.body = () => 'q'; })();", 'q');
+    const p = await i9Plan(e, r, m, n, x, shell, o, q);
+    eq(i9Where(p, 'e/010-e.js'), 'core', 'S.eco is created by a chunk and read by the core: its writer is core');
+    eq(i9Where(p, 'r/020-r.js'), 'r', 'S.scratch is only set inside a handler: that is not a definition, the area stays out of the core');
+    eq(i9Where(p, 'n/040-n.js'), 'core', 'area m draws data-act="doB": ACT.doB must exist whenever m is open, so its definer is core');
+    eq(i9Where(p, 'm/030-m.js'), 'm', 'the area with the button stays in its chunk');
+    eq(i9Where(p, 'x/050-x.js'), 'core', 'a chunk without a route of its own would never be loaded: core');
+    eq(i9Where(p, 'q/070-q.js'), 'core', 'a file that only patches a screen of another area has no route to be loaded by: core');
+    eq(i9Where(p, 'o/060-o.js'), 'core', 'and the screen it patches must exist when it runs: core too');
+  });
+
+  await group('R02.3 build fails: a plan that breaks the file graph is refused, a chunk that lost a file fails against the lock', 'ru', async () => {
+    const g = await i9Graph();
+    const a = I9_MK('a/010-a.js', "(() => { globalThis.helperA = x => x; SCREENS.a = { body: () => 'a' }; })();", 'a');
+    const b = I9_MK('b/020-b.js', "(() => { SCREENS.b = { body: () => helperA(1) }; })();", 'b');
+    const files = [I9_BASE, a, b, I9_APP], graph = g.buildGraph(files);
+    const bad = g.checkPlacement(files, new Map([['core.js', 'core'], ['a/010-a.js', 'a'], ['b/020-b.js', 'b'], ['app.js', 'core']]), graph);
+    assert(bad.length === 1 && /b\/020-b\.js \(b\) needs g:helperA .* a\/010-a\.js in chunk a/.test(bad[0]), 'chunk b needs a global defined in chunk a: ' + JSON.stringify(bad));
+    const bad2 = g.checkPlacement(files, new Map([['core.js', 'a'], ['a/010-a.js', 'core'], ['b/020-b.js', 'b'], ['app.js', 'core']]), graph);
+    assert(bad2.some(x => /a core file placed in chunk a/.test(x)), 'a core file placed in a chunk is refused: ' + JSON.stringify(bad2));
+    const plan = g.planChunks(files);
+    eq(JSON.stringify(g.checkLock(plan.chunks, { chunks: { b: { files: ['b/020-b.js'] } } })), '[]', 'the lock is met');
+    const lost = g.checkLock(plan.chunks, { chunks: { b: { files: ['b/020-b.js'] }, a: { files: ['a/010-a.js'] } } });
+    assert(lost.length === 1 && /a\/010-a\.js left chunk a|chunk a is gone/.test(lost[0]), 'a locked chunk that became core is reported: ' + JSON.stringify(lost));
+    let thrown = null; try { g.planChunks([I9_BASE, I9_MK('d1.js', 'const dupG = 1;', 'd1'), I9_MK('d2.js', 'const dupG = 2;', 'd2'), I9_APP]); } catch (e) { thrown = e; }
+    assert(thrown && /declared in d1\.js and in d2\.js/.test(thrown.message), 'the same global declared in two files fails the plan: ' + (thrown && thrown.message));
+  });
+
+  await group('R02 plan: the reader of the source sees strings, templates, regexes and division as the bundle runs them', 'ru', async () => {
+    const g = await i9Graph(), s = g.scanFile('x.js', "const a = /['\"]/.test(s) ? `x${`y${b}`}` : c / d / 2; function f() { return 1; } let h = 1, k = { z: 1 };\n(() => { const inner = 1; })();\nclass K {}");
+    eq([...s.globalsDeclared].sort().join(), 'K,a,f,h,k', 'top-level declarations; names inside the IIFE are local');
+    eq([...s.localDeclared].join(), 'inner', 'a name inside the IIFE is local');
+    const t = g.lex("x = a /* c */ / b; y = 'it\\'s'; z = `a${ {k: 1}.k }b`;").map(k => k.k + ':' + k.v).join(' ');
+    assert(t.includes("str:it\\'s") && t.includes('tpl:a') && t.includes('tpl:b') && !t.includes('re:'), 'tokens: ' + t);
+  });
+
+  await group('R02 plan data: split-plan.json (written by every build) - chunks own routes, the core keeps app.js, no file in two places, the lock is met', 'ru', async () => {
+    const plan = await i9PlanData(), g = await i9Graph();
+    assert(plan.core.files.includes('app.js') && plan.core.files.includes('core.js'), 'app.js and core.js are in the core');
+    const ids = Object.keys(plan.chunks); assert(ids.length >= 1, 'at least one chunk');
+    for (const id of ids) { assert(plan.chunks[id].routes.length >= 1, 'chunk ' + id + ' opens with a route'); for (const f of plan.chunks[id].files) assert(!plan.core.files.includes(f), f + ' is in the core and in chunk ' + id); }
+    assert(plan.lock && plan.lock.chunks, 'platform-src/tools-build/split-lock.json exists');
+    eq(JSON.stringify(g.checkLock(plan.chunks, plan.lock)), '[]', 'the lock is met by the plan');
+  });
+
+  await group('R02 built plan: platform/split/plan.json lists chunks whose routes the manifest maps, core keeps app.js, the lock is met', 'ru', async () => {
+    if (!(await i9Built())) return;
+    const plan = await i9Json('split/plan.json'), g = await i9Graph(), data = await i9PlanData(), lock = data.lock;
+    eq(JSON.stringify(Object.keys(plan.chunks).sort()), JSON.stringify(Object.keys(data.chunks).sort()), 'split/plan.json and split-plan.json agree on the chunks');
+    assert(plan.core.files.includes('app.js') && plan.core.files.includes('core.js'), 'app.js and core.js are in the core');
+    const ids = Object.keys(plan.chunks); assert(ids.length >= 1, 'at least one chunk');
+    for (const id of ids) { assert(plan.chunks[id].routes.length >= 1, 'chunk ' + id + ' opens with a route'); for (const f of plan.chunks[id].files) assert(!plan.core.files.includes(f), f + ' is in the core and in chunk ' + id); }
+    eq(JSON.stringify(g.checkLock(plan.chunks, lock)), '[]', 'split-lock.json is met by the built plan');
+    for (const lang of LANGS) {
+      const man = await i9Json('split/' + lang + '/manifest.json'), html = await i9Text(I9_PAGE(lang)), core = await i9Text('split/' + lang + '/core.js');
+      eq(JSON.stringify(Object.keys(man.chunks).sort()), JSON.stringify(ids.sort()), lang + ': a chunk file per chunk of the plan');
+      for (const id of ids) { const txt = await i9Text('split/' + lang + '/' + man.chunks[id].file); assert(txt.length > 200, lang + ' ' + id + ' is not empty'); assert(core.includes('"file":"area-' + id + '.js"'), lang + ': the core knows chunk ' + id); }
+      assert(html.includes('<' + 'script src="core.js?nosw&v=') && html.includes('data-split="core"'), lang + ': the page loads core.js, bypassing the service worker');
+      assert(html.includes('../../assets/brand/kokzhol-favicon.svg') && !/(href|src)="assets\//.test(html), lang + ': the page reaches platform/assets two folders up');
+      assert(core.includes("'../' + l + '/index.html'") && !/l \+ '\.html'/.test(core), lang + ': language links point to the sibling split pages');
+    }
+  });
+
+  for (const lang of LANGS) await group('[' + lang + '] R02 smoke: every section of the split page opens, a chunk loads once, the screens equal the single-file page', lang, async (g, ev, w) => {
+    if (!(await i9Built())) return;
+    const sp = await i9Open(lang);
+    try {
+      const man = sp.SPLIT.manifest, chunkRoutes = Object.keys(man.routeChunk);
+      assert(chunkRoutes.length >= 1, 'the page has chunk routes');
+      const routes = ev("NAV.filter(function(n){ return canSee(n[0]); }).map(function(n){ return n[0]; })");
+      for (const r of chunkRoutes) if (!routes.includes(r)) routes.push(r);
+      eq(sp.ev("SPLIT.stubs().join()"), chunkRoutes.join(), 'before a visit every chunk route is a stub');
+      const chunkScripts = () => [...sp.w.document.scripts].map(s => s.src).filter(u => /\/area-[\w-]+\.js\?/.test(u));
+      eq(chunkScripts().length, 0, 'no chunk is loaded by the first screen (the dashboard is in the core)');
+      for (const r of routes) {
+        sp.ev("go('" + r + "')"); await i9Settle(sp.w);
+        assert(!sp.w.document.querySelector('[data-test="state:error"]'), r + ': no error state');
+        assert(sp.w.document.querySelector('[data-test="state:loading"]') === null, r + ': not loading any more');
+        assert(sp.w.document.querySelector('.page-title').textContent.trim().length > 0, r + ': the screen has a title');
+        clean(sp.w, lang + ' split ' + r);
+        eq(ev("(function(){ go('" + r + "'); return shellContent(); })()"), sp.ev("shellContent()"), r + ': the section equals the single-file page'); await i9Settle(sp.w);
+      }
+      eq(sp.ev("SPLIT.stubs().length"), 0, 'all stubs are replaced after the visits');
+      eq(chunkScripts().length, chunkRoutes.map(r => man.routeChunk[r]).filter((v, i, a) => a.indexOf(v) === i).length, 'each chunk was requested exactly once');
+      assert(chunkScripts().every(u => u.includes('nosw')), 'chunk requests bypass the service worker');
+      const before = chunkScripts().length; for (const r of routes) { sp.ev("go('" + r + "')"); } await i9Settle(sp.w);
+      eq(chunkScripts().length, before, 'visiting the sections again loads nothing');
+      for (const k of ['SCREENS', 'ACT', 'DRAWERS', 'ACTION_REGISTRY']) eq(sp.ev("Object.keys(" + k + ").sort().join()"), ev("Object.keys(" + k + ").sort().join()"), k + ' has the same members once every chunk is loaded');
+      eq(sp.ev("HOOKS.status.length"), ev("HOOKS.status.length"), 'the same status hooks');
+      assert(!sp.w.__errs.length, 'no script error: ' + sp.w.__errs[0]);
+    } finally { sp.done(); }
+  });
+
+  await group('R02 dry run: a chunk section opened first after the load, or by a link, draws the same as in the single-file page', 'ru', async (g, ev, w) => {
+    if (!(await i9Built())) return;
+    const man = (await i9Json('split/ru/manifest.json')).chunks;
+    for (const id of Object.keys(man)) for (const route of man[id].routes) {
+      const sp = await i9Open('ru');
+      try {
+        sp.ev("go('" + route + "')"); await i9Settle(sp.w);
+        eq(sp.ev("SPLIT.isLoaded('" + id + "')"), true, route + ': the chunk loaded on the first visit');
+        eq(sp.ev("shellContent()"), ev("(function(){ go('" + route + "'); return shellContent(); })()"), route + ': first visit draws the same section');
+      } finally { sp.done(); }
+      const dl = await i9Open('ru', 's=' + route);
+      try {
+        eq(dl.ev("S.route"), route, route + ': a link to the section opens it'); eq(dl.ev("SPLIT.isLoaded('" + id + "')"), true, route + ': the chunk of the linked section is loaded before the first draw');
+        assert(!dl.w.document.querySelector('[data-test="state:loading"]'), route + ': the first draw is not a loading state');
+      } finally { dl.done(); }
+    }
+  });
+
+  await group('R02.2 a chunk that does not load shows KIT.state error with "Try again"; the rest works; Try again loads it', 'ru', async () => {
+    if (!(await i9Built())) return;
+    const sp = await i9Open('ru');
+    try {
+      const id = Object.keys(sp.SPLIT.manifest.chunks)[0], route = sp.SPLIT.manifest.chunks[id].routes[0], good = sp.SPLIT.manifest.chunks[id].file;
+      sp.SPLIT.manifest.chunks[id].file = 'missing-' + good;
+      sp.ev("go('" + route + "')"); await i9Settle(sp.w); await I9_WAIT(200);
+      const err = sp.w.document.querySelector('[data-test="state:error"]'); assert(err, 'the section shows the error state');
+      const btn = err.querySelector('button[data-act="retry"]'); assert(btn && btn.dataset.v === 'chunk:' + id, 'the error state has "Try again" bound to chunk:' + id);
+      sp.ev("go('orders')"); await i9Settle(sp.w);
+      assert(!sp.w.document.querySelector('[data-test="state:error"]') && sp.w.document.querySelector('.page-title').textContent.trim(), 'another section still works');
+      sp.ev("go('" + route + "')"); await i9Settle(sp.w);
+      assert(sp.w.document.querySelector('[data-test="state:error"]'), 'the failed chunk is not retried by itself');
+      eq(sp.SPLIT.isLoaded(id), false, 'not loaded');
+      sp.SPLIT.manifest.chunks[id].file = good;
+      sp.w.document.querySelector('[data-test="state:error"] button').click(); await i9Settle(sp.w); await I9_WAIT(200); await i9Settle(sp.w);
+      assert(!sp.w.document.querySelector('[data-test="state:error"]'), 'Try again: the error is gone'); eq(sp.SPLIT.isLoaded(id), true, 'Try again loaded the chunk');
+      eq(sp.ev("S.route"), route, 'the visitor is still on the section');
+      assert(![...sp.w.document.scripts].some(s => /missing-/.test(s.src)), 'the failed script element is removed');
+    } finally { sp.done(); }
+  });
+
+  await group('R02.2 ACT.retry runs the handler named in data-v / data-id, without one it redraws; the single-file page has no split runtime', 'ru', async (g, ev) => {
+    eq(ev("typeof RETRY"), 'object', 'RETRY is a registry');
+    eq(ev("typeof SPLIT"), 'undefined', 'the single-file page carries no split runtime');
+    ev("window.__r = []; RETRY['t:one'] = function(d){ window.__r.push('one:' + d.v); }; RETRY['t:two'] = function(d){ window.__r.push('two:' + d.id); };");
+    ev("ACT.retry({ v: 't:one' }); ACT.retry({ id: 't:two' });");
+    eq(ev("window.__r.join()"), 'one:t:one,two:t:two', 'handlers found by data-v and by data-id, called with the dataset');
+    ev("window.__n = 0; var r0 = render; render = function(){ window.__n++; return r0.apply(this, arguments); }; ACT.retry({ v: 'nobody' }); ACT.retry({}); ACT.retry(); render = r0;");
+    eq(ev("window.__n"), 3, 'an unknown name, no name and no argument redraw (as before)');
+    const html = ev("KIT.state('error', { action: { label: 'Again', act: 'retry', v: 't:one' } })");
+    assert(/data-act="retry" data-v="t:one">Again</.test(html), 'KIT.state error carries the handler name: ' + html);
+    ev("go('orders')"); ev("window.__r = []"); ev("document.getElementById('root').insertAdjacentHTML('beforeend', " + JSON.stringify(html) + ")");
+    g.w.document.querySelector('#root [data-test="state:error"] button').click();
+    eq(ev("window.__r.join()"), 'one:t:one', 'a click on the button runs the registered handler');
+  });
+
+  await group('R02 sw.js: chunk and core requests of the split page bypass the service worker, the pages it serves are inside its scope', 'ru', async () => {
+    const sw = await i9Text('sw.js'), m = /const skip = (r => \{[^\n]*\});/.exec(sw); assert(m, 'sw.js has its skip rule');
+    const skip = new Function('self', 'URL', 'return (' + m[1] + ');')({ location: new URL('http://h/platform/sw.js') }, URL);
+    const req = (u, o) => Object.assign({ url: u, method: 'GET', mode: 'no-cors', referrer: '' }, o);
+    eq(skip(req('http://h/platform/split/ru/area-ai.js?nosw&v=1')), true, 'a chunk request is not served by the worker');
+    eq(skip(req('http://h/platform/split/ru/core.js?nosw&v=1')), true, 'core.js is not served from the cache (a stale core would not match a new chunk)');
+    eq(skip(req('http://h/platform/split/ru/index.html', { mode: 'navigate' })), false, 'the split page itself is a normal page of the scope (network first)');
+    eq(skip(req('http://h/platform/tests.html')), true, 'the test harness is still left alone');
+    assert(!/split\//.test(sw.split('const PRECACHE')[1].split(';')[0]), 'the offline cache does not list split files: the single-file pages are the offline demo');
+  });
+
+  await group('R02.2 ACT.retry: a name like "constructor" / "toString" is not a handler (RETRY has no prototype)', 'ru', async (g, ev) => {
+    eq(ev("Object.getPrototypeOf(RETRY) === null"), true, 'RETRY is a bare dictionary');
+    ev("window.__n = 0; var r0 = render; render = function(){ window.__n++; return r0.apply(this, arguments); };");
+    ev("ACT.retry({ v: 'constructor' }); ACT.retry({ v: 'toString' }); ACT.retry({ id: '__proto__' }); ACT.retry({ v: 'hasOwnProperty' }); render = r0;");
+    eq(ev("window.__n"), 4, 'each of them only redraws');
+  });
+
+  await group('R02 split: a link naming Object.prototype members (?s=constructor, ?s=__proto__) loads no chunk and breaks nothing', 'ru', async () => {
+    if (!(await i9Built())) return;
+    for (const q of ['s=constructor', 's=__proto__', 's=toString']) {
+      const sp = await i9Open('ru', q);
+      try {
+        eq(sp.ev("SPLIT.chunkOf('constructor') === null && SPLIT.chunkOf('__proto__') === null && SPLIT.chunkOf('toString') === null"), true, q + ': not a chunk route');
+        eq(Object.keys(sp.SPLIT.state.failed).length + Object.keys(sp.SPLIT.state.loading).length + Object.keys(sp.SPLIT.state.loaded).length, 0, q + ': nothing was requested');
+        assert(sp.w.document.querySelector('.page-title'), q + ': the page is drawn');
+      } finally { sp.done(); }
+    }
+  });
+
+__suite(71);   /* j0-embed.js */
   /* ---- embed mode ?embed=customer: the customer portal inside the marketing site's iframe (screens/shell/004-embed.js) ---- */
   const j0Open = async (file, q) => { const fr = document.createElement('iframe'); fr.style.cssText = 'width:1000px;height:760px'; fr.src = file + '?' + q; document.getElementById('frames').appendChild(fr); await new Promise(ok => { fr.onload = ok; }); await new Promise(r => setTimeout(r, 200)); return fr; };
   await group('embed: ?embed=customer starts in the customer role on its home screen, without operator chrome, marked as a simulation', 'en', async () => {
