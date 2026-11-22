@@ -4030,6 +4030,166 @@ class Component extends DCLogic {
     return T;
   };
 })();
+
+// FR-191 … FR-198: hub inbound (/inbound) – pre-advice with plate «to follow» and a slot from the ramp board, numbered
+// consignor chips with hover, gate check with temperature alarm → ramp → unloading → done, overdue dwell red with hover
+// (demo data), SSCC check against the order, filters + saved view with filters + CSV, view only without orders:write, DE / EN.
+(() => {
+  const baseBuild = Component.prototype.build;
+  Component.prototype.build = function (fr) {
+    const T = baseBuild.call(this, fr);
+    const h = this.helpers(fr), { D, W, all, ok } = h;
+    const B0 = T.length, t = (mod, name, fn) => T.push({ mod, name, fn, blk: B0 }); // port: FR-171 – shard cuts only between blocks
+    const q = sel => D().querySelector(sel);
+    const goHash = async (hh, ms = 900) => { W().location.hash = '#' + hh; await sleep(ms); };
+    const waitFor = async (fn, n = 40) => { for (let i = 0; i < n; i++) { try { const v = fn(); if (v) return v; } catch (e) { /* not yet */ } await sleep(150); } return null; };
+    const setVal = async (sel, v, doc) => { const e = (doc || D()).querySelector(sel); if (!e) throw new Error('Нет поля ' + sel); const W2 = e.ownerDocument.defaultView;
+      const proto = e.tagName === 'SELECT' ? W2.HTMLSelectElement.prototype : W2.HTMLInputElement.prototype;
+      Object.getOwnPropertyDescriptor(proto, 'value').set.call(e, v); e.dispatchEvent(new W2.Event('input', { bubbles: true })); e.dispatchEvent(new W2.Event('change', { bubbles: true })); await sleep(180); };
+    const req = async (m, p, b) => { try { return await W().__OLYMP_DEMO_REQ(m, p, b); } catch (e) { return { error: String(e && e.message || e), status: e && e.status }; } };
+    const reqAs = async (u, m, p, b) => { try { return await W().__OLYMP_DEMO_REQ_AS(u, m, p, b); } catch (e) { return { error: String(e && e.message || e), status: e && e.status }; } };
+    const cyr = d => { const w = d.createTreeWalker(d.body, NodeFilter.SHOW_TEXT, { acceptNode: x => /^(SCRIPT|STYLE|TEMPLATE)$/.test(x.parentElement.tagName) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+      let x; while ((x = w.nextNode())) { const m = x.textContent.match(/[А-Яа-яЁё]{3,}/); if (m) return m[0]; } return ''; };
+    const kzDay = (d = 0) => new Date(Date.now() + 5 * 3600000 + d * 86400000).toISOString().slice(0, 10);
+    const asAdmin = async () => { if (h.BE()) { await h.asUser('admin'); return; } const s = q('.demo-role select'); if (s && s.value !== 'admin') await setVal('.demo-role select', 'admin'); };
+    const open = async () => { await goHash('/s/overview', 400); await goHash('/inbound', 1100); ok(await waitFor(() => q('[data-inbound] [data-in-table]')), 'нет таблицы приёмки'); };
+    const row = no => q('[data-in-row="' + no + '"]');
+    const ship = (carrier, extra = {}) => req('POST', '/api/inbound', { hub: 'AST', carrier, pickup_date: kzDay(), temp_class: 'cold', plate: '901 TST 01',
+      positions: [{ party: 'Roche Diagnostics KZ', city: 'Алматы', kg: 120, m3: 0.6, pcs: 2 }], ...extra });
+    const sscc = serial => { const b = '38700123456' + String(serial).padStart(6, '0'); const s = [...b].reverse().reduce((a, c, i) => a + Number(c) * (i % 2 === 0 ? 3 : 1), 0); return b + ((10 - s % 10) % 10); };
+    const M = 'FR-191…198 Приёмка на хабе';
+
+    t(M, 'Пункт меню, страница по хабу, доска рамп 09–17; предуведомление из ячейки доски: номер «следует», нумерованные чипы с подсказкой, аудит без названий', async () => {
+      await asAdmin();
+      ok(all('nav a').some(a => /#?\/inbound$/.test(a.getAttribute('href') || '')), 'нет пункта «Приёмка на хабе» в меню');
+      await open();
+      ok(all('[data-in-board] [data-in-cell]').length >= 16 * 3, 'доска рамп: ' + all('[data-in-board] [data-in-cell]').length);
+      await setVal('[data-in-board-day]', kzDay(1)); await sleep(700);
+      const cell = await waitFor(() => q('[data-in-board] button[data-in-cell="R4-16:00"]')); ok(cell, 'нет свободной ячейки R4 16:00');
+      cell.click(); await sleep(350);
+      ok(q('[data-in-f="ramp"]').value === 'R4' && q('[data-in-f="time"]').value === '16:00' && q('[data-in-f="pickup_date"]').value === kzDay(1), 'ячейка не подставилась в форму');
+      const carrier = 'ТОО «Приёмка-Тест ' + Date.now().toString(36) + '»';
+      await setVal('[data-in-f="carrier"]', carrier); await setVal('[data-in-pf="party-0"]', 'bioMérieux'); await setVal('[data-in-pf="city-0"]', 'Алматы');
+      await setVal('[data-in-pf="kg-0"]', '250'); await setVal('[data-in-pf="pcs-0"]', '3');
+      q('[data-in-add-pos]').click(); await sleep(200); await setVal('[data-in-pf="party-1"]', 'Werfen'); await setVal('[data-in-pf="kg-1"]', '80');
+      ok(q('[data-in-f="follows"]').checked, '«номер сообщат позже» не по умолчанию');
+      q('[data-in-create]').click(); await sleep(1200);
+      const n = (await req('GET', '/api/inbound')).items.find(x => x.carrier === carrier); ok(n, 'предуведомление не создано');
+      ok(n.plate === null && n.ramp === 'R4' && n.slot_start && n.positions.length === 2, 'данные: ' + JSON.stringify(n).slice(0, 200));
+      const r = await waitFor(() => row(n.number)); ok(r, 'строки нет в списке');
+      ok(r.querySelector('[data-in-plate-follows]'), 'нет «следует»'); ok(r.querySelector('[data-in-status="announced"]'), 'статус не «заявлен»');
+      const chips = [...r.querySelectorAll('[data-in-chip]')]; ok(chips.length === 2 && chips[0].textContent === '1', 'чипы: ' + chips.length);
+      ok(/bioM.rieux/.test(chips[0].getAttribute('title')) && /250 kg/.test(chips[0].getAttribute('title')), 'подсказка чипа: ' + chips[0].getAttribute('title'));
+      ok(r.textContent.includes('R4 · 16:00'), 'слот не показан');
+      const au = await req('GET', '/api/audit?limit=30'); const a = (au.items || au).find(x => x.action === 'inbound.created' && x.entity_id === n.number);
+      ok(a && a.details.plate_follows === true && !/Приёмка-Тест|bioM/.test(JSON.stringify(a.details)), 'аудит: ' + JSON.stringify(a));
+    });
+
+    t(M, 'Въезд: температура вне режима → тревога, логгер; к рампе → разгрузка → завершён', async () => {
+      await asAdmin();
+      const n = await ship('ТОО «Гейт-Тест ' + Date.now().toString(36) + '»'); ok(n.number, 'не создано: ' + JSON.stringify(n));
+      await open(); ok(await waitFor(() => row(n.number)), 'строки нет');
+      row(n.number).querySelector('[data-in-gate-btn]').click(); await sleep(300);
+      ok(await waitFor(() => q('[data-in-gate-form="' + n.number + '"]')), 'нет формы въезда');
+      await setVal('[data-in-g="temp"]', '9,5'); await setVal('[data-in-g="logger"]', 'ELT-0777');
+      q('[data-in-gate-save="' + n.number + '"]').click(); await sleep(1100);
+      ok(await waitFor(() => row(n.number).querySelector('[data-in-status="at_gate"]')), 'статус не «на въезде»');
+      ok(row(n.number).querySelector('[data-in-gate-ok="0"]') && row(n.number).textContent.includes('9.5 °C') && row(n.number).textContent.includes('ELT-0777 ✓'), 'входной контроль не показан');
+      const al = await req('GET', '/api/alarms?include_resolved=true'); ok((al.items || al).some(x => String(x.message || '').includes(n.number)), 'нет тревоги по температуре');
+      row(n.number).querySelector('[data-in-ramp-btn]').click(); await sleep(300); await setVal('[data-in-g="ramp"]', 'R3');
+      q('[data-in-ramp-save="' + n.number + '"]').click(); await sleep(1000);
+      ok(await waitFor(() => row(n.number).querySelector('[data-in-status="at_ramp"]')) && row(n.number).textContent.includes('R3'), 'не у рампы R3');
+      row(n.number).querySelector('[data-in-to="unloading"]').click(); await sleep(900);
+      ok(await waitFor(() => row(n.number).querySelector('[data-in-status="unloading"]')), 'нет разгрузки');
+      await setVal('[data-in-filter-status]', ''); row(n.number).querySelector('[data-in-to="done"]').click(); await sleep(1000);
+      ok(await waitFor(() => row(n.number) && row(n.number).querySelector('[data-in-status="done"]')), 'не завершено');
+      const v = await req('GET', '/api/inbound/' + n.id); ok(v.status === 'done' && v.demurrage_booked === 0 && v.positions.every(p => p.done), 'итог: ' + JSON.stringify(v).slice(0, 160));
+    });
+
+    t(M, 'Превышенный простой красный, подсказка: период, минуты, опоздание; KPI «простой превышен»', async () => {
+      await asAdmin(); await open();
+      if (h.BE()) { // the real backend cannot age a vehicle in the UI – the rules are served, the backend tests cover the minutes
+        const l = await req('GET', '/api/inbound'); ok(l.rules && l.rules.free_min === 60 && l.rules.rate_kzt_h === 6000, 'нет правил: ' + JSON.stringify(l.rules)); return;
+      }
+      const r = await waitFor(() => row('IN-26-000101')); ok(r, 'нет демо-строки IN-26-000101');
+      const d = r.querySelector('[data-in-overdue="1"]'); ok(d && d.classList.contains('over') && r.classList.contains('in-row-over'), 'не красный');
+      const tip = d.getAttribute('title'); ok(/Период: \d\d:\d\d – сейчас/.test(tip) && /норма 90 \(30 слот \+ 60 бесплатно\)/.test(tip) && /Опоздание: нет/.test(tip) && /Превышение: \d+ мин/.test(tip), 'подсказка: ' + tip);
+      const late = await waitFor(() => row('IN-26-000102')); ok(late.querySelector('[data-in-late="1"]') && /Опоздание: да/.test(late.querySelector('[data-in-overdue]').getAttribute('title')), 'опоздание не показано');
+      ok(Number(q('[data-in-kpi-overdue]').getAttribute('data-in-kpi-overdue')) >= 1, 'KPI превышения');
+      await setVal('[data-in-filter-status]', 'overdue'); ok(all('[data-in-table] tbody tr[data-in-row]').every(x => x.querySelector('[data-in-overdue="1"]')), 'фильтр «превышен простой»');
+      await setVal('[data-in-filter-status]', 'open');
+    });
+
+    t(M, 'Сверка SSCC с заказом у рампы: чужой / неверный код отклонён, повтор — нет, закрытие после всех мест', async () => {
+      await asAdmin();
+      let n, codes
+      if (h.BE()) {
+        const sites = await req('GET', '/api/sites'); const site = sites.find(s => s.hub_id === 1) || sites[0];
+        const o = await req('POST', '/api/orders', { site_id: site.id, description: 'UI SSCC', temp_class: 'cold', pallets: 1, weight_kg: 40, lines: [{ art: 'R-1', name: 'Reagent kit', packages: 2 }] });
+        codes = (await req('GET', '/api/orders/' + o.id + '/packages')).lines.flatMap(l => l.packages.map(p => p.sscc));
+        n = await ship('ТОО «SSCC-Тест»', { order: o.number, temp_class: 'ambient' });
+        await req('POST', '/api/inbound/' + n.id + '/gate', {}); await req('POST', '/api/inbound/' + n.id + '/status', { to: 'at_ramp', ramp: 'R1' });
+      } else {
+        n = (await req('GET', '/api/inbound')).items.find(x => x.number === 'IN-26-000102'); codes = [sscc(9101), sscc(9102), sscc(9103)];
+      }
+      await open(); await setVal('[data-in-filter-status]', '');
+      const scan = async c => { await setVal('[data-in-scan="' + n.number + '"]', c); q('[data-in-scan-btn="' + n.number + '"]').click(); await sleep(900); };
+      ok(await waitFor(() => q('[data-in-scan="' + n.number + '"]')), 'нет поля сканирования');
+      await scan(codes[0].slice(0, 17) + ((Number(codes[0][17]) + 1) % 10)); ok(/sscc/i.test(q('.err') ? q('.err').textContent : ''), 'неверная контрольная цифра принята');
+      const before = (await req('GET', '/api/inbound/' + n.id)).gate.sscc_scanned;
+      for (const c of codes) if (before === 0 || c !== codes[0]) { if (q('[data-in-scan="' + n.number + '"]')) await scan(c); }
+      const v = await req('GET', '/api/inbound/' + n.id); ok(v.gate.sscc_scanned === v.gate.sscc_expected && v.status === 'unloading', 'сверка: ' + JSON.stringify(v.gate));
+      ok(!q('[data-in-scan="' + n.number + '"]'), 'поле сканирования не скрылось после всех мест');
+      const twice = await req('POST', '/api/inbound/' + n.id + '/scan', { code: codes[1] }); ok(twice.status === 409, 'повтор принят: ' + JSON.stringify(twice));
+      row(n.number).querySelector('[data-in-to="done"]').click(); await sleep(900);
+      ok((await req('GET', '/api/inbound/' + n.id)).status === 'done', 'не закрыто после сверки');
+    });
+
+    t(M, 'Фильтр и сохранённый вид с фильтрами (по пользователю), вид по умолчанию после повторного открытия; CSV ровно видимых строк и колонок', async () => {
+      await asAdmin(); await ship('ТОО «Экспресс-Фильтр»', { priority: 'express' }); await open();
+      await setVal('[data-in-filter-status]', ''); await setVal('[data-in-filter-prio]', 'express'); await sleep(300);
+      const rows = all('[data-in-table] tbody tr[data-in-row]'); ok(rows.length >= 1 && rows.every(x => x.querySelector('[data-in-prio="express"]')), 'фильтр приоритета: ' + rows.length);
+      q('[data-in-cols] summary').click(); await sleep(150); q('[data-in-col="temp"]').click(); await sleep(150); q('[data-in-col="plate"]').click(); await sleep(200);
+      const ths = () => all('[data-in-table] th[data-col]').map(x => x.getAttribute('data-col'));
+      ok(ths().includes('temp') && !ths().includes('plate'), 'столбцы: ' + ths().join(','));
+      const name = 'Вход ' + Date.now().toString(36); W().prompt = () => name; q('[data-in-save-view]').click(); await sleep(900);
+      const vs = await req('GET', '/api/me/views/inbound'); const v = vs.find(x => x.name === name);
+      ok(v && v.default && v.filters && v.filters.prio === 'express' && v.cols.includes('temp') && !v.cols.includes('plate'), 'вид: ' + JSON.stringify(vs));
+      await open();
+      ok(await waitFor(() => q('[data-in-view]').value === name && q('[data-in-filter-prio]').value === 'express' && ths().includes('temp')), 'вид по умолчанию не применён');
+      let blob = null; const orig = W().URL.createObjectURL; W().URL.createObjectURL = b => { blob = b; return 'blob:test'; };
+      try { q('[data-in-export]').click(); await sleep(300); } finally { W().URL.createObjectURL = orig; }
+      ok(blob, 'нет файла'); const lines = (await blob.text()).replace(/^\uFEFF/, '').trim().split(/\r\n/);
+      ok(lines[0].split(';').length === ths().length && lines.length - 1 === all('[data-in-table] tbody tr[data-in-row]').length, 'CSV: ' + lines.length + ' / ' + lines[0]);
+      ok(!lines.slice(1).some(l => /(^|;)[=+@]/.test(l)), 'формула в CSV');
+      q('[data-in-del-view]').click(); await sleep(900);
+      ok(!(await req('GET', '/api/me/views/inbound')).some(x => x.name === name), 'вид не удалён');
+      await setVal('[data-in-filter-prio]', '');
+    });
+
+    t(M, 'Без orders:write — только просмотр; клиент не видит приёмку; другой хаб скрыт', async () => {
+      const a = await reqAs('auditor', 'GET', '/api/inbound'); ok(a && a.can_edit === false && Array.isArray(a.items), 'аудитор: ' + JSON.stringify(a).slice(0, 80));
+      const p = await reqAs('auditor', 'POST', '/api/inbound', { hub: 'AST', carrier: 'X Logistics', pickup_date: kzDay(), positions: [{ party: 'X', kg: 1 }] }); ok(p.status === 403, 'аудитор создал: ' + JSON.stringify(p).slice(0, 80));
+      const c = await reqAs('kdl.portal', 'GET', '/api/inbound'); ok(c.status === 403, 'клиент видит приёмку');
+      const ala = await reqAs('dispatcher.ala', 'GET', '/api/inbound'); ok(ala.items && ala.items.every(x => x.hub === 'ALA'), 'диспетчер Алматы видит чужой хаб');
+    });
+
+    ['DE', 'EN'].forEach(code => t(M, code + ': страница приёмки без русского текста, подсказки чипов в латинице', async () => {
+      const lc = code.toLowerCase(), url = fr.getAttribute('src').replace('.html', '-' + lc + '.html') + '#/inbound?lang=' + lc;
+      const f2 = document.createElement('iframe'); f2.style.cssText = 'position:fixed;left:-3000px;top:0;width:1400px;height:900px;border:0'; f2.src = url; document.body.appendChild(f2);
+      try {
+        for (let k = 0; k < 60; k++) { try { if (f2.contentDocument.querySelector('[data-in-table] tbody tr[data-in-row]')) break; } catch (e) { /* loading */ } await sleep(200); } await sleep(500);
+        const d = f2.contentDocument; ok(d.querySelector('[data-in-table]'), 'нет таблицы');
+        ok(d.body.textContent.includes(code === 'DE' ? 'Wareneingang Hub' : 'Hub inbound'), 'нет заголовка');
+        let bad = cyr(d); ok(!bad, code + ' /inbound: «' + bad + '»');
+        const tips = [...d.querySelectorAll('[data-in-chip], [data-in-overdue], [data-in-cell-no]')].map(x => x.getAttribute('title') || '').join(' ');
+        ok(!/[А-Яа-яЁё]{3,}/.test(tips), code + ' подсказки: ' + (tips.match(/[А-Яа-яЁё]{3,}/) || [''])[0]);
+        d.querySelector('[data-in-new] summary').click(); await sleep(300); bad = cyr(d); ok(!bad, code + ' форма: «' + bad + '»');
+      } finally { f2.remove(); }
+    }));
+    return T;
+  };
+})();
 </script>
 </body>
 </html>
