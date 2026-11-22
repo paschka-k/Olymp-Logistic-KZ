@@ -63,6 +63,22 @@
     "de": "Produktive Plattform (Backend + Web-App) als Online-Demo im Browser.",
     "en": "Production platform (backend + web app) as an in-browser online demo."
    }
+  },
+  {
+   "version": "0.3.13",
+   "date": "2026-11-23",
+   "built": "23.11.2026 02:40 UTC+5",
+   "path": "releases/0.3.13/",
+   "title": {
+    "ru": "Платформа Olymp Logistic · релиз 0.3.13",
+    "de": "Olymp Logistic Platform · Release 0.3.13",
+    "en": "Olymp Logistic Platform · release 0.3.13"
+   },
+   "note": {
+    "ru": "Рабочая платформа (бэкенд + веб-приложение), онлайн-демо в браузере.",
+    "de": "Produktive Plattform (Backend + Web-App) als Online-Demo im Browser.",
+    "en": "Production platform (backend + web app) as an in-browser online demo."
+   }
   }
  ]
 }

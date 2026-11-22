@@ -3289,11 +3289,11 @@ class Component extends DCLogic {
     const req = async (m, p, b) => { try { return await W().__OLYMP_DEMO_REQ(m, p, b); } catch (e) { return { error: String(e && e.message || e), status: e && e.status }; } };
     const press = el => { ok(el, 'нет кнопки'); el.click(); };
     const M = 'Плановые значения · проверка перед запуском';
-    t(M, 'FR-174: «Справочники» показывают число непроверенных значений, список из 26 с источником, подтверждение аудируется', async () => {
+    t(M, 'FR-174: «Справочники» показывают число непроверенных значений, список из 27 с источником, подтверждение аудируется', async () => {
       await goHash('/master-data', 1200); const n = await waitFor(() => q('[data-unverified]')); ok(n, 'нет баннера непроверенных значений');
       const before = Number(n.getAttribute('data-unverified')); ok(before >= 20, 'непроверенных: ' + before);
       press(q('[data-goto-verify]')); await sleep(500);
-      const rows = all('[data-mtable="verify"] [data-mrow]'); ok(rows.length === 26, 'строк: ' + rows.length);
+      const rows = all('[data-mtable="verify"] [data-mrow]'); ok(rows.length === 27, 'строк: ' + rows.length);
       const esf = q('[data-mrow="esf_deadline"]'); ok(esf && /Tax Code RK art\. 412/.test(esf.textContent) && /ЭСФ/.test(esf.textContent), 'строка ЭСФ: ' + (esf && esf.textContent.slice(0, 120)));
       const r = await req('POST', '/api/master/verify/esf_deadline', { data: { verified: true, note: 'Подтверждено налоговым консультантом', ref: 'НК РК ст. 412 п. 1' } });
       ok(r && r.status === 'active' && r.changed.includes('verified'), 'подтверждение: ' + JSON.stringify(r).slice(0, 150));
