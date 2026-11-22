@@ -765,6 +765,8 @@ tr.au-bad td{background:var(--chip-red-bg,rgba(220,38,38,.08))}
 /* embed mode (?embed=customer, screens/ */
 html[data-embed] .help-q,html[data-embed] .topbar .who,html[data-embed] .side-tools,html[data-embed] .alarm-banner,html[data-embed] .login-layer{display:none!important}
 html[data-embed] .topbar{justify-content:flex-start}
+/* the embed is Kökzhol-only: no design  */
+html[data-embed] .design-btn{display:none!important}
 .embed-demo{position:fixed;right:10px;bottom:10px;z-index:60;padding:3px 10px;border-radius:999px;background:var(--bg-surface,#fff);color:var(--text-muted);border:1px solid var(--border);font-size:11px;letter-spacing:.04em;text-transform:uppercase;pointer-events:none}
 @media (max-width:700px){.embed-demo{bottom:68px}}
 
@@ -1744,7 +1746,7 @@ if (on) PREFS.capture();
 window.addEventListener('pagehide', () => { if (on) PREFS.capture(); });
 })();
 /* Roles & permissions (FR-14/137): 11 roles, permission mat */
-const VERSION = '6.6.0', BUILD = '2026-11-03 12:23';
+const VERSION = '6.6.1', BUILD = '2026-11-23 02:40';
 const ROLES = ['admin', 'dispatcher', 'warehouse', 'driver', 'auditor', 'viewer', 'manager', 'finance', 'quality', 'customer', 'partner'];
 const ROLE_NAME = {
 admin: LT('role.administrator'), dispatcher: LT('role.dispatcher'), warehouse: LT('role.warehouse'),
@@ -2646,6 +2648,104 @@ const q = new URLSearchParams(typeof location !== 'undefined' ? location.search 
 if (mode !== 'customer') return;
 globalThis.EMBED = mode;
 document.documentElement.dataset.embed = mode;
+try { Object.defineProperty(S, 'design', { get: () => 'kokzhol', set: () => {}, configurable: true, enumerable: true }); } catch (_) { S.design = 'kokzhol'; }
+document.documentElement.dataset.design = 'kokzhol';
+const setDesign0 = ACT.setDesign;
+ACT.setDesign = () => { document.documentElement.dataset.design = 'kokzhol'; };
+ACT.setDesign.embedOff = setDesign0;
+const BANNED = /olymp|kombimed|олимп/i;
+const RULES = {
+en: [[/\bthe KDL Olymp branch\b/g, 'the client'], [/KDL Olymp branch/g, 'Client'], [/\bown KDL Olymp goods\b/g, "the client's own goods"],
+[/\b(for|to|from|of|and) KDL Olymp\b/g, '$1 the client'], [/KDL Olymp management/g, 'Client management'], [/Olymp Logistic LLP/g, 'Kökzhol'],
+[/KDL Olymp/g, 'Client']],
+ru: [[/Филиал KDL Olymp/g, 'Клиент'], [/филиал KDL Olymp/g, 'клиент'], [/собственный товар KDL Olymp/g, 'собственный товар клиента'],
+[/(для|в|от|и) KDL Olymp/g, '$1 клиента'], [/ТОО «Olymp Logistic»/g, 'Kökzhol'], [/KDL Olymp/g, 'Клиент']],
+de: [[/Filiale KDL Olymp/g, 'Kunde'], [/eigene Ware KDL Olymp/g, 'eigene Ware des Kunden'], [/\bfür KDL Olymp\b/g, 'für den Kunden'],
+[/\b(an die Disposition und) KDL Olymp\b/g, '$1 den Kunden'], [/TOO „Olymp Logistic“/g, 'Kökzhol'], [/KDL Olymp/g, 'Kunde']],
+kk: [[/KDL Olymp филиалы/g, 'Клиент'], [/KDL Olymp өз тауары/g, 'клиенттің өз тауары'], [/KDL Olymp-(қа|ке|ға|ге)/g, 'клиентке'],
+[/KDL Olymp үшін/g, 'клиент үшін'], [/«Olymp Logistic» ЖШС/g, 'Kökzhol'], [/KDL Olymp/g, 'Клиент']],
+};
+const ALL = [[/Olymp\s*(↔|→|\/)\s*Kökzhol|Kökzhol\s*(↔|→|\/)\s*Olymp/g, 'Kökzhol'], [/KombiMED(\s+GmbH)?/gi, 'Kökzhol'], [/Olymp Logistic/gi, 'Kökzhol'],
+[/олимп/gi, 'Көкжол'], [/olymp/gi, 'Kökzhol']];
+const rules = [...(RULES[typeof LANG === 'string' ? LANG : 'en'] || RULES.en), ...ALL];
+const scrub = s => { if (typeof s !== 'string' || !BANNED.test(s)) return s; for (const [re, to] of rules) s = s.replace(re, to); return s; };
+globalThis.embedScrub = scrub;
+const ATTRS = ['title', 'aria-label', 'aria-description', 'aria-valuetext', 'placeholder', 'alt', 'value', 'label', 'data-tip', 'data-tooltip', 'data-label'];
+const fixEl = el => {
+for (const a of ATTRS) { const v = el.getAttribute(a); if (v != null) { const w = scrub(v); if (w !== v) el.setAttribute(a, w); } }
+if ((el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') && typeof el.value === 'string') { const w = scrub(el.value); if (w !== el.value) el.value = w; }
+};
+const CODE = /^(SCRIPT|STYLE|TEMPLATE|NOSCRIPT)$/;
+const inCode = n => { const p = n.nodeType === 3 ? n.parentNode : n; return !!(p && p.nodeType === 1 && CODE.test(p.tagName)); };
+const fixText = t => { if (inCode(t)) return; const w = scrub(t.nodeValue); if (w !== t.nodeValue) t.nodeValue = w; };
+const walker = root => document.createTreeWalker(root, 1 | 4, { acceptNode: n => (n.nodeType === 1 && CODE.test(n.tagName) ? 2 : 1) });
+const fix = root => {
+if (!root) return;
+if (root.nodeType === 3) return fixText(root);
+if (root.nodeType !== 1 && root.nodeType !== 9 && root.nodeType !== 11) return;
+if (root.nodeType === 1) { if (CODE.test(root.tagName)) return; fixEl(root); }
+if (!BANNED.test(root.textContent || '') && !(root.querySelector && root.querySelector('[title],[aria-label],[placeholder],[alt],[value],[label],input,textarea,[data-tip],[data-tooltip],[data-label],[aria-description],[aria-valuetext]'))) return;
+const tw = walker(root);
+for (let n = tw.nextNode(); n; n = tw.nextNode()) (n.nodeType === 3 ? fixText(n) : fixEl(n));
+};
+globalThis.embedScrubDom = fix;
+const mo = new MutationObserver(list => {
+for (const m of list) {
+if (m.type === 'characterData') fixText(m.target);
+else if (m.type === 'attributes') fixEl(m.target);
+else m.addedNodes.forEach(fix);
+}
+});
+mo.observe(document.documentElement, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ATTRS });
+fix(document.documentElement);
+document.addEventListener('input', e => { const t = e.target; if (t && BANNED.test(t.value || '')) fixEl(t); }, true);
+if (typeof Blob === 'function') {
+const B = Blob;
+globalThis.Blob = class extends B { constructor(parts, opts) { super(Array.isArray(parts) ? parts.map(p => (typeof p === 'string' ? scrub(p) : p)) : parts, opts); } };
+}
+globalThis.embedAudit = async (opts = {}) => {
+const found = [], wait = () => new Promise(r => setTimeout(r, opts.wait || 40)), max = opts.maxClicks || 40;
+let memo = new Map();
+const shown = el => {
+if (!el || el.nodeType !== 1) return true;
+if (memo.has(el)) return memo.get(el);
+const cs = getComputedStyle(el);
+const v = !CODE.test(el.tagName) && !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' && cs.contentVisibility !== 'hidden' && shown(el.parentElement);
+memo.set(el, v); return v;
+};
+const hit = (where, kind, s) => { if (typeof s === 'string' && BANNED.test(s)) { const i = s.search(BANNED); found.push(`${where} · ${kind}: …${s.slice(Math.max(0, i - 40), i + 40).replace(/\s+/g, ' ')}…`); } };
+const scan = where => {
+memo = new Map(); hit(where, 'tab title', document.title);
+const tw = document.createTreeWalker(document.body, 4);
+for (let t = tw.nextNode(); t; t = tw.nextNode()) if (BANNED.test(t.nodeValue) && shown(t.parentElement)) hit(where, 'text', t.nodeValue);
+document.querySelectorAll('body *').forEach(el => {
+if (!shown(el)) return;
+for (const a of ATTRS) hit(where, a, el.getAttribute(a));
+if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') hit(where, 'field', el.value);
+if (el.tagName === 'SELECT') [...el.options].forEach(o => hit(where, 'option', o.text));
+});
+};
+const SKIP = /del|cancel|reset|send|sign|setRole|setDesign|print|lang|undo|logout/i;
+const routes = [...new Set([homeRoute(), ...navItems().map(n => n[0]), 'track', 'request'])].filter(r => canSee(r) && (SCREENS[r] || r === homeRoute()));
+const open0 = window.open, print0 = window.print; window.open = () => null; window.print = () => {};
+for (const r of routes) {
+go(r); await wait(); scan(r);
+for (const t of tabsOf(r)) { S.tab[r] = t.key; render(); await wait(); scan(`${r}/${t.key}`); }
+const seen = new Set(), keyOf = e => [e.dataset.act, e.dataset.v || '', e.dataset.id || ''].join('|');
+for (let n = 0; n < max; n++) {
+const next = [...document.querySelectorAll('main [data-act], .drawer [data-act]')].find(e => !SKIP.test(e.dataset.act) && e.dataset.act !== 'go' && !seen.has(keyOf(e)) && shown(e));
+if (!next) break;
+const k = keyOf(next); seen.add(k);
+try { next.click(); } catch (_) {   }
+await wait(); scan(`${r} → ${k}`);
+if (S.route !== r) { go(r); await wait(); }
+}
+S.drawer = null; S.diag = null; render();
+}
+window.open = open0; window.print = print0;
+go(homeRoute()); await wait();
+return found;
+};
 const host = () => { try { if (window.parent === window) return null; return (location.ancestorOrigins && location.ancestorOrigins[0]) || (document.referrer ? new URL(document.referrer).origin : '*'); } catch (_) { return '*'; } };
 const tell = action => { const o = host(); if (o) try { window.parent.postMessage({ type: 'kz-embed', action }, o); } catch (_) {   } };
 const open = () => !!(S.drawer || S.diag || S.sideOpen || S.kbd || S.tbMore);
@@ -2653,8 +2753,11 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && !open()) t
 const shellOverlays0 = globalThis.shellOverlays;
 globalThis.shellOverlays = () => (shellOverlays0 ? shellOverlays0() : '') + `<div class="embed-demo" role="note" data-test="embed-demo">${esc(LT('shell.embed_demo'))}</div>`;
 document.addEventListener('DOMContentLoaded', () => {
+document.documentElement.dataset.design = 'kokzhol';
 if (S.role !== 'customer') ACT.setRole({ v: 'customer' });
 if (S.route === 'forbidden' || !canSee(S.route)) go(homeRoute());
+fix(document.documentElement);
+document.title = scrub(document.title);
 tell('ready');
 });
 })();
@@ -11384,7 +11487,7 @@ r5TplLang: d => { N.prev = d.v; render(); },
 (function () { if (!globalThis.partnerGdpDecide) return; ACT.cmPqOk = d => { partnerGdpDecide(d.id, true); }; ACT.cmPqNo = d => { partnerGdpDecide(d.id, false); }; })();
 /* S2 · Delivery: FR-223 What's new panel, FR-224 print / PD */
 (() => {
-const WN = {"releases":[{"v":"next","date":""},{"v":"6.6.0","date":"2026-11-03"},{"v":"6.5.2","date":"2026-10-31"},{"v":"6.5.1","date":"2026-10-31"},{"v":"6.5.0","date":"2026-10-31"},{"v":"6.4.4","date":"2026-10-29"},{"v":"6.4.3","date":"2026-10-28"},{"v":"6.4.2","date":"2026-10-28"},{"v":"6.4.1","date":"2026-10-21"},{"v":"6.4.0","date":"2026-10-21"},{"v":"6.3.0","date":"2026-10-21"},{"v":"6.2.1","date":"2026-10-20"},{"v":"6.2.0","date":"2026-10-20"},{"v":"6.1.0","date":"2026-10-19"},{"v":"6.0.0","date":"2026-10-19"}],"streams":[{"k":"W1","h":"Operations flow (LH-B, C, D, H, N1, O1)","rows":29,"frs":["FR-01","FR-02","FR-03","FR-04","FR-05","FR-06","FR-09","FR-11","FR-12","FR-38","FR-41","FR-73","FR-91","FR-92","FR-93","FR-94","FR-99","FR-114","FR-116","FR-119","FR-126","FR-139","FR-140","FR-143","FR-144","FR-145","FR-146","FR-154","FR-156","FR-176"],"v":"6.1.0"},{"k":"W2","h":"Resources & driver app","rows":25,"frs":["FR-08","FR-10","FR-27","FR-39","FR-40","FR-46","FR-50","FR-52","FR-53","FR-54","FR-55","FR-56","FR-57","FR-58","FR-59","FR-60","FR-61","FR-62","FR-63","FR-64","FR-65","FR-66","FR-67","FR-83","FR-96","FR-97","FR-107","FR-108","FR-109","FR-110","FR-111","FR-114","FR-118","FR-120","FR-122","FR-123","FR-141","FR-155","FR-157","FR-158"],"v":"6.1.0"},{"k":"W3","h":"Records & administration","rows":10,"frs":["FR-14","FR-28","FR-78","FR-85","FR-101","FR-104","FR-105","FR-110","FR-135","FR-137","FR-153","FR-166","FR-167","FR-169","FR-173","FR-174","FR-176","FR-188","FR-190"],"v":"6.1.0"},{"k":"W4","h":"Customers & portals","rows":23,"frs":["FR-02","FR-30","FR-68","FR-112","FR-127","FR-146","FR-147","FR-148","FR-149","FR-150","FR-151","FR-152","FR-153","FR-154","FR-155","FR-172","FR-175","FR-185","FR-186","FR-187","FR-188","FR-189","FR-190"],"v":"6.1.0"},{"k":"W5","h":"Economics, reports & baseline data","rows":14,"frs":["FR-07","FR-35","FR-36","FR-37","FR-38","FR-41","FR-47","FR-48","FR-49","FR-85","FR-119","FR-122","FR-123","FR-125","FR-174"],"v":"6.1.0"},{"k":"W6","h":"Help & i18n","rows":8,"frs":["FR-14","FR-17","FR-41","FR-126","FR-132","FR-134","FR-135","FR-137","FR-154","FR-160","FR-170","FR-175"],"v":"6.1.0"},{"k":"P6","h":"Shell parity","rows":7,"frs":["FR-74","FR-131","FR-133","FR-134","FR-163","FR-175"],"v":"6.2.0"},{"k":"P1","h":"Load & weight parity","rows":11,"frs":["FR-05","FR-06","FR-17","FR-73","FR-99","FR-135","FR-140","FR-142","FR-143","FR-146"],"v":"6.2.0"},{"k":"P2","h":"Dashboard, dispatcher, trips, documents","rows":15,"frs":["FR-11","FR-12","FR-33","FR-34","FR-43","FR-44","FR-51","FR-91","FR-92","FR-94","FR-96","FR-98","FR-99","FR-101","FR-116","FR-138","FR-173","FR-175"],"v":"6.2.0"},{"k":"P3","h":"Routes parity","rows":12,"frs":["FR-16","FR-39","FR-40","FR-42","FR-102","FR-105","FR-106","FR-109","FR-110","FR-111"],"v":"6.2.0"},{"k":"P4","h":"Fleet, Staff, Partners parity","rows":17,"frs":["FR-10","FR-21","FR-38","FR-52","FR-82","FR-108","FR-117","FR-121"],"v":"6.2.0"},{"k":"P5","h":"Reports, Costs, Quality parity","rows":11,"frs":["FR-07","FR-11","FR-46","FR-64","FR-116","FR-125"],"v":"6.2.0"},{"k":"Q1","h":"Animated help diagrams","rows":8,"frs":["FR-138"],"v":"6.2.0"},{"k":"Q2","h":"UI language consistency","rows":4,"frs":[],"v":"6.2.0"},{"k":"Q3","h":"Explanatory notes parity","rows":8,"frs":[],"v":"6.2.0"},{"k":"Q4","h":"Narrow-window layout","rows":7,"frs":["FR-133","FR-163"],"v":"6.2.0"},{"k":"R3","h":"Hub inbound (I-1…I-7)","rows":8,"frs":[],"v":"6.3.0"},{"k":"R4","h":"SLA, winter rules, express overlap, views","rows":10,"frs":[],"v":"6.3.0"},{"k":"R5","h":"Driver, partner, network ideas","rows":7,"frs":["FR-68","FR-70","FR-188","FR-189"],"v":"6.3.0"},{"k":"R1","h":"Mirror 0.3.9 operations","rows":67,"frs":["FR-105","FR-114","FR-136"],"v":"6.3.0"},{"k":"R2","h":"Mirror 0.3.9 resources and economics","rows":69,"frs":["FR-78","FR-83","FR-117","FR-124","FR-125","FR-141","FR-157","FR-172"],"v":"6.3.0"},{"k":"R6","h":"Test parity with 0.3.9","rows":11,"frs":["FR-01","FR-81","FR-82","FR-134","FR-150","FR-170","FR-185"],"v":"6.3.0"},{"k":"S1","h":"CI and test infrastructure (FR-198, FR-205, FR-206, FR-208, FR-209, FR-210)","rows":6,"frs":["FR-198","FR-205","FR-206","FR-208","FR-209","FR-210"],"v":"6.3.0"},{"k":"S2","h":"Delivery: assets, What's new, print, offline (wave 1 of docs/OPTIMISATION-FR.md)","rows":7,"frs":["FR-196","FR-223","FR-224","FR-225"],"v":"6.3.0"},{"k":"S3","h":"Accessibility (FR-215, FR-218, FR-219)","rows":9,"frs":["FR-215","FR-218","FR-219"],"v":"6.3.0"},{"k":"S4","h":"Architecture (FR-199, FR-200, FR-201, FR-202, FR-203, FR-204, FR-207, FR-220, FR-221)","rows":9,"frs":["FR-199","FR-200","FR-201","FR-202","FR-203","FR-204","FR-207","FR-220","FR-221"],"v":"6.4.0"},{"k":"H1","h":"Help figures and sidebar scroll (user report 2026-10-21)","rows":3,"frs":[],"v":"6.4.1"}]};
+const WN = {"releases":[{"v":"next","date":""},{"v":"6.6.1","date":"2026-11-22"},{"v":"6.6.0","date":"2026-11-03"},{"v":"6.5.2","date":"2026-10-31"},{"v":"6.5.1","date":"2026-10-31"},{"v":"6.5.0","date":"2026-10-31"},{"v":"6.4.4","date":"2026-10-29"},{"v":"6.4.3","date":"2026-10-28"},{"v":"6.4.2","date":"2026-10-28"},{"v":"6.4.1","date":"2026-10-21"},{"v":"6.4.0","date":"2026-10-21"},{"v":"6.3.0","date":"2026-10-21"},{"v":"6.2.1","date":"2026-10-20"},{"v":"6.2.0","date":"2026-10-20"},{"v":"6.1.0","date":"2026-10-19"},{"v":"6.0.0","date":"2026-10-19"}],"streams":[{"k":"W1","h":"Operations flow (LH-B, C, D, H, N1, O1)","rows":29,"frs":["FR-01","FR-02","FR-03","FR-04","FR-05","FR-06","FR-09","FR-11","FR-12","FR-38","FR-41","FR-73","FR-91","FR-92","FR-93","FR-94","FR-99","FR-114","FR-116","FR-119","FR-126","FR-139","FR-140","FR-143","FR-144","FR-145","FR-146","FR-154","FR-156","FR-176"],"v":"6.1.0"},{"k":"W2","h":"Resources & driver app","rows":25,"frs":["FR-08","FR-10","FR-27","FR-39","FR-40","FR-46","FR-50","FR-52","FR-53","FR-54","FR-55","FR-56","FR-57","FR-58","FR-59","FR-60","FR-61","FR-62","FR-63","FR-64","FR-65","FR-66","FR-67","FR-83","FR-96","FR-97","FR-107","FR-108","FR-109","FR-110","FR-111","FR-114","FR-118","FR-120","FR-122","FR-123","FR-141","FR-155","FR-157","FR-158"],"v":"6.1.0"},{"k":"W3","h":"Records & administration","rows":10,"frs":["FR-14","FR-28","FR-78","FR-85","FR-101","FR-104","FR-105","FR-110","FR-135","FR-137","FR-153","FR-166","FR-167","FR-169","FR-173","FR-174","FR-176","FR-188","FR-190"],"v":"6.1.0"},{"k":"W4","h":"Customers & portals","rows":23,"frs":["FR-02","FR-30","FR-68","FR-112","FR-127","FR-146","FR-147","FR-148","FR-149","FR-150","FR-151","FR-152","FR-153","FR-154","FR-155","FR-172","FR-175","FR-185","FR-186","FR-187","FR-188","FR-189","FR-190"],"v":"6.1.0"},{"k":"W5","h":"Economics, reports & baseline data","rows":14,"frs":["FR-07","FR-35","FR-36","FR-37","FR-38","FR-41","FR-47","FR-48","FR-49","FR-85","FR-119","FR-122","FR-123","FR-125","FR-174"],"v":"6.1.0"},{"k":"W6","h":"Help & i18n","rows":8,"frs":["FR-14","FR-17","FR-41","FR-126","FR-132","FR-134","FR-135","FR-137","FR-154","FR-160","FR-170","FR-175"],"v":"6.1.0"},{"k":"P6","h":"Shell parity","rows":7,"frs":["FR-74","FR-131","FR-133","FR-134","FR-163","FR-175"],"v":"6.2.0"},{"k":"P1","h":"Load & weight parity","rows":11,"frs":["FR-05","FR-06","FR-17","FR-73","FR-99","FR-135","FR-140","FR-142","FR-143","FR-146"],"v":"6.2.0"},{"k":"P2","h":"Dashboard, dispatcher, trips, documents","rows":15,"frs":["FR-11","FR-12","FR-33","FR-34","FR-43","FR-44","FR-51","FR-91","FR-92","FR-94","FR-96","FR-98","FR-99","FR-101","FR-116","FR-138","FR-173","FR-175"],"v":"6.2.0"},{"k":"P3","h":"Routes parity","rows":12,"frs":["FR-16","FR-39","FR-40","FR-42","FR-102","FR-105","FR-106","FR-109","FR-110","FR-111"],"v":"6.2.0"},{"k":"P4","h":"Fleet, Staff, Partners parity","rows":17,"frs":["FR-10","FR-21","FR-38","FR-52","FR-82","FR-108","FR-117","FR-121"],"v":"6.2.0"},{"k":"P5","h":"Reports, Costs, Quality parity","rows":11,"frs":["FR-07","FR-11","FR-46","FR-64","FR-116","FR-125"],"v":"6.2.0"},{"k":"Q1","h":"Animated help diagrams","rows":8,"frs":["FR-138"],"v":"6.2.0"},{"k":"Q2","h":"UI language consistency","rows":4,"frs":[],"v":"6.2.0"},{"k":"Q3","h":"Explanatory notes parity","rows":8,"frs":[],"v":"6.2.0"},{"k":"Q4","h":"Narrow-window layout","rows":7,"frs":["FR-133","FR-163"],"v":"6.2.0"},{"k":"R3","h":"Hub inbound (I-1…I-7)","rows":8,"frs":[],"v":"6.3.0"},{"k":"R4","h":"SLA, winter rules, express overlap, views","rows":10,"frs":[],"v":"6.3.0"},{"k":"R5","h":"Driver, partner, network ideas","rows":7,"frs":["FR-68","FR-70","FR-188","FR-189"],"v":"6.3.0"},{"k":"R1","h":"Mirror 0.3.9 operations","rows":67,"frs":["FR-105","FR-114","FR-136"],"v":"6.3.0"},{"k":"R2","h":"Mirror 0.3.9 resources and economics","rows":69,"frs":["FR-78","FR-83","FR-117","FR-124","FR-125","FR-141","FR-157","FR-172"],"v":"6.3.0"},{"k":"R6","h":"Test parity with 0.3.9","rows":11,"frs":["FR-01","FR-81","FR-82","FR-134","FR-150","FR-170","FR-185"],"v":"6.3.0"},{"k":"S1","h":"CI and test infrastructure (FR-198, FR-205, FR-206, FR-208, FR-209, FR-210)","rows":6,"frs":["FR-198","FR-205","FR-206","FR-208","FR-209","FR-210"],"v":"6.3.0"},{"k":"S2","h":"Delivery: assets, What's new, print, offline (wave 1 of docs/OPTIMISATION-FR.md)","rows":7,"frs":["FR-196","FR-223","FR-224","FR-225"],"v":"6.3.0"},{"k":"S3","h":"Accessibility (FR-215, FR-218, FR-219)","rows":9,"frs":["FR-215","FR-218","FR-219"],"v":"6.3.0"},{"k":"S4","h":"Architecture (FR-199, FR-200, FR-201, FR-202, FR-203, FR-204, FR-207, FR-220, FR-221)","rows":9,"frs":["FR-199","FR-200","FR-201","FR-202","FR-203","FR-204","FR-207","FR-220","FR-221"],"v":"6.4.0"},{"k":"H1","h":"Help figures and sidebar scroll (user report 2026-10-21)","rows":3,"frs":[],"v":"6.4.1"}]};
 const WN_T = {
 W1: T('Operativer Ablauf: Beladung, Sendungen, Dokumente'),
 W2: T('Ressourcen und Fahrer-App'),

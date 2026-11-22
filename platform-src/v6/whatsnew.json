@@ -2,6 +2,7 @@
   "_": "FR-223 What's new: maps the stream key prefix of each docs/TRACEABILITY.md section to the release that shipped it. Streams without a release land in \"next\". On a version bump add the release here (newest first) and move the prefix (a prefix matches the start of the stream key, e.g. S1 or R).",
   "releases": [
     { "v": "next", "prefixes": [] },
+    { "v": "6.6.1", "date": "2026-11-22", "prefixes": [], "note": "Встраивание ?embed=customer для сайта Kökzhol: только дизайн Kökzhol без переключателя, названия клиента и компаний группы заменены нейтральными («Клиент · <город>»), проверка запрещённых названий (j0-embed, tools/ci/check-embed-names.cjs)." },
     { "v": "6.6.0", "date": "2026-11-03", "prefixes": [], "note": "Волна оптимизации 3: частичная перерисовка, ленивые демо-данные, состояния списков/отмена/настройки, виртуальные списки, палитра команд Ctrl+K и уведомления, стартовые плитки ролей, разбиение на чанки, удаление неиспользуемых языков, сценарии 0.3.11 построчно." },
     { "v": "6.5.2", "date": "2026-10-31", "prefixes": [] },
     { "v": "6.5.1", "date": "2026-10-31", "prefixes": [] },

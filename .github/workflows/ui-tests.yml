@@ -72,6 +72,11 @@ jobs:
         env:
           NODE_PATH: ${{ github.workspace }}/tools/ci/node_modules
         run: node tools/run-ui-tests.cjs "http://localhost:8080/platform/tests.html?shard=${{ matrix.shard }}/${{ strategy.job-total }}&retries=1&keepfail=1" --out "ui-results/v6-shard-${{ matrix.shard }}"
+      - name: Embed view shows no banned names (Kökzhol site preview)
+        if: matrix.shard == 1
+        env:
+          NODE_PATH: ${{ github.workspace }}/tools/ci/node_modules
+        run: node tools/ci/check-embed-names.cjs http://localhost:8080/platform/
       - name: Upload report and failure screenshots
         if: always()
         uses: actions/upload-artifact@v4

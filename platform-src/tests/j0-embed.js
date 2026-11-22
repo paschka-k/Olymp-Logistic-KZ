@@ -27,3 +27,29 @@
   await group('embed: every language has the note', 'ru', async () => {
     for (const [f, l] of [['index.html', 'ru'], ['de.html', 'de'], ['kk.html', 'kk']]) { const fr = await j0Open(f, 'embed=customer'), w = fr.contentWindow; eq(w.eval('S.role'), 'customer', l + ' role'); assert(w.document.querySelector('[data-test="embed-demo"]').textContent.length > 5, l + ' note'); fr.remove(); }
   });
+  /* public Kökzhol material never names the group companies: the embed forces the Kökzhol design, hides the switch and leaves no "Olymp" / "KombiMED" in anything visible */
+  await group('embed: Kökzhol design only, no design switch, no banned names on any reachable screen, tab or drawer (every language)', 'en', async () => {
+    for (const f of ['en.html', 'index.html', 'de.html', 'kk.html']) {
+      const fr = await j0Open(f, 'embed=customer&brand=olymp'), w = fr.contentWindow;
+      eq(w.eval('S.design'), 'kokzhol', f + ' design is Kökzhol even with ?brand=olymp');
+      eq(w.document.documentElement.dataset.design, 'kokzhol', f + ' html[data-design]');
+      w.eval('ACT.setDesign()'); eq(w.eval('S.design'), 'kokzhol', f + ' the switch does nothing');
+      const b = w.document.querySelector('.design-btn'); assert(!b || w.getComputedStyle(b).display === 'none', f + ' design switch hidden');
+      const found = await w.eval('embedAudit({ maxClicks: 25 })');
+      eq(found.length, 0, f + ' banned names: ' + found.slice(0, 5).join(' | '));
+      fr.remove();
+    }
+  });
+  await group('embed: the name scrub rewrites client and company names to neutral placeholders', 'en', async () => {
+    const fr = await j0Open('en.html', 'embed=customer'), w = fr.contentWindow, s = x => w.eval('embedScrub')(x);
+    eq(s('KDL Olymp branch · Almaty'), 'Client · Almaty', 'branch label');
+    eq(s('own KDL Olymp goods · hub → branch'), "the client's own goods · hub → branch", 'own goods');
+    eq(s('Deviation closed · report for KDL Olymp ready'), 'Deviation closed · report for the client ready', 'QA report');
+    eq(s('Design: Olymp / Kökzhol'), 'Design: Kökzhol', 'design label');
+    assert(!/olymp|kombimed/i.test(s('KombiMED GmbH · Olymp Logistic LLP · olymp')), 'fallbacks');
+    const p = w.document.createElement('p'); p.title = 'KDL Olymp'; p.textContent = 'KDL Olymp branch · Aktobe'; w.document.body.appendChild(p);
+    await new Promise(r => setTimeout(r, 20)); eq(p.textContent, 'Client · Aktobe', 'DOM text'); eq(p.title, 'Client', 'DOM title');
+    fr.remove();
+    const fr2 = await j0Open('index.html', 'embed=customer'), s2 = x => fr2.contentWindow.eval('embedScrub')(x);
+    eq(s2('Филиал KDL Olymp · Алматы'), 'Клиент · Алматы', 'ru branch label'); fr2.remove();
+  });
