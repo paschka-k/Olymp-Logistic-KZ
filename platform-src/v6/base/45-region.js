@@ -23,6 +23,20 @@ function regionFocusKey(el, nodes) {
   return { sel, n: [...document.querySelectorAll(sel)].indexOf(el), a: selOf(el) };
 }
 function selOf(el) { try { return el.selectionStart == null ? null : [el.selectionStart, el.selectionEnd, el.selectionDirection]; } catch (_) { return null; } }
+/* a field without the selection API (type="email", "number", …) cannot get its caret back by setSelectionRange: after focus() the caret sat at
+   the start, so a screen that redraws on every key wrote the text backwards ("clasberg" -> "grebsalc", booking form, payer e-mail). The rebuilt
+   copy is swapped for the very element the person is typing in, which keeps its caret, IME state and undo; the fresh attributes are copied over. */
+const CARET_SKIP = /^(checkbox|radio|button|submit|reset|file|range|color|hidden|image)$/;
+function caretNodeOf(el) { return el && el.tagName === 'INPUT' && el.id && !CARET_SKIP.test(el.type) && selOf(el) == null ? el : null; }
+function caretNodeBack(old) {
+  if (!old) return;
+  const n = document.getElementById(old.id);
+  if (!n || n === old || n.tagName !== 'INPUT' || n.type !== old.type) return;
+  [...old.attributes].forEach(a => { if (!n.hasAttribute(a.name)) old.removeAttribute(a.name); });
+  [...n.attributes].forEach(a => { if (old.getAttribute(a.name) !== a.value) old.setAttribute(a.name, a.value); });
+  if (n.value !== old.value) old.value = n.value;   // the screen normalised what was typed: its value wins
+  n.replaceWith(old);
+}
 function regionFocusBack(k) {
   if (!k) return;
   const e = k.id ? document.getElementById(k.id) : [...document.querySelectorAll(k.sel)][k.n];
@@ -74,7 +88,7 @@ function renderRegion(name) {
   if (!R || !root || !R.ready() || (name === 'main' && document.getElementById('da_sig'))) { REGION_COUNT.fallback++; return render(); }
   REGION_COUNT[name]++;
   const states = REGION_HOOKS.before.map(h => { try { return h.fn(name); } catch (e) { console.error(e); return null; } });
-  const old = R.nodes(), keep = {
+  const old = R.nodes(), caretEl = caretNodeOf(document.activeElement), caretNode = caretEl && old.some(n => n && n.contains(caretEl)) ? caretEl : null, keep = {
     focus: regionFocusKey(document.activeElement, old),
     sc: name === 'toast' ? null : scrollKeep(),
     y: name === 'main' ? (document.getElementById('main-content') || {}).scrollTop || 0 : 0,
@@ -82,6 +96,7 @@ function renderRegion(name) {
   };
   if (name === 'drawer') document.querySelectorAll('#root .app > aside.drawer input[id], #root .app > aside.drawer select[id], #root .app > aside.drawer textarea[id]').forEach(e => { keep.fields[e.id] = e.type === 'checkbox' ? e.checked : e.value; });
   const built = R.build(), fresh = R.apply(built);
+  caretNodeBack(caretNode);   // decided before apply: the old region nodes no longer contain the field once rebuilt
   fresh.forEach(n => { if (n) nameControls(n); });
   Object.keys(keep.fields).forEach(id => { const e = document.getElementById(id); if (e && e.closest('.drawer')) { if (e.type === 'checkbox') e.checked = keep.fields[id]; else e.value = keep.fields[id]; } });
   if (name === 'main') { const m = document.getElementById('main-content'); if (m) m.scrollTop = keep.y; }

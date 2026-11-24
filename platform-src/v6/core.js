@@ -345,7 +345,8 @@ function render() {
   const pos = document.activeElement && document.activeElement.selectionStart;
   const keepIn = {};   // keep what the user typed in drawer fields across re-renders (e.g. a toast)
   $$('.drawer input[id], .drawer select[id], .drawer textarea[id]').forEach(e => { keepIn[e.id] = e.type === 'checkbox' ? e.checked : e.value; });
-  $('#root').innerHTML = shell(); nameControls($('#root'));
+  const caretNode = caretNodeOf(document.activeElement);   // type="email" etc.: keep the element itself (base/45-region.js)
+  $('#root').innerHTML = shell(); caretNodeBack(caretNode); nameControls($('#root'));
   Object.keys(keepIn).forEach(id => { const e = document.getElementById(id); if (e && e.closest('.drawer')) { if (e.type === 'checkbox') e.checked = keepIn[id]; else e.value = keepIn[id]; } });
   const m = $('main'); if (m) m.scrollTop = keep.y;
   scrollRestore(keep.sc);

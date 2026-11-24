@@ -91,7 +91,7 @@ const UI = {
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 UI.$('only').onclick = () => { UI.onlyFail = !UI.onlyFail; UI.$('rows').classList.toggle('onlyfail', UI.onlyFail); UI.$('only').textContent = UI.onlyFail ? 'Показать все' : 'Только ошибки'; };
 UI.$('run').onclick = () => { if (window.__TESTS.done) location.reload(); };
-const __SUITES = [{"name":"10-navigation.js","ms":3049},{"name":"20-dispatch.js","ms":587},{"name":"30-chain.js","ms":447},{"name":"40-reports-ai-settings.js","ms":531},{"name":"50-legacy-tabs.js","ms":786},{"name":"60-foundation.js","ms":971},{"name":"61-shell-ext.js","ms":4141},{"name":"62-language-audit.js","ms":2265},{"name":"63-narrow.js","ms":9450},{"name":"70-ops-load.js","ms":4070},{"name":"71-ops-ship.js","ms":1035},{"name":"72-ops-docs.js","ms":861},{"name":"73-ops-dispatch.js","ms":1011},{"name":"74-ops-dashboard.js","ms":1042},{"name":"75-ops-trips.js","ms":1180},{"name":"76-ops-docs.js","ms":835},{"name":"80-res-fleet-staff.js","ms":948},{"name":"81-res-driver-app.js","ms":1133},{"name":"82-res-coverage-lines.js","ms":1350},{"name":"83-res-thermo.js","ms":871},{"name":"84-res-weather.js","ms":902},{"name":"85-res-coverage.js","ms":1915},{"name":"86-res-fleet-ext.js","ms":1277},{"name":"87-res-partners.js","ms":3018},{"name":"88-res-staff-app.js","ms":1163},{"name":"90-rec-records.js","ms":2493},{"name":"a0-por-portals.js","ms":1760},{"name":"b0-eco-economics.js","ms":1944},{"name":"b1-eco-reports-ext.js","ms":1157},{"name":"b2-eco-costs-ext.js","ms":1484},{"name":"c0-help-content.js","ms":3125},{"name":"c1-help-visuals.js","ms":1756},{"name":"c2-notes.js","ms":2682},{"name":"d0-v6-parity.js","ms":3193},{"name":"e1-mirror-ops-a.js","ms":2411},{"name":"e1-mirror-ops-b.js","ms":1870},{"name":"e1-mirror-ops-c.js","ms":3096},{"name":"e1-mirror-ops.js","ms":5006},{"name":"e2-mirror-res.js","ms":15641},{"name":"e3-hub-inbound.js","ms":1449},{"name":"e4-rules-sla.js","ms":1977},{"name":"e5-driver-partner.js","ms":1798},{"name":"f0-a11y.js","ms":915},{"name":"f0-ci-infra.js","ms":3922},{"name":"f0-delivery.js","ms":627},{"name":"f0-shell-parity.js","ms":357},{"name":"f1-data-integrity.js","ms":582},{"name":"f2-ops-fleet.js","ms":200},{"name":"f3-records-portals.js","ms":212},{"name":"f4-economics.js","ms":200},{"name":"f5-a11y-layout.js","ms":742},{"name":"g4-architecture.js","ms":1077},{"name":"g5-help-figures-scroll.js","ms":274},{"name":"h1-data-seed-integrity.js","ms":789},{"name":"h2-load-ship-vehicle.js","ms":1179},{"name":"h3-dispatch-gonogo-safety.js","ms":978},{"name":"h4-resources-partners.js","ms":1403},{"name":"h5-driver-app-delivery.js","ms":1026},{"name":"h6-portal-commercial.js","ms":552},{"name":"h7-economics-reports.js","ms":649},{"name":"h8-shell-i18n-help.js","ms":1142},{"name":"h9-0311-rows.js","ms":9100},{"name":"i1-render-regions.js","ms":788},{"name":"i2-build-lang.js","ms":518},{"name":"i3-ux-primitives.js","ms":692},{"name":"i4-lazy-data.js","ms":603},{"name":"i5-vlist.js","ms":653},{"name":"i6-palette-notify.js","ms":1038},{"name":"i7-home-scenarios.js","ms":724},{"name":"i8-migrate.js","ms":487},{"name":"i9-split.js","ms":1195},{"name":"j0-embed.js","ms":23500}];
+const __SUITES = [{"name":"10-navigation.js","ms":3049},{"name":"20-dispatch.js","ms":587},{"name":"30-chain.js","ms":447},{"name":"40-reports-ai-settings.js","ms":531},{"name":"50-legacy-tabs.js","ms":786},{"name":"60-foundation.js","ms":971},{"name":"61-shell-ext.js","ms":4141},{"name":"62-language-audit.js","ms":2265},{"name":"63-narrow.js","ms":9450},{"name":"70-ops-load.js","ms":4070},{"name":"71-ops-ship.js","ms":1035},{"name":"72-ops-docs.js","ms":861},{"name":"73-ops-dispatch.js","ms":1011},{"name":"74-ops-dashboard.js","ms":1042},{"name":"75-ops-trips.js","ms":1180},{"name":"76-ops-docs.js","ms":835},{"name":"80-res-fleet-staff.js","ms":948},{"name":"81-res-driver-app.js","ms":1133},{"name":"82-res-coverage-lines.js","ms":1350},{"name":"83-res-thermo.js","ms":871},{"name":"84-res-weather.js","ms":902},{"name":"85-res-coverage.js","ms":1915},{"name":"86-res-fleet-ext.js","ms":1277},{"name":"87-res-partners.js","ms":3018},{"name":"88-res-staff-app.js","ms":1163},{"name":"90-rec-records.js","ms":2493},{"name":"a0-por-portals.js","ms":1760},{"name":"b0-eco-economics.js","ms":1944},{"name":"b1-eco-reports-ext.js","ms":1157},{"name":"b2-eco-costs-ext.js","ms":1484},{"name":"c0-help-content.js","ms":3125},{"name":"c1-help-visuals.js","ms":1756},{"name":"c2-notes.js","ms":2682},{"name":"d0-v6-parity.js","ms":3193},{"name":"e1-mirror-ops-a.js","ms":2411},{"name":"e1-mirror-ops-b.js","ms":1870},{"name":"e1-mirror-ops-c.js","ms":3096},{"name":"e1-mirror-ops.js","ms":5006},{"name":"e2-mirror-res.js","ms":15641},{"name":"e3-hub-inbound.js","ms":1449},{"name":"e4-rules-sla.js","ms":1977},{"name":"e5-driver-partner.js","ms":1798},{"name":"f0-a11y.js","ms":915},{"name":"f0-ci-infra.js","ms":3922},{"name":"f0-delivery.js","ms":627},{"name":"f0-shell-parity.js","ms":357},{"name":"f1-data-integrity.js","ms":582},{"name":"f2-ops-fleet.js","ms":200},{"name":"f3-records-portals.js","ms":212},{"name":"f4-economics.js","ms":200},{"name":"f5-a11y-layout.js","ms":742},{"name":"g4-architecture.js","ms":1077},{"name":"g5-help-figures-scroll.js","ms":274},{"name":"h1-data-seed-integrity.js","ms":789},{"name":"h2-load-ship-vehicle.js","ms":1179},{"name":"h3-dispatch-gonogo-safety.js","ms":978},{"name":"h4-resources-partners.js","ms":1403},{"name":"h5-driver-app-delivery.js","ms":1026},{"name":"h6-portal-commercial.js","ms":552},{"name":"h7-economics-reports.js","ms":649},{"name":"h8-shell-i18n-help.js","ms":1142},{"name":"h9-0311-rows.js","ms":9100},{"name":"i1-render-regions.js","ms":788},{"name":"i2-build-lang.js","ms":518},{"name":"i3-ux-primitives.js","ms":692},{"name":"i4-lazy-data.js","ms":603},{"name":"i5-vlist.js","ms":653},{"name":"i6-palette-notify.js","ms":1038},{"name":"i7-home-scenarios.js","ms":724},{"name":"i8-migrate.js","ms":487},{"name":"i9-split.js","ms":1195},{"name":"j0-embed.js","ms":23500},{"name":"j1-caret.js","ms":200}];
 const __QUARANTINE = [];
 const __HARNESS = {
   /* longest-processing-time split: heaviest suite first onto the lightest shard; deterministic for a given suite list */
@@ -7164,6 +7164,45 @@ __suite(71);   /* j0-embed.js */
     fr.remove();
     const fr2 = await j0Open('index.html', 'embed=customer'), s2 = x => fr2.contentWindow.eval('embedScrub')(x);
     eq(s2('Филиал KDL Olymp · Алматы'), 'Клиент · Алматы', 'ru branch label'); fr2.remove();
+  });
+
+__suite(72);   /* j1-caret.js */
+  /* ---- a field without the selection API (type="email") keeps its caret through a redraw (base/45-region.js caretNodeOf / caretNodeBack).
+     Before: the booking form redraws on every key, focus() put the caret at the start, "clasberg" was written as "grebsalc".
+     Test frames may not get real focus (background window), so the focused element is pinned through document.activeElement. ---- */
+  const j1Book = (ev, w) => {
+    ev("ACT.setRole({ v: 'customer' }); go('book')");
+    ev("(function(){ var t = document.querySelector('[data-bk=\"payerOn\"]'); if (t && !t.checked) t.click(); })()");
+    const d = w.document, pin = { el: null };
+    Object.defineProperty(d, 'activeElement', { configurable: true, get: () => pin.el || d.body });
+    return { d, pin };
+  };
+  await group('caret: the focused e-mail field of the booking form is the same element after each keystroke render (full render and region render)', 'en', async (g, ev, w) => {
+    const { d, pin } = j1Book(ev, w), f0 = d.getElementById('bk_payer.email');
+    assert(f0 && f0.type === 'email', 'payer e-mail field is type=email');
+    pin.el = f0;
+    for (const v of ['c', 'cl', 'cla']) {
+      f0.value = v; f0.dispatchEvent(new w.Event('input', { bubbles: true }));
+      const f = d.getElementById('bk_payer.email');
+      assert(f === f0, 'after "' + v + '" the typed-in element survives the redraw');
+      eq(f.value, v, 'value "' + v + '"');
+    }
+    ev("renderRegion('main')");
+    assert(d.getElementById('bk_payer.email') === f0, 'region render keeps the element');
+    eq(f0.value, 'cla', 'value after region render');
+    pin.el = null; ev('render()');
+    assert(d.getElementById('bk_payer.email') !== f0, 'a field that is not focused is rebuilt as before');
+    eq(d.getElementById('bk_payer.email').value, 'cla', 'rebuilt field shows the typed value');
+  });
+  await group('caret: the kept element takes the fresh attributes; a focused text field is rebuilt (its caret comes back by setSelectionRange)', 'en', async (g, ev, w) => {
+    const { d, pin } = j1Book(ev, w), f0 = d.getElementById('bk_payer.email');
+    pin.el = f0; f0.setAttribute('data-stale', '1'); ev('render()');
+    assert(d.getElementById('bk_payer.email') === f0 && !f0.hasAttribute('data-stale'), 'stale attribute dropped, element kept');
+    eq(f0.getAttribute('autocomplete'), d.getElementById('bk_payer.email').getAttribute('autocomplete'), 'fresh attributes present');
+    const p = d.getElementById('bk_payer.contact');
+    pin.el = p; ev('render()');
+    assert(d.getElementById('bk_payer.contact') !== p, 'text field is not swapped');
+    eq(w.eval('caretNodeOf(document.getElementById("bk_payer.contact"))'), null, 'caretNodeOf ignores fields with a selection API');
   });
 
   __suite(-1);
